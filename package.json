@@ -1,11 +1,12 @@
 {
-  "name": "@bun-examples/elysia",
+  "name": "convertx-frontend",
   "version": "1.0.50",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
+    "@elysiajs/static": "^1.0.2",
     "elysia": "latest"
   },
   "devDependencies": {
