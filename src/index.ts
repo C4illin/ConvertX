@@ -1,11 +1,13 @@
 import { Elysia } from "elysia";
 import { staticPlugin } from '@elysiajs/static'
+import { html } from '@elysiajs/html'
 
 const app = new Elysia()
+  .use(html())
   .use(staticPlugin({
-    assets: "../frontend/", prefix: "/"
+    assets: "src/public/", prefix: "/"
   }))
-  .get("/", () => Bun.file("../frontend/index.html"))
+  .get("/", () => Bun.file("src/pages/index.html"))
   .listen(3000);
 
 console.log(
