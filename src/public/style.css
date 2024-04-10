@@ -1,0 +1,21 @@
+article {
+  /* height: 300px; */
+  /* width: 300px; */
+
+}
+
+div.icon {
+  height: 100px;
+  width: 100px;
+}
+
+button[type="submit"] {
+  width: 50%
+}
+
+div.center {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
