@@ -31,13 +31,16 @@ fileInput.addEventListener("change", (e) => {
 
 // Add a onclick for the delete button
 const deleteRow = (target) => {
-	const fileName = target.parentElement.parentElement.children[0].textContent;
+	const filename = target.parentElement.parentElement.children[0].textContent;
 	const row = target.parentElement.parentElement;
 	row.remove();
-	
+
 	fetch("/delete", {
 		method: "POST",
-		body: JSON.stringify({ fileName }),
+		body: JSON.stringify({ filename: filename }),
+		headers: {
+			"Content-Type": "application/json",
+		},
 	})
 		.then((res) => res.json())
 		.then((data) => {
