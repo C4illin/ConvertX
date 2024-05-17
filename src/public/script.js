@@ -1,7 +1,7 @@
 // Select the file input element
 const fileInput = document.querySelector('input[type="file"]');
 
-let filesToUpload = [];
+const filesToUpload = [];
 
 // Add a 'change' event listener to the file input element
 fileInput.addEventListener("change", (e) => {
@@ -19,7 +19,7 @@ fileInput.addEventListener("change", (e) => {
 		row.innerHTML = `
       <td>${files[i].name}</td>
       <td>${(files[i].size / 1024 / 1024).toFixed(2)} MB</td>
-      <td><button class="secondary">x</button></td>
+      <td><button class="secondary" onclick="deleteRow(this)">x</button></td>
     `;
 
 		// Append the row to the file-list table
@@ -28,6 +28,23 @@ fileInput.addEventListener("change", (e) => {
 
 	uploadFiles(files);
 });
+
+// Add a onclick for the delete button
+const deleteRow = (target) => {
+	const fileName = target.parentElement.parentElement.children[0].textContent;
+	const row = target.parentElement.parentElement;
+	row.remove();
+	
+	fetch("/delete", {
+		method: "POST",
+		body: JSON.stringify({ fileName }),
+	})
+		.then((res) => res.json())
+		.then((data) => {
+			console.log(data);
+		})
+		.catch((err) => console.log(err));
+};
 
 const uploadFiles = (files) => {
 	const formData = new FormData();

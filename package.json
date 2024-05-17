@@ -6,16 +6,19 @@
     "dev": "bun run --hot src/index.ts"
   },
   "dependencies": {
+    "@elysiajs/cookie": "^0.8.0",
     "@elysiajs/html": "^1.0.2",
+    "@elysiajs/jwt": "^1.0.2",
     "@elysiajs/static": "^1.0.2",
-    "elysia": "latest",
-    "nanoid": "^5.0.7"
-  },
-  "devDependencies": {
-    "bun-types": "latest"
+    "elysia": "latest"
   },
   "module": "src/index.js",
   "bun-create": {
     "start": "bun run src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.2",
+    "@types/node": "^20.12.12",
+    "bun-types": "latest"
   }
 }
