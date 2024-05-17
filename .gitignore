@@ -40,3 +40,6 @@ yarn-error.log*
 **/*.log
 package-lock.json
 **/*.bun
+/src/uploads
+/uploads
+/mydb.sqlite

@@ -27,13 +27,13 @@
   <main class="container-fluid">
 
     <!-- File upload -->
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" action="upload" enctype="multipart/form-data">
       <div>
         <article>
           <table id="file-list">
           </table>
           <input type="file" name="file" multiple />
-          
+
         </article>
         <!-- <div class="icon">></div> -->
         <article>
@@ -48,7 +48,8 @@
         </article>
       </div>
       <div class="center">
-        <button type="submit">Convert</button>
+        <input type="submit" value="Convert">
+        <!-- <button type="submit">Convert</button> -->
       </div>
     </form>
   </main>
