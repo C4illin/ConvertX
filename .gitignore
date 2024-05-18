@@ -44,4 +44,5 @@ package-lock.json
 /uploads
 /mydb.sqlite
 /output
-/db/mydb.sqlite
+/db
+/data

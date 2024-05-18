@@ -11,11 +11,16 @@ import { Header } from "./components/header";
 import { mainConverter, possibleConversions } from "./converters/main";
 import { normalizeFiletype } from "./helpers/normalizeFiletype";
 
-const db = new Database("./db/mydb.sqlite");
-const uploadsDir = "./uploads/";
-const outputDir = "./output/";
+const db = new Database("./data/mydb.sqlite", { create: true });
+const uploadsDir = "./data/uploads/";
+const outputDir = "./data/output/";
 
 const jobs = {};
+
+// fileNames: fileNames,
+// filesToConvert: fileNames.length,
+// convertedFiles : 0,
+// outputFiles: [],
 
 // init db
 db.exec(`
@@ -24,13 +29,23 @@ CREATE TABLE IF NOT EXISTS users (
 	email TEXT NOT NULL,
 	password TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS file_names (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  job_id TEXT NOT NULL,
+  file_name TEXT NOT NULL,
+  output_file_name TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS jobs (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	user_id INTEGER NOT NULL,
 	job_id TEXT NOT NULL,
 	date_created TEXT NOT NULL,
-  status TEXT DEFAULT 'pending'
+  status TEXT DEFAULT 'pending',
+  converted_files INTEGER DEFAULT 0
 );`);
+
+// enable WAL mode
+db.exec("PRAGMA journal_mode = WAL;");
 
 const app = new Elysia()
   .use(cookie())
