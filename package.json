@@ -3,22 +3,35 @@
   "version": "1.0.50",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.tsx"
   },
   "dependencies": {
     "@elysiajs/cookie": "^0.8.0",
     "@elysiajs/html": "^1.0.2",
     "@elysiajs/jwt": "^1.0.2",
     "@elysiajs/static": "^1.0.2",
-    "elysia": "latest"
+    "elysia": "latest",
+    "sharp": "^0.33.4"
   },
-  "module": "src/index.js",
+  "module": "src/index.tsx",
   "bun-create": {
-    "start": "bun run src/index.ts"
+    "start": "bun run src/index.tsx"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.7.3",
+    "@ianvs/prettier-plugin-sort-imports": "^4.2.1",
+    "@kitajs/ts-html-plugin": "^4.0.1",
+    "@total-typescript/ts-reset": "^0.5.1",
     "@types/bun": "^1.1.2",
+    "@types/eslint": "^8.56.10",
     "@types/node": "^20.12.12",
-    "bun-types": "latest"
+    "@types/ws": "^8.5.10",
+    "@typescript-eslint/eslint-plugin": "^7.9.0",
+    "@typescript-eslint/parser": "^7.9.0",
+    "bun-types": "^1.1.8",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   }
 }

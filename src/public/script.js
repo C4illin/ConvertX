@@ -1,7 +1,7 @@
 // Select the file input element
 const fileInput = document.querySelector('input[type="file"]');
+const fileNames = [];
 
-const filesToUpload = [];
 
 // Add a 'change' event listener to the file input element
 fileInput.addEventListener("change", (e) => {
@@ -13,17 +13,20 @@ fileInput.addEventListener("change", (e) => {
 	const fileList = document.querySelector("#file-list");
 
 	// Loop through the selected files
-	for (let i = 0; i < files.length; i++) {
+	for (const file of files) {
 		// Create a new table row for each file
 		const row = document.createElement("tr");
 		row.innerHTML = `
-      <td>${files[i].name}</td>
-      <td>${(files[i].size / 1024 / 1024).toFixed(2)} MB</td>
+      <td>${file.name}</td>
+      <td>${(file.size / 1024 / 1024).toFixed(2)} MB</td>
       <td><button class="secondary" onclick="deleteRow(this)">x</button></td>
     `;
 
 		// Append the row to the file-list table
 		fileList.appendChild(row);
+
+		// Append the file to the hidden input
+		fileNames.push(file.name);
 	}
 
 	uploadFiles(files);
@@ -34,6 +37,10 @@ const deleteRow = (target) => {
 	const filename = target.parentElement.parentElement.children[0].textContent;
 	const row = target.parentElement.parentElement;
 	row.remove();
+
+	// remove from fileNames
+	const index = fileNames.indexOf(filename);
+	fileNames.splice(index, 1);
 
 	fetch("/delete", {
 		method: "POST",
@@ -52,8 +59,8 @@ const deleteRow = (target) => {
 const uploadFiles = (files) => {
 	const formData = new FormData();
 
-	for (let i = 0; i < files.length; i++) {
-		formData.append("files", files[i], files[i].name);
+	for (const file of files) {
+		formData.append("file", file, file.name);
 	}
 
 	fetch("/upload", {
@@ -66,3 +73,11 @@ const uploadFiles = (files) => {
 		})
 		.catch((err) => console.log(err));
 };
+
+
+const formConvert = document.querySelector("form[action='/convert']");
+
+formConvert.addEventListener("submit", (e) => {
+	const hiddenInput = document.querySelector("input[name='file_names']");
+	hiddenInput.value = JSON.stringify(fileNames);
+});

@@ -43,3 +43,5 @@ package-lock.json
 /src/uploads
 /uploads
 /mydb.sqlite
+/output
+/db/mydb.sqlite
