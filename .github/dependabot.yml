@@ -7,6 +7,7 @@ version: 2
 updates:
   # Maintain dependencies for npm
   - package-ecosystem: "npm" # See documentation for possible values
+    versioning-strategy: increase
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
