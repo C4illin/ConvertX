@@ -9,7 +9,7 @@
     "@elysiajs/cookie": "^0.8.0",
     "@elysiajs/html": "^1.0.2",
     "@elysiajs/jwt": "^1.0.2",
-    "@elysiajs/static": "^1.0.2",
+    "@elysiajs/static": "^1.0.3",
     "elysia": "latest",
     "sharp": "^0.33.4"
   },
