@@ -73,8 +73,12 @@ export async function mainConverter(
 
 const possibleConversions: { [key: string]: string[] } = {};
 
-for (const from of [...propertiesImage.from, ...propertiesPandoc.from]) {
-  possibleConversions[from] = [...propertiesImage.to, ...propertiesPandoc.to];
+for (const from of propertiesImage.from) {
+  possibleConversions[from] = propertiesImage.to;
+}
+
+for (const from of propertiesPandoc.from) {
+  possibleConversions[from] = propertiesPandoc.to;
 }
 
 export const getPossibleConversions = (from: string): string[] => {

@@ -1,0 +1,19 @@
+{
+  "name": "ConvertX | Self Hosted File Converter",
+  "short_name": "ConvertX",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#a5d601",
+  "background_color": "#13171f",
+  "display": "standalone"
+}

@@ -28,9 +28,7 @@ fileInput.addEventListener("change", (e) => {
       fileType = file.name.split(".").pop();
       console.log(file.type);
       fileInput.setAttribute("accept", `.${fileType}`);
-
-      const title = document.querySelector("h1");
-      title.textContent = `Convert .${fileType}`;
+      setTitle();
 
       fetch("/conversions", {
         method: "POST",
@@ -57,6 +55,11 @@ fileInput.addEventListener("change", (e) => {
   uploadFiles(files);
 });
 
+const setTitle = () => {
+  const title = document.querySelector("h1");
+  title.textContent = `Convert ${fileType ? `.${fileType}` : "___"}`;
+};
+
 // Add a onclick for the delete button
 const deleteRow = (target) => {
   const filename = target.parentElement.parentElement.children[0].textContent;
@@ -66,6 +69,13 @@ const deleteRow = (target) => {
   // remove from fileNames
   const index = fileNames.indexOf(filename);
   fileNames.splice(index, 1);
+
+  // if fileNames is empty, reset fileType
+  if (fileNames.length === 0) {
+    fileType = null;
+    fileInput.removeAttribute("accept");
+    setTitle();
+  }
 
   fetch("/delete", {
     method: "POST",

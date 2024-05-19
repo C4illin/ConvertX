@@ -178,7 +178,20 @@ const app = new Elysia()
       };
     },
   )
-  .get("/login", () => {
+  .get("/login", async ({ jwt, redirect, cookie: { auth } }) => {
+    console.log("login handler");
+    // if already logged in, redirect to home
+    if (auth?.value) {
+      const user = await jwt.verify(auth.value);
+      console.log(user);
+
+      if (user) {
+        return redirect("/");
+      }
+
+      auth.remove();
+    }
+
     return (
       <BaseHtml title="ConvertX | Login">
         <Header />
@@ -220,15 +233,6 @@ const app = new Elysia()
   .post(
     "/login",
     async function handler({ body, set, redirect, jwt, cookie: { auth } }) {
-      // if already logged in, redirect to home
-      if (auth?.value) {
-        const user = await jwt.verify(auth.value);
-        if (user) {
-          return redirect("/");
-        }
-        auth.remove();
-      }
-
       const existingUser = (await db
         .query("SELECT * FROM users WHERE email = ?")
         .get(body.email)) as IUser;
@@ -514,7 +518,7 @@ const app = new Elysia()
       return redirect(`/results/${jobId.value}`);
     },
   )
-  .get("/histt", async ({ jwt, redirect, cookie: { auth } }) => {
+  .get("/history", async ({ jwt, redirect, cookie: { auth } }) => {
     console.log("results page");
     if (!auth?.value) {
       console.log("no auth value");
@@ -549,7 +553,7 @@ const app = new Elysia()
     return (
       <BaseHtml title="ConvertX | Results">
         <Header loggedIn />
-        <main class="container-fluid">
+        <main class="container">
           <article>
             <h1>Results</h1>
             <table>
@@ -619,7 +623,7 @@ const app = new Elysia()
       return (
         <BaseHtml title="ConvertX | Result">
           <Header loggedIn />
-          <main class="container-fluid">
+          <main class="container">
             <article>
               <div class="grid">
                 <h1>Results</h1>
@@ -690,8 +694,12 @@ const app = new Elysia()
       if (!job) {
         return redirect("/results");
       }
+      // parse from url encoded string
+      const userId = decodeURIComponent(params.userId);
+      const jobId = decodeURIComponent(params.jobId);
+      const fileName = decodeURIComponent(params.fileName);
 
-      const filePath = `${outputDir}${params.userId}/${params.jobId}/${params.fileName}`;
+      const filePath = `${outputDir}${userId}/${jobId}/${fileName}`;
       return Bun.file(filePath);
     },
   )
