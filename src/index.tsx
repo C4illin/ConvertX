@@ -703,6 +703,31 @@ const app = new Elysia()
       return Bun.file(filePath);
     },
   )
+  .get("/zip/:userId/:jobId", async ({ params, jwt, redirect, cookie: { auth } }) => {
+    // TODO: Implement zip download
+    if (!auth?.value) {
+      return redirect("/login");
+    }
+
+    const user = await jwt.verify(auth.value);
+    if (!user) {
+      return redirect("/login");
+    }
+
+    const job = await db
+      .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
+      .get(user.id, params.jobId);
+
+    if (!job) {
+      return redirect("/results");
+    }
+
+    const userId = decodeURIComponent(params.userId);
+    const jobId = decodeURIComponent(params.jobId);
+    const outputPath = `${outputDir}${userId}/${jobId}/`;
+
+    // return Bun.zip(outputPath);
+  })
   .onError(({ code, error, request }) => {
     // log.error(` ${request.method} ${request.url}`, code, error);
     console.error(error);
