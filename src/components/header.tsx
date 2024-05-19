@@ -25,7 +25,7 @@ export const Header = ({ loggedIn }: { loggedIn?: boolean }) => {
   }
 
   return (
-    <header class="container-fluid">
+    <header class="container">
       <nav>
         <ul>
           <li>

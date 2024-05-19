@@ -6,7 +6,7 @@ export const BaseHtml = ({ children, title = "ConvertX" }) => (
       <title>{title}</title>
       <link rel="stylesheet" href="/pico.lime.min.css" />
       <link rel="stylesheet" href="/style.css" />
-      <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+      <script src="https://unpkg.com/htmx.org@1.9.12" />
     </head>
     <body>{children}</body>
   </html>

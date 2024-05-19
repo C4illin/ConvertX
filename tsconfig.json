@@ -21,7 +21,7 @@
       "bun-types" // add Bun global
     ],
     // non bun init
-    // "plugins": [{ "name": "@kitajs/ts-html-plugin" }],
+    "plugins": [{ "name": "@kitajs/ts-html-plugin" }],
     "noUncheckedIndexedAccess": true,
     // "noUnusedLocals": true,
     // "noUnusedParameters": true,
