@@ -163,7 +163,7 @@ export const getPossibleConversions = (
   return possibleConversions[fromClean] || {};
 };
 
-const allTargets: { [key: string]: string[] | undefined } = {};
+const allTargets: { [key: string]: string[]} = {};
 
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
