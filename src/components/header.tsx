@@ -4,7 +4,7 @@ export const Header = ({ loggedIn }: { loggedIn?: boolean }) => {
     rightNav = (
       <ul>
         <li>
-          <a href="/history">History</a>
+          <a href="/test">History</a>
         </li>
         <li>
           <a href="/logout">Logout</a>

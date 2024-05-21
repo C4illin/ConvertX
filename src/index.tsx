@@ -511,7 +511,7 @@ const app = new Elysia()
       }
 
       db.run(
-        "UPDATE jobs SET num_files = ? WHERE id = ?",
+        "UPDATE jobs SET num_files = ?, status = 'pending' WHERE id = ?",
         fileNames.length,
         jobId.value,
       );
@@ -540,7 +540,7 @@ const app = new Elysia()
       }),
     },
   )
-  .get("/hist", async ({ body, jwt, redirect, cookie: { auth } }) => {
+  .get("/test", async ({ jwt, redirect, cookie: { auth } }) => {
     console.log("results page");
 
     if (!auth?.value) {

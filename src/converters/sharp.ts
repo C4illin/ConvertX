@@ -3,8 +3,8 @@ import type { FormatEnum } from "sharp";
 
 // declare possible conversions
 export const properties = {
-  from: ["jpeg", "png", "webp", "gif", "avif", "tiff", "svg"],
-  to: ["jpeg", "png", "webp", "gif", "avif", "tiff"],
+  from: { images: ["jpeg", "png", "webp", "gif", "avif", "tiff", "svg"] },
+  to: { images: ["jpeg", "png", "webp", "gif", "avif", "tiff"] },
   options: {
     svg: {
       scale: {

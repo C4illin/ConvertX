@@ -16,8 +16,8 @@ import {
 const properties: {
   [key: string]: {
     properties: {
-      from: string[] | { [key: string]: string[] };
-      to: string[] | { [key: string]: string[] };
+      from: { [key: string]: string[] };
+      to: { [key: string]: string[] };
       options?: {
         [key: string]: {
           [key: string]: {
@@ -36,7 +36,7 @@ const properties: {
       targetPath: string,
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       options?: any,
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     ) => any;
   };
 } = {
@@ -70,12 +70,13 @@ export async function mainConverter(
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   let converterFunc: any;
+  let converterName = converter;
 
   if (converter) {
     converterFunc = properties[converter];
   } else {
     // Iterate over each converter in properties
-    for (const converterName in properties) {
+    for (converterName in properties) {
       const converterObj = properties[converterName];
 
       if (!converterObj) {
@@ -84,23 +85,14 @@ export async function mainConverter(
 
       // if converter properties.from is an object loop thorugh the keys otherwise use the array
       // for example ffmpeg is an object eg from: {video: ["mp4", "webm"], audio: ["mp3"]}
-      if (Array.isArray(converterObj.properties.from) && Array.isArray(converterObj.properties.to)) {
+
+      for (const key in converterObj.properties.from) {
         if (
-          converterObj.properties.from.includes(fileType) &&
-          converterObj.properties.to.includes(convertTo)
+          converterObj.properties.from[key].includes(fileType) &&
+          converterObj.properties.to[key].includes(convertTo)
         ) {
           converterFunc = converterObj.converter;
           break;
-        }
-      } else {
-        for (const key in converterObj.properties.from) {
-          if (
-            converterObj.properties.from[key].includes(fileType) &&
-            converterObj.properties.to[key].includes(convertTo)
-          ) {
-            converterFunc = converterObj.converter;
-            break;
-          }
         }
       }
     }
@@ -141,19 +133,13 @@ for (const converterName in properties) {
     continue;
   }
 
-  if (Array.isArray(converterProperties.from)) {
-    for (const extension of converterProperties.from) {
-      possibleConversions[extension] = converterProperties.to;
+  for (const key in converterProperties.from) {
+    if (!converterProperties.from[key] || !converterProperties.to[key]) {
+      continue;
     }
-  } else {
-    for (const key in converterProperties.from) {
-      if (!converterProperties.from[key] || !converterProperties.to[key]) {
-        continue;
-      }
 
-      for (const extension of converterProperties.from[key]) {
-        possibleConversions[extension] = converterProperties.to[key];
-      }
+    for (const extension of converterProperties.from[key]) {
+      possibleConversions[extension] = converterProperties.to[key];
     }
   }
 }
@@ -178,12 +164,8 @@ let allTargets: string[] = [];
 for (const converterName in properties) {
   const converterProperties = properties[converterName].properties;
 
-  if (Array.isArray(converterProperties.from)) {
-    allTargets = allTargets.concat(converterProperties.to);
-  } else {
-    for (const key in converterProperties.to) {
-      allTargets = allTargets.concat(converterProperties.to[key]);
-    }
+  for (const key in converterProperties.to) {
+    allTargets = allTargets.concat(converterProperties.to[key]);
   }
 }
 
