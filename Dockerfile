@@ -15,29 +15,26 @@ RUN mkdir -p /temp/prod
 COPY package.json bun.lockb /temp/prod/
 RUN cd /temp/prod && bun install --frozen-lockfile --production
 
-# install pandoc
-RUN apt-get update && apt-get install -y pandoc
-
 # copy node_modules from temp directory
 # then copy all (non-ignored) project files into the image
-FROM base AS prerelease
-COPY --from=install /temp/dev/node_modules node_modules
-COPY . .
+# FROM base AS prerelease
+# COPY --from=install /temp/dev/node_modules node_modules
+# COPY . .
 
-# [optional] tests & build
-ENV NODE_ENV=production
+# # [optional] tests & build
+# ENV NODE_ENV=production
 # RUN bun test
 # RUN bun run build
 
 # copy production dependencies and source code into final image
 FROM base AS release
 COPY --from=install /temp/prod/node_modules node_modules
-COPY --from=prerelease /app/src/index.tsx /app/src/
-COPY --from=prerelease /app/package.json .
+# COPY --from=prerelease /app/src/index.tsx /app/src/
+# COPY --from=prerelease /app/package.json .
 COPY . .
 
-# copy pandoc
-COPY --from=install /usr/bin/pandoc /usr/bin/pandoc
+# install additional dependencies
+RUN apt-get update && apt-get install -y pandoc texlive-latex-recommended ffmpeg
 
 # run the app
 USER bun

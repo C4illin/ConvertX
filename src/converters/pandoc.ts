@@ -115,15 +115,23 @@ export const properties = {
   ],
 };
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export function convert(
   filePath: string,
   fileType: string,
   convertTo: string,
   targetPath: string,
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   options?: any,
 ) {
   return exec(
     `pandoc "${filePath}" -f ${fileType} -t ${convertTo} -o "${targetPath}"`,
+    (error, stdout, stderr) => {
+      if (error) {
+        console.error(`exec error: ${error}`);
+        return;
+      }
+      console.log(`stdout: ${stdout}`);
+      console.error(`stderr: ${stderr}`);
+    },
   );
 }

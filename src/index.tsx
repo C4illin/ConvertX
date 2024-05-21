@@ -130,7 +130,7 @@ const app = new Elysia()
   })
   .post(
     "/register",
-    async function handler({ body, set, jwt, cookie: { auth } }) {
+    async ({ body, set, jwt, cookie: { auth } }) => {
       const existingUser = await db
         .query("SELECT * FROM users WHERE email = ?")
         .get(body.email);
@@ -177,6 +177,7 @@ const app = new Elysia()
         Location: "/",
       };
     },
+    { body: t.Object({ email: t.String(), password: t.String() }) },
   )
   .get("/login", async ({ jwt, redirect, cookie: { auth } }) => {
     console.log("login handler");
@@ -276,17 +277,15 @@ const app = new Elysia()
         sameSite: "strict",
       });
 
-      // redirect to home
-      set.status = 302;
-      set.headers = {
-        Location: "/",
-      };
+      redirect("/");
     },
+    { body: t.Object({ email: t.String(), password: t.String() }) },
   )
   .get("/logout", ({ redirect, cookie: { auth } }) => {
     if (auth?.value) {
       auth.remove();
     }
+
     return redirect("/login");
   })
   .post("/logout", ({ redirect, cookie: { auth } }) => {
@@ -518,8 +517,9 @@ const app = new Elysia()
       return redirect(`/results/${jobId.value}`);
     },
   )
-  .get("/history", async ({ jwt, redirect, cookie: { auth } }) => {
+  .get("/hist", async ({ body, jwt, redirect, cookie: { auth } }) => {
     console.log("results page");
+
     if (!auth?.value) {
       console.log("no auth value");
       return redirect("/login");
@@ -533,14 +533,7 @@ const app = new Elysia()
 
     const userJobs = db
       .query("SELECT * FROM jobs WHERE user_id = ?")
-      .all(user.id) as {
-      id: number;
-      user_id: number;
-      date_created: string;
-      status: string;
-      num_files: number;
-      finished_files: number;
-    }[];
+      .all(user.id) as IJobs[];
 
     for (const job of userJobs) {
       const files = db
@@ -631,6 +624,7 @@ const app = new Elysia()
                   <button
                     type="button"
                     style={{ width: "10rem", float: "right" }}
+                    onclick="downloadAll()"
                   >
                     Download All
                   </button>
@@ -671,6 +665,7 @@ const app = new Elysia()
               </table>
             </article>
           </main>
+          <script src="/downloadAll.js" defer />
         </BaseHtml>
       );
     },
@@ -703,31 +698,34 @@ const app = new Elysia()
       return Bun.file(filePath);
     },
   )
-  .get("/zip/:userId/:jobId", async ({ params, jwt, redirect, cookie: { auth } }) => {
-    // TODO: Implement zip download
-    if (!auth?.value) {
-      return redirect("/login");
-    }
+  .get(
+    "/zip/:userId/:jobId",
+    async ({ params, jwt, redirect, cookie: { auth } }) => {
+      // TODO: Implement zip download
+      if (!auth?.value) {
+        return redirect("/login");
+      }
 
-    const user = await jwt.verify(auth.value);
-    if (!user) {
-      return redirect("/login");
-    }
+      const user = await jwt.verify(auth.value);
+      if (!user) {
+        return redirect("/login");
+      }
 
-    const job = await db
-      .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
-      .get(user.id, params.jobId);
+      const job = await db
+        .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
+        .get(user.id, params.jobId);
 
-    if (!job) {
-      return redirect("/results");
-    }
+      if (!job) {
+        return redirect("/results");
+      }
 
-    const userId = decodeURIComponent(params.userId);
-    const jobId = decodeURIComponent(params.jobId);
-    const outputPath = `${outputDir}${userId}/${jobId}/`;
+      const userId = decodeURIComponent(params.userId);
+      const jobId = decodeURIComponent(params.jobId);
+      const outputPath = `${outputDir}${userId}/${jobId}/`;
 
-    // return Bun.zip(outputPath);
-  })
+      // return Bun.zip(outputPath);
+    },
+  )
   .onError(({ code, error, request }) => {
     // log.error(` ${request.method} ${request.url}`, code, error);
     console.error(error);
