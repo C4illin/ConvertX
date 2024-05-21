@@ -64,27 +64,25 @@ export async function mainConverter(
   targetPath: string,
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   options?: any,
-  converter?: string,
+  converterName?: string,
 ) {
   const fileType = normalizeFiletype(fileTypeOriginal);
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   let converterFunc: any;
-  let converterName = converter;
+  // let converterName = converterName;
 
-  if (converter) {
-    converterFunc = properties[converter];
+  if (converterName) {
+    converterFunc = properties[converterName]?.converter;
   } else {
     // Iterate over each converter in properties
+    // biome-ignore lint/style/noParameterAssign: <explanation>
     for (converterName in properties) {
       const converterObj = properties[converterName];
 
       if (!converterObj) {
         break;
       }
-
-      // if converter properties.from is an object loop thorugh the keys otherwise use the array
-      // for example ffmpeg is an object eg from: {video: ["mp4", "webm"], audio: ["mp3"]}
 
       for (const key in converterObj.properties.from) {
         if (
@@ -114,17 +112,17 @@ export async function mainConverter(
       options,
     );
     console.log(
-      `Converted ${inputFilePath} from ${fileType} to ${convertTo} successfully using ${converter}.`,
+      `Converted ${inputFilePath} from ${fileType} to ${convertTo} successfully using ${converterName}.`,
     );
   } catch (error) {
     console.error(
-      `Failed to convert ${inputFilePath} from ${fileType} to ${convertTo} using ${converter}.`,
+      `Failed to convert ${inputFilePath} from ${fileType} to ${convertTo} using ${converterName}.`,
       error,
     );
   }
 }
 
-const possibleConversions: { [key: string]: string[] } = {};
+const possibleConversions: { [key: string]: { [key: string]: string[] } } = {};
 
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
@@ -134,12 +132,16 @@ for (const converterName in properties) {
   }
 
   for (const key in converterProperties.from) {
-    if (!converterProperties.from[key] || !converterProperties.to[key]) {
+    if (converterProperties.from[key] === undefined) {
       continue;
     }
 
-    for (const extension of converterProperties.from[key]) {
-      possibleConversions[extension] = converterProperties.to[key];
+    for (const extension of converterProperties.from[key] ?? []) {
+      if (!possibleConversions[extension]) {
+        possibleConversions[extension] = {};
+      }
+      possibleConversions[extension][converterName] =
+        converterProperties.to[key] || [];
     }
   }
 }
@@ -153,19 +155,29 @@ for (const converterName in properties) {
 //   JSON.stringify(possibleConversions),
 // );
 
-export const getPossibleConversions = (from: string): string[] => {
+export const getPossibleConversions = (
+  from: string,
+): { [key: string]: string[] } => {
   const fromClean = normalizeFiletype(from);
 
-  return possibleConversions[fromClean] || ([] as string[]);
+  return possibleConversions[fromClean] || {};
 };
 
-let allTargets: string[] = [];
+const allTargets: { [key: string]: string[] | undefined } = {};
 
 for (const converterName in properties) {
-  const converterProperties = properties[converterName].properties;
+  const converterProperties = properties[converterName]?.properties;
+
+  if (!converterProperties) {
+    continue;
+  }
 
   for (const key in converterProperties.to) {
-    allTargets = allTargets.concat(converterProperties.to[key]);
+    if (allTargets[converterName]) {
+      allTargets[converterName].push(...converterProperties.to[key]);
+    } else {
+      allTargets[converterName] = converterProperties.to[key];
+    }
   }
 }
 

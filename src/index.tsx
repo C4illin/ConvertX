@@ -357,9 +357,14 @@ const app = new Elysia()
                 <option selected disabled value="">
                   Convert to
                 </option>
-                {getAllTargets().map((target) => (
+                {Object.entries(getAllTargets()).map(([converter, targets]) => (
                   // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-                  <option value={target}>{target}</option>
+                  <optgroup label={converter}>
+                    {targets.map((target) => (
+                      // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                      <option value={`${target},${converter}`}>{target}</option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </article>
@@ -379,9 +384,14 @@ const app = new Elysia()
           <option selected disabled value="">
             Convert to
           </option>
-          {getPossibleConversions(body.fileType).map((target) => (
+          {Object.entries(getPossibleConversions(body.fileType)).map(([converter, targets]) => (
             // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-            <option value={target}>{target}</option>
+            <optgroup label={converter}>
+              {targets.map((target) => (
+                // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                <option value={`${target},${converter}`}>{target}</option>
+              ))}
+            </optgroup>
           ))}
         </select>
       );
@@ -503,7 +513,8 @@ const app = new Elysia()
         );
       }
 
-      const convertTo = normalizeFiletype(body.convert_to);
+      const convertTo = normalizeFiletype(body.convert_to.split(",")[0] as string);
+      const converterName = body.convert_to.split(",")[1];
       const fileNames = JSON.parse(body.file_names) as string[];
 
       if (!Array.isArray(fileNames) || fileNames.length === 0) {
@@ -520,17 +531,29 @@ const app = new Elysia()
         "INSERT INTO file_names (job_id, file_name, output_file_name) VALUES (?, ?, ?)",
       );
 
-      for (const fileName of fileNames) {
+      // Start the conversion process in the background
+      Promise.all(fileNames.map(async (fileName) => {
         const filePath = `${userUploadsDir}${fileName}`;
         const fileTypeOrig = fileName.split(".").pop() as string;
         const fileType = normalizeFiletype(fileTypeOrig);
         const newFileName = fileName.replace(fileTypeOrig, convertTo);
         const targetPath = `${userOutputDir}${newFileName}`;
 
-        await mainConverter(filePath, fileType, convertTo, targetPath);
+        await mainConverter(filePath, fileType, convertTo, targetPath, {}, converterName);
         query.run(jobId.value, fileName, newFileName);
-      }
+      }))
+      .then(() => {
+        // All conversions are done, update the job status to 'completed'
+        db.run(
+          "UPDATE jobs SET status = 'completed' WHERE id = ?",
+          jobId.value,
+        );
+      })
+      .catch((error) => {
+        console.error('Error in conversion process:', error);
+      });
 
+      // Redirect the client immediately
       return redirect(`/results/${jobId.value}`);
     },
     {
