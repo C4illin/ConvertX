@@ -370,85 +370,102 @@ const app = new Elysia()
       </BaseHtml>
     );
   })
-  .post("/conversions", ({ body }) => {
-    console.log(body);
-    return (
-      <select name="convert_to" aria-label="Convert to" required>
-        <option selected disabled value="">
-          Convert to
-        </option>
-        {getPossibleConversions(body.fileType).map((target) => (
-          // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-          <option value={target}>{target}</option>
-        ))}
-      </select>
-    );
-  })
-  .post("/upload", async ({ body, redirect, jwt, cookie: { auth, jobId } }) => {
-    if (!auth?.value) {
-      return redirect("/login");
-    }
-
-    const user = await jwt.verify(auth.value);
-    if (!user) {
-      return redirect("/login");
-    }
-
-    if (!jobId?.value) {
-      return redirect("/");
-    }
-
-    const existingJob = await db
-      .query("SELECT * FROM jobs WHERE id = ? AND user_id = ?")
-      .get(jobId.value, user.id);
-
-    if (!existingJob) {
-      return redirect("/");
-    }
-
-    const userUploadsDir = `${uploadsDir}${user.id}/${jobId.value}/`;
-
-    if (body?.file) {
-      if (Array.isArray(body.file)) {
-        for (const file of body.file) {
-          console.log(file);
-          await Bun.write(`${userUploadsDir}${file.name}`, file);
-        }
-      } else {
-        await Bun.write(`${userUploadsDir}${body.file.name}`, body.file);
+  .post(
+    "/conversions",
+    ({ body }) => {
+      console.log(body);
+      return (
+        <select name="convert_to" aria-label="Convert to" required>
+          <option selected disabled value="">
+            Convert to
+          </option>
+          {getPossibleConversions(body.fileType).map((target) => (
+            // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+            <option value={target}>{target}</option>
+          ))}
+        </select>
+      );
+    },
+    { body: t.Object({ fileType: t.String() }) },
+  )
+  .post(
+    "/upload",
+    async ({ body, redirect, jwt, cookie: { auth, jobId } }) => {
+      if (!auth?.value) {
+        return redirect("/login");
       }
-    }
 
-    return {
-      message: "Files uploaded successfully.",
-    };
-  })
-  .post("/delete", async ({ body, redirect, jwt, cookie: { auth, jobId } }) => {
-    if (!auth?.value) {
-      return redirect("/login");
-    }
+      const user = await jwt.verify(auth.value);
+      if (!user) {
+        return redirect("/login");
+      }
 
-    const user = await jwt.verify(auth.value);
-    if (!user) {
-      return redirect("/login");
-    }
+      if (!jobId?.value) {
+        return redirect("/");
+      }
 
-    if (!jobId?.value) {
-      return redirect("/");
-    }
+      const existingJob = await db
+        .query("SELECT * FROM jobs WHERE id = ? AND user_id = ?")
+        .get(jobId.value, user.id);
 
-    const existingJob = await db
-      .query("SELECT * FROM jobs WHERE id = ? AND user_id = ?")
-      .get(jobId.value, user.id);
+      if (!existingJob) {
+        return redirect("/");
+      }
 
-    if (!existingJob) {
-      return redirect("/");
-    }
+      const userUploadsDir = `${uploadsDir}${user.id}/${jobId.value}/`;
 
-    const userUploadsDir = `${uploadsDir}${user.id}/${jobId.value}/`;
+      if (body?.file) {
+        if (Array.isArray(body.file)) {
+          for (const file of body.file) {
+            await Bun.write(`${userUploadsDir}${file.name}`, file);
+          }
+        } else {
+          await Bun.write(
+            `${userUploadsDir}${
+              // biome-ignore lint/complexity/useLiteralKeys: ts bug
+              body.file["name"]
+            }`,
+            body.file,
+          );
+        }
+      }
 
-    await unlink(`${userUploadsDir}${body.filename}`);
-  })
+      return {
+        message: "Files uploaded successfully.",
+      };
+    },
+    { body: t.Object({ file: t.Files() }) },
+  )
+  .post(
+    "/delete",
+    async ({ body, redirect, jwt, cookie: { auth, jobId } }) => {
+      if (!auth?.value) {
+        return redirect("/login");
+      }
+
+      const user = await jwt.verify(auth.value);
+      if (!user) {
+        return redirect("/login");
+      }
+
+      if (!jobId?.value) {
+        return redirect("/");
+      }
+
+      const existingJob = await db
+        .query("SELECT * FROM jobs WHERE id = ? AND user_id = ?")
+        .get(jobId.value, user.id);
+
+      if (!existingJob) {
+        return redirect("/");
+      }
+
+      const userUploadsDir = `${uploadsDir}${user.id}/${jobId.value}/`;
+
+      await unlink(`${userUploadsDir}${body.filename}`);
+    },
+    { body: t.Object({ filename: t.String() }) },
+  )
   .post(
     "/convert",
     async ({ body, redirect, jwt, cookie: { auth, jobId } }) => {
@@ -487,7 +504,7 @@ const app = new Elysia()
       }
 
       const convertTo = normalizeFiletype(body.convert_to);
-      const fileNames: string[] = JSON.parse(body.file_names) as string[];
+      const fileNames = JSON.parse(body.file_names) as string[];
 
       if (!Array.isArray(fileNames) || fileNames.length === 0) {
         return redirect("/");
@@ -515,6 +532,12 @@ const app = new Elysia()
       }
 
       return redirect(`/results/${jobId.value}`);
+    },
+    {
+      body: t.Object({
+        convert_to: t.String(),
+        file_names: t.String(),
+      }),
     },
   )
   .get("/hist", async ({ body, jwt, redirect, cookie: { auth } }) => {
@@ -624,8 +647,7 @@ const app = new Elysia()
                   <button
                     type="button"
                     style={{ width: "10rem", float: "right" }}
-                    onclick="downloadAll()"
-                  >
+                    onclick="downloadAll()">
                     Download All
                   </button>
                 </div>
@@ -646,16 +668,14 @@ const app = new Elysia()
                       <td>{file.output_file_name}</td>
                       <td>
                         <a
-                          href={`/download/${outputPath}${file.output_file_name}`}
-                        >
+                          href={`/download/${outputPath}${file.output_file_name}`}>
                           View
                         </a>
                       </td>
                       <td>
                         <a
                           href={`/download/${outputPath}${file.output_file_name}`}
-                          download={file.output_file_name}
-                        >
+                          download={file.output_file_name}>
                           Download
                         </a>
                       </td>

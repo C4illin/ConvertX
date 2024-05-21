@@ -36,7 +36,7 @@
       "suspicious": {
         "noEmptyBlockStatements": "error",
         "noEmptyInterface": "error",
-        "noExplicitAny": "error",
+        "noExplicitAny": "warn",
         "noExtraNonNullAssertion": "error",
         "noMisleadingInstantiator": "error",
         "noUnsafeDeclarationMerging": "error",
@@ -52,7 +52,7 @@
       "semicolons": "always",
       "arrowParentheses": "always",
       "bracketSpacing": true,
-      "bracketSameLine": false,
+      "bracketSameLine": true,
       "quoteStyle": "double",
       "attributePosition": "auto"
     }
