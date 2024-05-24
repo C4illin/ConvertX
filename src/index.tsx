@@ -277,9 +277,11 @@ const app = new Elysia()
                 </label>
               </fieldset>
               <div role="group">
-                <a href="/register" role="button" class="secondary">
-                  Register an account
-                </a>
+                {ACCOUNT_REGISTRATION && (
+                  <a href="/register" role="button" class="secondary">
+                    Register an account
+                  </a>
+                )}
                 <input type="submit" value="Login" />
               </div>
             </form>
