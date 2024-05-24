@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, unlink } from "node:fs/promises";
+import { mkdir, unlink, rmdir } from "node:fs/promises";
 import cookie from "@elysiajs/cookie";
 import { html } from "@elysiajs/html";
 import { jwt } from "@elysiajs/jwt";
@@ -639,6 +639,9 @@ const app = new Elysia()
             "UPDATE jobs SET status = 'completed' WHERE id = ?",
             jobId.value,
           );
+
+          // delete all uploaded files in userUploadsDir
+          rmdir(userUploadsDir, { recursive: true });
         })
         .catch((error) => {
           console.error("Error in conversion process:", error);
