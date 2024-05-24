@@ -1,6 +1,6 @@
 # ConvertX
 
-A self-hosted online file converter. Supports 708 different formats.
+A self-hosted online file converter. Supports 808 different formats.
 ## Features
 
 - Convert files to different formats
@@ -15,7 +15,9 @@ A self-hosted online file converter. Supports 708 different formats.
 | Sharp          | Images (fast) | 7             | 6           |
 | Pandoc         | Documents     | 43            | 65          |
 | GraphicsMagick | Images        | 166           | 133         |
-| FFmpeg         | Video         | 461           | 170         |
+| FFmpeg         | Video         | ~473          | ~280        |
+
+<!-- many ffmpeg fileformats are duplicates -->
 
 ## Deployment
 

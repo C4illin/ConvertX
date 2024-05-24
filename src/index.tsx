@@ -831,7 +831,7 @@ const app = new Elysia()
       return Bun.file(filePath);
     },
   )
-  .get("/converters", async ({ params, jwt, redirect, cookie: { auth } }) => {
+  .get("/converters", async ({ jwt, redirect, cookie: { auth } }) => {
     if (!auth?.value) {
       return redirect("/login");
     }
