@@ -673,7 +673,7 @@ export async function convert(
     command += ` -f "${convertTo}"`;
   }
 
-  command += " ${targetPath}";
+  command += ` ${targetPath}`;
 
   return exec(command, (error, stdout, stderr) => {
     if (error) {

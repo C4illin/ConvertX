@@ -28,6 +28,7 @@ services:
       - "3000:3000"
     environment: # Defaults are listed below
       - ACCOUNT_REGISTRATION=false # true or false
+      - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken
     volumes:
       - /path/you/want:/app/data
 ```
