@@ -15,7 +15,10 @@ import {
   getAllTargets,
   getAllInputs,
 } from "./converters/main";
-import { normalizeFiletype } from "./helpers/normalizeFiletype";
+import {
+  normalizeFiletype,
+  normalizeOutputFiletype,
+} from "./helpers/normalizeFiletype";
 
 const db = new Database("./data/mydb.sqlite", { create: true });
 const uploadsDir = "./data/uploads/";
@@ -336,18 +339,18 @@ const app = new Elysia()
         sameSite: "strict",
       });
 
-      redirect("/");
+      return redirect("/");
     },
     { body: t.Object({ email: t.String(), password: t.String() }) },
   )
-  .get("/logout", ({ redirect, cookie: { auth } }) => {
+  .get("/logoff", ({ redirect, cookie: { auth } }) => {
     if (auth?.value) {
       auth.remove();
     }
 
     return redirect("/login");
   })
-  .post("/logout", ({ redirect, cookie: { auth } }) => {
+  .post("/logoff", ({ redirect, cookie: { auth } }) => {
     if (auth?.value) {
       auth.remove();
     }
@@ -415,7 +418,7 @@ const app = new Elysia()
             </div>
             <input type="file" name="file" multiple />
             {/* <label for="convert_from">Convert from</label> */}
-            <select name="convert_from" aria-label="Convert from" required>
+            {/* <select name="convert_from" aria-label="Convert from" required>
               <option selected disabled value="">
                 Convert from
               </option>
@@ -423,7 +426,7 @@ const app = new Elysia()
                 // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                 <option>{input}</option>
               ))}
-            </select>
+            </select> */}
           </article>
           <form method="post" action="/convert">
             <input type="hidden" name="file_names" id="file_names" />
@@ -616,7 +619,7 @@ const app = new Elysia()
           const fileTypeOrig = fileName.split(".").pop() as string;
           const fileType = normalizeFiletype(fileTypeOrig);
           const newFileExt = normalizeOutputFiletype(convertTo);
-          const newFileName = fileName.replace(fileTypeOrig, convertTo);
+          const newFileName = fileName.replace(fileTypeOrig, newFileExt);
           const targetPath = `${userOutputDir}${newFileName}`;
 
           await mainConverter(
@@ -863,6 +866,7 @@ const app = new Elysia()
                         Count: {inputs.length}
                         <ul>
                           {inputs.map((input) => (
+                            // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                             <li>{input}</li>
                           ))}
                         </ul>
@@ -871,6 +875,7 @@ const app = new Elysia()
                         Count: {targets.length}
                         <ul>
                           {targets.map((target) => (
+                            // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                             <li>{target}</li>
                           ))}
                         </ul>

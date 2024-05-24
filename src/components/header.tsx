@@ -7,7 +7,7 @@ export const Header = ({ loggedIn }: { loggedIn?: boolean }) => {
           <a href="/test">History</a>
         </li>
         <li>
-          <a href="/logout">Logout</a>
+          <a href="/logoff">Logout</a>
         </li>
       </ul>
     );

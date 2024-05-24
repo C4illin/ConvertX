@@ -17,8 +17,6 @@ export const normalizeOutputFiletype = (filetype: string): string => {
   switch (lowercaseFiletype) {
     case "jpeg":
       return "jpg";
-    case "mpeg4":
-      return "mp4";
     default:
       return lowercaseFiletype;
   }
