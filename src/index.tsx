@@ -615,6 +615,7 @@ const app = new Elysia()
           const filePath = `${userUploadsDir}${fileName}`;
           const fileTypeOrig = fileName.split(".").pop() as string;
           const fileType = normalizeFiletype(fileTypeOrig);
+          const newFileExt = normalizeOutputFiletype(convertTo);
           const newFileName = fileName.replace(fileTypeOrig, convertTo);
           const targetPath = `${userOutputDir}${newFileName}`;
 
@@ -838,50 +839,51 @@ const app = new Elysia()
     }
 
     return (
-  <BaseHtml title="ConvertX | Converters">
-    <Header loggedIn />
-    <main class="container">
-      <article>
-        <h1>Converters</h1>
-        <table>
-          <thead>
-            <tr>
-              <th>Converter</th>
-              <th>From (Count)</th>
-              <th>To (Count)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Object.entries(getAllTargets()).map(([converter, targets]) => {
-              const inputs = getAllInputs(converter);
-              return (
-                <tr key={converter}>
-                  <td>{converter}</td>
-                  <td>
-                    Count: {inputs.length}
-                    <ul>
-                      {inputs.map((input, index) => (
-                        <li key={index}>{input}</li>
-                      ))}
-                    </ul>
-                  </td>
-                  <td>
-                    Count: {targets.length}
-                    <ul>
-                      {targets.map((target, index) => (
-                        <li key={index}>{target}</li>
-                      ))}
-                    </ul>
-                  </td>
+      <BaseHtml title="ConvertX | Converters">
+        <Header loggedIn />
+        <main class="container">
+          <article>
+            <h1>Converters</h1>
+            <table>
+              <thead>
+                <tr>
+                  <th>Converter</th>
+                  <th>From (Count)</th>
+                  <th>To (Count)</th>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </article>
-    </main>
-  </BaseHtml>
-);
+              </thead>
+              <tbody>
+                {Object.entries(getAllTargets()).map(([converter, targets]) => {
+                  const inputs = getAllInputs(converter);
+                  return (
+                    // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                    <tr>
+                      <td>{converter}</td>
+                      <td>
+                        Count: {inputs.length}
+                        <ul>
+                          {inputs.map((input) => (
+                            <li>{input}</li>
+                          ))}
+                        </ul>
+                      </td>
+                      <td>
+                        Count: {targets.length}
+                        <ul>
+                          {targets.map((target) => (
+                            <li>{target}</li>
+                          ))}
+                        </ul>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </article>
+        </main>
+      </BaseHtml>
+    );
   })
   .get(
     "/zip/:userId/:jobId",
