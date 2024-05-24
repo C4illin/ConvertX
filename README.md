@@ -25,7 +25,7 @@ A self-hosted online file converter. Supports 808 different formats.
 # docker-compose.yml
 services:
   convertx: 
-    image: ghcr.io/c4illin/convertx:master
+    image: ghcr.io/c4illin/convertx:main
     ports:
       - "3000:3000"
     environment: # Defaults are listed below
