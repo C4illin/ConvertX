@@ -88,7 +88,7 @@ const app = new Elysia()
       schema: t.Object({
         id: t.String(),
       }),
-      secret: "secret",
+      secret: process.env.JWT_SECRET || randomUUID(),
       exp: "7d",
     }),
   )
