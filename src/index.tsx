@@ -10,8 +10,10 @@ import { BaseHtml } from "./components/base";
 import { Header } from "./components/header";
 import {
   mainConverter,
-  getPossibleConversions,
+  getPossibleTargets,
+  getPossibleInputs,
   getAllTargets,
+  getAllInputs,
 } from "./converters/main";
 import { normalizeFiletype } from "./helpers/normalizeFiletype";
 
@@ -19,7 +21,7 @@ const db = new Database("./data/mydb.sqlite", { create: true });
 const uploadsDir = "./data/uploads/";
 const outputDir = "./data/output/";
 
-const accountRegistration =
+const ACCOUNT_REGISTRATION =
   process.env.ACCOUNT_REGISTRATION === "true" || false;
 
 // fileNames: fileNames,
@@ -49,6 +51,8 @@ CREATE TABLE IF NOT EXISTS jobs (
   num_files INTEGER DEFAULT 0,
   FOREIGN KEY (user_id) REFERENCES users(id)
 );`);
+
+let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
 
 interface IUser {
   id: number;
@@ -94,7 +98,54 @@ const app = new Elysia()
       prefix: "/",
     }),
   )
-  .get("/register", () => {
+  .get("/setup", ({ redirect }) => {
+    if (!FIRST_RUN) {
+      return redirect("/login");
+    }
+
+    return (
+      <BaseHtml title="ConvertX | Setup">
+        <main class="container">
+          <h1>Welcome to ConvertX</h1>
+          <article>
+            <header>Create your account</header>
+            <form method="post" action="/register">
+              <fieldset>
+                <label>
+                  Email/Username
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    required
+                  />
+                </label>
+                <label>
+                  Password
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    required
+                  />
+                </label>
+              </fieldset>
+              <input type="submit" value="Create account" />
+            </form>
+            <footer>
+              Report any issues on{" "}
+              <a href="https://github.com/C4illin/ConvertX">GitHub</a>.
+            </footer>
+          </article>
+        </main>
+      </BaseHtml>
+    );
+  })
+  .get("/register", ({ redirect }) => {
+    if (!ACCOUNT_REGISTRATION) {
+      return redirect("/login");
+    }
+
     return (
       <BaseHtml title="ConvertX | Register">
         <Header />
@@ -130,7 +181,15 @@ const app = new Elysia()
   })
   .post(
     "/register",
-    async ({ body, set, jwt, cookie: { auth } }) => {
+    async ({ body, set, redirect, jwt, cookie: { auth } }) => {
+      if (!ACCOUNT_REGISTRATION && !FIRST_RUN) {
+        return redirect("/login");
+      }
+
+      if (FIRST_RUN) {
+        FIRST_RUN = false;
+      }
+
       const existingUser = await db
         .query("SELECT * FROM users WHERE email = ?")
         .get(body.email);
@@ -171,20 +230,18 @@ const app = new Elysia()
         sameSite: "strict",
       });
 
-      // redirect to home
-      set.status = 302;
-      set.headers = {
-        Location: "/",
-      };
+      redirect("/");
     },
     { body: t.Object({ email: t.String(), password: t.String() }) },
   )
   .get("/login", async ({ jwt, redirect, cookie: { auth } }) => {
-    console.log("login handler");
+    if (FIRST_RUN) {
+      return redirect("/setup");
+    }
+
     // if already logged in, redirect to home
     if (auth?.value) {
       const user = await jwt.verify(auth.value);
-      console.log(user);
 
       if (user) {
         return redirect("/");
@@ -296,6 +353,10 @@ const app = new Elysia()
     return redirect("/login");
   })
   .get("/", async ({ jwt, redirect, cookie: { auth, jobId } }) => {
+    if (FIRST_RUN) {
+      return redirect("/setup");
+    }
+
     if (!auth?.value) {
       return redirect("/login");
     }
@@ -347,8 +408,20 @@ const app = new Elysia()
         <main class="container">
           <article>
             <h1>Convert</h1>
-            <table id="file-list" />
+            <div style={{ maxHeight: "50vh", overflowY: "auto" }}>
+              <table id="file-list" class="striped" />
+            </div>
             <input type="file" name="file" multiple />
+            {/* <label for="convert_from">Convert from</label> */}
+            <select name="convert_from" aria-label="Convert from" required>
+              <option selected disabled value="">
+                Convert from
+              </option>
+              {getPossibleInputs().map((input) => (
+                // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                <option>{input}</option>
+              ))}
+            </select>
           </article>
           <form method="post" action="/convert">
             <input type="hidden" name="file_names" id="file_names" />
@@ -378,21 +451,22 @@ const app = new Elysia()
   .post(
     "/conversions",
     ({ body }) => {
-      console.log(body);
       return (
         <select name="convert_to" aria-label="Convert to" required>
           <option selected disabled value="">
             Convert to
           </option>
-          {Object.entries(getPossibleConversions(body.fileType)).map(([converter, targets]) => (
-            // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-            <optgroup label={converter}>
-              {targets.map((target) => (
-                // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-                <option value={`${target},${converter}`}>{target}</option>
-              ))}
-            </optgroup>
-          ))}
+          {Object.entries(getPossibleTargets(body.fileType)).map(
+            ([converter, targets]) => (
+              // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+              <optgroup label={converter}>
+                {targets.map((target) => (
+                  // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                  <option value={`${target},${converter}`}>{target}</option>
+                ))}
+              </optgroup>
+            ),
+          )}
         </select>
       );
     },
@@ -513,7 +587,9 @@ const app = new Elysia()
         );
       }
 
-      const convertTo = normalizeFiletype(body.convert_to.split(",")[0] as string);
+      const convertTo = normalizeFiletype(
+        body.convert_to.split(",")[0] as string,
+      );
       const converterName = body.convert_to.split(",")[1];
       const fileNames = JSON.parse(body.file_names) as string[];
 
@@ -532,26 +608,35 @@ const app = new Elysia()
       );
 
       // Start the conversion process in the background
-      Promise.all(fileNames.map(async (fileName) => {
-        const filePath = `${userUploadsDir}${fileName}`;
-        const fileTypeOrig = fileName.split(".").pop() as string;
-        const fileType = normalizeFiletype(fileTypeOrig);
-        const newFileName = fileName.replace(fileTypeOrig, convertTo);
-        const targetPath = `${userOutputDir}${newFileName}`;
+      Promise.all(
+        fileNames.map(async (fileName) => {
+          const filePath = `${userUploadsDir}${fileName}`;
+          const fileTypeOrig = fileName.split(".").pop() as string;
+          const fileType = normalizeFiletype(fileTypeOrig);
+          const newFileName = fileName.replace(fileTypeOrig, convertTo);
+          const targetPath = `${userOutputDir}${newFileName}`;
 
-        await mainConverter(filePath, fileType, convertTo, targetPath, {}, converterName);
-        query.run(jobId.value, fileName, newFileName);
-      }))
-      .then(() => {
-        // All conversions are done, update the job status to 'completed'
-        db.run(
-          "UPDATE jobs SET status = 'completed' WHERE id = ?",
-          jobId.value,
-        );
-      })
-      .catch((error) => {
-        console.error('Error in conversion process:', error);
-      });
+          await mainConverter(
+            filePath,
+            fileType,
+            convertTo,
+            targetPath,
+            {},
+            converterName,
+          );
+          query.run(jobId.value, fileName, newFileName);
+        }),
+      )
+        .then(() => {
+          // All conversions are done, update the job status to 'completed'
+          db.run(
+            "UPDATE jobs SET status = 'completed' WHERE id = ?",
+            jobId.value,
+          );
+        })
+        .catch((error) => {
+          console.error("Error in conversion process:", error);
+        });
 
       // Redirect the client immediately
       return redirect(`/results/${jobId.value}`);
@@ -564,20 +649,16 @@ const app = new Elysia()
     },
   )
   .get("/test", async ({ jwt, redirect, cookie: { auth } }) => {
-    console.log("results page");
-
     if (!auth?.value) {
-      console.log("no auth value");
       return redirect("/login");
     }
     const user = await jwt.verify(auth.value);
 
     if (!user) {
-      console.log("no user");
       return redirect("/login");
     }
 
-    const userJobs = db
+    let userJobs = db
       .query("SELECT * FROM jobs WHERE user_id = ?")
       .all(user.id) as IJobs[];
 
@@ -588,6 +669,9 @@ const app = new Elysia()
 
       job.finished_files = files.length;
     }
+
+    // filter out jobs with no files
+    userJobs = userJobs.filter((job) => job.num_files > 0);
 
     return (
       <BaseHtml title="ConvertX | Results">
@@ -741,6 +825,62 @@ const app = new Elysia()
       return Bun.file(filePath);
     },
   )
+  .get("/converters", async ({ params, jwt, redirect, cookie: { auth } }) => {
+    if (!auth?.value) {
+      return redirect("/login");
+    }
+
+    const user = await jwt.verify(auth.value);
+    if (!user) {
+      return redirect("/login");
+    }
+
+    return (
+  <BaseHtml title="ConvertX | Converters">
+    <Header loggedIn />
+    <main class="container">
+      <article>
+        <h1>Converters</h1>
+        <table>
+          <thead>
+            <tr>
+              <th>Converter</th>
+              <th>From (Count)</th>
+              <th>To (Count)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(getAllTargets()).map(([converter, targets]) => {
+              const inputs = getAllInputs(converter);
+              return (
+                <tr key={converter}>
+                  <td>{converter}</td>
+                  <td>
+                    Count: {inputs.length}
+                    <ul>
+                      {inputs.map((input, index) => (
+                        <li key={index}>{input}</li>
+                      ))}
+                    </ul>
+                  </td>
+                  <td>
+                    Count: {targets.length}
+                    <ul>
+                      {targets.map((target, index) => (
+                        <li key={index}>{target}</li>
+                      ))}
+                    </ul>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </article>
+    </main>
+  </BaseHtml>
+);
+  })
   .get(
     "/zip/:userId/:jobId",
     async ({ params, jwt, redirect, cookie: { auth } }) => {

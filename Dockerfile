@@ -1,5 +1,3 @@
-# use the official Bun image
-# see all versions at https://hub.docker.com/r/oven/bun/tags
 FROM oven/bun:1-debian as base
 WORKDIR /app
 
@@ -28,13 +26,19 @@ RUN cd /temp/prod && bun install --frozen-lockfile --production
 
 # copy production dependencies and source code into final image
 FROM base AS release
+# install additional dependencies
+RUN rm -rf /var/lib/apt/lists/partial && apt-get update -o Acquire::CompressionTypes::Order::=gz \
+  && apt-get install -y \
+  pandoc \
+  texlive-latex-recommended \
+  ffmpeg \
+  graphicsmagick \
+  ghostscript
+
 COPY --from=install /temp/prod/node_modules node_modules
 # COPY --from=prerelease /app/src/index.tsx /app/src/
 # COPY --from=prerelease /app/package.json .
 COPY . .
-
-# install additional dependencies
-RUN apt-get update && apt-get install -y pandoc texlive-latex-recommended ffmpeg
 
 # run the app
 USER bun

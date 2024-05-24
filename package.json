@@ -2,8 +2,8 @@
   "name": "convertx-frontend",
   "version": "1.0.50",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --hot src/index.tsx"
+    "dev": "bun run --watch src/index.tsx",
+    "hot": "bun run --hot src/index.tsx"
   },
   "dependencies": {
     "@elysiajs/cookie": "^0.8.0",

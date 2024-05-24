@@ -659,16 +659,34 @@ export async function convert(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   options?: any,
 ) {
+  let command = "ffmpeg";
 
-  return exec(
-    `ffmpeg -f "${fileType}" -i "${filePath}" -f "${convertTo}" "${targetPath}"`,
-    (error, stdout, stderr) => {
-      if (error) {
-        console.error(`exec error: ${error}`);
-        return;
-      }
+  const notWorking = ["bmp"];
+
+  if (!(fileType in notWorking)) {
+    command += ` -f "${fileType}"`;
+  }
+
+  command += ` -i "${filePath}"`;
+
+  if (!(convertTo in notWorking)) {
+    command += ` -f "${convertTo}"`;
+  }
+
+  command += " ${targetPath}";
+
+  return exec(command, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`exec error: ${error}`);
+      return;
+    }
+
+    if (stdout) {
       console.log(`stdout: ${stdout}`);
+    }
+
+    if (stderr) {
       console.error(`stderr: ${stderr}`);
-    },
-  );
+    }
+  });
 }

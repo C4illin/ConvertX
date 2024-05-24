@@ -9,9 +9,14 @@ import {
 } from "./pandoc";
 
 import {
-  properties as propertiesFfmpeg,
-  convert as convertFfmpeg,
+  properties as propertiesFFmpeg,
+  convert as convertFFmpeg,
 } from "./ffmpeg";
+
+import {
+  properties as propertiesGraphicsmagick,
+  convert as convertGraphicsmagick,
+} from "./graphicsmagick";
 
 const properties: {
   [key: string]: {
@@ -48,9 +53,13 @@ const properties: {
     properties: propertiesPandoc,
     converter: convertPandoc,
   },
+  graphicsmagick: {
+    properties: propertiesGraphicsmagick,
+    converter: convertGraphicsmagick,
+  },
   ffmpeg: {
-    properties: propertiesFfmpeg,
-    converter: convertFfmpeg,
+    properties: propertiesFFmpeg,
+    converter: convertFFmpeg,
   },
 };
 
@@ -86,6 +95,7 @@ export async function mainConverter(
 
       for (const key in converterObj.properties.from) {
         if (
+          // HOW??
           converterObj.properties.from[key].includes(fileType) &&
           converterObj.properties.to[key].includes(convertTo)
         ) {
@@ -122,7 +132,7 @@ export async function mainConverter(
   }
 }
 
-const possibleConversions: { [key: string]: { [key: string]: string[] } } = {};
+const possibleTargets: { [key: string]: { [key: string]: string[] } } = {};
 
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
@@ -137,33 +147,47 @@ for (const converterName in properties) {
     }
 
     for (const extension of converterProperties.from[key] ?? []) {
-      if (!possibleConversions[extension]) {
-        possibleConversions[extension] = {};
+      if (!possibleTargets[extension]) {
+        possibleTargets[extension] = {};
       }
-      possibleConversions[extension][converterName] =
+
+      possibleTargets[extension][converterName] =
         converterProperties.to[key] || [];
     }
   }
 }
 
-// // save all possible conversions to a file
-// import fs from "fs";
-// import path from "path";
-// import { FormatEnum } from "sharp";
-// fs.writeFileSync(
-//   path.join(__dirname, ".", "possibleConversions.json"),
-//   JSON.stringify(possibleConversions),
-// );
-
-export const getPossibleConversions = (
+export const getPossibleTargets = (
   from: string,
 ): { [key: string]: string[] } => {
   const fromClean = normalizeFiletype(from);
 
-  return possibleConversions[fromClean] || {};
+  return possibleTargets[fromClean] || {};
 };
 
-const allTargets: { [key: string]: string[]} = {};
+const possibleInputs: string[] = [];
+for (const converterName in properties) {
+  const converterProperties = properties[converterName]?.properties;
+
+  if (!converterProperties) {
+    continue;
+  }
+
+  for (const key in converterProperties.from) {
+    for (const extension of converterProperties.from[key] ?? []) {
+      if (!possibleInputs.includes(extension)) {
+        possibleInputs.push(extension);
+      }
+    }
+  }
+}
+possibleInputs.sort();
+
+export const getPossibleInputs = () => {
+  return possibleInputs;
+};
+
+const allTargets: { [key: string]: string[] } = {};
 
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
@@ -184,3 +208,50 @@ for (const converterName in properties) {
 export const getAllTargets = () => {
   return allTargets;
 };
+
+const allInputs: { [key: string]: string[] } = {};
+for (const converterName in properties) {
+  const converterProperties = properties[converterName]?.properties;
+
+  if (!converterProperties) {
+    continue;
+  }
+
+  for (const key in converterProperties.from) {
+    if (allInputs[converterName]) {
+      allInputs[converterName].push(...converterProperties.from[key]);
+    } else {
+      allInputs[converterName] = converterProperties.from[key];
+    }
+  }
+}
+
+export const getAllInputs = (converter: string) => {
+  return allInputs[converter] || [];
+};
+
+// // count the number of unique formats
+// const uniqueFormats = new Set();
+
+// for (const converterName in properties) {
+//   const converterProperties = properties[converterName]?.properties;
+
+//   if (!converterProperties) {
+//     continue;
+//   }
+
+//   for (const key in converterProperties.from) {
+//     for (const extension of converterProperties.from[key] ?? []) {
+//       uniqueFormats.add(extension);
+//     }
+//   }
+
+//   for (const key in converterProperties.to) {
+//     for (const extension of converterProperties.to[key] ?? []) {
+//       uniqueFormats.add(extension);
+//     }
+//   }
+// }
+
+// // print the number of unique Inputs and Outputs
+// console.log(`Unique Formats: ${uniqueFormats.size}`);

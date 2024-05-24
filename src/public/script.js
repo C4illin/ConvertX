@@ -5,6 +5,8 @@ let fileType;
 
 const selectElem = document.querySelector("select[name='convert_to']");
 
+const convertFromSelect = document.querySelector("select[name='convert_from']");
+
 // Add a 'change' event listener to the file input element
 fileInput.addEventListener("change", (e) => {
   console.log(e.target.files);
@@ -20,8 +22,8 @@ fileInput.addEventListener("change", (e) => {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${file.name}</td>
-      <td>${(file.size / 1024 / 1024).toFixed(2)} MB</td>
-      <td><button class="secondary" onclick="deleteRow(this)">x</button></td>
+      <td>${(file.size / 1024).toFixed(2)} kB</td>
+      <td><a class="secondary" onclick="deleteRow(this)" style="cursor: pointer">Remove</a></td>
     `;
 
     if (!fileType) {
@@ -29,6 +31,15 @@ fileInput.addEventListener("change", (e) => {
       console.log(file.type);
       fileInput.setAttribute("accept", `.${fileType}`);
       setTitle();
+
+      // choose the option that matches the file type
+      for (const option of convertFromSelect.children) {
+        console.log(option.value);
+        if (option.value === fileType) {
+          option.selected = true;
+        }
+      }
+
 
       fetch("/conversions", {
         method: "POST",
@@ -57,7 +68,7 @@ fileInput.addEventListener("change", (e) => {
 
 const setTitle = () => {
   const title = document.querySelector("h1");
-  title.textContent = `Convert ${fileType ? `.${fileType}` : "___"}`;
+  title.textContent = `Convert ${fileType ? `.${fileType}` : ""}`;
 };
 
 // Add a onclick for the delete button
