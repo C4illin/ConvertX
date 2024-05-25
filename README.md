@@ -1,6 +1,4 @@
-<!-- input image -->
 ![ConvertX](images/logo.png)
-
 # ConvertX
 
 A self-hosted online file converter. Supports 808 different formats.
@@ -33,7 +31,7 @@ services:
       - "3000:3000"
     environment: # Defaults are listed below
       - ACCOUNT_REGISTRATION=false # true or false
-      - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken
+      - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234
     volumes:
       - /path/you/want:/app/data
 ```
@@ -44,4 +42,11 @@ services:
 docker run ghcr.io/c4illin/convertx:master -p 3000:3000 -e ACCOUNT_REGISTRATION=false -v /path/you/want:/app/data
 ``` -->
 
-Then visit `http://localhost:3000` in your browser and create your account.
+Then visit `http://localhost:3000` in your browser and create your account. Don't leave it unconfigured and open, as anyone can register the first account.
+
+## Todo
+- [ ] Add messages for errors in converters
+- [ ] Add options for converters
+- [ ] Add more converters
+- [ ] Divide index.tsx into smaller components
+- [ ] Add tests

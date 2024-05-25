@@ -10,14 +10,14 @@ updates:
     versioning-strategy: increase
     directory: "/" # Location of package manifests
     schedule:
-      interval: "weekly"
+      interval: "daily"
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
   # Maintain dependencies for Docker
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
