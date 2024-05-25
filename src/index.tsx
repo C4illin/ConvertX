@@ -824,7 +824,7 @@ const app = new Elysia()
       );
     },
   )
-  .get(
+  .post(
     "/progress/:jobId",
     async ({ jwt, set, params, redirect, cookie: { auth, job_id } }) => {
       if (!auth?.value) {
@@ -877,6 +877,7 @@ const app = new Elysia()
             <thead>
               <tr>
                 <th>Converted File Name</th>
+                <th>Status</th>
                 <th>View</th>
                 <th>Download</th>
               </tr>
@@ -886,6 +887,7 @@ const app = new Elysia()
                 // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                 <tr>
                   <td>{file.output_file_name}</td>
+                  <td>{file.status}</td>
                   <td>
                     <a href={`/download/${outputPath}${file.output_file_name}`}>
                       View

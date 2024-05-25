@@ -16,12 +16,10 @@ const main = document.querySelector("main");
 const progressElem = document.querySelector("progress");
 
 const refreshData = () => {
-  console.log("Refreshing data...");
-  console.log(progressElem.value);
-  console.log(progressElem.max);
-
   if (progressElem.value !== progressElem.max) {
-    fetch(`/progress/${jobId}`)
+    fetch(`/progress/${jobId}`, {
+      method: "POST",
+    })
       .then((res) => res.text())
       .then((html) => {
         main.innerHTML = html;

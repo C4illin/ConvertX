@@ -3,7 +3,7 @@ const fileInput = document.querySelector('input[type="file"]');
 const fileNames = [];
 let fileType;
 
-const selectElem = document.querySelector("select[name='convert_to']");
+const selectContainer = document.querySelector("form > article");
 
 // const convertFromSelect = document.querySelector("select[name='convert_from']");
 
@@ -46,9 +46,9 @@ fileInput.addEventListener("change", (e) => {
           "Content-Type": "application/json",
         },
       })
-        .then((res) => res.text()) // Convert the response to text
+        .then((res) => res.text())
         .then((html) => {
-          selectElem.outerHTML = html; // Set the HTML
+          selectContainer.innerHTML = html;
         })
         .catch((err) => console.log(err));
     }

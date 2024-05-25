@@ -96,7 +96,7 @@ export function convert(
   targetPath: string,
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   options?: any,
-) {
+): Promise<string> {
   // if (fileType === "svg") {
   //   const scale = options.scale || 1;
   //   const metadata = await sharp(filePath).metadata();
@@ -114,11 +114,10 @@ export function convert(
   //     .toFile(targetPath);
   // }
 
-  return exec(
-    `vips copy ${filePath} ${targetPath}`,
-    (error, stdout, stderr) => {
+  return new Promise((resolve, reject) => {
+    exec(`vips copy ${filePath} ${targetPath}`, (error, stdout, stderr) => {
       if (error) {
-        return error;
+        reject(`error: ${error}`);
       }
 
       if (stdout) {
@@ -128,6 +127,8 @@ export function convert(
       if (stderr) {
         console.error(`stderr: ${stderr}`);
       }
-    },
-  );
+
+      resolve("success");
+    });
+  });
 }

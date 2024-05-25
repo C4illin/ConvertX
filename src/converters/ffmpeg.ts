@@ -772,7 +772,7 @@ export async function convert(
   targetPath: string,
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   options?: any,
-) {
+): Promise<string> {
   // let command = "ffmpeg";
 
   // these are containers that can contain multiple formats
@@ -807,17 +807,21 @@ export async function convert(
 
   const command = `ffmpeg -i "${filePath}" "${targetPath}"`;
 
-  return exec(command, (error, stdout, stderr) => {
-    if (error) {
-      return error;
-    }
+  return new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        reject(`error: ${error}`);
+      }
 
-    if (stdout) {
-      console.log(`stdout: ${stdout}`);
-    }
+      if (stdout) {
+        console.log(`stdout: ${stdout}`);
+      }
 
-    if (stderr) {
-      console.error(`stderr: ${stderr}`);
-    }
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+      }
+
+      resolve("success");
+    });
   });
 }

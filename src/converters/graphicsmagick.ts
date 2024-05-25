@@ -315,21 +315,25 @@ export function convert(
   targetPath: string,
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   options?: any,
-) {
-  return exec(
-    `gm convert "${filePath}" "${targetPath}"`,
-    (error, stdout, stderr) => {
-      if (error) {
-        return error;
-      }
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    exec(
+      `gm convert "${filePath}" "${targetPath}"`,
+      (error, stdout, stderr) => {
+        if (error) {
+          reject(`error: ${error}`);
+        }
 
-      if (stdout) {
-        console.log(`stdout: ${stdout}`);
-      }
+        if (stdout) {
+          console.log(`stdout: ${stdout}`);
+        }
 
-      if (stderr) {
-        console.error(`stderr: ${stderr}`);
-      }
-    },
-  );
+        if (stderr) {
+          console.error(`stderr: ${stderr}`);
+        }
+
+        resolve("success");
+      },
+    );
+  });
 }
