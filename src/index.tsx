@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, unlink, rmdir } from "node:fs/promises";
+import { mkdir, unlink } from "node:fs/promises";
 import cookie from "@elysiajs/cookie";
 import { html } from "@elysiajs/html";
 import { jwt } from "@elysiajs/jwt";
@@ -19,6 +19,7 @@ import {
   normalizeFiletype,
   normalizeOutputFiletype,
 } from "./helpers/normalizeFiletype";
+import { rmSync } from "node:fs";
 
 const db = new Database("./data/mydb.sqlite", { create: true });
 const uploadsDir = "./data/uploads/";
@@ -641,7 +642,7 @@ const app = new Elysia()
           );
 
           // delete all uploaded files in userUploadsDir
-          rmdir(userUploadsDir, { recursive: true });
+          rmSync(userUploadsDir, { recursive: true, force: true });
         })
         .catch((error) => {
           console.error("Error in conversion process:", error);
@@ -763,7 +764,8 @@ const app = new Elysia()
                   <button
                     type="button"
                     style={{ width: "10rem", float: "right" }}
-                    onclick="downloadAll()">
+                    onclick="downloadAll()"
+                    {...(files.length !== job.num_files && { disabled: true })}>
                     Download All
                   </button>
                 </div>
@@ -801,8 +803,90 @@ const app = new Elysia()
               </table>
             </article>
           </main>
-          <script src="/downloadAll.js" defer />
+          <script src="/results.js" defer />
         </BaseHtml>
+      );
+    },
+  )
+  .get(
+    "/progress/:jobId",
+    async ({ jwt, set, params, redirect, cookie: { auth, job_id } }) => {
+      if (!auth?.value) {
+        return redirect("/login");
+      }
+
+      if (job_id?.value) {
+        // clear the job_id cookie since we are viewing the results
+        job_id.remove();
+      }
+
+      const user = await jwt.verify(auth.value);
+      if (!user) {
+        return redirect("/login");
+      }
+
+      const job = (await db
+        .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
+        .get(user.id, params.jobId)) as IJobs;
+
+      if (!job) {
+        set.status = 404;
+        return {
+          message: "Job not found.",
+        };
+      }
+
+      const outputPath = `${user.id}/${params.jobId}/`;
+
+      const files = db
+        .query("SELECT * FROM file_names WHERE job_id = ?")
+        .all(params.jobId) as IFileNames[];
+
+      return (
+        <article>
+          <div class="grid">
+            <h1>Results</h1>
+            <div>
+              <button
+                type="button"
+                style={{ width: "10rem", float: "right" }}
+                onclick="downloadAll()"
+                {...(files.length !== job.num_files && { disabled: true })}>
+                Download All
+              </button>
+            </div>
+          </div>
+          <progress max={job.num_files} value={files.length} />
+          <table>
+            <thead>
+              <tr>
+                <th>Converted File Name</th>
+                <th>View</th>
+                <th>Download</th>
+              </tr>
+            </thead>
+            <tbody>
+              {files.map((file) => (
+                // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                <tr>
+                  <td>{file.output_file_name}</td>
+                  <td>
+                    <a href={`/download/${outputPath}${file.output_file_name}`}>
+                      View
+                    </a>
+                  </td>
+                  <td>
+                    <a
+                      href={`/download/${outputPath}${file.output_file_name}`}
+                      download={file.output_file_name}>
+                      Download
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </article>
       );
     },
   )
@@ -930,3 +1014,29 @@ const app = new Elysia()
 console.log(
   `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,
 );
+
+const clearJobs = () => {
+  // clear all jobs older than 24 hours
+  // get all files older than 24 hours
+  const jobs = db
+    .query("SELECT * FROM jobs WHERE date_created < ?")
+    .all(new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) as IJobs[];
+  
+  for (const job of jobs) {
+    const files = db
+      .query("SELECT * FROM file_names WHERE job_id = ?")
+      .all(job.id) as IFileNames[];
+
+    for (const file of files) {
+      // delete the file
+      unlink(`${outputDir}${job.user_id}/${job.id}/${file.output_file_name}`);
+    }
+
+    // delete the job
+    db.query("DELETE FROM jobs WHERE id = ?").run(job.id);
+  }
+
+  // run every 24 hours
+  setTimeout(clearJobs, 24 * 60 * 60 * 1000);
+}
+clearJobs();

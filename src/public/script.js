@@ -5,11 +5,11 @@ let fileType;
 
 const selectElem = document.querySelector("select[name='convert_to']");
 
-const convertFromSelect = document.querySelector("select[name='convert_from']");
+// const convertFromSelect = document.querySelector("select[name='convert_from']");
 
 // Add a 'change' event listener to the file input element
 fileInput.addEventListener("change", (e) => {
-  console.log(e.target.files);
+  // console.log(e.target.files);
   // Get the selected files from the event target
   const files = e.target.files;
 
@@ -28,18 +28,16 @@ fileInput.addEventListener("change", (e) => {
 
     if (!fileType) {
       fileType = file.name.split(".").pop();
-      console.log(file.type);
       fileInput.setAttribute("accept", `.${fileType}`);
       setTitle();
 
       // choose the option that matches the file type
-      for (const option of convertFromSelect.children) {
-        console.log(option.value);
-        if (option.value === fileType) {
-          option.selected = true;
-        }
-      }
-
+      // for (const option of convertFromSelect.children) {
+      //   console.log(option.value);
+      //   if (option.value === fileType) {
+      //     option.selected = true;
+      //   }
+      // }
 
       fetch("/conversions", {
         method: "POST",
@@ -50,7 +48,6 @@ fileInput.addEventListener("change", (e) => {
       })
         .then((res) => res.text()) // Convert the response to text
         .then((html) => {
-          console.log(html);
           selectElem.outerHTML = html; // Set the HTML
         })
         .catch((err) => console.log(err));

@@ -24,7 +24,6 @@ export const BaseHtml = ({ children, title = "ConvertX" }) => (
         href="/favicon-16x16.png"
       />
       <link rel="manifest" href="/site.webmanifest" />
-      <script src="https://unpkg.com/htmx.org@1.9.12" />
     </head>
     <body>{children}</body>
   </html>

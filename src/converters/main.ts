@@ -18,6 +18,8 @@ import {
   convert as convertGraphicsmagick,
 } from "./graphicsmagick";
 
+// This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
+
 const properties: {
   [key: string]: {
     properties: {

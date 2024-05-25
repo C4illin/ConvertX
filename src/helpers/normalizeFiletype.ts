@@ -6,6 +6,8 @@ export const normalizeFiletype = (filetype: string): string => {
       return "jpeg";
     case "htm":
       return "html";
+    case "tex":
+      return "latex";
     default:
       return lowercaseFiletype;
   }
@@ -17,6 +19,8 @@ export const normalizeOutputFiletype = (filetype: string): string => {
   switch (lowercaseFiletype) {
     case "jpeg":
       return "jpg";
+    case "latex":
+      return "tex";
     default:
       return lowercaseFiletype;
   }
