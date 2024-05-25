@@ -1,7 +1,7 @@
 ![ConvertX](images/logo.png)
 # ConvertX
 
-A self-hosted online file converter. Supports 808 different formats. Written with Bun and Elysia.
+A self-hosted online file converter. Supports 831 different formats. Written with Typescript, Bun and Elysia.
 
 ## Features
 
@@ -50,3 +50,4 @@ Then visit `http://localhost:3000` in your browser and create your account. Don'
 - [ ] Add more converters
 - [ ] Divide index.tsx into smaller components
 - [ ] Add tests
+- [ ] Add searchable list of formats
