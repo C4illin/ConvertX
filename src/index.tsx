@@ -60,7 +60,9 @@ const dbVersion = (
   db.query("PRAGMA user_version").get() as { user_version?: number }
 ).user_version;
 if (dbVersion === 0) {
-  db.exec("ALTER TABLE file_names ADD COLUMN status TEXT DEFAULT 'not started';");
+  db.exec(
+    "ALTER TABLE file_names ADD COLUMN status TEXT DEFAULT 'not started';",
+  );
   db.exec("PRAGMA user_version = 1;");
 }
 
@@ -213,27 +215,27 @@ const app = new Elysia()
         };
       }
       const savedPassword = await Bun.password.hash(body.password);
-  
+
       db.query("INSERT INTO users (email, password) VALUES (?, ?)").run(
         body.email,
         savedPassword,
       );
-  
+
       const user = (await db
         .query("SELECT * FROM users WHERE email = ?")
         .get(body.email)) as IUser;
-  
+
       const accessToken = await jwt.sign({
         id: String(user.id),
       });
-  
+
       if (!auth) {
         set.status = 500;
         return {
           message: "No auth cookie, perhaps your browser is blocking cookies.",
         };
       }
-  
+
       // set cookie
       auth.set({
         value: accessToken,
@@ -242,7 +244,7 @@ const app = new Elysia()
         maxAge: 60 * 60 * 24 * 7,
         sameSite: "strict",
       });
-  
+
       return redirect("/");
     },
     { body: t.Object({ email: t.String(), password: t.String() }) },

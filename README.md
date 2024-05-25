@@ -1,19 +1,19 @@
 ![ConvertX](images/logo.png)
 # ConvertX
 
-A self-hosted online file converter. Supports 808 different formats.
+A self-hosted online file converter. Supports 808 different formats. Written with Bun and Elysia.
+
 ## Features
 
 - Convert files to different formats
 - Password protection
 - Multiple accounts
 
-
 ## Converters supported
 
 | Converter      | Use case      | Converts from | Converts to |
 |----------------|---------------|---------------|-------------|
-| Sharp          | Images (fast) | 7             | 6           |
+| Vips           | Images (fast) | 45            | 23          |
 | Pandoc         | Documents     | 43            | 65          |
 | GraphicsMagick | Images        | 166           | 133         |
 | FFmpeg         | Video         | ~473          | ~280        |
@@ -45,7 +45,7 @@ docker run ghcr.io/c4illin/convertx:master -p 3000:3000 -e ACCOUNT_REGISTRATION=
 Then visit `http://localhost:3000` in your browser and create your account. Don't leave it unconfigured and open, as anyone can register the first account.
 
 ## Todo
-- [ ] Add messages for errors in converters
+- [x] Add messages for errors in converters
 - [ ] Add options for converters
 - [ ] Add more converters
 - [ ] Divide index.tsx into smaller components
