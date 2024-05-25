@@ -4,7 +4,7 @@ export const Header = ({ loggedIn }: { loggedIn?: boolean }) => {
     rightNav = (
       <ul>
         <li>
-          <a href="/test">History</a>
+          <a href="/history">History</a>
         </li>
         <li>
           <a href="/logoff">Logout</a>
@@ -35,8 +35,7 @@ export const Header = ({ loggedIn }: { loggedIn?: boolean }) => {
                 style={{
                   textDecoration: "none",
                   color: "inherit",
-                }}
-              >
+                }}>
                 ConvertX
               </a>
             </strong>

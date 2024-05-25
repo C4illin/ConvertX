@@ -33,7 +33,8 @@ RUN rm -rf /var/lib/apt/lists/partial && apt-get update -o Acquire::CompressionT
   texlive-latex-recommended \
   ffmpeg \
   graphicsmagick \
-  ghostscript
+  ghostscript \
+  libvips-tools
 
 COPY --from=install /temp/prod/node_modules node_modules
 # COPY --from=prerelease /app/src/index.tsx /app/src/

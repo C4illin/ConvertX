@@ -131,11 +131,16 @@ export function convert(
     `pandoc "${filePath}" -f ${fileType} -t ${convertTo} -o "${targetPath}"`,
     (error, stdout, stderr) => {
       if (error) {
-        console.error(`exec error: ${error}`);
-        return;
+        return error;
       }
-      console.log(`stdout: ${stdout}`);
-      console.error(`stderr: ${stderr}`);
+
+      if (stdout) {
+        console.log(`stdout: ${stdout}`);
+      }
+
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+      }
     },
   );
 }

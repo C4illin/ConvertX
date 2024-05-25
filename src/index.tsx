@@ -1,25 +1,24 @@
+import { Database } from "bun:sqlite";
 import { randomUUID } from "node:crypto";
+import { rmSync } from "node:fs";
 import { mkdir, unlink } from "node:fs/promises";
 import cookie from "@elysiajs/cookie";
 import { html } from "@elysiajs/html";
 import { jwt } from "@elysiajs/jwt";
 import { staticPlugin } from "@elysiajs/static";
-import { Database } from "bun:sqlite";
 import { Elysia, t } from "elysia";
 import { BaseHtml } from "./components/base";
 import { Header } from "./components/header";
 import {
-  mainConverter,
-  getPossibleTargets,
-  getPossibleInputs,
-  getAllTargets,
   getAllInputs,
+  getAllTargets,
+  getPossibleTargets,
+  mainConverter,
 } from "./converters/main";
 import {
   normalizeFiletype,
   normalizeOutputFiletype,
 } from "./helpers/normalizeFiletype";
-import { rmSync } from "node:fs";
 
 const db = new Database("./data/mydb.sqlite", { create: true });
 const uploadsDir = "./data/uploads/";
@@ -45,6 +44,7 @@ CREATE TABLE IF NOT EXISTS file_names (
   job_id INTEGER NOT NULL,
   file_name TEXT NOT NULL,
   output_file_name TEXT NOT NULL,
+  status TEXT DEFAULT 'not started',
   FOREIGN KEY (job_id) REFERENCES jobs(id)
 );
 CREATE TABLE IF NOT EXISTS jobs (
@@ -55,6 +55,14 @@ CREATE TABLE IF NOT EXISTS jobs (
   num_files INTEGER DEFAULT 0,
   FOREIGN KEY (user_id) REFERENCES users(id)
 );`);
+
+const dbVersion = (
+  db.query("PRAGMA user_version").get() as { user_version?: number }
+).user_version;
+if (dbVersion === 0) {
+  db.exec("ALTER TABLE file_names ADD COLUMN status TEXT DEFAULT 'not started';");
+  db.exec("PRAGMA user_version = 1;");
+}
 
 let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
 
@@ -69,6 +77,7 @@ interface IFileNames {
   job_id: number;
   file_name: string;
   output_file_name: string;
+  status: string;
 }
 
 interface IJobs {
@@ -204,27 +213,27 @@ const app = new Elysia()
         };
       }
       const savedPassword = await Bun.password.hash(body.password);
-
+  
       db.query("INSERT INTO users (email, password) VALUES (?, ?)").run(
         body.email,
         savedPassword,
       );
-
+  
       const user = (await db
         .query("SELECT * FROM users WHERE email = ?")
         .get(body.email)) as IUser;
-
+  
       const accessToken = await jwt.sign({
         id: String(user.id),
       });
-
+  
       if (!auth) {
         set.status = 500;
         return {
           message: "No auth cookie, perhaps your browser is blocking cookies.",
         };
       }
-
+  
       // set cookie
       auth.set({
         value: accessToken,
@@ -233,8 +242,8 @@ const app = new Elysia()
         maxAge: 60 * 60 * 24 * 7,
         sameSite: "strict",
       });
-
-      redirect("/");
+  
+      return redirect("/");
     },
     { body: t.Object({ email: t.String(), password: t.String() }) },
   )
@@ -407,6 +416,8 @@ const app = new Elysia()
       maxAge: 24 * 60 * 60,
       sameSite: "strict",
     });
+
+    console.log("jobId set to:", id);
 
     return (
       <BaseHtml>
@@ -610,7 +621,7 @@ const app = new Elysia()
       );
 
       const query = db.query(
-        "INSERT INTO file_names (job_id, file_name, output_file_name) VALUES (?, ?, ?)",
+        "INSERT INTO file_names (job_id, file_name, output_file_name, status) VALUES (?, ?, ?, ?)",
       );
 
       // Start the conversion process in the background
@@ -623,7 +634,7 @@ const app = new Elysia()
           const newFileName = fileName.replace(fileTypeOrig, newFileExt);
           const targetPath = `${userOutputDir}${newFileName}`;
 
-          await mainConverter(
+          const result = await mainConverter(
             filePath,
             fileType,
             convertTo,
@@ -631,7 +642,8 @@ const app = new Elysia()
             {},
             converterName,
           );
-          query.run(jobId.value, fileName, newFileName);
+
+          query.run(jobId.value, fileName, newFileName, result);
         }),
       )
         .then(() => {
@@ -642,7 +654,7 @@ const app = new Elysia()
           );
 
           // delete all uploaded files in userUploadsDir
-          rmSync(userUploadsDir, { recursive: true, force: true });
+          // rmSync(userUploadsDir, { recursive: true, force: true });
         })
         .catch((error) => {
           console.error("Error in conversion process:", error);
@@ -658,7 +670,7 @@ const app = new Elysia()
       }),
     },
   )
-  .get("/test", async ({ jwt, redirect, cookie: { auth } }) => {
+  .get("/history", async ({ jwt, redirect, cookie: { auth } }) => {
     if (!auth?.value) {
       return redirect("/login");
     }
@@ -775,6 +787,7 @@ const app = new Elysia()
                 <thead>
                   <tr>
                     <th>Converted File Name</th>
+                    <th>Status</th>
                     <th>View</th>
                     <th>Download</th>
                   </tr>
@@ -784,6 +797,7 @@ const app = new Elysia()
                     // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                     <tr>
                       <td>{file.output_file_name}</td>
+                      <td>{file.status}</td>
                       <td>
                         <a
                           href={`/download/${outputPath}${file.output_file_name}`}>
@@ -1021,16 +1035,11 @@ const clearJobs = () => {
   const jobs = db
     .query("SELECT * FROM jobs WHERE date_created < ?")
     .all(new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) as IJobs[];
-  
-  for (const job of jobs) {
-    const files = db
-      .query("SELECT * FROM file_names WHERE job_id = ?")
-      .all(job.id) as IFileNames[];
 
-    for (const file of files) {
-      // delete the file
-      unlink(`${outputDir}${job.user_id}/${job.id}/${file.output_file_name}`);
-    }
+  for (const job of jobs) {
+    // delete the directories
+    rmSync(`${outputDir}${job.user_id}/${job.id}`, { recursive: true });
+    rmSync(`${uploadsDir}${job.user_id}/${job.id}`, { recursive: true });
 
     // delete the job
     db.query("DELETE FROM jobs WHERE id = ?").run(job.id);
@@ -1038,5 +1047,5 @@ const clearJobs = () => {
 
   // run every 24 hours
   setTimeout(clearJobs, 24 * 60 * 60 * 1000);
-}
+};
 clearJobs();

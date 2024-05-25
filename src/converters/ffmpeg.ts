@@ -809,8 +809,7 @@ export async function convert(
 
   return exec(command, (error, stdout, stderr) => {
     if (error) {
-      console.error(`exec error: ${error}`);
-      return;
+      return error;
     }
 
     if (stdout) {

@@ -11,8 +11,7 @@
     "@elysiajs/jwt": "^1.0.2",
     "@elysiajs/static": "^1.0.3",
     "@picocss/pico": "^2.0.6",
-    "elysia": "^1.0.22",
-    "sharp": "^0.33.4"
+    "elysia": "^1.0.22"
   },
   "module": "src/index.tsx",
   "bun-create": {

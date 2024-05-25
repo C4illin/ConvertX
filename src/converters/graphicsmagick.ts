@@ -320,9 +320,9 @@ export function convert(
     `gm convert "${filePath}" "${targetPath}"`,
     (error, stdout, stderr) => {
       if (error) {
-        console.error(`exec error: ${error}`);
-        return;
+        return error;
       }
+
       if (stdout) {
         console.log(`stdout: ${stdout}`);
       }

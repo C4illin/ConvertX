@@ -1,5 +1,4 @@
-import sharp from "sharp";
-import type { FormatEnum } from "sharp";
+import { exec } from "node:child_process";
 
 // declare possible conversions
 export const properties = {
@@ -90,30 +89,45 @@ export const properties = {
   },
 };
 
-export async function convert(
+export function convert(
   filePath: string,
   fileType: string,
-  convertTo: keyof FormatEnum,
+  convertTo: string,
   targetPath: string,
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   options?: any,
 ) {
-  if (fileType === "svg") {
-    const scale = options.scale || 1;
-    const metadata = await sharp(filePath).metadata();
+  // if (fileType === "svg") {
+  //   const scale = options.scale || 1;
+  //   const metadata = await sharp(filePath).metadata();
 
-    if (!metadata || !metadata.width || !metadata.height) {
-      throw new Error("Could not get metadata from image");
-    }
+  //   if (!metadata || !metadata.width || !metadata.height) {
+  //     throw new Error("Could not get metadata from image");
+  //   }
 
-    const newWidth = Math.round(metadata.width * scale);
-    const newHeight = Math.round(metadata.height * scale);
+  //   const newWidth = Math.round(metadata.width * scale);
+  //   const newHeight = Math.round(metadata.height * scale);
 
-    return await sharp(filePath)
-      .resize(newWidth, newHeight)
-      .toFormat(convertTo)
-      .toFile(targetPath);
-  }
+  //   return await sharp(filePath)
+  //     .resize(newWidth, newHeight)
+  //     .toFormat(convertTo)
+  //     .toFile(targetPath);
+  // }
 
-  return await sharp(filePath).toFormat(convertTo).toFile(targetPath);
+  return exec(
+    `vips copy ${filePath} ${targetPath}`,
+    (error, stdout, stderr) => {
+      if (error) {
+        return error;
+      }
+
+      if (stdout) {
+        console.log(`stdout: ${stdout}`);
+      }
+
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+      }
+    },
+  );
 }

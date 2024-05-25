@@ -1,22 +1,21 @@
-import {
-  properties as propertiesImage,
-  convert as convertImage,
-} from "./sharp";
+import { convert as convertImage, properties as propertiesImage } from "./vips";
 
 import {
-  properties as propertiesPandoc,
   convert as convertPandoc,
+  properties as propertiesPandoc,
 } from "./pandoc";
 
 import {
-  properties as propertiesFFmpeg,
   convert as convertFFmpeg,
+  properties as propertiesFFmpeg,
 } from "./ffmpeg";
 
 import {
-  properties as propertiesGraphicsmagick,
   convert as convertGraphicsmagick,
+  properties as propertiesGraphicsmagick,
 } from "./graphicsmagick";
+
+import { normalizeFiletype } from "../helpers/normalizeFiletype";
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
 
@@ -38,8 +37,7 @@ const properties: {
     converter: (
       filePath: string,
       fileType: string,
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-      convertTo: any,
+      convertTo: string,
       targetPath: string,
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       options?: any,
@@ -47,7 +45,7 @@ const properties: {
     ) => any;
   };
 } = {
-  sharp: {
+  vips: {
     properties: propertiesImage,
     converter: convertImage,
   },
@@ -64,8 +62,6 @@ const properties: {
     converter: convertFFmpeg,
   },
 };
-
-import { normalizeFiletype } from "../helpers/normalizeFiletype";
 
 export async function mainConverter(
   inputFilePath: string,
@@ -112,7 +108,7 @@ export async function mainConverter(
     console.log(
       `No available converter supports converting from ${fileType} to ${convertTo}.`,
     );
-    return;
+    return "File type not supported"
   }
 
   try {
@@ -123,14 +119,17 @@ export async function mainConverter(
       targetPath,
       options,
     );
+
     console.log(
       `Converted ${inputFilePath} from ${fileType} to ${convertTo} successfully using ${converterName}.`,
     );
+    return "Done"
   } catch (error) {
     console.error(
       `Failed to convert ${inputFilePath} from ${fileType} to ${convertTo} using ${converterName}.`,
       error,
     );
+    return "Failed, check logs"
   }
 }
 
