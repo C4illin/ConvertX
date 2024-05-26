@@ -108,7 +108,7 @@ export async function mainConverter(
     console.log(
       `No available converter supports converting from ${fileType} to ${convertTo}.`,
     );
-    return "File type not supported"
+    return "File type not supported";
   }
 
   try {
@@ -123,13 +123,13 @@ export async function mainConverter(
     console.log(
       `Converted ${inputFilePath} from ${fileType} to ${convertTo} successfully using ${converterName}.`,
     );
-    return "Done"
+    return "Done";
   } catch (error) {
     console.error(
       `Failed to convert ${inputFilePath} from ${fileType} to ${convertTo} using ${converterName}.`,
       error,
     );
-    return "Failed, check logs"
+    return "Failed, check logs";
   }
 }
 

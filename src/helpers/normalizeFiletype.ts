@@ -1,6 +1,6 @@
 export const normalizeFiletype = (filetype: string): string => {
   const lowercaseFiletype = filetype.toLowerCase();
-  
+
   switch (lowercaseFiletype) {
     case "jpg":
       return "jpeg";
@@ -11,11 +11,11 @@ export const normalizeFiletype = (filetype: string): string => {
     default:
       return lowercaseFiletype;
   }
-}
+};
 
 export const normalizeOutputFiletype = (filetype: string): string => {
   const lowercaseFiletype = filetype.toLowerCase();
-  
+
   switch (lowercaseFiletype) {
     case "jpeg":
       return "jpg";
@@ -24,4 +24,4 @@ export const normalizeOutputFiletype = (filetype: string): string => {
     default:
       return lowercaseFiletype;
   }
-}
+};

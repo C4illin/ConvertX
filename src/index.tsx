@@ -458,7 +458,9 @@ const app = new Elysia()
                   <optgroup label={converter}>
                     {targets.map((target) => (
                       // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-                      <option value={`${target},${converter}`} safe>{target}</option>
+                      <option value={`${target},${converter}`} safe>
+                        {target}
+                      </option>
                     ))}
                   </optgroup>
                 ))}
@@ -485,7 +487,9 @@ const app = new Elysia()
               <optgroup label={converter}>
                 {targets.map((target) => (
                   // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-                  <option value={`${target},${converter}`} safe>{target}</option>
+                  <option value={`${target},${converter}`} safe>
+                    {target}
+                  </option>
                 ))}
               </optgroup>
             ),
