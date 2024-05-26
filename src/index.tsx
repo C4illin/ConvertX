@@ -32,8 +32,9 @@ const ACCOUNT_REGISTRATION =
 // convertedFiles : 0,
 // outputFiles: [],
 
-// init db
-db.exec(`
+// init db if not exists
+if (!db.query("SELECT * FROM sqlite_master WHERE type='table'").get()) {
+  db.exec(`
 CREATE TABLE IF NOT EXISTS users (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	email TEXT NOT NULL,
@@ -54,7 +55,9 @@ CREATE TABLE IF NOT EXISTS jobs (
   status TEXT DEFAULT 'not started',
   num_files INTEGER DEFAULT 0,
   FOREIGN KEY (user_id) REFERENCES users(id)
-);`);
+);
+PRAGMA user_version = 1;`);
+}
 
 const dbVersion = (
   db.query("PRAGMA user_version").get() as { user_version?: number }
@@ -64,6 +67,7 @@ if (dbVersion === 0) {
     "ALTER TABLE file_names ADD COLUMN status TEXT DEFAULT 'not started';",
   );
   db.exec("PRAGMA user_version = 1;");
+  console.log("Updated database to version 1.");
 }
 
 let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
@@ -454,7 +458,7 @@ const app = new Elysia()
                   <optgroup label={converter}>
                     {targets.map((target) => (
                       // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-                      <option value={`${target},${converter}`}>{target}</option>
+                      <option value={`${target},${converter}`} safe>{target}</option>
                     ))}
                   </optgroup>
                 ))}
@@ -481,7 +485,7 @@ const app = new Elysia()
               <optgroup label={converter}>
                 {targets.map((target) => (
                   // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-                  <option value={`${target},${converter}`}>{target}</option>
+                  <option value={`${target},${converter}`} safe>{target}</option>
                 ))}
               </optgroup>
             ),
@@ -717,10 +721,10 @@ const app = new Elysia()
                 {userJobs.map((job) => (
                   // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                   <tr>
-                    <td>{job.date_created}</td>
+                    <td safe>{job.date_created}</td>
                     <td>{job.num_files}</td>
                     <td>{job.finished_files}</td>
-                    <td>{job.status}</td>
+                    <td safe>{job.status}</td>
                     <td>
                       <a href={`/results/${job.id}`}>View</a>
                     </td>
@@ -798,8 +802,8 @@ const app = new Elysia()
                   {files.map((file) => (
                     // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                     <tr>
-                      <td>{file.output_file_name}</td>
-                      <td>{file.status}</td>
+                      <td safe>{file.output_file_name}</td>
+                      <td safe>{file.status}</td>
                       <td>
                         <a
                           href={`/download/${outputPath}${file.output_file_name}`}>
@@ -886,8 +890,8 @@ const app = new Elysia()
               {files.map((file) => (
                 // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                 <tr>
-                  <td>{file.output_file_name}</td>
-                  <td>{file.status}</td>
+                  <td safe>{file.output_file_name}</td>
+                  <td safe>{file.status}</td>
                   <td>
                     <a href={`/download/${outputPath}${file.output_file_name}`}>
                       View
@@ -966,13 +970,13 @@ const app = new Elysia()
                   return (
                     // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                     <tr>
-                      <td>{converter}</td>
+                      <td safe>{converter}</td>
                       <td>
                         Count: {inputs.length}
                         <ul>
                           {inputs.map((input) => (
                             // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-                            <li>{input}</li>
+                            <li safe>{input}</li>
                           ))}
                         </ul>
                       </td>
@@ -981,7 +985,7 @@ const app = new Elysia()
                         <ul>
                           {targets.map((target) => (
                             // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-                            <li>{target}</li>
+                            <li safe>{target}</li>
                           ))}
                         </ul>
                       </td>
