@@ -3,7 +3,7 @@ export const BaseHtml = ({ children, title = "ConvertX" }) => (
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>{title}</title>
+      <title safe>{title}</title>
       <link rel="stylesheet" href="/pico.lime.min.css" />
       <link rel="stylesheet" href="/style.css" />
       <link

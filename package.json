@@ -4,14 +4,14 @@
   "scripts": {
     "dev": "bun run --watch src/index.tsx",
     "hot": "bun run --hot src/index.tsx",
-    "format": "biome format --write ./src"
+    "format": "biome format --write ./src",
+    "css": "cpy 'node_modules/@picocss/pico/css/pico.lime.min.css' 'src/public/' --flat"
   },
   "dependencies": {
     "@elysiajs/cookie": "^0.8.0",
     "@elysiajs/html": "^1.0.2",
     "@elysiajs/jwt": "^1.0.2",
     "@elysiajs/static": "^1.0.3",
-    "@picocss/pico": "^2.0.6",
     "elysia": "^1.0.22"
   },
   "module": "src/index.tsx",
@@ -22,6 +22,7 @@
     "@biomejs/biome": "1.7.3",
     "@ianvs/prettier-plugin-sort-imports": "^4.2.1",
     "@kitajs/ts-html-plugin": "^4.0.1",
+    "@picocss/pico": "^2.0.6",
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/bun": "^1.1.3",
     "@types/eslint": "^8.56.10",
@@ -29,6 +30,7 @@
     "@types/ws": "^8.5.10",
     "@typescript-eslint/eslint-plugin": "^7.10.0",
     "@typescript-eslint/parser": "^7.10.0",
+    "cpy-cli": "^5.0.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
     "prettier": "^3.2.5",
