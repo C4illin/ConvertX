@@ -27,6 +27,8 @@ const outputDir = "./data/output/";
 const ACCOUNT_REGISTRATION =
   process.env.ACCOUNT_REGISTRATION === "true" || false;
 
+const HTTP_ALLOWED = process.env.HTTP_ALLOWED === "true" || false;
+
 // fileNames: fileNames,
 // filesToConvert: fileNames.length,
 // convertedFiles : 0,
@@ -244,7 +246,7 @@ const app = new Elysia()
       auth.set({
         value: accessToken,
         httpOnly: true,
-        secure: true,
+        secure: !HTTP_ALLOWED,
         maxAge: 60 * 60 * 24 * 7,
         sameSite: "strict",
       });
@@ -350,7 +352,7 @@ const app = new Elysia()
       auth.set({
         value: accessToken,
         httpOnly: true,
-        secure: true,
+        secure: !HTTP_ALLOWED,
         maxAge: 60 * 60 * 24 * 7,
         sameSite: "strict",
       });
@@ -418,7 +420,7 @@ const app = new Elysia()
     jobId.set({
       value: id,
       httpOnly: true,
-      secure: true,
+      secure: !HTTP_ALLOWED,
       maxAge: 24 * 60 * 60,
       sameSite: "strict",
     });
