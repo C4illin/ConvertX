@@ -45,6 +45,8 @@ docker run ghcr.io/c4illin/convertx:master -p 3000:3000 -e ACCOUNT_REGISTRATION=
 
 Then visit `http://localhost:3000` in your browser and create your account. Don't leave it unconfigured and open, as anyone can register the first account.
 
+If you get unable to open database file run `chown -R $USER:$USER path` on the path you choose.
+
 ## Todo
 - [x] Add messages for errors in converters
 - [ ] Add options for converters
