@@ -31,8 +31,9 @@ services:
     ports:
       - "3000:3000"
     environment: # Defaults are listed below
-      - ACCOUNT_REGISTRATION=false # true or false
+      - ACCOUNT_REGISTRATION=false # true or false, you can register the first account even though this is disabled
       - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234
+      - HTTP_ALLOWED=false # setting this to true is unsafe, but as long as it locally and you trust your local network there is no problem
     volumes:
       - /path/you/want:/app/data
 ```
@@ -46,6 +47,10 @@ docker run ghcr.io/c4illin/convertx:master -p 3000:3000 -e ACCOUNT_REGISTRATION=
 Then visit `http://localhost:3000` in your browser and create your account. Don't leave it unconfigured and open, as anyone can register the first account.
 
 If you get unable to open database file run `chown -R $USER:$USER path` on the path you choose.
+
+### Tutorial
+
+Tutorial in french: https://belginux.com/installer-convertx-avec-docker/
 
 ## Todo
 - [x] Add messages for errors in converters
