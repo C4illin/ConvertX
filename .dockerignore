@@ -13,3 +13,4 @@ helm-charts
 .editorconfig
 .idea
 coverage*
+data
