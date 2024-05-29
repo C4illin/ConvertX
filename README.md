@@ -32,7 +32,7 @@ services:
     ports:
       - "3000:3000"
     environment: # Defaults are listed below
-      - ACCOUNT_REGISTRATION=false # true or false, you can register the first account even though this is disabled
+      - ACCOUNT_REGISTRATION=false # true or false, doesn't matter for the first account (e.g. keep this to false if you only want one account)
       - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234
       - HTTP_ALLOWED=false # setting this to true is unsafe, only set this to true locally
     volumes:
