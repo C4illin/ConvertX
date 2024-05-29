@@ -47,9 +47,10 @@ COPY --from=install /temp/prod/node_modules node_modules
 # COPY --from=prerelease /app/package.json .
 COPY . .
 
+# create folder data and set owner to bun
+RUN mkdir -p /app/data && chown bun:bun /app/data
+
 # run the app
 USER bun
-RUN mkdir data
-RUN chmod 755 data
 EXPOSE 3000/tcp
 ENTRYPOINT [ "bun", "run", "./src/index.tsx" ]
