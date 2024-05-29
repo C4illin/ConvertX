@@ -26,11 +26,17 @@ RUN cd /temp/prod && bun install --frozen-lockfile --production
 
 # copy production dependencies and source code into final image
 FROM base AS release
+LABEL maintainer="Emrik Östling (C4illin)"
+LABEL description="ConvertX: self-hosted online file converter supporting 700+ file formats."
+LABEL repo="https://github.com/C4illin/ConvertX"
+
 # install additional dependencies
 RUN rm -rf /var/lib/apt/lists/partial && apt-get update -o Acquire::CompressionTypes::Order::=gz \
   && apt-get install -y \
   pandoc \
   texlive-latex-recommended \
+  texlive-fonts-recommended \
+  texlive-latex-extra \
   ffmpeg \
   graphicsmagick \
   ghostscript \

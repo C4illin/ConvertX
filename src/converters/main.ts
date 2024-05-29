@@ -15,6 +15,11 @@ import {
   properties as propertiesGraphicsmagick,
 } from "./graphicsmagick";
 
+import {
+  convert as convertPdflatex,
+  properties as propertiesPdflatex,
+} from "./pdflatex";
+
 import { normalizeFiletype } from "../helpers/normalizeFiletype";
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
@@ -48,6 +53,10 @@ const properties: {
   vips: {
     properties: propertiesImage,
     converter: convertImage,
+  },
+  pdflatex: {
+    properties: propertiesPdflatex,
+    converter: convertPdflatex,
   },
   pandoc: {
     properties: propertiesPandoc,
