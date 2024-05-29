@@ -33,7 +33,7 @@ services:
     environment: # Defaults are listed below
       - ACCOUNT_REGISTRATION=false # true or false, you can register the first account even though this is disabled
       - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234
-      - HTTP_ALLOWED=false # setting this to true is unsafe, but as long as it locally and you trust your local network there is no problem
+      - HTTP_ALLOWED=false # setting this to true is unsafe, only set this to true locally
     volumes:
       - convertx:/app/data
 ```
