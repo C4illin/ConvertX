@@ -60,6 +60,12 @@ Tutorial in french: https://belginux.com/installer-convertx-avec-docker/
 - [ ] Add tests
 - [ ] Add searchable list of formats
 
+## Contributors
+
+<a href="https://github.com/C4illin/ConvertX/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=C4illin/ConvertX" />
+</a>
+
 ## Star History
 
 <a href="https://github.com/C4illin/ConvertX/stargazers">
