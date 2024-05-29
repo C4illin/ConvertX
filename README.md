@@ -59,3 +59,13 @@ Tutorial in french: https://belginux.com/installer-convertx-avec-docker/
 - [ ] Divide index.tsx into smaller components
 - [ ] Add tests
 - [ ] Add searchable list of formats
+
+## Star History
+
+<a href="https://github.com/C4illin/ConvertX/stargazers">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=C4illin/ConvertX&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=C4illin/ConvertX&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=C4illin/ConvertX&type=Date" />
+ </picture>
+</a>
