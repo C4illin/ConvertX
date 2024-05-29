@@ -32,10 +32,11 @@ services:
     ports:
       - "3000:3000"
     environment: # Defaults are listed below
-      - ACCOUNT_REGISTRATION=false # true or false
+      - ACCOUNT_REGISTRATION=false # true or false, you can register the first account even though this is disabled
       - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234
+      - HTTP_ALLOWED=false # setting this to true is unsafe, only set this to true locally
     volumes:
-      - /path/you/want:/app/data
+      - convertx:/app/data
 ```
 
 <!-- or
@@ -46,6 +47,12 @@ docker run ghcr.io/c4illin/convertx:master -p 3000:3000 -e ACCOUNT_REGISTRATION=
 
 Then visit `http://localhost:3000` in your browser and create your account. Don't leave it unconfigured and open, as anyone can register the first account.
 
+If you get unable to open database file run `chown -R $USER:$USER path` on the path you choose.
+
+### Tutorial
+
+Tutorial in french: https://belginux.com/installer-convertx-avec-docker/
+
 ## Todo
 - [x] Add messages for errors in converters
 - [ ] Add options for converters
@@ -53,3 +60,19 @@ Then visit `http://localhost:3000` in your browser and create your account. Don'
 - [ ] Divide index.tsx into smaller components
 - [ ] Add tests
 - [ ] Add searchable list of formats
+
+## Contributors
+
+<a href="https://github.com/C4illin/ConvertX/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=C4illin/ConvertX" />
+</a>
+
+## Star History
+
+<a href="https://github.com/C4illin/ConvertX/stargazers">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=C4illin/ConvertX&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=C4illin/ConvertX&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=C4illin/ConvertX&type=Date" />
+ </picture>
+</a>
