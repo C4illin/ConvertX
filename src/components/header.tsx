@@ -1,4 +1,7 @@
-export const Header = ({ loggedIn }: { loggedIn?: boolean }) => {
+export const Header = ({
+  loggedIn,
+  accountRegistration,
+}: { loggedIn?: boolean; accountRegistration?: boolean }) => {
   let rightNav: JSX.Element;
   if (loggedIn) {
     rightNav = (
@@ -17,15 +20,17 @@ export const Header = ({ loggedIn }: { loggedIn?: boolean }) => {
         <li>
           <a href="/login">Login</a>
         </li>
-        <li>
-          <a href="/register">Register</a>
-        </li>
+        {accountRegistration && (
+          <li>
+            <a href="/register">Register</a>
+          </li>
+        )}
       </ul>
     );
   }
 
   return (
-    <header class="container">
+    <header className="container">
       <nav>
         <ul>
           <li>

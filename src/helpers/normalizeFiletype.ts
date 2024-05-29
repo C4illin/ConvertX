@@ -8,6 +8,8 @@ export const normalizeFiletype = (filetype: string): string => {
       return "html";
     case "tex":
       return "latex";
+    case "md":
+      return "markdown";
     default:
       return lowercaseFiletype;
   }
@@ -21,6 +23,8 @@ export const normalizeOutputFiletype = (filetype: string): string => {
       return "jpg";
     case "latex":
       return "tex";
+    case "markdown":
+      return "md";
     default:
       return lowercaseFiletype;
   }

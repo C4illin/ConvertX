@@ -31,9 +31,9 @@ services:
     image: ghcr.io/c4illin/convertx:main
     ports:
       - "3000:3000"
-    environment: # Defaults are listed below
+    environment: # Defaults are listed below. All are optional.
       - ACCOUNT_REGISTRATION=false # true or false, doesn't matter for the first account (e.g. keep this to false if you only want one account)
-      - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234
+      - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234 # will use randomUUID() by default
       - HTTP_ALLOWED=false # setting this to true is unsafe, only set this to true locally
     volumes:
       - convertx:/app/data

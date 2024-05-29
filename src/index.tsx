@@ -169,7 +169,7 @@ const app = new Elysia()
 
     return (
       <BaseHtml title="ConvertX | Register">
-        <Header />
+        <Header accountRegistration={ACCOUNT_REGISTRATION} />
         <main class="container">
           <article>
             <form method="post">
@@ -180,6 +180,7 @@ const app = new Elysia()
                     type="email"
                     name="email"
                     placeholder="Email"
+                    autocomplete="email"
                     required
                   />
                 </label>
@@ -189,6 +190,7 @@ const app = new Elysia()
                     type="password"
                     name="password"
                     placeholder="Password"
+                    autocomplete="new-password"
                     required
                   />
                 </label>
@@ -273,7 +275,7 @@ const app = new Elysia()
 
     return (
       <BaseHtml title="ConvertX | Login">
-        <Header />
+        <Header accountRegistration={ACCOUNT_REGISTRATION} />
         <main class="container">
           <article>
             <form method="post">
@@ -284,6 +286,7 @@ const app = new Elysia()
                     type="email"
                     name="email"
                     placeholder="Email"
+                    autocomplete="email"
                     required
                   />
                 </label>
@@ -293,6 +296,7 @@ const app = new Elysia()
                     type="password"
                     name="password"
                     placeholder="Password"
+                    autocomplete="current-password"
                     required
                   />
                 </label>
@@ -789,8 +793,12 @@ const app = new Elysia()
                     type="button"
                     style={{ width: "10rem", float: "right" }}
                     onclick="downloadAll()"
-                    {...(files.length !== job.num_files && { disabled: true })}>
-                    Download All
+                    {...(files.length !== job.num_files
+                      ? { disabled: true, "aria-busy": "true" }
+                      : "")}>
+                    {files.length === job.num_files
+                      ? "Download All"
+                      : "Converting..."}
                   </button>
                 </div>
               </div>
@@ -877,8 +885,12 @@ const app = new Elysia()
                 type="button"
                 style={{ width: "10rem", float: "right" }}
                 onclick="downloadAll()"
-                {...(files.length !== job.num_files && { disabled: true })}>
-                Download All
+                {...(files.length !== job.num_files
+                  ? { disabled: true, "aria-busy": "true" }
+                  : "")}>
+                {files.length === job.num_files
+                  ? "Download All"
+                  : "Converting..."}
               </button>
             </div>
           </div>

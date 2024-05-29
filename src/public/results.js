@@ -13,9 +13,10 @@ window.downloadAll = function () {
 };
 const jobId = window.location.pathname.split("/").pop();
 const main = document.querySelector("main");
-const progressElem = document.querySelector("progress");
+let progressElem = document.querySelector("progress");
 
 const refreshData = () => {
+  // console.log("Refreshing data...", progressElem.value, progressElem.max);
   if (progressElem.value !== progressElem.max) {
     fetch(`/progress/${jobId}`, {
       method: "POST",
@@ -28,6 +29,8 @@ const refreshData = () => {
 
     setTimeout(refreshData, 1000);
   }
+
+  progressElem = document.querySelector("progress");
 };
 
 refreshData();

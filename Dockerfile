@@ -47,8 +47,5 @@ COPY --from=install /temp/prod/node_modules node_modules
 # COPY --from=prerelease /app/package.json .
 COPY . .
 
-# create folder data
-RUN mkdir -p /app/data && chmod 755 /app/data
-
 EXPOSE 3000/tcp
 ENTRYPOINT [ "bun", "run", "./src/index.tsx" ]

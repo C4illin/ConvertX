@@ -5,6 +5,7 @@ services:
     volumes:
       - ./data:/app/data
     environment:
-      NODE_ENV: production
+      - ACCOUNT_REGISTRATION=true
+      - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234
     ports:
       - 3000:3000

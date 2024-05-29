@@ -115,7 +115,7 @@ export function convert(
   // }
 
   return new Promise((resolve, reject) => {
-    exec(`vips copy ${filePath} ${targetPath}`, (error, stdout, stderr) => {
+    exec(`vips copy "${filePath}" "${targetPath}"`, (error, stdout, stderr) => {
       if (error) {
         reject(`error: ${error}`);
       }
