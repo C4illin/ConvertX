@@ -35,7 +35,7 @@ services:
       - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234
       - HTTP_ALLOWED=false # setting this to true is unsafe, but as long as it locally and you trust your local network there is no problem
     volumes:
-      - /path/you/want:/app/data
+      - convertx:/app/data
 ```
 
 <!-- or
