@@ -12,7 +12,8 @@
     "@elysiajs/html": "^1.0.2",
     "@elysiajs/jwt": "^1.0.2",
     "@elysiajs/static": "^1.0.3",
-    "elysia": "^1.0.22"
+    "elysia": "^1.0.22",
+    "node-poppler": "^7.2.0"
   },
   "module": "src/index.tsx",
   "bun-create": {

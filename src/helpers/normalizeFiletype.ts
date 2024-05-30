@@ -25,6 +25,8 @@ export const normalizeOutputFiletype = (filetype: string): string => {
       return "tex";
     case "markdown":
       return "md";
+    case "text":
+      return "txt";
     default:
       return lowercaseFiletype;
   }

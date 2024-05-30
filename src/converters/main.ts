@@ -20,6 +20,8 @@ import {
   properties as propertiesPdflatex,
 } from "./pdflatex";
 
+import { convert as convertPoppler, properties as propertiesPoppler } from "./poppler";
+
 import { normalizeFiletype } from "../helpers/normalizeFiletype";
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
@@ -57,6 +59,10 @@ const properties: {
   pdflatex: {
     properties: propertiesPdflatex,
     converter: convertPdflatex,
+  },
+  poppler: {
+    properties: propertiesPoppler,
+    converter: convertPoppler,
   },
   pandoc: {
     properties: propertiesPandoc,
