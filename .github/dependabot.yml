@@ -5,19 +5,19 @@
 
 version: 2
 updates:
-  # Maintain dependencies for npm
-  - package-ecosystem: "npm" # See documentation for possible values
-    versioning-strategy: increase
-    directory: "/" # Location of package manifests
-    schedule:
-      interval: "daily"
-  # Maintain dependencies for GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "daily"
-  # Maintain dependencies for Docker
-  - package-ecosystem: "docker"
-    directory: "/"
-    schedule:
-      interval: "daily"
+- package-ecosystem: npm
+  versioning-strategy: increase
+  directory: "/"
+  schedule:
+    interval: daily
+  commit-message:
+    prefix: "build"
+    include: "scope"
+  open-pull-requests-limit: 10
+- package-ecosystem: github-actions
+  directory: "/"
+  schedule:
+    interval: weekly
+  commit-message:
+    prefix: "build"
+    include: "scope"
