@@ -1,6 +1,8 @@
 ![ConvertX](images/logo.png)
 # ConvertX
 [![Docker](https://github.com/C4illin/ConvertX/actions/workflows/docker-publish.yml/badge.svg?branch=main)](https://github.com/C4illin/ConvertX/actions/workflows/docker-publish.yml)
+![GitHub Release](https://img.shields.io/github/v/release/C4illin/ConvertX)
+![GitHub commits since latest release](https://img.shields.io/github/commits-since/C4illin/ConvertX/latest)
 
 A self-hosted online file converter. Supports 831 different formats. Written with Typescript, Bun and Elysia.
 
