@@ -121,7 +121,7 @@ const app = new Elysia()
   )
   .get("/setup", ({ redirect }) => {
     if (!FIRST_RUN) {
-      return redirect("/login");
+      return redirect("/login", 302);
     }
 
     return (
@@ -164,7 +164,7 @@ const app = new Elysia()
   })
   .get("/register", ({ redirect }) => {
     if (!ACCOUNT_REGISTRATION) {
-      return redirect("/login");
+      return redirect("/login", 302);
     }
 
     return (
@@ -206,7 +206,7 @@ const app = new Elysia()
     "/register",
     async ({ body, set, redirect, jwt, cookie: { auth } }) => {
       if (!ACCOUNT_REGISTRATION && !FIRST_RUN) {
-        return redirect("/login");
+        return redirect("/login", 302);
       }
 
       if (FIRST_RUN) {
@@ -253,13 +253,13 @@ const app = new Elysia()
         sameSite: "strict",
       });
 
-      return redirect("/");
+      return redirect("/", 302);
     },
     { body: t.Object({ email: t.String(), password: t.String() }) },
   )
   .get("/login", async ({ jwt, redirect, cookie: { auth } }) => {
     if (FIRST_RUN) {
-      return redirect("/setup");
+      return redirect("/setup", 302);
     }
 
     // if already logged in, redirect to home
@@ -267,7 +267,7 @@ const app = new Elysia()
       const user = await jwt.verify(auth.value);
 
       if (user) {
-        return redirect("/");
+        return redirect("/", 302);
       }
 
       auth.remove();
@@ -361,7 +361,7 @@ const app = new Elysia()
         sameSite: "strict",
       });
 
-      return redirect("/");
+      return redirect("/", 302);
     },
     { body: t.Object({ email: t.String(), password: t.String() }) },
   )
@@ -370,27 +370,27 @@ const app = new Elysia()
       auth.remove();
     }
 
-    return redirect("/login");
+    return redirect("/login", 302);
   })
   .post("/logoff", ({ redirect, cookie: { auth } }) => {
     if (auth?.value) {
       auth.remove();
     }
 
-    return redirect("/login");
+    return redirect("/login", 302);
   })
   .get("/", async ({ jwt, redirect, cookie: { auth, jobId } }) => {
     if (FIRST_RUN) {
-      return redirect("/setup");
+      return redirect("/setup", 302);
     }
 
     if (!auth?.value) {
-      return redirect("/login");
+      return redirect("/login", 302);
     }
     // validate jwt
     const user = await jwt.verify(auth.value);
     if (!user) {
-      return redirect("/login");
+      return redirect("/login", 302);
     }
 
     // make sure user exists in db
@@ -402,7 +402,7 @@ const app = new Elysia()
       if (auth?.value) {
         auth.remove();
       }
-      return redirect("/login");
+      return redirect("/login", 302);
     }
 
     // create a new job
@@ -509,16 +509,16 @@ const app = new Elysia()
     "/upload",
     async ({ body, redirect, jwt, cookie: { auth, jobId } }) => {
       if (!auth?.value) {
-        return redirect("/login");
+        return redirect("/login", 302);
       }
 
       const user = await jwt.verify(auth.value);
       if (!user) {
-        return redirect("/login");
+        return redirect("/login", 302);
       }
 
       if (!jobId?.value) {
-        return redirect("/");
+        return redirect("/", 302);
       }
 
       const existingJob = await db
@@ -526,7 +526,7 @@ const app = new Elysia()
         .get(jobId.value, user.id);
 
       if (!existingJob) {
-        return redirect("/");
+        return redirect("/", 302);
       }
 
       const userUploadsDir = `${uploadsDir}${user.id}/${jobId.value}/`;
@@ -557,16 +557,16 @@ const app = new Elysia()
     "/delete",
     async ({ body, redirect, jwt, cookie: { auth, jobId } }) => {
       if (!auth?.value) {
-        return redirect("/login");
+        return redirect("/login", 302);
       }
 
       const user = await jwt.verify(auth.value);
       if (!user) {
-        return redirect("/login");
+        return redirect("/login", 302);
       }
 
       if (!jobId?.value) {
-        return redirect("/");
+        return redirect("/", 302);
       }
 
       const existingJob = await db
@@ -574,7 +574,7 @@ const app = new Elysia()
         .get(jobId.value, user.id);
 
       if (!existingJob) {
-        return redirect("/");
+        return redirect("/", 302);
       }
 
       const userUploadsDir = `${uploadsDir}${user.id}/${jobId.value}/`;
@@ -587,16 +587,16 @@ const app = new Elysia()
     "/convert",
     async ({ body, redirect, jwt, cookie: { auth, jobId } }) => {
       if (!auth?.value) {
-        return redirect("/login");
+        return redirect("/login", 302);
       }
 
       const user = await jwt.verify(auth.value);
       if (!user) {
-        return redirect("/login");
+        return redirect("/login", 302);
       }
 
       if (!jobId?.value) {
-        return redirect("/");
+        return redirect("/", 302);
       }
 
       const existingJob = (await db
@@ -604,7 +604,7 @@ const app = new Elysia()
         .get(jobId.value, user.id)) as IJobs;
 
       if (!existingJob) {
-        return redirect("/");
+        return redirect("/", 302);
       }
 
       const userUploadsDir = `${uploadsDir}${user.id}/${jobId.value}/`;
@@ -627,7 +627,7 @@ const app = new Elysia()
       const fileNames = JSON.parse(body.file_names) as string[];
 
       if (!Array.isArray(fileNames) || fileNames.length === 0) {
-        return redirect("/");
+        return redirect("/", 302);
       }
 
       db.run(
@@ -677,7 +677,7 @@ const app = new Elysia()
         });
 
       // Redirect the client immediately
-      return redirect(`/results/${jobId.value}`);
+      return redirect(`/results/, 302${jobId.value}`);
     },
     {
       body: t.Object({
@@ -688,12 +688,12 @@ const app = new Elysia()
   )
   .get("/history", async ({ jwt, redirect, cookie: { auth } }) => {
     if (!auth?.value) {
-      return redirect("/login");
+      return redirect("/login", 302);
     }
     const user = await jwt.verify(auth.value);
 
     if (!user) {
-      return redirect("/login");
+      return redirect("/login", 302);
     }
 
     let userJobs = db
@@ -751,7 +751,7 @@ const app = new Elysia()
     "/results/:jobId",
     async ({ params, jwt, set, redirect, cookie: { auth, job_id } }) => {
       if (!auth?.value) {
-        return redirect("/login");
+        return redirect("/login", 302);
       }
 
       if (job_id?.value) {
@@ -761,7 +761,7 @@ const app = new Elysia()
 
       const user = await jwt.verify(auth.value);
       if (!user) {
-        return redirect("/login");
+        return redirect("/login", 302);
       }
 
       const job = (await db
@@ -846,7 +846,7 @@ const app = new Elysia()
     "/progress/:jobId",
     async ({ jwt, set, params, redirect, cookie: { auth, job_id } }) => {
       if (!auth?.value) {
-        return redirect("/login");
+        return redirect("/login", 302);
       }
 
       if (job_id?.value) {
@@ -856,7 +856,7 @@ const app = new Elysia()
 
       const user = await jwt.verify(auth.value);
       if (!user) {
-        return redirect("/login");
+        return redirect("/login", 302);
       }
 
       const job = (await db
@@ -934,12 +934,12 @@ const app = new Elysia()
     "/download/:userId/:jobId/:fileName",
     async ({ params, jwt, redirect, cookie: { auth } }) => {
       if (!auth?.value) {
-        return redirect("/login");
+        return redirect("/login", 302);
       }
 
       const user = await jwt.verify(auth.value);
       if (!user) {
-        return redirect("/login");
+        return redirect("/login", 302);
       }
 
       const job = await db
@@ -947,7 +947,7 @@ const app = new Elysia()
         .get(user.id, params.jobId);
 
       if (!job) {
-        return redirect("/results");
+        return redirect("/results", 302);
       }
       // parse from url encoded string
       const userId = decodeURIComponent(params.userId);
@@ -960,12 +960,12 @@ const app = new Elysia()
   )
   .get("/converters", async ({ jwt, redirect, cookie: { auth } }) => {
     if (!auth?.value) {
-      return redirect("/login");
+      return redirect("/login", 302);
     }
 
     const user = await jwt.verify(auth.value);
     if (!user) {
-      return redirect("/login");
+      return redirect("/login", 302);
     }
 
     return (
@@ -1022,12 +1022,12 @@ const app = new Elysia()
     async ({ params, jwt, redirect, cookie: { auth } }) => {
       // TODO: Implement zip download
       if (!auth?.value) {
-        return redirect("/login");
+        return redirect("/login", 302);
       }
 
       const user = await jwt.verify(auth.value);
       if (!user) {
-        return redirect("/login");
+        return redirect("/login", 302);
       }
 
       const job = await db
@@ -1035,7 +1035,7 @@ const app = new Elysia()
         .get(user.id, params.jobId);
 
       if (!job) {
-        return redirect("/results");
+        return redirect("/results", 302);
       }
 
       const userId = decodeURIComponent(params.userId);
