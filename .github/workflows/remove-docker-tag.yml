@@ -15,7 +15,7 @@ jobs:
 
     steps:
     - name: Remove Docker Tag
-      uses: rafalkk/remove-dockertag-action@v1
+      uses: ArchieAtkinson/remove-dockertag-action@v0.0
       with:
         tag-name: master
         github_token: ${{ secrets.GITHUB_TOKEN }}
