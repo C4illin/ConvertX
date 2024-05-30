@@ -15,7 +15,7 @@ A self-hosted online file converter. Supports 831 different formats. Written wit
 | Converter      | Use case      | Converts from | Converts to |
 |----------------|---------------|---------------|-------------|
 | Vips           | Images (fast) | 45            | 23          |
-| PdfLaTeX       | Documents     | 1             | 1           |
+| PDFLaTeX       | Documents     | 1             | 1           |
 | Pandoc         | Documents     | 43            | 65          |
 | GraphicsMagick | Images        | 166           | 133         |
 | FFmpeg         | Video         | ~473          | ~280        |
