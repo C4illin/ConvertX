@@ -1,0 +1,21 @@
+name: Remove Docker Tag
+
+on:
+  workflow_dispatch:
+
+jobs:
+  remove-docker-tag:
+    runs-on: ubuntu-latest
+
+    # Sets the permissions granted to the `GITHUB_TOKEN` for the actions in this job.
+    # (required)
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Remove Docker Tag
+      uses: rafalkk/remove-dockertag-action@v1
+      with:
+        tag-name: master
+        github_token: ${{ secrets.GITHUB_TOKEN }}
