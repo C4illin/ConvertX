@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/C4illin/ConvertX/compare/v0.1.0...v0.1.1) (2024-05-30)
+
+
+### Bug Fixes
+
+* :bug: make sure all redirects are 302 ([9970fd3](https://github.com/C4illin/ConvertX/commit/9970fd3f89190af96f8762edc3817d1e03082b3a)), closes [#12](https://github.com/C4illin/ConvertX/issues/12)
+
 ## 0.1.0 (2024-05-30)
 
 
