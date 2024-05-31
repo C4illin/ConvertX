@@ -3,6 +3,8 @@
 [![Docker](https://github.com/C4illin/ConvertX/actions/workflows/docker-publish.yml/badge.svg?branch=main)](https://github.com/C4illin/ConvertX/actions/workflows/docker-publish.yml)
 ![GitHub Release](https://img.shields.io/github/v/release/C4illin/ConvertX)
 ![GitHub commits since latest release](https://img.shields.io/github/commits-since/C4illin/ConvertX/latest)
+![GitHub repo size](https://img.shields.io/github/repo-size/C4illin/ConvertX)
+![GitHub top language](https://img.shields.io/github/languages/top/C4illin/ConvertX)
 
 A self-hosted online file converter. Supports 831 different formats. Written with Typescript, Bun and Elysia.
 
