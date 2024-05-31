@@ -14,13 +14,13 @@ A self-hosted online file converter. Supports 831 different formats. Written wit
 
 ## Converters supported
 
-| Converter      | Use case      | Converts from | Converts to |
-|----------------|---------------|---------------|-------------|
-| Vips           | Images (fast) | 45            | 23          |
-| PDFLaTeX       | Documents     | 1             | 1           |
-| Pandoc         | Documents     | 43            | 65          |
-| GraphicsMagick | Images        | 166           | 133         |
-| FFmpeg         | Video         | ~473          | ~280        |
+| Converter                                                                    | Use case      | Converts from | Converts to |
+|------------------------------------------------------------------------------|---------------|---------------|-------------|
+| [Vips](https://github.com/libvips/libvips)                                   | Images (fast) | 45            | 23          |
+| [PDFLaTeX](https://www.math.rug.nl/~trentelman/jacob/pdflatex/pdflatex.html) | Documents     | 1             | 1           |
+| [Pandoc](https://pandoc.org/)                                                | Documents     | 43            | 65          |
+| [GraphicsMagick](http://www.graphicsmagick.org/)                             | Images        | 166           | 133         |
+| [FFmpeg](https://ffmpeg.org/)                                                | Video         | ~473          | ~280        |
 
 <!-- many ffmpeg fileformats are duplicates -->
 
