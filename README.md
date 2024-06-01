@@ -6,7 +6,7 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/C4illin/ConvertX)
 ![GitHub top language](https://img.shields.io/github/languages/top/C4illin/ConvertX)
 
-A self-hosted online file converter. Supports 831 different formats. Written with Typescript, Bun and Elysia.
+A self-hosted online file converter. Supports 831 different formats. Written with TypeScript, Bun and Elysia.
 
 ## Features
 
@@ -64,6 +64,7 @@ Tutorial in french: https://belginux.com/installer-convertx-avec-docker/
 - [ ] Divide index.tsx into smaller components
 - [ ] Add tests
 - [ ] Add searchable list of formats
+- [ ] Make the upload button nicer and more easy to drop files on. Support copy paste as well if possible.
 
 ## Contributors
 
