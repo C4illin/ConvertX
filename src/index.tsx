@@ -677,7 +677,7 @@ const app = new Elysia()
         });
 
       // Redirect the client immediately
-      return redirect(`/results/, 302${jobId.value}`);
+      return redirect(`/results/${jobId.value}`, 302);
     },
     {
       body: t.Object({
