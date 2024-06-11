@@ -20,6 +20,11 @@ import {
   properties as propertiesPdflatex,
 } from "./pdflatex";
 
+import {
+  convert as convertLibjxl,
+  properties as propertiesLibjxl,
+} from "./libjxl";
+
 import { normalizeFiletype } from "../helpers/normalizeFiletype";
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
@@ -50,6 +55,10 @@ const properties: {
     ) => any;
   };
 } = {
+  libjxl: {
+    properties: propertiesLibjxl,
+    converter: convertLibjxl,
+  },
   vips: {
     properties: propertiesImage,
     converter: convertImage,

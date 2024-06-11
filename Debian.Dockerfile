@@ -1,4 +1,4 @@
-FROM oven/bun:1-alpine as base
+FROM oven/bun:1-debian as base
 WORKDIR /app
 
 # install dependencies into temp directory
@@ -31,16 +31,16 @@ LABEL description="ConvertX: self-hosted online file converter supporting 700+ f
 LABEL repo="https://github.com/C4illin/ConvertX"
 
 # install additional dependencies
-RUN apk update && apk add --no-cache \
+RUN rm -rf /var/lib/apt/lists/partial && apt-get update -o Acquire::CompressionTypes::Order::=gz \
+  && apt-get install -y \
   pandoc \
-  texlive \
-  texmf-dist-fontsextra \
-  texmf-dist-latexextra \
+  texlive-latex-recommended \
+  texlive-fonts-recommended \
+  texlive-latex-extra \
   ffmpeg \
   graphicsmagick \
   ghostscript \
-  vips-tools \
-  libjxl-tools
+  libvips-tools
 
 COPY --from=install /temp/prod/node_modules node_modules
 # COPY --from=prerelease /app/src/index.tsx /app/src/
