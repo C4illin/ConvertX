@@ -19,7 +19,11 @@ export function convert(
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     // const fileName: string = (targetPath.split("/").pop() as string).replace(".pdf", "")
-    const outputPath = targetPath.split("/").slice(0, -1).join("/").replace("./", "")
+    const outputPath = targetPath
+      .split("/")
+      .slice(0, -1)
+      .join("/")
+      .replace("./", "");
     exec(
       `pdflatex -interaction=nonstopmode -output-directory="${outputPath}" "${filePath}"`,
       (error, stdout, stderr) => {
