@@ -26,7 +26,7 @@
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/bun": "^1.1.4",
     "@types/eslint": "^8.56.10",
-    "@types/node": "^20.14.2",
+    "@types/node": "^20.14.5",
     "@types/ws": "^8.5.10",
     "@typescript-eslint/eslint-plugin": "^7.13.0",
     "@typescript-eslint/parser": "^7.13.1",
