@@ -2,6 +2,7 @@ services:
   convertx:
     build:
       context: .
+      # dockerfile: Debian.Dockerfile
     volumes:
       - ./data:/app/data
     environment:

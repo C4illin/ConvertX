@@ -13,6 +13,11 @@ RUN mkdir -p /temp/prod
 COPY package.json bun.lockb /temp/prod/
 RUN cd /temp/prod && bun install --frozen-lockfile --production
 
+# FROM base AS install-libjxl-tools
+# download
+
+
+
 # copy node_modules from temp directory
 # then copy all (non-ignored) project files into the image
 # FROM base AS prerelease
@@ -41,6 +46,13 @@ RUN rm -rf /var/lib/apt/lists/partial && apt-get update -o Acquire::CompressionT
   graphicsmagick \
   ghostscript \
   libvips-tools
+
+# # libjxl is not available in the official debian repositories
+# RUN wget https://github.com/libjxl/libjxl/releases/download/v0.10.2/jxl-debs-amd64-debian-bullseye-v0.10.2.tar.gz -O /tmp/jxl-debs-amd64-debian-bullseye-v0.10.2.tar.gz \
+#   && mkdir -p /tmp/libjxl \
+#   && tar -xvf /tmp/jxl-debs-amd64-debian-bullseye-v0.10.2.tar.gz -C /tmp/libjxl \
+#   && dpkg -i /tmp/libjxl/libjxl_0.10.2_amd64.deb /tmp/libjxl/jxl_0.10.2_amd64.deb \
+#   && rm -rf /tmp/jxl-debs-amd64-debian-bullseye-v0.10.2.tar.gz /tmp/libjxl
 
 COPY --from=install /temp/prod/node_modules node_modules
 # COPY --from=prerelease /app/src/index.tsx /app/src/

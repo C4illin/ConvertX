@@ -31,16 +31,18 @@ LABEL description="ConvertX: self-hosted online file converter supporting 700+ f
 LABEL repo="https://github.com/C4illin/ConvertX"
 
 # install additional dependencies
-RUN apk update && apk add --no-cache \
+RUN apk --no-cache add  \
   pandoc \
   texlive \
-  texmf-dist-fontsextra \
   texmf-dist-latexextra \
   ffmpeg \
   graphicsmagick \
   ghostscript \
   vips-tools \
   libjxl-tools
+
+# this might be needed for some latex use cases, will add it if needed.
+#   texmf-dist-fontsextra \
 
 COPY --from=install /temp/prod/node_modules node_modules
 # COPY --from=prerelease /app/src/index.tsx /app/src/
