@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.0](https://github.com/C4illin/ConvertX/compare/v0.1.2...v0.2.0) (2024-06-20)
+
+
+### Features
+
+* add libjxl for jpegxl conversion ([ff680cb](https://github.com/C4illin/ConvertX/commit/ff680cb29534a25c3148a90fd064bb86c71fb482))
+* change from debian to alpine ([1316957](https://github.com/C4illin/ConvertX/commit/13169574f0134ae236f8d41287bb73930b575e82)), closes [#34](https://github.com/C4illin/ConvertX/issues/34)
+
 ## [0.1.2](https://github.com/C4illin/ConvertX/compare/v0.1.1...v0.1.2) (2024-06-10)
 
 
