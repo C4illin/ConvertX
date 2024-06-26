@@ -111,9 +111,8 @@ export async function mainConverter(
 
       for (const key in converterObj.properties.from) {
         if (
-          // HOW??
-          converterObj.properties.from[key].includes(fileType) &&
-          converterObj.properties.to[key].includes(convertTo)
+          converterObj?.properties?.from[key]?.includes(fileType) &&
+          converterObj?.properties?.to[key]?.includes(convertTo)
         ) {
           converterFunc = converterObj.converter;
           break;
@@ -217,9 +216,9 @@ for (const converterName in properties) {
 
   for (const key in converterProperties.to) {
     if (allTargets[converterName]) {
-      allTargets[converterName].push(...converterProperties.to[key]);
+      allTargets[converterName].push(...(converterProperties.to[key] || []));
     } else {
-      allTargets[converterName] = converterProperties.to[key];
+      allTargets[converterName] = converterProperties.to[key] || [];
     }
   }
 }
@@ -238,9 +237,9 @@ for (const converterName in properties) {
 
   for (const key in converterProperties.from) {
     if (allInputs[converterName]) {
-      allInputs[converterName].push(...converterProperties.from[key]);
+      allInputs[converterName].push(...(converterProperties.from[key] || []));
     } else {
-      allInputs[converterName] = converterProperties.from[key];
+      allInputs[converterName] = converterProperties.from[key] || [];
     }
   }
 }
