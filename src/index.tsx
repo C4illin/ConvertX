@@ -20,6 +20,9 @@ import {
   normalizeOutputFiletype,
 } from "./helpers/normalizeFiletype";
 
+import { version } from "../package.json";
+console.log(`ConvertX v${version}`);
+
 const db = new Database("./data/mydb.sqlite", { create: true });
 const uploadsDir = "./data/uploads/";
 const outputDir = "./data/output/";
