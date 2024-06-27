@@ -51,4 +51,5 @@ COPY --from=install /temp/prod/node_modules node_modules
 COPY . .
 
 EXPOSE 3000/tcp
+ENV NODE_ENV=production
 ENTRYPOINT [ "bun", "run", "./src/index.tsx" ]
