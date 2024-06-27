@@ -34,6 +34,7 @@ LABEL repo="https://github.com/C4illin/ConvertX"
 RUN apk --no-cache add  \
   pandoc \
   texlive \
+  texlive-xetex \
   texmf-dist-latexextra \
   ffmpeg \
   graphicsmagick \

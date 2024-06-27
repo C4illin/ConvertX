@@ -25,7 +25,7 @@ export function convert(
       .join("/")
       .replace("./", "");
     exec(
-      `pdflatex -interaction=nonstopmode -output-directory="${outputPath}" "${filePath}"`,
+      `latexmk -xelatex -interaction=nonstopmode -output-directory="${outputPath}" "${filePath}"`,
       (error, stdout, stderr) => {
         if (error) {
           reject(`error: ${error}`);

@@ -16,9 +16,9 @@ import {
 } from "./graphicsmagick";
 
 import {
-  convert as convertPdflatex,
-  properties as propertiesPdflatex,
-} from "./pdflatex";
+  convert as convertxelatex,
+  properties as propertiesxelatex,
+} from "./xelatex";
 
 import {
   convert as convertLibjxl,
@@ -63,9 +63,9 @@ const properties: {
     properties: propertiesImage,
     converter: convertImage,
   },
-  pdflatex: {
-    properties: propertiesPdflatex,
-    converter: convertPdflatex,
+  xelatex: {
+    properties: propertiesxelatex,
+    converter: convertxelatex,
   },
   pandoc: {
     properties: propertiesPandoc,

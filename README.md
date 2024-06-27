@@ -21,7 +21,7 @@ A self-hosted online file converter. Supports 831 different formats. Written wit
 |------------------------------------------------------------------------------|---------------|---------------|-------------|
 | [libjxl](https://github.com/libjxl/libjxl)                                   | JPEG XL       | 11            | 11          |
 | [Vips](https://github.com/libvips/libvips)                                   | Images        | 45            | 23          |
-| [PDFLaTeX](https://www.math.rug.nl/~trentelman/jacob/pdflatex/pdflatex.html) | Documents     | 1             | 1           |
+| [XeLaTeX](https://tug.org/xetex/)                                            | Documents     | 1             | 1           |
 | [Pandoc](https://pandoc.org/)                                                | Documents     | 43            | 65          |
 | [GraphicsMagick](http://www.graphicsmagick.org/)                             | Images        | 166           | 133         |
 | [FFmpeg](https://ffmpeg.org/)                                                | Video         | ~473          | ~280        |

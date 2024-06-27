@@ -127,9 +127,15 @@ export function convert(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   options?: any,
 ): Promise<string> {
+  // set xelatex here
+  const xelatex = ["pdf", "latex"];
+  let option = "";
+  if (xelatex.includes(convertTo)) {
+    option = "--pdf-engine=xelatex";
+  }
   return new Promise((resolve, reject) => {
     exec(
-      `pandoc "${filePath}" -f ${fileType} -t ${convertTo} -o "${targetPath}"`,
+      `pandoc ${option} "${filePath}" -f ${fileType} -t ${convertTo} -o "${targetPath}"`,
       (error, stdout, stderr) => {
         if (error) {
           reject(`error: ${error}`);
