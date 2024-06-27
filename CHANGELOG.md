@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.0](https://github.com/C4illin/ConvertX/compare/v0.2.0...v0.3.0) (2024-06-27)
+
+
+### Features
+
+* add version number to log ([4dcb796](https://github.com/C4illin/ConvertX/commit/4dcb796e1bd27badc078d0638076cd9f1e81c4a4)), closes [#44](https://github.com/C4illin/ConvertX/issues/44)
+* change to xelatex ([fae2ba9](https://github.com/C4illin/ConvertX/commit/fae2ba9c54461dccdccd1bfb5e76398540d11d0b))
+* print version of installed converters to log ([801cf28](https://github.com/C4illin/ConvertX/commit/801cf28d1e5edac9353b0b16be75a4fb48470b8a))
+
 ## [0.2.0](https://github.com/C4illin/ConvertX/compare/v0.1.2...v0.2.0) (2024-06-20)
 
 
