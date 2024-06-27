@@ -1,6 +1,6 @@
 {
   "name": "convertx-frontend",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "scripts": {
     "dev": "bun run --watch src/index.tsx",
     "hot": "bun run --hot src/index.tsx",

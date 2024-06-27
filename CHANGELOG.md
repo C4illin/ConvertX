@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/C4illin/ConvertX/compare/v0.3.0...v0.3.1) (2024-06-27)
+
+
+### Bug Fixes
+
+* release releases ([4d4c13a](https://github.com/C4illin/ConvertX/commit/4d4c13a8d85ec7c9209ad41cdbea7d4380b0edbf))
+
 ## [0.3.0](https://github.com/C4illin/ConvertX/compare/v0.2.0...v0.3.0) (2024-06-27)
 
 
