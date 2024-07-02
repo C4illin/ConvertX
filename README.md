@@ -28,6 +28,8 @@ A self-hosted online file converter. Supports 831 different formats. Written wit
 
 <!-- many ffmpeg fileformats are duplicates -->
 
+Any missing converter? Open an issue or pull request!
+
 ## Deployment
 
 ```yml
