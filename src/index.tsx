@@ -21,9 +21,6 @@ import {
 } from "./helpers/normalizeFiletype";
 import "./helpers/printVersions";
 
-
-
-
 const db = new Database("./data/mydb.sqlite", { create: true });
 const uploadsDir = "./data/uploads/";
 const outputDir = "./data/output/";
@@ -104,7 +101,11 @@ interface IJobs {
 // enable WAL mode
 db.exec("PRAGMA journal_mode = WAL;");
 
-const app = new Elysia()
+const app = new Elysia({
+  serve: {
+    maxRequestBodySize: Number.MAX_SAFE_INTEGER,
+  },
+})
   .use(cookie())
   .use(html())
   .use(
