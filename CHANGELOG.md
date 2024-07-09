@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/C4illin/ConvertX/compare/v0.3.1...v0.3.2) (2024-07-09)
+
+
+### Bug Fixes
+
+* increase max request body to support large uploads ([3ae2db5](https://github.com/C4illin/ConvertX/commit/3ae2db5d9b36fe3dcd4372ddcd32aa573ea59aa6)), closes [#64](https://github.com/C4illin/ConvertX/issues/64)
+
 ## [0.3.1](https://github.com/C4illin/ConvertX/compare/v0.3.0...v0.3.1) (2024-06-27)
 
 
