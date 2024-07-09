@@ -28,7 +28,7 @@
     "@types/eslint": "^8.56.10",
     "@types/node": "^20.14.10",
     "@types/ws": "^8.5.10",
-    "@typescript-eslint/eslint-plugin": "^7.15.0",
+    "@typescript-eslint/eslint-plugin": "^7.16.0",
     "@typescript-eslint/parser": "^7.15.0",
     "cpy-cli": "^5.0.0",
     "eslint-config-prettier": "^9.1.0",
