@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
-    "@ianvs/prettier-plugin-sort-imports": "^4.3.0",
+    "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
     "@kitajs/ts-html-plugin": "^4.0.1",
     "@picocss/pico": "^2.0.6",
     "@total-typescript/ts-reset": "^0.5.1",
