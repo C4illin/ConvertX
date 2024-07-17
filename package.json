@@ -11,7 +11,7 @@
     "@elysiajs/cookie": "^0.8.0",
     "@elysiajs/html": "^1.0.2",
     "@elysiajs/jwt": "^1.0.2",
-    "@elysiajs/static": "^1.0.3",
+    "@elysiajs/static": "^1.1.0",
     "elysia": "^1.1.2"
   },
   "module": "src/index.tsx",
