@@ -17,9 +17,6 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
-    "types": [
-      "bun-types" // add Bun global
-    ],
     // non bun init
     "plugins": [{ "name": "@kitajs/ts-html-plugin" }],
     "noUncheckedIndexedAccess": true,

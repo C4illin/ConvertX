@@ -30,7 +30,7 @@ export const Header = ({
   }
 
   return (
-    <header className="container">
+    <header class="container">
       <nav>
         <ul>
           <li>

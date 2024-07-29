@@ -47,3 +47,4 @@ package-lock.json
 /db
 /data
 /Bruno
+/tsconfig.tsbuildinfo

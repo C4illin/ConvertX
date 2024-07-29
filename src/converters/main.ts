@@ -201,7 +201,7 @@ for (const converterName in properties) {
 }
 possibleInputs.sort();
 
-export const getPossibleInputs = () => {
+const getPossibleInputs = () => {
   return possibleInputs;
 };
 

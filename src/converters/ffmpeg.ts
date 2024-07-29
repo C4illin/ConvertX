@@ -260,6 +260,7 @@ export const properties = {
       "mpegts",
       "mpegtsraw",
       "mpegvideo",
+      "mpg",
       "mpjpeg",
       "mpl2",
       "mpo",

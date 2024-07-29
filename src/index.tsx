@@ -75,27 +75,27 @@ if (dbVersion === 0) {
 
 let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
 
-interface IUser {
-  id: number;
-  email: string;
-  password: string;
+class User {
+  id!: number;
+  email!: string;
+  password!: string;
 }
 
-interface IFileNames {
-  id: number;
-  job_id: number;
-  file_name: string;
-  output_file_name: string;
-  status: string;
+class Filename {
+  id!: number;
+  job_id!: number;
+  file_name!: string;
+  output_file_name!: string;
+  status!: string;
 }
 
-interface IJobs {
-  finished_files: number;
-  id: number;
-  user_id: number;
-  date_created: string;
-  status: string;
-  num_files: number;
+class Jobs {
+  finished_files!: number;
+  id!: number;
+  user_id!: number;
+  date_created!: string;
+  status!: string;
+  num_files!: number;
 }
 
 // enable WAL mode
@@ -174,36 +174,38 @@ const app = new Elysia({
 
     return (
       <BaseHtml title="ConvertX | Register">
-        <Header accountRegistration={ACCOUNT_REGISTRATION} />
-        <main class="container">
-          <article>
-            <form method="post">
-              <fieldset>
-                <label>
-                  Email
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    autocomplete="email"
-                    required
-                  />
-                </label>
-                <label>
-                  Password
-                  <input
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    autocomplete="new-password"
-                    required
-                  />
-                </label>
-              </fieldset>
-              <input type="submit" value="Register" />
-            </form>
-          </article>
-        </main>
+        <>
+          <Header accountRegistration={ACCOUNT_REGISTRATION} />
+          <main class="container">
+            <article>
+              <form method="post">
+                <fieldset>
+                  <label>
+                    Email
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="Email"
+                      autocomplete="email"
+                      required
+                    />
+                  </label>
+                  <label>
+                    Password
+                    <input
+                      type="password"
+                      name="password"
+                      placeholder="Password"
+                      autocomplete="new-password"
+                      required
+                    />
+                  </label>
+                </fieldset>
+                <input type="submit" value="Register" />
+              </form>
+            </article>
+          </main>
+        </>
       </BaseHtml>
     );
   })
@@ -234,9 +236,17 @@ const app = new Elysia({
         savedPassword,
       );
 
-      const user = (await db
+      const user = db
         .query("SELECT * FROM users WHERE email = ?")
-        .get(body.email)) as IUser;
+        .as(User)
+        .get(body.email);
+
+      if (!user) {
+        set.status = 500;
+        return {
+          message: "Failed to create user.",
+        };
+      }
 
       const accessToken = await jwt.sign({
         id: String(user.id),
@@ -280,52 +290,55 @@ const app = new Elysia({
 
     return (
       <BaseHtml title="ConvertX | Login">
-        <Header accountRegistration={ACCOUNT_REGISTRATION} />
-        <main class="container">
-          <article>
-            <form method="post">
-              <fieldset>
-                <label>
-                  Email
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    autocomplete="email"
-                    required
-                  />
-                </label>
-                <label>
-                  Password
-                  <input
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    autocomplete="current-password"
-                    required
-                  />
-                </label>
-              </fieldset>
-              <div role="group">
-                {ACCOUNT_REGISTRATION && (
-                  <a href="/register" role="button" class="secondary">
-                    Register an account
-                  </a>
-                )}
-                <input type="submit" value="Login" />
-              </div>
-            </form>
-          </article>
-        </main>
+        <>
+          <Header accountRegistration={ACCOUNT_REGISTRATION} />
+          <main class="container">
+            <article>
+              <form method="post">
+                <fieldset>
+                  <label>
+                    Email
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="Email"
+                      autocomplete="email"
+                      required
+                    />
+                  </label>
+                  <label>
+                    Password
+                    <input
+                      type="password"
+                      name="password"
+                      placeholder="Password"
+                      autocomplete="current-password"
+                      required
+                    />
+                  </label>
+                </fieldset>
+                <div role="group">
+                  {ACCOUNT_REGISTRATION && (
+                    <a href="/register" role="button" class="secondary">
+                      Register an account
+                    </a>
+                  )}
+                  <input type="submit" value="Login" />
+                </div>
+              </form>
+            </article>
+          </main>
+        </>
       </BaseHtml>
     );
   })
   .post(
     "/login",
     async function handler({ body, set, redirect, jwt, cookie: { auth } }) {
-      const existingUser = (await db
+      const existingUser = await db
         .query("SELECT * FROM users WHERE email = ?")
-        .get(body.email)) as IUser;
+        .as(User)
+        .get(body.email);
 
       if (!existingUser) {
         set.status = 403;
@@ -399,9 +412,10 @@ const app = new Elysia({
     }
 
     // make sure user exists in db
-    const existingUser = (await db
+    const existingUser = await db
       .query("SELECT * FROM users WHERE id = ?")
-      .get(user.id)) as IUser;
+      .as(User)
+      .get(user.id);
 
     if (!existingUser) {
       if (auth?.value) {
@@ -438,16 +452,17 @@ const app = new Elysia({
 
     return (
       <BaseHtml>
-        <Header loggedIn />
-        <main class="container">
-          <article>
-            <h1>Convert</h1>
-            <div style={{ maxHeight: "50vh", overflowY: "auto" }}>
-              <table id="file-list" class="striped" />
-            </div>
-            <input type="file" name="file" multiple />
-            {/* <label for="convert_from">Convert from</label> */}
-            {/* <select name="convert_from" aria-label="Convert from" required>
+        <>
+          <Header loggedIn />
+          <main class="container">
+            <article>
+              <h1>Convert</h1>
+              <div style={{ maxHeight: "50vh", overflowY: "auto" }}>
+                <table id="file-list" class="striped" />
+              </div>
+              <input type="file" name="file" multiple />
+              {/* <label for="convert_from">Convert from</label> */}
+              {/* <select name="convert_from" aria-label="Convert from" required>
               <option selected disabled value="">
                 Convert from
               </option>
@@ -456,31 +471,34 @@ const app = new Elysia({
                 <option>{input}</option>
               ))}
             </select> */}
-          </article>
-          <form method="post" action="/convert">
-            <input type="hidden" name="file_names" id="file_names" />
-            <article>
-              <select name="convert_to" aria-label="Convert to" required>
-                <option selected disabled value="">
-                  Convert to
-                </option>
-                {Object.entries(getAllTargets()).map(([converter, targets]) => (
-                  // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-                  <optgroup label={converter}>
-                    {targets.map((target) => (
-                      // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-                      <option value={`${target},${converter}`} safe>
-                        {target}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
             </article>
-            <input type="submit" value="Convert" />
-          </form>
-        </main>
-        <script src="script.js" defer />
+            <form method="post" action="/convert">
+              <input type="hidden" name="file_names" id="file_names" />
+              <article>
+                <select name="convert_to" aria-label="Convert to" required>
+                  <option selected disabled value="">
+                    Convert to
+                  </option>
+                  {Object.entries(getAllTargets()).map(
+                    ([converter, targets]) => (
+                      // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                      <optgroup label={converter}>
+                        {targets.map((target) => (
+                          // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                          <option value={`${target},${converter}`} safe>
+                            {target}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ),
+                  )}
+                </select>
+              </article>
+              <input type="submit" value="Convert" />
+            </form>
+          </main>
+          <script src="script.js" defer />
+        </>
       </BaseHtml>
     );
   })
@@ -604,9 +622,10 @@ const app = new Elysia({
         return redirect("/", 302);
       }
 
-      const existingJob = (await db
+      const existingJob = await db
         .query("SELECT * FROM jobs WHERE id = ? AND user_id = ?")
-        .get(jobId.value, user.id)) as IJobs;
+        .as(Jobs)
+        .get(jobId.value, user.id);
 
       if (!existingJob) {
         return redirect("/", 302);
@@ -635,14 +654,12 @@ const app = new Elysia({
         return redirect("/", 302);
       }
 
-      db.run(
-        "UPDATE jobs SET num_files = ?, status = 'pending' WHERE id = ?",
-        fileNames.length,
-        jobId.value,
-      );
+      db.query(
+        "UPDATE jobs SET num_files = ?1, status = 'pending' WHERE id = ?2",
+      ).run(fileNames.length, jobId.value);
 
       const query = db.query(
-        "INSERT INTO file_names (job_id, file_name, output_file_name, status) VALUES (?, ?, ?, ?)",
+        "INSERT INTO file_names (job_id, file_name, output_file_name, status) VALUES (?1, ?2, ?3, ?4)",
       );
 
       // Start the conversion process in the background
@@ -663,16 +680,18 @@ const app = new Elysia({
             {},
             converterName,
           );
-
-          query.run(jobId.value, fileName, newFileName, result);
+          if (jobId.value) {
+            query.run(jobId.value, fileName, newFileName, result);
+          }
         }),
       )
         .then(() => {
           // All conversions are done, update the job status to 'completed'
-          db.run(
-            "UPDATE jobs SET status = 'completed' WHERE id = ?",
-            jobId.value,
-          );
+          if (jobId.value) {
+            db.query("UPDATE jobs SET status = 'completed' WHERE id = ?1").run(
+              jobId.value,
+            );
+          }
 
           // delete all uploaded files in userUploadsDir
           // rmSync(userUploadsDir, { recursive: true, force: true });
@@ -703,12 +722,14 @@ const app = new Elysia({
 
     let userJobs = db
       .query("SELECT * FROM jobs WHERE user_id = ?")
-      .all(user.id) as IJobs[];
+      .as(Jobs)
+      .all(user.id);
 
     for (const job of userJobs) {
       const files = db
         .query("SELECT * FROM file_names WHERE job_id = ?")
-        .all(job.id) as IFileNames[];
+        .as(Filename)
+        .all(job.id);
 
       job.finished_files = files.length;
     }
@@ -718,37 +739,39 @@ const app = new Elysia({
 
     return (
       <BaseHtml title="ConvertX | Results">
-        <Header loggedIn />
-        <main class="container">
-          <article>
-            <h1>Results</h1>
-            <table>
-              <thead>
-                <tr>
-                  <th>Time</th>
-                  <th>Files</th>
-                  <th>Files Done</th>
-                  <th>Status</th>
-                  <th>View</th>
-                </tr>
-              </thead>
-              <tbody>
-                {userJobs.map((job) => (
-                  // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+        <>
+          <Header loggedIn />
+          <main class="container">
+            <article>
+              <h1>Results</h1>
+              <table>
+                <thead>
                   <tr>
-                    <td safe>{job.date_created}</td>
-                    <td>{job.num_files}</td>
-                    <td>{job.finished_files}</td>
-                    <td safe>{job.status}</td>
-                    <td>
-                      <a href={`/results/${job.id}`}>View</a>
-                    </td>
+                    <th>Time</th>
+                    <th>Files</th>
+                    <th>Files Done</th>
+                    <th>Status</th>
+                    <th>View</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </article>
-        </main>
+                </thead>
+                <tbody>
+                  {userJobs.map((job) => (
+                    // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                    <tr>
+                      <td safe>{job.date_created}</td>
+                      <td>{job.num_files}</td>
+                      <td>{job.finished_files}</td>
+                      <td safe>{job.status}</td>
+                      <td>
+                        <a href={`/results/${job.id}`}>View</a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </article>
+          </main>
+        </>
       </BaseHtml>
     );
   })
@@ -769,9 +792,10 @@ const app = new Elysia({
         return redirect("/login", 302);
       }
 
-      const job = (await db
+      const job = await db
         .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
-        .get(user.id, params.jobId)) as IJobs;
+        .as(Jobs)
+        .get(user.id, params.jobId);
 
       if (!job) {
         set.status = 404;
@@ -784,65 +808,68 @@ const app = new Elysia({
 
       const files = db
         .query("SELECT * FROM file_names WHERE job_id = ?")
-        .all(params.jobId) as IFileNames[];
+        .as(Filename)
+        .all(params.jobId);
 
       return (
         <BaseHtml title="ConvertX | Result">
-          <Header loggedIn />
-          <main class="container">
-            <article>
-              <div class="grid">
-                <h1>Results</h1>
-                <div>
-                  <button
-                    type="button"
-                    style={{ width: "10rem", float: "right" }}
-                    onclick="downloadAll()"
-                    {...(files.length !== job.num_files
-                      ? { disabled: true, "aria-busy": "true" }
-                      : "")}>
-                    {files.length === job.num_files
-                      ? "Download All"
-                      : "Converting..."}
-                  </button>
+          <>
+            <Header loggedIn />
+            <main class="container">
+              <article>
+                <div class="grid">
+                  <h1>Results</h1>
+                  <div>
+                    <button
+                      type="button"
+                      style={{ width: "10rem", float: "right" }}
+                      onclick="downloadAll()"
+                      {...(files.length !== job.num_files
+                        ? { disabled: true, "aria-busy": "true" }
+                        : "")}>
+                      {files.length === job.num_files
+                        ? "Download All"
+                        : "Converting..."}
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <progress max={job.num_files} value={files.length} />
-              <table>
-                <thead>
-                  <tr>
-                    <th>Converted File Name</th>
-                    <th>Status</th>
-                    <th>View</th>
-                    <th>Download</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {files.map((file) => (
-                    // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                <progress max={job.num_files} value={files.length} />
+                <table>
+                  <thead>
                     <tr>
-                      <td safe>{file.output_file_name}</td>
-                      <td safe>{file.status}</td>
-                      <td>
-                        <a
-                          href={`/download/${outputPath}${file.output_file_name}`}>
-                          View
-                        </a>
-                      </td>
-                      <td>
-                        <a
-                          href={`/download/${outputPath}${file.output_file_name}`}
-                          download={file.output_file_name}>
-                          Download
-                        </a>
-                      </td>
+                      <th>Converted File Name</th>
+                      <th>Status</th>
+                      <th>View</th>
+                      <th>Download</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </article>
-          </main>
-          <script src="/results.js" defer />
+                  </thead>
+                  <tbody>
+                    {files.map((file) => (
+                      // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                      <tr>
+                        <td safe>{file.output_file_name}</td>
+                        <td safe>{file.status}</td>
+                        <td>
+                          <a
+                            href={`/download/${outputPath}${file.output_file_name}`}>
+                            View
+                          </a>
+                        </td>
+                        <td>
+                          <a
+                            href={`/download/${outputPath}${file.output_file_name}`}
+                            download={file.output_file_name}>
+                            Download
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </article>
+            </main>
+            <script src="/results.js" defer />
+          </>
         </BaseHtml>
       );
     },
@@ -864,9 +891,10 @@ const app = new Elysia({
         return redirect("/login", 302);
       }
 
-      const job = (await db
+      const job = await db
         .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
-        .get(user.id, params.jobId)) as IJobs;
+        .as(Jobs)
+        .get(user.id, params.jobId);
 
       if (!job) {
         set.status = 404;
@@ -879,7 +907,8 @@ const app = new Elysia({
 
       const files = db
         .query("SELECT * FROM file_names WHERE job_id = ?")
-        .all(params.jobId) as IFileNames[];
+        .as(Filename)
+        .all(params.jobId);
 
       return (
         <article>
@@ -975,50 +1004,54 @@ const app = new Elysia({
 
     return (
       <BaseHtml title="ConvertX | Converters">
-        <Header loggedIn />
-        <main class="container">
-          <article>
-            <h1>Converters</h1>
-            <table>
-              <thead>
-                <tr>
-                  <th>Converter</th>
-                  <th>From (Count)</th>
-                  <th>To (Count)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(getAllTargets()).map(([converter, targets]) => {
-                  const inputs = getAllInputs(converter);
-                  return (
-                    // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-                    <tr>
-                      <td safe>{converter}</td>
-                      <td>
-                        Count: {inputs.length}
-                        <ul>
-                          {inputs.map((input) => (
-                            // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-                            <li safe>{input}</li>
-                          ))}
-                        </ul>
-                      </td>
-                      <td>
-                        Count: {targets.length}
-                        <ul>
-                          {targets.map((target) => (
-                            // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-                            <li safe>{target}</li>
-                          ))}
-                        </ul>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </article>
-        </main>
+        <>
+          <Header loggedIn />
+          <main class="container">
+            <article>
+              <h1>Converters</h1>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Converter</th>
+                    <th>From (Count)</th>
+                    <th>To (Count)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(getAllTargets()).map(
+                    ([converter, targets]) => {
+                      const inputs = getAllInputs(converter);
+                      return (
+                        // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                        <tr>
+                          <td safe>{converter}</td>
+                          <td>
+                            Count: {inputs.length}
+                            <ul>
+                              {inputs.map((input) => (
+                                // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                                <li safe>{input}</li>
+                              ))}
+                            </ul>
+                          </td>
+                          <td>
+                            Count: {targets.length}
+                            <ul>
+                              {targets.map((target) => (
+                                // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                                <li safe>{target}</li>
+                              ))}
+                            </ul>
+                          </td>
+                        </tr>
+                      );
+                    },
+                  )}
+                </tbody>
+              </table>
+            </article>
+          </main>
+        </>
       </BaseHtml>
     );
   })
@@ -1065,7 +1098,8 @@ const clearJobs = () => {
   // get all files older than 24 hours
   const jobs = db
     .query("SELECT * FROM jobs WHERE date_created < ?")
-    .all(new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) as IJobs[];
+    .as(Jobs)
+    .all(new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
 
   for (const job of jobs) {
     // delete the directories

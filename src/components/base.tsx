@@ -1,4 +1,7 @@
-export const BaseHtml = ({ children, title = "ConvertX" }) => (
+export const BaseHtml = ({
+  children,
+  title = "ConvertX",
+}: { children: JSX.Element; title?: string }) => (
   <html lang="en">
     <head>
       <meta charset="UTF-8" />

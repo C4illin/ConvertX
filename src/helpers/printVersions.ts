@@ -72,4 +72,14 @@ if (process.env.NODE_ENV === "production") {
       console.log(stdout.split("\n")[0]);
     }
   });
+
+  exec("bun -v", (error, stdout) => {
+    if (error) {
+      console.error("Bun is not installed. wait what");
+    }
+
+    if (stdout) {
+      console.log(`Bun v${stdout.split("\n")[0]}`);
+    }
+  });
 }
