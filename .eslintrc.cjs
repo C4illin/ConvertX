@@ -12,17 +12,11 @@ const config = {
     ecmaVersion: "latest",
     sourceType: "module",
     tsconfigRootDir: __dirname,
-    project: [
-      "./tsconfig.json",
-      "./cli/tsconfig.eslint.json", // separate eslint config for the CLI since we want to lint and typecheck differently due to template files
-      "./upgrade/tsconfig.json",
-      "./www/tsconfig.json",
-    ],
+    project: ["./tsconfig.json"],
   },
   overrides: [
     // Template files don't have reliable type information
     {
-      files: ["./cli/template/**/*.{ts,tsx}"],
       extends: ["plugin:@typescript-eslint/disable-type-checked"],
     },
   ],
@@ -46,9 +40,6 @@ const config = {
     // These lint rules don't make sense for us but are enabled in the preset configs
     "@typescript-eslint/no-confusing-void-expression": "off",
     "@typescript-eslint/restrict-template-expressions": "off",
-
-    // This rule doesn't seem to be working properly
-    "@typescript-eslint/prefer-nullish-coalescing": "off",
   },
 };
 
