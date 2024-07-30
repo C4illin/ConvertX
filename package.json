@@ -1,6 +1,6 @@
 {
   "name": "convertx-frontend",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "scripts": {
     "dev": "bun run --watch src/index.tsx",
     "hot": "bun run --hot src/index.tsx",
@@ -44,5 +44,7 @@
     "prettier": "^3.3.3",
     "typescript": "^5.5.4"
   },
-  "trustedDependencies": ["@biomejs/biome"]
+  "trustedDependencies": [
+    "@biomejs/biome"
+  ]
 }
