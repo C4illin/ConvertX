@@ -21,6 +21,7 @@ import {
 } from "./helpers/normalizeFiletype";
 import "./helpers/printVersions";
 
+mkdir("./data", { recursive: true }).catch(console.error);
 const db = new Database("./data/mydb.sqlite", { create: true });
 const uploadsDir = "./data/uploads/";
 const outputDir = "./data/output/";
