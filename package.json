@@ -30,7 +30,7 @@
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/bun": "^1.1.6",
     "@types/eslint": "^9.6.0",
-    "@types/node": "^22.0.0",
+    "@types/node": "^22.0.2",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "cpy-cli": "^5.0.0",
