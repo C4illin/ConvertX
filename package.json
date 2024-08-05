@@ -40,7 +40,7 @@
     "eslint-plugin-isaacscript": "^3.12.2",
     "eslint-plugin-prettier": "^5.2.1",
     "knip": "^5.27.0",
-    "npm-run-all": "^4.1.5",
+    "npm-run-all2": "^5.0.0",
     "prettier": "^3.3.3",
     "typescript": "^5.5.4"
   },
