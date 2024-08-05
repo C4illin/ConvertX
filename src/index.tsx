@@ -115,7 +115,7 @@ const app = new Elysia({
       schema: t.Object({
         id: t.String(),
       }),
-      secret: process.env.JWT_SECRET || randomUUID(),
+      secret: process.env.JWT_SECRET ?? randomUUID(),
       exp: "7d",
     }),
   )
@@ -336,7 +336,7 @@ const app = new Elysia({
   .post(
     "/login",
     async function handler({ body, set, redirect, jwt, cookie: { auth } }) {
-      const existingUser = await db
+      const existingUser = db
         .query("SELECT * FROM users WHERE email = ?")
         .as(User)
         .get(body.email);
@@ -413,7 +413,7 @@ const app = new Elysia({
     }
 
     // make sure user exists in db
-    const existingUser = await db
+    const existingUser = db
       .query("SELECT * FROM users WHERE id = ?")
       .as(User)
       .get(user.id);
@@ -561,13 +561,8 @@ const app = new Elysia({
             await Bun.write(`${userUploadsDir}${file.name}`, file);
           }
         } else {
-          await Bun.write(
-            `${userUploadsDir}${
-              // biome-ignore lint/complexity/useLiteralKeys: ts bug
-              body.file["name"]
-            }`,
-            body.file,
-          );
+          // biome-ignore lint/complexity/useLiteralKeys: weird error
+          await Bun.write(`${userUploadsDir}${body.file["name"]}`, body.file);
         }
       }
 
@@ -623,7 +618,7 @@ const app = new Elysia({
         return redirect("/", 302);
       }
 
-      const existingJob = await db
+      const existingJob = db
         .query("SELECT * FROM jobs WHERE id = ? AND user_id = ?")
         .as(Jobs)
         .get(jobId.value, user.id);
@@ -645,9 +640,7 @@ const app = new Elysia({
         );
       }
 
-      const convertTo = normalizeFiletype(
-        body.convert_to.split(",")[0] as string,
-      );
+      const convertTo = normalizeFiletype(body.convert_to.split(",")[0] ?? "");
       const converterName = body.convert_to.split(",")[1];
       const fileNames = JSON.parse(body.file_names) as string[];
 
@@ -667,7 +660,7 @@ const app = new Elysia({
       Promise.all(
         fileNames.map(async (fileName) => {
           const filePath = `${userUploadsDir}${fileName}`;
-          const fileTypeOrig = fileName.split(".").pop() as string;
+          const fileTypeOrig = fileName.split(".").pop() ?? "";
           const fileType = normalizeFiletype(fileTypeOrig);
           const newFileExt = normalizeOutputFiletype(convertTo);
           const newFileName = fileName.replace(fileTypeOrig, newFileExt);
@@ -793,7 +786,7 @@ const app = new Elysia({
         return redirect("/login", 302);
       }
 
-      const job = await db
+      const job = db
         .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
         .as(Jobs)
         .get(user.id, params.jobId);
@@ -892,7 +885,7 @@ const app = new Elysia({
         return redirect("/login", 302);
       }
 
-      const job = await db
+      const job = db
         .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
         .as(Jobs)
         .get(user.id, params.jobId);
@@ -1077,14 +1070,14 @@ const app = new Elysia({
         return redirect("/results", 302);
       }
 
-      const userId = decodeURIComponent(params.userId);
-      const jobId = decodeURIComponent(params.jobId);
-      const outputPath = `${outputDir}${userId}/${jobId}/`;
+      // const userId = decodeURIComponent(params.userId);
+      // const jobId = decodeURIComponent(params.jobId);
+      // const outputPath = `${outputDir}${userId}/${jobId}/`;
 
       // return Bun.zip(outputPath);
     },
   )
-  .onError(({ code, error, request }) => {
+  .onError(({ error }) => {
     // log.error(` ${request.method} ${request.url}`, code, error);
     console.error(error);
   })

@@ -10,7 +10,7 @@
     "attributePosition": "auto"
   },
   "files": {
-    "ignore": ["node_modules"]
+    "ignore": ["**/node_modules/**"]
   },
   "organizeImports": { "enabled": true },
   "linter": {
