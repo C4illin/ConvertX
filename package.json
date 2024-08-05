@@ -15,7 +15,7 @@
     "@elysiajs/html": "1.0.2",
     "@elysiajs/jwt": "^1.1.0",
     "@elysiajs/static": "1.0.3",
-    "elysia": "^1.1.4"
+    "elysia": "^1.1.5"
   },
   "module": "src/index.tsx",
   "type": "module",
