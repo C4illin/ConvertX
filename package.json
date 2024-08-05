@@ -46,7 +46,7 @@
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "knip": "^5.27.0",
-    "npm-run-all2": "^5.0.0",
+    "npm-run-all2": "^6.0.0",
     "prettier": "^3.3.3",
     "typescript": "^5.5.4",
     "typescript-eslint": "^8.0.1"
