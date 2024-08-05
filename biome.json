@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.7.3/schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "formatter": {
     "enabled": true,
     "formatWithErrors": true,
@@ -8,6 +8,9 @@
     "lineEnding": "lf",
     "lineWidth": 80,
     "attributePosition": "auto"
+  },
+  "files": {
+    "ignore": ["node_modules"]
   },
   "organizeImports": { "enabled": true },
   "linter": {
