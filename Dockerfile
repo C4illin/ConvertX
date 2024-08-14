@@ -1,4 +1,4 @@
-FROM oven/bun:1.1.22-alpine as base
+FROM oven/bun:1.1.23-alpine as base
 WORKDIR /app
 
 # install dependencies into temp directory
