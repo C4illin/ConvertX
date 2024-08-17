@@ -37,6 +37,8 @@ Any missing converter? Open an issue or pull request!
 services:
   convertx: 
     image: ghcr.io/c4illin/convertx
+    container_name: convertx
+    restart: unless-stopped
     ports:
       - "3000:3000"
     environment: # Defaults are listed below. All are optional.
