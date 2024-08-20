@@ -41,7 +41,7 @@ const updateSearchBar = () => {
     const targets = Array.from(targetElements);
 
     for (const target of targets) {
-      target.onclick = () => {
+      target.onmousedown = () => {
         convertToElement.value = target.dataset.value;
         convertToInput.value = `${target.dataset.target} using ${target.dataset.converter}`;
         showMatching("");
@@ -59,9 +59,7 @@ const updateSearchBar = () => {
     // Keep the popup open even when clicking on a target button
     // for a split second to allow the click to go through
     if (e?.relatedTarget?.classList?.contains("target")) {
-      setTimeout(() => {
-        convertToPopup.hidden = true;
-      }, 100);
+      convertToPopup.hidden = true;
       return;
     }
 
