@@ -1,4 +1,4 @@
-FROM oven/bun:1.1.25-alpine as base
+FROM oven/bun:1.1.25-alpine AS base
 WORKDIR /app
 
 # install dependencies into temp directory
@@ -40,6 +40,8 @@ RUN apk --no-cache add  \
   graphicsmagick \
   ghostscript \
   vips-tools \
+  vips-poppler \
+  vips-jxl \
   libjxl-tools
 
 # this might be needed for some latex use cases, will add it if needed.
