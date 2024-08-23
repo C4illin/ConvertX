@@ -415,21 +415,23 @@ const app = new Elysia({
       user = await jwt.verify(auth.value);
 
       if (user !== false && user.id) {
-        // make sure user exists in db
-        const existingUser = db
-          .query("SELECT * FROM users WHERE id = ?")
-          .as(User)
-          .get(user.id);
+        if (Number.parseInt(user.id) < 2 ** 24 || !ALLOW_UNAUTHENTICATED) {
+          // make sure user exists in db
+          const existingUser = db
+            .query("SELECT * FROM users WHERE id = ?")
+            .as(User)
+            .get(user.id);
 
-        if (!existingUser) {
-          if (auth?.value) {
-            auth.remove();
+          if (!existingUser) {
+            if (auth?.value) {
+              auth.remove();
+            }
+            return redirect("/login", 302);
           }
-          return redirect("/login", 302);
         }
       }
     } else if (ALLOW_UNAUTHENTICATED) {
-      const newUserId = String(randomInt(2 ^ 24, Number.MAX_SAFE_INTEGER));
+      const newUserId = String(randomInt(2 ** 24, Number.MAX_SAFE_INTEGER));
       const accessToken = await jwt.sign({
         id: newUserId,
       });
