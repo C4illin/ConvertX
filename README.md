@@ -20,8 +20,9 @@ A self-hosted online file converter. Supports 831 different formats. Written wit
 | Converter                                                                    | Use case      | Converts from | Converts to |
 |------------------------------------------------------------------------------|---------------|---------------|-------------|
 | [libjxl](https://github.com/libjxl/libjxl)                                   | JPEG XL       | 11            | 11          |
+| [resvg](https://github.com/RazrFalcon/resvg)                                 | SVG           | 1             | 1           |
 | [Vips](https://github.com/libvips/libvips)                                   | Images        | 45            | 23          |
-| [XeLaTeX](https://tug.org/xetex/)                                            | Documents     | 1             | 1           |
+| [XeLaTeX](https://tug.org/xetex/)                                            | LaTeX         | 1             | 1           |
 | [Pandoc](https://pandoc.org/)                                                | Documents     | 43            | 65          |
 | [GraphicsMagick](http://www.graphicsmagick.org/)                             | Images        | 166           | 133         |
 | [FFmpeg](https://ffmpeg.org/)                                                | Video         | ~473          | ~280        |
