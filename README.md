@@ -20,8 +20,9 @@ A self-hosted online file converter. Supports 831 different formats. Written wit
 | Converter                                                                    | Use case      | Converts from | Converts to |
 |------------------------------------------------------------------------------|---------------|---------------|-------------|
 | [libjxl](https://github.com/libjxl/libjxl)                                   | JPEG XL       | 11            | 11          |
+| [resvg](https://github.com/RazrFalcon/resvg)                                 | SVG           | 1             | 1           |
 | [Vips](https://github.com/libvips/libvips)                                   | Images        | 45            | 23          |
-| [XeLaTeX](https://tug.org/xetex/)                                            | Documents     | 1             | 1           |
+| [XeLaTeX](https://tug.org/xetex/)                                            | LaTeX         | 1             | 1           |
 | [Pandoc](https://pandoc.org/)                                                | Documents     | 43            | 65          |
 | [GraphicsMagick](http://www.graphicsmagick.org/)                             | Images        | 166           | 133         |
 | [FFmpeg](https://ffmpeg.org/)                                                | Video         | ~473          | ~280        |
@@ -37,12 +38,15 @@ Any missing converter? Open an issue or pull request!
 services:
   convertx: 
     image: ghcr.io/c4illin/convertx
+    container_name: convertx
+    restart: unless-stopped
     ports:
       - "3000:3000"
     environment: # Defaults are listed below. All are optional.
       - ACCOUNT_REGISTRATION=false # true or false, doesn't matter for the first account (e.g. keep this to false if you only want one account)
       - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234 # will use randomUUID() by default
       - HTTP_ALLOWED=false # setting this to true is unsafe, only set this to true locally
+      - ALLOW_UNAUTHENTICATED=false # allows anyone to use the service without logging in, only set this to true locally
     volumes:
       - convertx:/app/data
 ```

@@ -113,22 +113,29 @@ export function convert(
   //     .toFormat(convertTo)
   //     .toFile(targetPath);
   // }
+  let action = "copy";
+  if (fileType === "pdf") {
+    action = "pdfload";
+  }
 
   return new Promise((resolve, reject) => {
-    exec(`vips copy "${filePath}" "${targetPath}"`, (error, stdout, stderr) => {
-      if (error) {
-        reject(`error: ${error}`);
-      }
+    exec(
+      `vips ${action} "${filePath}" "${targetPath}"`,
+      (error, stdout, stderr) => {
+        if (error) {
+          reject(`error: ${error}`);
+        }
 
-      if (stdout) {
-        console.log(`stdout: ${stdout}`);
-      }
+        if (stdout) {
+          console.log(`stdout: ${stdout}`);
+        }
 
-      if (stderr) {
-        console.error(`stderr: ${stderr}`);
-      }
+        if (stderr) {
+          console.error(`stderr: ${stderr}`);
+        }
 
-      resolve("success");
-    });
+        resolve("success");
+      },
+    );
   });
 }

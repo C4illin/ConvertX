@@ -25,6 +25,11 @@ import {
   properties as propertiesLibjxl,
 } from "./libjxl";
 
+import {
+  convert as convertresvg,
+  properties as propertiesresvg,
+} from "./resvg";
+
 import { normalizeFiletype } from "../helpers/normalizeFiletype";
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
@@ -58,6 +63,10 @@ const properties: {
   libjxl: {
     properties: propertiesLibjxl,
     converter: convertLibjxl,
+  },
+  resvg: {
+    properties: propertiesresvg,
+    converter: convertresvg,
   },
   vips: {
     properties: propertiesImage,
