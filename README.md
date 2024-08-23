@@ -45,6 +45,7 @@ services:
       - ACCOUNT_REGISTRATION=false # true or false, doesn't matter for the first account (e.g. keep this to false if you only want one account)
       - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234 # will use randomUUID() by default
       - HTTP_ALLOWED=false # setting this to true is unsafe, only set this to true locally
+      - ALLOW_UNAUTHENTICATED=false # allows anyone to use the service without logging in, only set this to true locally
     volumes:
       - convertx:/app/data
 ```

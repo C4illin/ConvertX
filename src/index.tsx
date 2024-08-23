@@ -1,10 +1,10 @@
 import { Database } from "bun:sqlite";
-import { randomUUID } from "node:crypto";
+import { randomUUID, randomInt } from "node:crypto";
 import { rmSync } from "node:fs";
 import { mkdir, unlink } from "node:fs/promises";
 import cookie from "@elysiajs/cookie";
 import { html } from "@elysiajs/html";
-import { jwt } from "@elysiajs/jwt";
+import { jwt, type JWTPayloadSpec } from "@elysiajs/jwt";
 import { staticPlugin } from "@elysiajs/static";
 import { Elysia, t } from "elysia";
 import { BaseHtml } from "./components/base";
@@ -30,6 +30,8 @@ const ACCOUNT_REGISTRATION =
   process.env.ACCOUNT_REGISTRATION === "true" || false;
 
 const HTTP_ALLOWED = process.env.HTTP_ALLOWED === "true" || false;
+const ALLOW_UNAUTHENTICATED =
+  process.env.ALLOW_UNAUTHENTICATED === "true" || false;
 
 // fileNames: fileNames,
 // filesToConvert: fileNames.length,
@@ -403,25 +405,53 @@ const app = new Elysia({
       return redirect("/setup", 302);
     }
 
-    if (!auth?.value) {
+    if (!auth?.value && !ALLOW_UNAUTHENTICATED) {
       return redirect("/login", 302);
     }
+
     // validate jwt
-    const user = await jwt.verify(auth.value);
-    if (!user) {
-      return redirect("/login", 302);
+    let user: ({ id: string } & JWTPayloadSpec) | false = false;
+    if (auth?.value) {
+      user = await jwt.verify(auth.value);
+
+      if (user !== false && user.id) {
+        // make sure user exists in db
+        const existingUser = db
+          .query("SELECT * FROM users WHERE id = ?")
+          .as(User)
+          .get(user.id);
+
+        if (!existingUser) {
+          if (auth?.value) {
+            auth.remove();
+          }
+          return redirect("/login", 302);
+        }
+      }
+    } else if (ALLOW_UNAUTHENTICATED) {
+      const newUserId = String(randomInt(2 ^ 24, Number.MAX_SAFE_INTEGER));
+      const accessToken = await jwt.sign({
+        id: newUserId,
+      });
+
+      user = { id: newUserId };
+      if (!auth) {
+        return {
+          message: "No auth cookie, perhaps your browser is blocking cookies.",
+        };
+      }
+
+      // set cookie
+      auth.set({
+        value: accessToken,
+        httpOnly: true,
+        secure: !HTTP_ALLOWED,
+        maxAge: 60 * 60 * 24 * 1,
+        sameSite: "strict",
+      });
     }
 
-    // make sure user exists in db
-    const existingUser = db
-      .query("SELECT * FROM users WHERE id = ?")
-      .as(User)
-      .get(user.id);
-
-    if (!existingUser) {
-      if (auth?.value) {
-        auth.remove();
-      }
+    if (!user) {
       return redirect("/login", 302);
     }
 

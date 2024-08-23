@@ -8,5 +8,6 @@ services:
     environment:
       - ACCOUNT_REGISTRATION=true
       - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234
+      - ALLOW_UNAUTHENTICATED=true
     ports:
       - 3000:3000
