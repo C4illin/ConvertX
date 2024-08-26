@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.4.0](https://github.com/C4illin/ConvertX/compare/v0.3.3...v0.4.0) (2024-08-26)
+
+
+### Features
+
+* add option for unauthenticated file conversions [#114](https://github.com/C4illin/ConvertX/issues/114) ([f0d0e43](https://github.com/C4illin/ConvertX/commit/f0d0e4392983c3e4c530304ea88e023fda9bcac0))
+* add resvg converter ([d5eeef9](https://github.com/C4illin/ConvertX/commit/d5eeef9f6884b2bb878508bed97ea9ceaa662995))
+* add robots.txt ([6597c1d](https://github.com/C4illin/ConvertX/commit/6597c1d7caeb4dfb6bc47b442e4dfc9840ad12b7))
+* Add search bar for formats ([53fff59](https://github.com/C4illin/ConvertX/commit/53fff594fc4d69306abcb2a5cad890fcd0953a58))
+
+
+### Bug Fixes
+
+* keep unauthenticated user logged in if allowed [#114](https://github.com/C4illin/ConvertX/issues/114) ([bc4ad49](https://github.com/C4illin/ConvertX/commit/bc4ad492852fad8cb832a0c03485cccdd7f7b117))
+* pdf support in vips ([8ca4f15](https://github.com/C4illin/ConvertX/commit/8ca4f1587df7f358893941c656d78d75f04dac93))
+* Slow click on conversion popup does not work ([4d9c4d6](https://github.com/C4illin/ConvertX/commit/4d9c4d64aa0266f3928935ada68d91ac81f638aa))
+
 ## [0.3.3](https://github.com/C4illin/ConvertX/compare/v0.3.2...v0.3.3) (2024-07-30)
 
 
