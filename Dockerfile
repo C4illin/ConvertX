@@ -1,4 +1,5 @@
-FROM oven/bun:1.1.24-alpine as base
+FROM oven/bun:1.1.25-alpine AS base
+LABEL org.opencontainers.image.source="https://github.com/C4illin/ConvertX"
 WORKDIR /app
 
 # install dependencies into temp directory
@@ -12,6 +13,12 @@ RUN cd /temp/dev && bun install --frozen-lockfile
 RUN mkdir -p /temp/prod
 COPY package.json bun.lockb /temp/prod/
 RUN cd /temp/prod && bun install --frozen-lockfile --production
+
+FROM base AS builder
+RUN apk --no-cache add curl gcc
+ENV PATH=/root/.cargo/bin:$PATH
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+RUN cargo install resvg
 
 # copy node_modules from temp directory
 # then copy all (non-ignored) project files into the image
@@ -40,12 +47,15 @@ RUN apk --no-cache add  \
   graphicsmagick \
   ghostscript \
   vips-tools \
+  vips-poppler \
+  vips-jxl \
   libjxl-tools
 
 # this might be needed for some latex use cases, will add it if needed.
 #   texmf-dist-fontsextra \
 
 COPY --from=install /temp/prod/node_modules node_modules
+COPY --from=builder /root/.cargo/bin/resvg /usr/local/bin/resvg
 # COPY --from=prerelease /app/src/index.tsx /app/src/
 # COPY --from=prerelease /app/package.json .
 COPY . .

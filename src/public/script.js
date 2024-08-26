@@ -3,7 +3,73 @@ const fileInput = document.querySelector('input[type="file"]');
 const fileNames = [];
 let fileType;
 
-const selectContainer = document.querySelector("form > article");
+const selectContainer = document.querySelector("form .select_container");
+
+const updateSearchBar = () => {
+  const convertToInput = document.querySelector(
+    "input[name='convert_to_search']",
+  );
+  const convertToPopup = document.querySelector(".convert_to_popup");
+  const convertToGroupElements = document.querySelectorAll(".convert_to_group");
+  const convertToGroups = {};
+  const convertToElement = document.querySelector("select[name='convert_to']");
+
+  const showMatching = (search) => {
+    for (const [targets, groupElement] of Object.values(convertToGroups)) {
+      let matchingTargetsFound = 0;
+      for (const target of targets) {
+        if (target.dataset.target.includes(search)) {
+          matchingTargetsFound++;
+          target.hidden = false;
+        } else {
+          target.hidden = true;
+        }
+      }
+
+      if (matchingTargetsFound === 0) {
+        groupElement.hidden = true;
+      } else {
+        groupElement.hidden = false;
+      }
+    }
+  };
+
+  for (const groupElement of convertToGroupElements) {
+    const groupName = groupElement.dataset.converter;
+
+    const targetElements = groupElement.querySelectorAll(".target");
+    const targets = Array.from(targetElements);
+
+    for (const target of targets) {
+      target.onmousedown = () => {
+        convertToElement.value = target.dataset.value;
+        convertToInput.value = `${target.dataset.target} using ${target.dataset.converter}`;
+        showMatching("");
+      };
+    }
+
+    convertToGroups[groupName] = [targets, groupElement];
+  }
+
+  convertToInput.addEventListener("input", (e) => {
+    showMatching(e.target.value.toLowerCase());
+  });
+
+  convertToInput.addEventListener("blur", (e) => {
+    // Keep the popup open even when clicking on a target button
+    // for a split second to allow the click to go through
+    if (e?.relatedTarget?.classList?.contains("target")) {
+      convertToPopup.hidden = true;
+      return;
+    }
+
+    convertToPopup.hidden = true;
+  });
+
+  convertToInput.addEventListener("focus", () => {
+    convertToPopup.hidden = false;
+  });
+};
 
 // const convertFromSelect = document.querySelector("select[name='convert_from']");
 
@@ -49,6 +115,7 @@ fileInput.addEventListener("change", (e) => {
         .then((res) => res.text())
         .then((html) => {
           selectContainer.innerHTML = html;
+          updateSearchBar();
         })
         .catch((err) => console.log(err));
     }
@@ -123,3 +190,5 @@ formConvert.addEventListener("submit", (e) => {
   const hiddenInput = document.querySelector("input[name='file_names']");
   hiddenInput.value = JSON.stringify(fileNames);
 });
+
+updateSearchBar();

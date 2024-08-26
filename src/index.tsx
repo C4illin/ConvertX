@@ -1,12 +1,12 @@
-import { Database } from "bun:sqlite";
-import { randomUUID } from "node:crypto";
-import { rmSync } from "node:fs";
-import { mkdir, unlink } from "node:fs/promises";
 import cookie from "@elysiajs/cookie";
 import { html } from "@elysiajs/html";
-import { jwt } from "@elysiajs/jwt";
+import { jwt, type JWTPayloadSpec } from "@elysiajs/jwt";
 import { staticPlugin } from "@elysiajs/static";
+import { Database } from "bun:sqlite";
 import { Elysia, t } from "elysia";
+import { randomInt, randomUUID } from "node:crypto";
+import { rmSync } from "node:fs";
+import { mkdir, unlink } from "node:fs/promises";
 import { BaseHtml } from "./components/base";
 import { Header } from "./components/header";
 import {
@@ -30,6 +30,8 @@ const ACCOUNT_REGISTRATION =
   process.env.ACCOUNT_REGISTRATION === "true" || false;
 
 const HTTP_ALLOWED = process.env.HTTP_ALLOWED === "true" || false;
+const ALLOW_UNAUTHENTICATED =
+  process.env.ALLOW_UNAUTHENTICATED === "true" || false;
 
 // fileNames: fileNames,
 // filesToConvert: fileNames.length,
@@ -403,25 +405,55 @@ const app = new Elysia({
       return redirect("/setup", 302);
     }
 
-    if (!auth?.value) {
+    if (!auth?.value && !ALLOW_UNAUTHENTICATED) {
       return redirect("/login", 302);
     }
+
     // validate jwt
-    const user = await jwt.verify(auth.value);
-    if (!user) {
-      return redirect("/login", 302);
+    let user: ({ id: string } & JWTPayloadSpec) | false = false;
+    if (auth?.value) {
+      user = await jwt.verify(auth.value);
+
+      if (user !== false && user.id) {
+        if (Number.parseInt(user.id) < 2 ** 24 || !ALLOW_UNAUTHENTICATED) {
+          // make sure user exists in db
+          const existingUser = db
+            .query("SELECT * FROM users WHERE id = ?")
+            .as(User)
+            .get(user.id);
+
+          if (!existingUser) {
+            if (auth?.value) {
+              auth.remove();
+            }
+            return redirect("/login", 302);
+          }
+        }
+      }
+    } else if (ALLOW_UNAUTHENTICATED) {
+      const newUserId = String(randomInt(2 ** 24, Number.MAX_SAFE_INTEGER));
+      const accessToken = await jwt.sign({
+        id: newUserId,
+      });
+
+      user = { id: newUserId };
+      if (!auth) {
+        return {
+          message: "No auth cookie, perhaps your browser is blocking cookies.",
+        };
+      }
+
+      // set cookie
+      auth.set({
+        value: accessToken,
+        httpOnly: true,
+        secure: !HTTP_ALLOWED,
+        maxAge: 60 * 60 * 24 * 1,
+        sameSite: "strict",
+      });
     }
 
-    // make sure user exists in db
-    const existingUser = db
-      .query("SELECT * FROM users WHERE id = ?")
-      .as(User)
-      .get(user.id);
-
-    if (!existingUser) {
-      if (auth?.value) {
-        auth.remove();
-      }
+    if (!user) {
       return redirect("/login", 302);
     }
 
@@ -473,27 +505,101 @@ const app = new Elysia({
               ))}
             </select> */}
             </article>
-            <form method="post" action="/convert">
+            <form
+              method="post"
+              action="/convert"
+              style={{ position: "relative" }}>
               <input type="hidden" name="file_names" id="file_names" />
               <article>
-                <select name="convert_to" aria-label="Convert to" required>
-                  <option selected disabled value="">
-                    Convert to
-                  </option>
-                  {Object.entries(getAllTargets()).map(
-                    ([converter, targets]) => (
-                      // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-                      <optgroup label={converter}>
-                        {targets.map((target) => (
-                          // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-                          <option value={`${target},${converter}`} safe>
-                            {target}
-                          </option>
-                        ))}
-                      </optgroup>
-                    ),
-                  )}
-                </select>
+                <input
+                  type="search"
+                  name="convert_to_search"
+                  placeholder="Search for conversions"
+                  autocomplete="off"
+                />
+
+                <div class="select_container">
+                  <article
+                    class="convert_to_popup"
+                    hidden
+                    style={{
+                      flexDirection: "column",
+                      display: "flex",
+                      zIndex: 2,
+                      position: "absolute",
+                      maxHeight: "50vh",
+                      width: "90vw",
+                      overflowY: "scroll",
+                      margin: "0px",
+                      overflowX: "hidden",
+                    }}>
+                    {Object.entries(getAllTargets()).map(
+                      ([converter, targets]) => (
+                        // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                        <article
+                          class="convert_to_group"
+                          data-converter={converter}
+                          style={{
+                            borderColor: "gray",
+                            padding: "2px",
+                          }}>
+                          <header
+                            style={{ fontSize: "20px", fontWeight: "bold" }}>
+                            {converter}
+                          </header>
+
+                          <ul
+                            class="convert_to_target"
+                            style={{
+                              display: "flex",
+                              flexDirection: "row",
+                              gap: "5px",
+                              flexWrap: "wrap",
+                            }}>
+                            {targets.map((target) => (
+                              // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                              <button
+                                // https://stackoverflow.com/questions/121499/when-a-blur-event-occurs-how-can-i-find-out-which-element-focus-went-to#comment82388679_33325953
+                                tabindex={0}
+                                class="target"
+                                data-value={`${target},${converter}`}
+                                data-target={target}
+                                data-converter={converter}
+                                style={{ fontSize: "15px", padding: "5px" }}
+                                type="button">
+                                {target}
+                              </button>
+                            ))}
+                          </ul>
+                        </article>
+                      ),
+                    )}
+                  </article>
+
+                  {/* Hidden element which determines the format to convert the file too and the converter to use */}
+                  <select
+                    name="convert_to"
+                    aria-label="Convert to"
+                    required
+                    hidden>
+                    <option selected disabled value="">
+                      Convert to
+                    </option>
+                    {Object.entries(getAllTargets()).map(
+                      ([converter, targets]) => (
+                        // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                        <optgroup label={converter}>
+                          {targets.map((target) => (
+                            // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                            <option value={`${target},${converter}`} safe>
+                              {target}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ),
+                    )}
+                  </select>
+                </div>
               </article>
               <input type="submit" value="Convert" />
             </form>
@@ -507,24 +613,82 @@ const app = new Elysia({
     "/conversions",
     ({ body }) => {
       return (
-        <select name="convert_to" aria-label="Convert to" required>
-          <option selected disabled value="">
-            Convert to
-          </option>
-          {Object.entries(getPossibleTargets(body.fileType)).map(
-            ([converter, targets]) => (
-              // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-              <optgroup label={converter}>
-                {targets.map((target) => (
-                  // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-                  <option value={`${target},${converter}`} safe>
-                    {target}
-                  </option>
-                ))}
-              </optgroup>
-            ),
-          )}
-        </select>
+        <>
+          <article
+            class="convert_to_popup"
+            hidden
+            style={{
+              flexDirection: "column",
+              display: "flex",
+              zIndex: 2,
+              position: "absolute",
+              maxHeight: "50vh",
+              width: "90vw",
+              overflowY: "scroll",
+              margin: "0px",
+              overflowX: "hidden",
+            }}>
+            {Object.entries(getPossibleTargets(body.fileType)).map(
+              ([converter, targets]) => (
+                // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                <article
+                  class="convert_to_group"
+                  data-converter={converter}
+                  style={{
+                    borderColor: "gray",
+                    padding: "2px",
+                  }}>
+                  <header style={{ fontSize: "20px", fontWeight: "bold" }}>
+                    {converter}
+                  </header>
+
+                  <ul
+                    class="convert_to_target"
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      gap: "5px",
+                      flexWrap: "wrap",
+                    }}>
+                    {targets.map((target) => (
+                      // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                      <button
+                        // https://stackoverflow.com/questions/121499/when-a-blur-event-occurs-how-can-i-find-out-which-element-focus-went-to#comment82388679_33325953
+                        tabindex={0}
+                        class="target"
+                        data-value={`${target},${converter}`}
+                        data-target={target}
+                        data-converter={converter}
+                        style={{ fontSize: "15px", padding: "5px" }}
+                        type="button">
+                        {target}
+                      </button>
+                    ))}
+                  </ul>
+                </article>
+              ),
+            )}
+          </article>
+
+          <select name="convert_to" aria-label="Convert to" required hidden>
+            <option selected disabled value="">
+              Convert to
+            </option>
+            {Object.entries(getPossibleTargets(body.fileType)).map(
+              ([converter, targets]) => (
+                // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                <optgroup label={converter}>
+                  {targets.map((target) => (
+                    // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
+                    <option value={`${target},${converter}`} safe>
+                      {target}
+                    </option>
+                  ))}
+                </optgroup>
+              ),
+            )}
+          </select>
+        </>
       );
     },
     { body: t.Object({ fileType: t.String() }) },

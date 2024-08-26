@@ -73,6 +73,16 @@ if (process.env.NODE_ENV === "production") {
     }
   });
 
+  exec("resvg -V", (error, stdout) => {
+    if (error) {
+      console.error("resvg is not installed");
+    }
+
+    if (stdout) {
+      console.log(`resvg v${stdout.split("\n")[0]}`);
+    }
+  });
+
   exec("bun -v", (error, stdout) => {
     if (error) {
       console.error("Bun is not installed. wait what");
