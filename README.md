@@ -51,11 +51,11 @@ services:
       - convertx:/app/data
 ```
 
-<!-- or
+or
 
 ```bash
-docker run ghcr.io/c4illin/convertx:master -p 3000:3000 -e ACCOUNT_REGISTRATION=false -v /path/you/want:/app/data
-``` -->
+docker run ghcr.io/c4illin/convertx -p 3000:3000 -v ./data:/app/data
+```
 
 Then visit `http://localhost:3000` in your browser and create your account. Don't leave it unconfigured and open, as anyone can register the first account.
 
@@ -65,6 +65,15 @@ If you get unable to open database file run `chown -R $USER:$USER path` on the p
 
 Tutorial in french: https://belginux.com/installer-convertx-avec-docker/
 
+## Development
+
+0. Install [Bun](https://bun.sh/) and Git
+1. Clone the repository
+2. `bun install`
+3. `bun run dev`
+
+Pull requests are welcome! See below and open issues for the list of todos.
+
 ## Todo
 - [x] Add messages for errors in converters
 - [ ] Add options for converters
@@ -73,6 +82,10 @@ Tutorial in french: https://belginux.com/installer-convertx-avec-docker/
 - [ ] Add tests
 - [ ] Add searchable list of formats
 - [ ] Make the upload button nicer and more easy to drop files on. Support copy paste as well if possible.
+- [ ] Add more converters:
+  - [ ] [deark](https://github.com/jsummers/deark)
+  - [ ] LibreOffice
+  - [ ] [dvisvgm](https://github.com/mgieseki/dvisvgm)
 
 ## Contributors
 
