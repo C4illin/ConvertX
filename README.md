@@ -76,12 +76,12 @@ Pull requests are welcome! See below and open issues for the list of todos.
 
 ## Todo
 - [x] Add messages for errors in converters
+- [x] Add searchable list of formats
 - [ ] Add options for converters
-- [ ] Add more converters
 - [ ] Divide index.tsx into smaller components
 - [ ] Add tests
-- [ ] Add searchable list of formats
 - [ ] Make the upload button nicer and more easy to drop files on. Support copy paste as well if possible.
+- [ ] Make errors logs visible from the web ui
 - [ ] Add more converters:
   - [ ] [deark](https://github.com/jsummers/deark)
   - [ ] LibreOffice
