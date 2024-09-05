@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@elysiajs/cookie": "^0.8.0",
-    "@elysiajs/html": "1.0.2",
+    "@elysiajs/html": "1.1.1",
     "@elysiajs/jwt": "^1.1.1",
     "@elysiajs/static": "1.0.3",
     "elysia": "^1.1.12"
