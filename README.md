@@ -54,7 +54,7 @@ services:
 or
 
 ```bash
-docker run ghcr.io/c4illin/convertx -p 3000:3000 -v ./data:/app/data
+docker run -p 3000:3000 -v ./data:/app/data ghcr.io/c4illin/convertx
 ```
 
 Then visit `http://localhost:3000` in your browser and create your account. Don't leave it unconfigured and open, as anyone can register the first account.
