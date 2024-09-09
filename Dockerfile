@@ -22,14 +22,14 @@ RUN cargo install resvg
 
 # copy node_modules from temp directory
 # then copy all (non-ignored) project files into the image
-# FROM base AS prerelease
-# COPY --from=install /temp/dev/node_modules node_modules
-# COPY . .
+FROM base AS prerelease
+COPY --from=install /temp/dev/node_modules node_modules
+COPY . .
 
 # # [optional] tests & build
-# ENV NODE_ENV=production
+ENV NODE_ENV=production
 # RUN bun test
-# RUN bun run build
+RUN bun run build
 
 # copy production dependencies and source code into final image
 FROM base AS release
@@ -56,6 +56,7 @@ RUN apk --no-cache add  \
 
 COPY --from=install /temp/prod/node_modules node_modules
 COPY --from=builder /root/.cargo/bin/resvg /usr/local/bin/resvg
+COPY --from=prerelease /app/src/public/style.css /app/src/public/
 # COPY --from=prerelease /app/src/index.tsx /app/src/
 # COPY --from=prerelease /app/package.json .
 COPY . .

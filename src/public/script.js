@@ -1,7 +1,16 @@
 // Select the file input element
 const fileInput = document.querySelector('input[type="file"]');
+const dropZone = document.getElementById("dropzone");
 const fileNames = [];
 let fileType;
+
+dropZone.addEventListener("dragover", (e) => {
+  dropZone.classList.add("dragover");
+});
+
+dropZone.addEventListener("dragleave", (e) => {
+  dropZone.classList.remove("dragover");
+});
 
 const selectContainer = document.querySelector("form .select_container");
 
@@ -20,16 +29,20 @@ const updateSearchBar = () => {
       for (const target of targets) {
         if (target.dataset.target.includes(search)) {
           matchingTargetsFound++;
-          target.hidden = false;
+          target.classList.remove("hidden");
+          target.classList.add("flex");
         } else {
-          target.hidden = true;
+          target.classList.add("hidden");
+          target.classList.remove("flex");
         }
       }
 
       if (matchingTargetsFound === 0) {
-        groupElement.hidden = true;
+        groupElement.classList.add("hidden");
+        groupElement.classList.remove("flex");
       } else {
-        groupElement.hidden = false;
+        groupElement.classList.remove("hidden");
+        groupElement.classList.add("flex");
       }
     }
   };
@@ -59,15 +72,18 @@ const updateSearchBar = () => {
     // Keep the popup open even when clicking on a target button
     // for a split second to allow the click to go through
     if (e?.relatedTarget?.classList?.contains("target")) {
-      convertToPopup.hidden = true;
+      convertToPopup.classList.add("hidden");
+      convertToPopup.classList.remove("flex");
       return;
     }
 
-    convertToPopup.hidden = true;
+    convertToPopup.classList.add("hidden");
+    convertToPopup.classList.remove("flex");
   });
 
   convertToInput.addEventListener("focus", () => {
-    convertToPopup.hidden = false;
+    convertToPopup.classList.remove("hidden");
+    convertToPopup.classList.add("flex");
   });
 };
 
@@ -94,6 +110,7 @@ fileInput.addEventListener("change", (e) => {
 
     if (!fileType) {
       fileType = file.name.split(".").pop();
+      console.log("fileType", fileType);
       fileInput.setAttribute("accept", `.${fileType}`);
       setTitle();
 
