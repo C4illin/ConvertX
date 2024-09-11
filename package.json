@@ -42,7 +42,7 @@
     "eslint-plugin-deprecation": "^3.0.0",
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-import": "^2.30.0",
-    "eslint-plugin-isaacscript": "^3.12.2",
+    "eslint-plugin-isaacscript": "^4.0.0",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "knip": "^5.29.2",
