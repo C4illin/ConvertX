@@ -9,7 +9,6 @@ export const properties = {
   },
 };
 
-
 export function convert(
   filePath: string,
   fileType: string,
@@ -19,23 +18,20 @@ export function convert(
   options?: any,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    exec(
-      `resvg "${filePath}" "${targetPath}"`,
-      (error, stdout, stderr) => {
-        if (error) {
-          reject(`error: ${error}`);
-        }
+    exec(`resvg "${filePath}" "${targetPath}"`, (error, stdout, stderr) => {
+      if (error) {
+        reject(`error: ${error}`);
+      }
 
-        if (stdout) {
-          console.log(`stdout: ${stdout}`);
-        }
+      if (stdout) {
+        console.log(`stdout: ${stdout}`);
+      }
 
-        if (stderr) {
-          console.error(`stderr: ${stderr}`);
-        }
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+      }
 
-        resolve("success");
-      },
-    );
+      resolve("success");
+    });
   });
 }
