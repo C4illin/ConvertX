@@ -27,11 +27,12 @@ const uploadsDir = "./data/uploads/";
 const outputDir = "./data/output/";
 
 const ACCOUNT_REGISTRATION =
-  process.env.ACCOUNT_REGISTRATION === "true" || false;
+  process.env.ACCOUNT_REGISTRATION?.toLowerCase() === "true" || false;
 
-const HTTP_ALLOWED = process.env.HTTP_ALLOWED === "true" || false;
+const HTTP_ALLOWED =
+  process.env.HTTP_ALLOWED?.toLowerCase() === "true" || false;
 const ALLOW_UNAUTHENTICATED =
-  process.env.ALLOW_UNAUTHENTICATED === "true" || false;
+  process.env.ALLOW_UNAUTHENTICATED?.toLowerCase() === "true" || false;
 
 // fileNames: fileNames,
 // filesToConvert: fileNames.length,
