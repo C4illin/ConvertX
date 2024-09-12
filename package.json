@@ -24,7 +24,7 @@
     "start": "bun run src/index.tsx"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.8.3",
+    "@biomejs/biome": "1.9.0",
     "@eslint/compat": "^1.1.1",
     "@eslint/js": "^9.9.1",
     "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
