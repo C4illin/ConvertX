@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/C4illin/ConvertX/compare/v0.4.0...v0.4.1) (2024-09-15)
+
+
+### Bug Fixes
+
+* allow non lowercase true and false values, fixes [#122](https://github.com/C4illin/ConvertX/issues/122) ([bef1710](https://github.com/C4illin/ConvertX/commit/bef1710e3376baa7e25c107ded20a40d18b8c6b0))
+
 ## [0.4.0](https://github.com/C4illin/ConvertX/compare/v0.3.3...v0.4.0) (2024-08-26)
 
 
