@@ -33,7 +33,9 @@ const HTTP_ALLOWED =
   process.env.HTTP_ALLOWED?.toLowerCase() === "true" || false;
 const ALLOW_UNAUTHENTICATED =
   process.env.ALLOW_UNAUTHENTICATED?.toLowerCase() === "true" || false;
-const AUTO_DELETE_EVERY_N_HOURS = process.env.AUTO_DELETE_EVERY_N_HOURS ? Number(process.env.AUTO_DELETE_EVERY_N_HOURS) : 24;
+const AUTO_DELETE_EVERY_N_HOURS = process.env.AUTO_DELETE_EVERY_N_HOURS
+  ? Number(process.env.AUTO_DELETE_EVERY_N_HOURS)
+  : 24;
 
 // fileNames: fileNames,
 // filesToConvert: fileNames.length,
@@ -1267,7 +1269,11 @@ const clearJobs = () => {
   const jobs = db
     .query("SELECT * FROM jobs WHERE date_created < ?")
     .as(Jobs)
-    .all(new Date(Date.now() - AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000).toISOString());
+    .all(
+      new Date(
+        Date.now() - AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000,
+      ).toISOString(),
+    );
 
   for (const job of jobs) {
     // delete the directories
