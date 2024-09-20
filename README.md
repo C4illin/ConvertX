@@ -65,6 +65,10 @@ If you get unable to open database file run `chown -R $USER:$USER path` on the p
 
 Tutorial in french: https://belginux.com/installer-convertx-avec-docker/
 
+## Screenshots
+
+![ConvertX Preview](images/preview.png)
+
 ## Development
 
 0. Install [Bun](https://bun.sh/) and Git
