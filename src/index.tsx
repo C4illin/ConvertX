@@ -828,7 +828,7 @@ const app = new Elysia({
           const fileTypeOrig = fileName.split(".").pop() ?? "";
           const fileType = normalizeFiletype(fileTypeOrig);
           const newFileExt = normalizeOutputFiletype(convertTo);
-          const newFileName = fileName.replace(fileTypeOrig, newFileExt);
+          const newFileName = fileName.replace(new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`), newFileExt);
           const targetPath = `${userOutputDir}${newFileName}`;
 
           const result = await mainConverter(
