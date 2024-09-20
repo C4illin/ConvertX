@@ -543,9 +543,11 @@ const app = new Elysia({
                           style={{
                             borderColor: "gray",
                             padding: "2px",
-                          }}>
+                          }}
+                        >
                           <header
-                            style={{ fontSize: "20px", fontWeight: "bold" }}>
+                            style={{ fontSize: "20px", fontWeight: "bold" }}
+                            safe>
                             {converter}
                           </header>
 
@@ -567,7 +569,9 @@ const app = new Elysia({
                                 data-target={target}
                                 data-converter={converter}
                                 style={{ fontSize: "15px", padding: "5px" }}
-                                type="button">
+                                type="button"
+                                safe
+                              >
                                 {target}
                               </button>
                             ))}
@@ -638,8 +642,9 @@ const app = new Elysia({
                   style={{
                     borderColor: "gray",
                     padding: "2px",
-                  }}>
-                  <header style={{ fontSize: "20px", fontWeight: "bold" }}>
+                  }}
+                >
+                  <header style={{ fontSize: "20px", fontWeight: "bold" }} safe>
                     {converter}
                   </header>
 
@@ -661,7 +666,9 @@ const app = new Elysia({
                         data-target={target}
                         data-converter={converter}
                         style={{ fontSize: "15px", padding: "5px" }}
-                        type="button">
+                        type="button"
+                        safe
+                      >
                         {target}
                       </button>
                     ))}
@@ -828,7 +835,10 @@ const app = new Elysia({
           const fileTypeOrig = fileName.split(".").pop() ?? "";
           const fileType = normalizeFiletype(fileTypeOrig);
           const newFileExt = normalizeOutputFiletype(convertTo);
-          const newFileName = fileName.replace(new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`), newFileExt);
+          const newFileName = fileName.replace(
+            new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`),
+            newFileExt,
+          );
           const targetPath = `${userOutputDir}${newFileName}`;
 
           const result = await mainConverter(
