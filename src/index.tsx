@@ -33,6 +33,7 @@ const HTTP_ALLOWED =
   process.env.HTTP_ALLOWED?.toLowerCase() === "true" || false;
 const ALLOW_UNAUTHENTICATED =
   process.env.ALLOW_UNAUTHENTICATED?.toLowerCase() === "true" || false;
+const AUTO_DELETE_EVERY_N_HOURS = process.env.AUTO_DELETE_EVERY_N_HOURS ? Number(process.env.AUTO_DELETE_EVERY_N_HOURS) : 24;
 
 // fileNames: fileNames,
 // filesToConvert: fileNames.length,
@@ -1263,12 +1264,10 @@ console.log(
 );
 
 const clearJobs = () => {
-  // clear all jobs older than 24 hours
-  // get all files older than 24 hours
   const jobs = db
     .query("SELECT * FROM jobs WHERE date_created < ?")
     .as(Jobs)
-    .all(new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+    .all(new Date(Date.now() - AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000).toISOString());
 
   for (const job of jobs) {
     // delete the directories
@@ -1279,7 +1278,9 @@ const clearJobs = () => {
     db.query("DELETE FROM jobs WHERE id = ?").run(job.id);
   }
 
-  // run every 24 hours
-  setTimeout(clearJobs, 24 * 60 * 60 * 1000);
+  setTimeout(clearJobs, AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000);
 };
-clearJobs();
+
+if (AUTO_DELETE_EVERY_N_HOURS > 0) {
+  clearJobs();
+}

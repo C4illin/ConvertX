@@ -47,6 +47,7 @@ services:
       - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234 # will use randomUUID() by default
       - HTTP_ALLOWED=false # setting this to true is unsafe, only set this to true locally
       - ALLOW_UNAUTHENTICATED=false # allows anyone to use the service without logging in, only set this to true locally
+      - AUTO_DELETE_EVERY_N_HOURS=24 # checks every n hours for files older then n hours and deletes them, set to 0 to disable
     volumes:
       - convertx:/app/data
 ```
