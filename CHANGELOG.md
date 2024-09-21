@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0](https://github.com/C4illin/ConvertX/compare/v0.4.1...v0.5.0) (2024-09-20)
+
+
+### Features
+
+* add option to customize how often files are automatically deleted ([317c932](https://github.com/C4illin/ConvertX/commit/317c932c2a26280bf37ed3d3bf9b879413590f5a))
+
+
+### Bug Fixes
+
+* improve file name replacement logic ([60ba7c9](https://github.com/C4illin/ConvertX/commit/60ba7c93fbdc961f3569882fade7cc13dee7a7a5))
+
 ## [0.4.1](https://github.com/C4illin/ConvertX/compare/v0.4.0...v0.4.1) (2024-09-15)
 
 
