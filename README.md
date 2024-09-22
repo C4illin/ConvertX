@@ -12,6 +12,7 @@ A self-hosted online file converter. Supports 831 different formats. Written wit
 ## Features
 
 - Convert files to different formats
+- Process multiple files at once
 - Password protection
 - Multiple accounts
 
