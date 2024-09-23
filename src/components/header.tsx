@@ -5,44 +5,53 @@ export const Header = ({
   let rightNav: JSX.Element;
   if (loggedIn) {
     rightNav = (
-      <ul>
+      <ul class="flex gap-4 ">
         <li>
-          <a href="/history">History</a>
+          <a
+            class="text-lime-600 transition-all hover:text-lime-500 hover:underline"
+            href="/history">
+            History
+          </a>
         </li>
         <li>
-          <a href="/logoff">Logout</a>
+          <a
+            class="text-lime-600 transition-all hover:text-lime-500 hover:underline"
+            href="/logoff">
+            Logout
+          </a>
         </li>
       </ul>
     );
   } else {
     rightNav = (
-      <ul>
+      <ul class="flex gap-4">
         <li>
-          <a href="/login">Login</a>
+          <a
+            class="text-lime-600 transition-all hover:text-lime-500 hover:underline"
+            href="/login">
+            Login
+          </a>
         </li>
-        {accountRegistration && (
+        {accountRegistration ? (
           <li>
-            <a href="/register">Register</a>
+            <a
+              class="text-lime-600 transition-all hover:text-lime-500 hover:underline"
+              href="/register">
+              Register
+            </a>
           </li>
-        )}
+        ) : null}
       </ul>
     );
   }
 
   return (
-    <header class="container">
-      <nav>
+    <header class="w-full p-4">
+      <nav class="mx-auto flex max-w-4xl justify-between rounded bg-gray-900 p-4">
         <ul>
           <li>
             <strong>
-              <a
-                href="/"
-                style={{
-                  textDecoration: "none",
-                  color: "inherit",
-                }}>
-                ConvertX
-              </a>
+              <a href="/">ConvertX</a>
             </strong>
           </li>
         </ul>

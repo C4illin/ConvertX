@@ -138,36 +138,45 @@ const app = new Elysia({
 
     return (
       <BaseHtml title="ConvertX | Setup">
-        <main class="container">
-          <h1>Welcome to ConvertX</h1>
-          <article>
-            <header>Create your account</header>
-            <form method="post" action="/register">
-              <fieldset>
-                <label>
-                  Email/Username
+        <main class="w-full mx-auto max-w-4xl px-4">
+          <h1 class="text-3xl my-8">Welcome to ConvertX!</h1>
+          <article class="article p-0">
+            <header class="w-full bg-gray-800 p-4">Create your account</header>
+            <form method="post" action="/register" class="p-4">
+              <fieldset class="mb-4 flex flex-col gap-4">
+                <label class="flex flex-col gap-1">
+                  Email
                   <input
                     type="email"
                     name="email"
+                    class="rounded bg-gray-800 p-3"
                     placeholder="Email"
+                    autocomplete="email"
                     required
                   />
                 </label>
-                <label>
+                <label class="flex flex-col gap-1">
                   Password
                   <input
                     type="password"
                     name="password"
+                    class="rounded bg-gray-800 p-3"
                     placeholder="Password"
+                    autocomplete="current-password"
                     required
                   />
                 </label>
               </fieldset>
-              <input type="submit" value="Create account" />
+              <input type="submit" value="Create account" class="btn-primary" />
             </form>
-            <footer>
+            <footer class="p-4">
               Report any issues on{" "}
-              <a href="https://github.com/C4illin/ConvertX">GitHub</a>.
+              <a
+                class="underline text-lime-500 hover:text-lime-400"
+                href="https://github.com/C4illin/ConvertX">
+                GitHub
+              </a>
+              .
             </footer>
           </article>
         </main>
@@ -183,32 +192,38 @@ const app = new Elysia({
       <BaseHtml title="ConvertX | Register">
         <>
           <Header accountRegistration={ACCOUNT_REGISTRATION} />
-          <main class="container">
-            <article>
-              <form method="post">
-                <fieldset>
-                  <label>
+          <main class="w-full px-4">
+            <article class="article">
+              <form method="post" class="flex flex-col gap-4">
+                <fieldset class="mb-4 flex flex-col gap-4">
+                  <label class="flex flex-col gap-1">
                     Email
                     <input
                       type="email"
                       name="email"
+                      class="rounded bg-gray-800 p-3"
                       placeholder="Email"
                       autocomplete="email"
                       required
                     />
                   </label>
-                  <label>
+                  <label class="flex flex-col gap-1">
                     Password
                     <input
                       type="password"
                       name="password"
+                      class="rounded bg-gray-800 p-3"
                       placeholder="Password"
-                      autocomplete="new-password"
+                      autocomplete="current-password"
                       required
                     />
                   </label>
                 </fieldset>
-                <input type="submit" value="Register" />
+                <input
+                  type="submit"
+                  value="Register"
+                  class="btn-primary w-full"
+                />
               </form>
             </article>
           </main>
@@ -299,25 +314,27 @@ const app = new Elysia({
       <BaseHtml title="ConvertX | Login">
         <>
           <Header accountRegistration={ACCOUNT_REGISTRATION} />
-          <main class="container">
-            <article>
-              <form method="post">
-                <fieldset>
-                  <label>
+          <main class="w-full px-4">
+            <article class="article">
+              <form method="post" class="flex flex-col gap-4">
+                <fieldset class="mb-4 flex flex-col gap-4">
+                  <label class="flex flex-col gap-1">
                     Email
                     <input
                       type="email"
                       name="email"
+                      class="rounded bg-gray-800 p-3"
                       placeholder="Email"
                       autocomplete="email"
                       required
                     />
                   </label>
-                  <label>
+                  <label class="flex flex-col gap-1">
                     Password
                     <input
                       type="password"
                       name="password"
+                      class="rounded bg-gray-800 p-3"
                       placeholder="Password"
                       autocomplete="current-password"
                       required
@@ -325,12 +342,16 @@ const app = new Elysia({
                   </label>
                 </fieldset>
                 <div role="group">
-                  {ACCOUNT_REGISTRATION && (
+                  {ACCOUNT_REGISTRATION ? (
                     <a href="/register" role="button" class="secondary">
                       Register an account
                     </a>
-                  )}
-                  <input type="submit" value="Login" />
+                  ) : null}
+                  <input
+                    type="submit"
+                    value="Login"
+                    class="btn-primary w-full"
+                  />
                 </div>
               </form>
             </article>
@@ -452,7 +473,7 @@ const app = new Elysia({
         value: accessToken,
         httpOnly: true,
         secure: !HTTP_ALLOWED,
-        maxAge: 60 * 60 * 24 * 1,
+        maxAge: 24 * 60 * 60,
         sameSite: "strict",
       });
     }
@@ -491,90 +512,63 @@ const app = new Elysia({
       <BaseHtml>
         <>
           <Header loggedIn />
-          <main class="container">
-            <article>
-              <h1>Convert</h1>
-              <div style={{ maxHeight: "50vh", overflowY: "auto" }}>
-                <table id="file-list" class="striped" />
+          <main class="w-full px-4">
+            <article class="article">
+              <h1 class="mb-4 text-xl">Convert</h1>
+              <div class="max-h-[50vh] overflow-y-auto mb-4 scrollbar-thin">
+                <table
+                  id="file-list"
+                  class="table-auto w-full bg-gray-900 [&_td]:p-4 rounded [&_tr]:border-b [&_tr]:border-gray-800 [&_tr]:rounded"
+                />
               </div>
-              <input type="file" name="file" multiple />
-              {/* <label for="convert_from">Convert from</label> */}
-              {/* <select name="convert_from" aria-label="Convert from" required>
-              <option selected disabled value="">
-                Convert from
-              </option>
-              {getPossibleInputs().map((input) => (
-                // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
-                <option>{input}</option>
-              ))}
-            </select> */}
+              <div
+                id="dropzone"
+                class="relative flex h-48 w-full items-center justify-center rounded border border-gray-700 border-dashed transition-all hover:border-gray-600 [&.dragover]:border-4 [&.dragover]:border-gray-500">
+                <span>
+                  <b>Choose a file</b> or drag it here
+                </span>
+                <input
+                  type="file"
+                  name="file"
+                  multiple
+                  class="absolute inset-0 size-full cursor-pointer opacity-0"
+                />
+              </div>
             </article>
             <form
               method="post"
               action="/convert"
-              style={{ position: "relative" }}>
+              class="relative w-full mx-auto max-w-4xl mb-[35vh]">
               <input type="hidden" name="file_names" id="file_names" />
-              <article>
+              <article class="article w-full">
                 <input
                   type="search"
                   name="convert_to_search"
                   placeholder="Search for conversions"
                   autocomplete="off"
+                  class="w-full rounded bg-gray-800 p-4"
                 />
-
-                <div class="select_container">
-                  <article
-                    class="convert_to_popup"
-                    hidden
-                    style={{
-                      flexDirection: "column",
-                      display: "flex",
-                      zIndex: 2,
-                      position: "absolute",
-                      maxHeight: "50vh",
-                      width: "90vw",
-                      overflowY: "scroll",
-                      margin: "0px",
-                      overflowX: "hidden",
-                    }}>
+                <div class="select_container relative">
+                  <article class="convert_to_popup flex-col absolute z-[2] max-h-[50vh] h-[30vh] w-full overflow-y-auto m-0 overflow-x-hidden hidden bg-gray-800 sm:h-[30vh] rounded">
                     {Object.entries(getAllTargets()).map(
                       ([converter, targets]) => (
-                        // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                         <article
-                          class="convert_to_group"
-                          data-converter={converter}
-                          style={{
-                            borderColor: "gray",
-                            padding: "2px",
-                          }}
-                        >
-                          <header
-                            style={{ fontSize: "20px", fontWeight: "bold" }}
-                            safe>
+                          class="convert_to_group border-gray-700 border-b p-4 w-full"
+                          data-converter={converter}>
+                          <header class="text-xl font-bold w-full mb-2" safe>
                             {converter}
                           </header>
-
-                          <ul
-                            class="convert_to_target"
-                            style={{
-                              display: "flex",
-                              flexDirection: "row",
-                              gap: "5px",
-                              flexWrap: "wrap",
-                            }}>
+                          <ul class="convert_to_target flex flex-row gap-1 flex-wrap">
                             {targets.map((target) => (
-                              // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                               <button
                                 // https://stackoverflow.com/questions/121499/when-a-blur-event-occurs-how-can-i-find-out-which-element-focus-went-to#comment82388679_33325953
                                 tabindex={0}
-                                class="target"
+                                class="target p-1 text-base bg-gray-700 rounded hover:bg-gray-600"
                                 data-value={`${target},${converter}`}
                                 data-target={target}
                                 data-converter={converter}
-                                style={{ fontSize: "15px", padding: "5px" }}
                                 type="button"
-                                safe
-                              >
+                                safe>
                                 {target}
                               </button>
                             ))}
@@ -595,10 +589,8 @@ const app = new Elysia({
                     </option>
                     {Object.entries(getAllTargets()).map(
                       ([converter, targets]) => (
-                        // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                         <optgroup label={converter}>
                           {targets.map((target) => (
-                            // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                             <option value={`${target},${converter}`} safe>
                               {target}
                             </option>
@@ -609,7 +601,7 @@ const app = new Elysia({
                   </select>
                 </div>
               </article>
-              <input type="submit" value="Convert" />
+              <input class="btn-primary w-full" type="submit" value="Convert" />
             </form>
           </main>
           <script src="script.js" defer />
@@ -622,56 +614,26 @@ const app = new Elysia({
     ({ body }) => {
       return (
         <>
-          <article
-            class="convert_to_popup"
-            hidden
-            style={{
-              flexDirection: "column",
-              display: "flex",
-              zIndex: 2,
-              position: "absolute",
-              maxHeight: "50vh",
-              width: "90vw",
-              overflowY: "scroll",
-              margin: "0px",
-              overflowX: "hidden",
-            }}>
+          <article class="convert_to_popup flex-col absolute z-[2] max-h-[50vh] h-[50vh] w-full overflow-y-auto m-0 overflow-x-hidden hidden bg-gray-800 sm:h-[30vh] rounded">
             {Object.entries(getPossibleTargets(body.fileType)).map(
               ([converter, targets]) => (
-                // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                 <article
-                  class="convert_to_group"
-                  data-converter={converter}
-                  style={{
-                    borderColor: "gray",
-                    padding: "2px",
-                  }}
-                >
-                  <header style={{ fontSize: "20px", fontWeight: "bold" }} safe>
+                  class="convert_to_group border-gray-700 border-b p-4 w-full"
+                  data-converter={converter}>
+                  <header class="text-xl font-bold w-full mb-2" safe>
                     {converter}
                   </header>
-
-                  <ul
-                    class="convert_to_target"
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      gap: "5px",
-                      flexWrap: "wrap",
-                    }}>
+                  <ul class="convert_to_target flex flex-row gap-1 flex-wrap">
                     {targets.map((target) => (
-                      // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                       <button
                         // https://stackoverflow.com/questions/121499/when-a-blur-event-occurs-how-can-i-find-out-which-element-focus-went-to#comment82388679_33325953
                         tabindex={0}
-                        class="target"
+                        class="target p-1 text-base bg-gray-700 rounded hover:bg-gray-600"
                         data-value={`${target},${converter}`}
                         data-target={target}
                         data-converter={converter}
-                        style={{ fontSize: "15px", padding: "5px" }}
                         type="button"
-                        safe
-                      >
+                        safe>
                         {target}
                       </button>
                     ))}
@@ -687,10 +649,8 @@ const app = new Elysia({
             </option>
             {Object.entries(getPossibleTargets(body.fileType)).map(
               ([converter, targets]) => (
-                // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                 <optgroup label={converter}>
                   {targets.map((target) => (
-                    // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                     <option value={`${target},${converter}`} safe>
                       {target}
                     </option>
@@ -736,7 +696,7 @@ const app = new Elysia({
             await Bun.write(`${userUploadsDir}${file.name}`, file);
           }
         } else {
-          // biome-ignore lint/complexity/useLiteralKeys: weird error
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/dot-notation
           await Bun.write(`${userUploadsDir}${body.file["name"]}`, body.file);
         }
       }
@@ -913,29 +873,32 @@ const app = new Elysia({
       <BaseHtml title="ConvertX | Results">
         <>
           <Header loggedIn />
-          <main class="container">
-            <article>
-              <h1>Results</h1>
-              <table>
+          <main class="w-full px-4">
+            <article class="article">
+              <h1 class="text-xl mb-4">Results</h1>
+              <table class="table-auto w-full bg-gray-900 [&_td]:p-4 rounded [&_tr]:border-b [&_tr]:border-gray-800 [&_tr]:rounded text-left">
                 <thead>
                   <tr>
-                    <th>Time</th>
-                    <th>Files</th>
-                    <th>Files Done</th>
-                    <th>Status</th>
-                    <th>View</th>
+                    <th class="px-4 py-2">Time</th>
+                    <th class="px-4 py-2">Files</th>
+                    <th class="px-4 py-2">Files Done</th>
+                    <th class="px-4 py-2">Status</th>
+                    <th class="px-4 py-2">View</th>
                   </tr>
                 </thead>
                 <tbody>
                   {userJobs.map((job) => (
-                    // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                     <tr>
                       <td safe>{job.date_created}</td>
                       <td>{job.num_files}</td>
                       <td>{job.finished_files}</td>
                       <td safe>{job.status}</td>
                       <td>
-                        <a href={`/results/${job.id}`}>View</a>
+                        <a
+                          class="underline text-lime-500 hover:text-lime-400"
+                          href={`/results/${job.id}`}>
+                          View
+                        </a>
                       </td>
                     </tr>
                   ))}
@@ -987,14 +950,14 @@ const app = new Elysia({
         <BaseHtml title="ConvertX | Result">
           <>
             <Header loggedIn />
-            <main class="container">
-              <article>
-                <div class="grid">
-                  <h1>Results</h1>
+            <main class="w-full px-4">
+              <article class="article">
+                <div class="flex items-center justify-between mb-4">
+                  <h1 class="text-xl">Results</h1>
                   <div>
                     <button
                       type="button"
-                      style={{ width: "10rem", float: "right" }}
+                      class="w-40 float-right btn-primary"
                       onclick="downloadAll()"
                       {...(files.length !== job.num_files
                         ? { disabled: true, "aria-busy": "true" }
@@ -1005,30 +968,35 @@ const app = new Elysia({
                     </button>
                   </div>
                 </div>
-                <progress max={job.num_files} value={files.length} />
-                <table>
+                <progress
+                  max={job.num_files}
+                  value={files.length}
+                  class="w-full rounded-full mb-4 h-2 border-0 inline-block appearance-none overflow-hidden bg-none bg-gray-700 text-lime-500 accent-lime-500 [&::-moz-progress-bar]:bg-gray-700 [&::-webkit-progress-value]:[ background:none] [&::-webkit-progress-value]:rounded-full [&[value]::-webkit-progress-value]:bg-lime-500 [&[value]::-webkit-progress-value]:transition-[inline-size]"
+                />
+                <table class="table-auto w-full bg-gray-900 [&_td]:p-4 rounded [&_tr]:border-b [&_tr]:border-gray-800 [&_tr]:rounded text-left">
                   <thead>
                     <tr>
-                      <th>Converted File Name</th>
-                      <th>Status</th>
-                      <th>View</th>
-                      <th>Download</th>
+                      <th class="px-4 py-2">Converted File Name</th>
+                      <th class="px-4 py-2">Status</th>
+                      <th class="px-4 py-2">View</th>
+                      <th class="px-4 py-2">Download</th>
                     </tr>
                   </thead>
                   <tbody>
                     {files.map((file) => (
-                      // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                       <tr>
                         <td safe>{file.output_file_name}</td>
                         <td safe>{file.status}</td>
                         <td>
                           <a
+                            class="underline text-lime-500 hover:text-lime-400"
                             href={`/download/${outputPath}${file.output_file_name}`}>
                             View
                           </a>
                         </td>
                         <td>
                           <a
+                            class="underline text-lime-500 hover:text-lime-400"
                             href={`/download/${outputPath}${file.output_file_name}`}
                             download={file.output_file_name}>
                             Download
@@ -1083,13 +1051,13 @@ const app = new Elysia({
         .all(params.jobId);
 
       return (
-        <article>
-          <div class="grid">
-            <h1>Results</h1>
+        <article class="article">
+          <div class="flex items-center justify-between mb-4">
+            <h1 class="text-xl">Results</h1>
             <div>
               <button
                 type="button"
-                style={{ width: "10rem", float: "right" }}
+                class="w-40 float-right btn-primary"
                 onclick="downloadAll()"
                 {...(files.length !== job.num_files
                   ? { disabled: true, "aria-busy": "true" }
@@ -1100,29 +1068,35 @@ const app = new Elysia({
               </button>
             </div>
           </div>
-          <progress max={job.num_files} value={files.length} />
-          <table>
+          <progress
+            max={job.num_files}
+            value={files.length}
+            class="w-full rounded-full mb-4 h-2 border-0 inline-block appearance-none overflow-hidden bg-none bg-gray-700 text-lime-500 accent-lime-500 [&::-moz-progress-bar]:bg-gray-700 [&::-webkit-progress-value]:[ background:none] [&::-webkit-progress-value]:rounded-full [&[value]::-webkit-progress-value]:bg-lime-500 [&[value]::-webkit-progress-value]:transition-[inline-size]"
+          />
+          <table class="table-auto w-full bg-gray-900 [&_td]:p-4 rounded [&_tr]:border-b [&_tr]:border-gray-800 [&_tr]:rounded text-left">
             <thead>
               <tr>
-                <th>Converted File Name</th>
-                <th>Status</th>
-                <th>View</th>
-                <th>Download</th>
+                <th class="px-4 py-2">Converted File Name</th>
+                <th class="px-4 py-2">Status</th>
+                <th class="px-4 py-2">View</th>
+                <th class="px-4 py-2">Download</th>
               </tr>
             </thead>
             <tbody>
               {files.map((file) => (
-                // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                 <tr>
                   <td safe>{file.output_file_name}</td>
                   <td safe>{file.status}</td>
                   <td>
-                    <a href={`/download/${outputPath}${file.output_file_name}`}>
+                    <a
+                      class="underline text-lime-500 hover:text-lime-400"
+                      href={`/download/${outputPath}${file.output_file_name}`}>
                       View
                     </a>
                   </td>
                   <td>
                     <a
+                      class="underline text-lime-500 hover:text-lime-400"
                       href={`/download/${outputPath}${file.output_file_name}`}
                       download={file.output_file_name}>
                       Download
@@ -1178,15 +1152,15 @@ const app = new Elysia({
       <BaseHtml title="ConvertX | Converters">
         <>
           <Header loggedIn />
-          <main class="container">
-            <article>
-              <h1>Converters</h1>
-              <table>
+          <main class="w-full px-4">
+            <article class="article">
+              <h1 class="mb-4 text-xl">Converters</h1>
+              <table class="table-auto w-full bg-gray-900 [&_td]:p-4 rounded [&_tr]:border-b [&_tr]:border-gray-800 [&_tr]:rounded text-left [&_ul]:list-inside [&_ul]:list-disc">
                 <thead>
                   <tr>
-                    <th>Converter</th>
-                    <th>From (Count)</th>
-                    <th>To (Count)</th>
+                    <th class="mx-4 my-2">Converter</th>
+                    <th class="mx-4 my-2">From (Count)</th>
+                    <th class="mx-4 my-2">To (Count)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1194,14 +1168,12 @@ const app = new Elysia({
                     ([converter, targets]) => {
                       const inputs = getAllInputs(converter);
                       return (
-                        // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                         <tr>
                           <td safe>{converter}</td>
                           <td>
                             Count: {inputs.length}
                             <ul>
                               {inputs.map((input) => (
-                                // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                                 <li safe>{input}</li>
                               ))}
                             </ul>
@@ -1210,7 +1182,6 @@ const app = new Elysia({
                             Count: {targets.length}
                             <ul>
                               {targets.map((target) => (
-                                // biome-ignore lint/correctness/useJsxKeyInIterable: <explanation>
                                 <li safe>{target}</li>
                               ))}
                             </ul>
@@ -1258,8 +1229,23 @@ const app = new Elysia({
   .onError(({ error }) => {
     // log.error(` ${request.method} ${request.url}`, code, error);
     console.error(error);
-  })
-  .listen(3000);
+  });
+  
+
+if (process.env.NODE_ENV !== "production") {
+  await import("./helpers/tailwind").then(
+    async ({ generateTailwind }) => {
+      const result = await generateTailwind()
+
+      app.get("/style.css", ({ set }) => {
+        set.headers["content-type"] = "text/css";
+        return result;
+      });
+    },
+  );
+}
+
+app.listen(3000);
 
 console.log(
   `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,

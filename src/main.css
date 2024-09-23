@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .article {
+    @apply p-4 mb-4 bg-gray-800/40 w-full mx-auto max-w-4xl rounded;
+  }
+  .btn-primary {
+    @apply bg-lime-500 text-black rounded p-4 hover:bg-lime-400 cursor-pointer;
+  }
+}

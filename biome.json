@@ -10,9 +10,14 @@
     "attributePosition": "auto"
   },
   "files": {
-    "ignore": ["**/node_modules/**", "**/pico.lime.min.css"]
+    "ignore": [
+      "**/node_modules/**",
+      "**/pico.lime.min.css"
+    ]
   },
-  "organizeImports": { "enabled": true },
+  "organizeImports": {
+    "enabled": true
+  },
   "linter": {
     "enabled": true,
     "rules": {
@@ -25,7 +30,11 @@
         "useLiteralKeys": "error",
         "useOptionalChain": "error"
       },
-      "correctness": { "noPrecisionLoss": "error", "noUnusedVariables": "off" },
+      "correctness": {
+        "noPrecisionLoss": "error",
+        "noUnusedVariables": "off",
+        "useJsxKeyInIterable": "off"
+      },
       "style": {
         "noInferrableTypes": "error",
         "noNamespace": "error",
@@ -45,6 +54,9 @@
         "noUnsafeDeclarationMerging": "error",
         "useAwait": "error",
         "useNamespaceKeyword": "error"
+      },
+      "nursery": {
+        "useSortedClasses": "error"
       }
     }
   },

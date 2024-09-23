@@ -48,3 +48,4 @@ package-lock.json
 /data
 /Bruno
 /tsconfig.tsbuildinfo
+/src/public/style.css

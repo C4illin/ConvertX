@@ -7,7 +7,6 @@ export const BaseHtml = ({
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title safe>{title}</title>
-      <link rel="stylesheet" href="/pico.lime.min.css" />
       <link rel="stylesheet" href="/style.css" />
       <link
         rel="apple-touch-icon"
@@ -28,6 +27,6 @@ export const BaseHtml = ({
       />
       <link rel="manifest" href="/site.webmanifest" />
     </head>
-    <body>{children}</body>
+    <body class="w-full bg-gray-900 text-gray-200">{children}</body>
   </html>
 );
