@@ -456,7 +456,7 @@ const app = new Elysia({
         }
       }
     } else if (ALLOW_UNAUTHENTICATED) {
-      const newUserId = String(randomInt(2 ** 24, Number.MAX_SAFE_INTEGER));
+      const newUserId = String(randomInt(2 ** 24, Math.min(2 ** 48 + 2 ** 24 - 1,  Number.MAX_SAFE_INTEGER)));
       const accessToken = await jwt.sign({
         id: newUserId,
       });
