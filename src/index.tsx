@@ -138,8 +138,8 @@ const app = new Elysia({
 
     return (
       <BaseHtml title="ConvertX | Setup">
-        <main class="w-full mx-auto max-w-4xl px-4">
-          <h1 class="text-3xl my-8">Welcome to ConvertX!</h1>
+        <main class="mx-auto w-full max-w-4xl px-4">
+          <h1 class="my-8 text-3xl">Welcome to ConvertX!</h1>
           <article class="article p-0">
             <header class="w-full bg-gray-800 p-4">Create your account</header>
             <form method="post" action="/register" class="p-4">
@@ -172,7 +172,7 @@ const app = new Elysia({
             <footer class="p-4">
               Report any issues on{" "}
               <a
-                class="underline text-lime-500 hover:text-lime-400"
+                class="text-lime-500 underline hover:text-lime-400"
                 href="https://github.com/C4illin/ConvertX">
                 GitHub
               </a>
@@ -343,7 +343,7 @@ const app = new Elysia({
                 </fieldset>
                 <div role="group">
                   {ACCOUNT_REGISTRATION ? (
-                    <a href="/register" role="button" class="secondary">
+                    <a href="/register" role="button" class="btn-primary w-full">
                       Register an account
                     </a>
                   ) : null}
@@ -456,7 +456,12 @@ const app = new Elysia({
         }
       }
     } else if (ALLOW_UNAUTHENTICATED) {
-      const newUserId = String(randomInt(2 ** 24, Math.min(2 ** 48 + 2 ** 24 - 1,  Number.MAX_SAFE_INTEGER)));
+      const newUserId = String(
+        randomInt(
+          2 ** 24,
+          Math.min(2 ** 48 + 2 ** 24 - 1, Number.MAX_SAFE_INTEGER),
+        ),
+      );
       const accessToken = await jwt.sign({
         id: newUserId,
       });
@@ -515,15 +520,15 @@ const app = new Elysia({
           <main class="w-full px-4">
             <article class="article">
               <h1 class="mb-4 text-xl">Convert</h1>
-              <div class="max-h-[50vh] overflow-y-auto mb-4 scrollbar-thin">
+              <div class="mb-4 max-h-[50vh] overflow-y-auto scrollbar-thin">
                 <table
                   id="file-list"
-                  class="table-auto w-full bg-gray-900 [&_td]:p-4 rounded [&_tr]:border-b [&_tr]:border-gray-800 [&_tr]:rounded"
+                  class="w-full table-auto rounded bg-gray-900 [&_td]:p-4 [&_tr]:rounded [&_tr]:border-b [&_tr]:border-gray-800"
                 />
               </div>
               <div
                 id="dropzone"
-                class="relative flex h-48 w-full items-center justify-center rounded border border-gray-700 border-dashed transition-all hover:border-gray-600 [&.dragover]:border-4 [&.dragover]:border-gray-500">
+                class="relative flex h-48 w-full items-center justify-center rounded border border-dashed border-gray-700 transition-all hover:border-gray-600 [&.dragover]:border-4 [&.dragover]:border-gray-500">
                 <span>
                   <b>Choose a file</b> or drag it here
                 </span>
@@ -538,7 +543,7 @@ const app = new Elysia({
             <form
               method="post"
               action="/convert"
-              class="relative w-full mx-auto max-w-4xl mb-[35vh]">
+              class="relative mx-auto mb-[35vh] w-full max-w-4xl">
               <input type="hidden" name="file_names" id="file_names" />
               <article class="article w-full">
                 <input
@@ -549,21 +554,21 @@ const app = new Elysia({
                   class="w-full rounded bg-gray-800 p-4"
                 />
                 <div class="select_container relative">
-                  <article class="convert_to_popup flex-col absolute z-[2] max-h-[50vh] h-[30vh] w-full overflow-y-auto m-0 overflow-x-hidden hidden bg-gray-800 sm:h-[30vh] rounded">
+                  <article class="convert_to_popup absolute z-[2] m-0 hidden h-[30vh] max-h-[50vh] w-full flex-col overflow-y-auto overflow-x-hidden rounded bg-gray-800 sm:h-[30vh]">
                     {Object.entries(getAllTargets()).map(
                       ([converter, targets]) => (
                         <article
-                          class="convert_to_group border-gray-700 border-b p-4 w-full"
+                          class="convert_to_group w-full border-b border-gray-700 p-4"
                           data-converter={converter}>
-                          <header class="text-xl font-bold w-full mb-2" safe>
+                          <header class="mb-2 w-full text-xl font-bold" safe>
                             {converter}
                           </header>
-                          <ul class="convert_to_target flex flex-row gap-1 flex-wrap">
+                          <ul class="convert_to_target flex flex-row flex-wrap gap-1">
                             {targets.map((target) => (
                               <button
                                 // https://stackoverflow.com/questions/121499/when-a-blur-event-occurs-how-can-i-find-out-which-element-focus-went-to#comment82388679_33325953
                                 tabindex={0}
-                                class="target p-1 text-base bg-gray-700 rounded hover:bg-gray-600"
+                                class="target rounded bg-gray-700 p-1 text-base hover:bg-gray-600"
                                 data-value={`${target},${converter}`}
                                 data-target={target}
                                 data-converter={converter}
@@ -614,21 +619,21 @@ const app = new Elysia({
     ({ body }) => {
       return (
         <>
-          <article class="convert_to_popup flex-col absolute z-[2] max-h-[50vh] h-[50vh] w-full overflow-y-auto m-0 overflow-x-hidden hidden bg-gray-800 sm:h-[30vh] rounded">
+          <article class="convert_to_popup absolute z-[2] m-0 hidden h-[50vh] max-h-[50vh] w-full flex-col overflow-y-auto overflow-x-hidden rounded bg-gray-800 sm:h-[30vh]">
             {Object.entries(getPossibleTargets(body.fileType)).map(
               ([converter, targets]) => (
                 <article
-                  class="convert_to_group border-gray-700 border-b p-4 w-full"
+                  class="convert_to_group w-full border-b border-gray-700 p-4"
                   data-converter={converter}>
-                  <header class="text-xl font-bold w-full mb-2" safe>
+                  <header class="mb-2 w-full text-xl font-bold" safe>
                     {converter}
                   </header>
-                  <ul class="convert_to_target flex flex-row gap-1 flex-wrap">
+                  <ul class="convert_to_target flex flex-row flex-wrap gap-1">
                     {targets.map((target) => (
                       <button
                         // https://stackoverflow.com/questions/121499/when-a-blur-event-occurs-how-can-i-find-out-which-element-focus-went-to#comment82388679_33325953
                         tabindex={0}
-                        class="target p-1 text-base bg-gray-700 rounded hover:bg-gray-600"
+                        class="target rounded bg-gray-700 p-1 text-base hover:bg-gray-600"
                         data-value={`${target},${converter}`}
                         data-target={target}
                         data-converter={converter}
@@ -875,8 +880,8 @@ const app = new Elysia({
           <Header loggedIn />
           <main class="w-full px-4">
             <article class="article">
-              <h1 class="text-xl mb-4">Results</h1>
-              <table class="table-auto w-full bg-gray-900 [&_td]:p-4 rounded [&_tr]:border-b [&_tr]:border-gray-800 [&_tr]:rounded text-left">
+              <h1 class="mb-4 text-xl">Results</h1>
+              <table class="w-full table-auto rounded bg-gray-900 text-left [&_td]:p-4 [&_tr]:rounded [&_tr]:border-b [&_tr]:border-gray-800">
                 <thead>
                   <tr>
                     <th class="px-4 py-2">Time</th>
@@ -895,7 +900,7 @@ const app = new Elysia({
                       <td safe>{job.status}</td>
                       <td>
                         <a
-                          class="underline text-lime-500 hover:text-lime-400"
+                          class="text-lime-500 underline hover:text-lime-400"
                           href={`/results/${job.id}`}>
                           View
                         </a>
@@ -952,12 +957,12 @@ const app = new Elysia({
             <Header loggedIn />
             <main class="w-full px-4">
               <article class="article">
-                <div class="flex items-center justify-between mb-4">
+                <div class="mb-4 flex items-center justify-between">
                   <h1 class="text-xl">Results</h1>
                   <div>
                     <button
                       type="button"
-                      class="w-40 float-right btn-primary"
+                      class="btn-primary float-right w-40"
                       onclick="downloadAll()"
                       {...(files.length !== job.num_files
                         ? { disabled: true, "aria-busy": "true" }
@@ -971,9 +976,9 @@ const app = new Elysia({
                 <progress
                   max={job.num_files}
                   value={files.length}
-                  class="w-full rounded-full mb-4 h-2 border-0 inline-block appearance-none overflow-hidden bg-none bg-gray-700 text-lime-500 accent-lime-500 [&::-moz-progress-bar]:bg-gray-700 [&::-webkit-progress-value]:[ background:none] [&::-webkit-progress-value]:rounded-full [&[value]::-webkit-progress-value]:bg-lime-500 [&[value]::-webkit-progress-value]:transition-[inline-size]"
+                  class="mb-4 inline-block h-2 w-full appearance-none overflow-hidden rounded-full border-0 bg-gray-700 bg-none text-lime-500 accent-lime-500 [&::-moz-progress-bar]:bg-gray-700 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:[background:none] [&[value]::-webkit-progress-value]:bg-lime-500 [&[value]::-webkit-progress-value]:transition-[inline-size]"
                 />
-                <table class="table-auto w-full bg-gray-900 [&_td]:p-4 rounded [&_tr]:border-b [&_tr]:border-gray-800 [&_tr]:rounded text-left">
+                <table class="w-full table-auto rounded bg-gray-900 text-left [&_td]:p-4 [&_tr]:rounded [&_tr]:border-b [&_tr]:border-gray-800">
                   <thead>
                     <tr>
                       <th class="px-4 py-2">Converted File Name</th>
@@ -989,14 +994,14 @@ const app = new Elysia({
                         <td safe>{file.status}</td>
                         <td>
                           <a
-                            class="underline text-lime-500 hover:text-lime-400"
+                            class="text-lime-500 underline hover:text-lime-400"
                             href={`/download/${outputPath}${file.output_file_name}`}>
                             View
                           </a>
                         </td>
                         <td>
                           <a
-                            class="underline text-lime-500 hover:text-lime-400"
+                            class="text-lime-500 underline hover:text-lime-400"
                             href={`/download/${outputPath}${file.output_file_name}`}
                             download={file.output_file_name}>
                             Download
@@ -1052,12 +1057,12 @@ const app = new Elysia({
 
       return (
         <article class="article">
-          <div class="flex items-center justify-between mb-4">
+          <div class="mb-4 flex items-center justify-between">
             <h1 class="text-xl">Results</h1>
             <div>
               <button
                 type="button"
-                class="w-40 float-right btn-primary"
+                class="btn-primary float-right w-40"
                 onclick="downloadAll()"
                 {...(files.length !== job.num_files
                   ? { disabled: true, "aria-busy": "true" }
@@ -1071,9 +1076,9 @@ const app = new Elysia({
           <progress
             max={job.num_files}
             value={files.length}
-            class="w-full rounded-full mb-4 h-2 border-0 inline-block appearance-none overflow-hidden bg-none bg-gray-700 text-lime-500 accent-lime-500 [&::-moz-progress-bar]:bg-gray-700 [&::-webkit-progress-value]:[ background:none] [&::-webkit-progress-value]:rounded-full [&[value]::-webkit-progress-value]:bg-lime-500 [&[value]::-webkit-progress-value]:transition-[inline-size]"
+            class="mb-4 inline-block h-2 w-full appearance-none overflow-hidden rounded-full border-0 bg-gray-700 bg-none text-lime-500 accent-lime-500 [&::-moz-progress-bar]:bg-gray-700 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:[background:none] [&[value]::-webkit-progress-value]:bg-lime-500 [&[value]::-webkit-progress-value]:transition-[inline-size]"
           />
-          <table class="table-auto w-full bg-gray-900 [&_td]:p-4 rounded [&_tr]:border-b [&_tr]:border-gray-800 [&_tr]:rounded text-left">
+          <table class="w-full table-auto rounded bg-gray-900 text-left [&_td]:p-4 [&_tr]:rounded [&_tr]:border-b [&_tr]:border-gray-800">
             <thead>
               <tr>
                 <th class="px-4 py-2">Converted File Name</th>
@@ -1089,14 +1094,14 @@ const app = new Elysia({
                   <td safe>{file.status}</td>
                   <td>
                     <a
-                      class="underline text-lime-500 hover:text-lime-400"
+                      class="text-lime-500 underline hover:text-lime-400"
                       href={`/download/${outputPath}${file.output_file_name}`}>
                       View
                     </a>
                   </td>
                   <td>
                     <a
-                      class="underline text-lime-500 hover:text-lime-400"
+                      class="text-lime-500 underline hover:text-lime-400"
                       href={`/download/${outputPath}${file.output_file_name}`}
                       download={file.output_file_name}>
                       Download
@@ -1155,7 +1160,7 @@ const app = new Elysia({
           <main class="w-full px-4">
             <article class="article">
               <h1 class="mb-4 text-xl">Converters</h1>
-              <table class="table-auto w-full bg-gray-900 [&_td]:p-4 rounded [&_tr]:border-b [&_tr]:border-gray-800 [&_tr]:rounded text-left [&_ul]:list-inside [&_ul]:list-disc">
+              <table class="w-full table-auto rounded bg-gray-900 text-left [&_td]:p-4 [&_tr]:rounded [&_tr]:border-b [&_tr]:border-gray-800 [&_ul]:list-inside [&_ul]:list-disc">
                 <thead>
                   <tr>
                     <th class="mx-4 my-2">Converter</th>
@@ -1230,19 +1235,16 @@ const app = new Elysia({
     // log.error(` ${request.method} ${request.url}`, code, error);
     console.error(error);
   });
-  
 
 if (process.env.NODE_ENV !== "production") {
-  await import("./helpers/tailwind").then(
-    async ({ generateTailwind }) => {
-      const result = await generateTailwind()
+  await import("./helpers/tailwind").then(async ({ generateTailwind }) => {
+    const result = await generateTailwind();
 
-      app.get("/style.css", ({ set }) => {
-        set.headers["content-type"] = "text/css";
-        return result;
-      });
-    },
-  );
+    app.get("/style.css", ({ set }) => {
+      set.headers["content-type"] = "text/css";
+      return result;
+    });
+  });
 }
 
 app.listen(3000);

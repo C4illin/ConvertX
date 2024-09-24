@@ -34,20 +34,15 @@ import { normalizeFiletype } from "../helpers/normalizeFiletype";
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
 
-const properties: {
-  [key: string]: {
+const properties: Record<string, {
     properties: {
-      from: { [key: string]: string[] };
-      to: { [key: string]: string[] };
-      options?: {
-        [key: string]: {
-          [key: string]: {
+      from: Record<string, string[]>;
+      to: Record<string, string[]>;
+      options?: Record<string, Record<string, {
             description: string;
             type: string;
             default: number;
-          };
-        };
-      };
+          }>>;
     };
     converter: (
       filePath: string,
@@ -58,8 +53,7 @@ const properties: {
       options?: any,
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     ) => any;
-  };
-} = {
+  }> = {
   libjxl: {
     properties: propertiesLibjxl,
     converter: convertLibjxl,
@@ -159,7 +153,7 @@ export async function mainConverter(
   }
 }
 
-const possibleTargets: { [key: string]: { [key: string]: string[] } } = {};
+const possibleTargets: Record<string, Record<string, string[]>> = {};
 
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
@@ -186,7 +180,7 @@ for (const converterName in properties) {
 
 export const getPossibleTargets = (
   from: string,
-): { [key: string]: string[] } => {
+): Record<string, string[]> => {
   const fromClean = normalizeFiletype(from);
 
   return possibleTargets[fromClean] || {};
@@ -214,7 +208,7 @@ const getPossibleInputs = () => {
   return possibleInputs;
 };
 
-const allTargets: { [key: string]: string[] } = {};
+const allTargets: Record<string, string[]> = {};
 
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
@@ -236,7 +230,7 @@ export const getAllTargets = () => {
   return allTargets;
 };
 
-const allInputs: { [key: string]: string[] } = {};
+const allInputs: Record<string, string[]> = {};
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
 

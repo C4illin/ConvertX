@@ -5,9 +5,11 @@ services:
       # dockerfile: Debian.Dockerfile
     volumes:
       - ./data:/app/data
-    environment:
-      - ACCOUNT_REGISTRATION=true
-      - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234
-      - ALLOW_UNAUTHENTICATED=true
+    environment: # Defaults are listed below. All are optional.
+      - ACCOUNT_REGISTRATION=true # true or false, doesn't matter for the first account (e.g. keep this to false if you only want one account)
+      - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234 # will use randomUUID() by default
+      - HTTP_ALLOWED=true # setting this to true is unsafe, only set this to true locally
+      - ALLOW_UNAUTHENTICATED=true # allows anyone to use the service without logging in, only set this to true locally
+      - AUTO_DELETE_EVERY_N_HOURS=1 # checks every n hours for files older then n hours and deletes them, set to 0 to disable
     ports:
       - 3000:3000
