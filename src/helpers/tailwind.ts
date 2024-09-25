@@ -9,7 +9,7 @@ export const generateTailwind = async () => {
 
       return postcss([tw(config)]).process(sourceText, {
         from: "./src/main.css",
-        to: "./public/style.css",
+        to: "./public/generated.css",
       });
     });
 

@@ -7,7 +7,7 @@ export const BaseHtml = ({
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title safe>{title}</title>
-      <link rel="stylesheet" href="/style.css" />
+      <link rel="stylesheet" href="/generated.css" />
       <link
         rel="apple-touch-icon"
         sizes="180x180"

@@ -1,12 +1,12 @@
+import { randomInt, randomUUID } from "node:crypto";
+import { rmSync } from "node:fs";
+import { mkdir, unlink } from "node:fs/promises";
 import cookie from "@elysiajs/cookie";
 import { html } from "@elysiajs/html";
 import { jwt, type JWTPayloadSpec } from "@elysiajs/jwt";
 import { staticPlugin } from "@elysiajs/static";
 import { Database } from "bun:sqlite";
 import { Elysia, t } from "elysia";
-import { randomInt, randomUUID } from "node:crypto";
-import { rmSync } from "node:fs";
-import { mkdir, unlink } from "node:fs/promises";
 import { BaseHtml } from "./components/base";
 import { Header } from "./components/header";
 import {
@@ -173,7 +173,8 @@ const app = new Elysia({
               Report any issues on{" "}
               <a
                 class="text-lime-500 underline hover:text-lime-400"
-                href="https://github.com/C4illin/ConvertX">
+                href="https://github.com/C4illin/ConvertX"
+              >
                 GitHub
               </a>
               .
@@ -343,7 +344,11 @@ const app = new Elysia({
                 </fieldset>
                 <div role="group">
                   {ACCOUNT_REGISTRATION ? (
-                    <a href="/register" role="button" class="btn-primary w-full">
+                    <a
+                      href="/register"
+                      role="button"
+                      class="btn-primary w-full"
+                    >
                       Register an account
                     </a>
                   ) : null}
@@ -528,7 +533,8 @@ const app = new Elysia({
               </div>
               <div
                 id="dropzone"
-                class="relative flex h-48 w-full items-center justify-center rounded border border-dashed border-gray-700 transition-all hover:border-gray-600 [&.dragover]:border-4 [&.dragover]:border-gray-500">
+                class="relative flex h-48 w-full items-center justify-center rounded border border-dashed border-gray-700 transition-all hover:border-gray-600 [&.dragover]:border-4 [&.dragover]:border-gray-500"
+              >
                 <span>
                   <b>Choose a file</b> or drag it here
                 </span>
@@ -543,7 +549,8 @@ const app = new Elysia({
             <form
               method="post"
               action="/convert"
-              class="relative mx-auto mb-[35vh] w-full max-w-4xl">
+              class="relative mx-auto mb-[35vh] w-full max-w-4xl"
+            >
               <input type="hidden" name="file_names" id="file_names" />
               <article class="article w-full">
                 <input
@@ -559,7 +566,8 @@ const app = new Elysia({
                       ([converter, targets]) => (
                         <article
                           class="convert_to_group w-full border-b border-gray-700 p-4"
-                          data-converter={converter}>
+                          data-converter={converter}
+                        >
                           <header class="mb-2 w-full text-xl font-bold" safe>
                             {converter}
                           </header>
@@ -573,7 +581,8 @@ const app = new Elysia({
                                 data-target={target}
                                 data-converter={converter}
                                 type="button"
-                                safe>
+                                safe
+                              >
                                 {target}
                               </button>
                             ))}
@@ -588,7 +597,8 @@ const app = new Elysia({
                     name="convert_to"
                     aria-label="Convert to"
                     required
-                    hidden>
+                    hidden
+                  >
                     <option selected disabled value="">
                       Convert to
                     </option>
@@ -624,7 +634,8 @@ const app = new Elysia({
               ([converter, targets]) => (
                 <article
                   class="convert_to_group w-full border-b border-gray-700 p-4"
-                  data-converter={converter}>
+                  data-converter={converter}
+                >
                   <header class="mb-2 w-full text-xl font-bold" safe>
                     {converter}
                   </header>
@@ -638,7 +649,8 @@ const app = new Elysia({
                         data-target={target}
                         data-converter={converter}
                         type="button"
-                        safe>
+                        safe
+                      >
                         {target}
                       </button>
                     ))}
@@ -901,7 +913,8 @@ const app = new Elysia({
                       <td>
                         <a
                           class="text-lime-500 underline hover:text-lime-400"
-                          href={`/results/${job.id}`}>
+                          href={`/results/${job.id}`}
+                        >
                           View
                         </a>
                       </td>
@@ -966,7 +979,8 @@ const app = new Elysia({
                       onclick="downloadAll()"
                       {...(files.length !== job.num_files
                         ? { disabled: true, "aria-busy": "true" }
-                        : "")}>
+                        : "")}
+                    >
                       {files.length === job.num_files
                         ? "Download All"
                         : "Converting..."}
@@ -995,7 +1009,8 @@ const app = new Elysia({
                         <td>
                           <a
                             class="text-lime-500 underline hover:text-lime-400"
-                            href={`/download/${outputPath}${file.output_file_name}`}>
+                            href={`/download/${outputPath}${file.output_file_name}`}
+                          >
                             View
                           </a>
                         </td>
@@ -1003,7 +1018,8 @@ const app = new Elysia({
                           <a
                             class="text-lime-500 underline hover:text-lime-400"
                             href={`/download/${outputPath}${file.output_file_name}`}
-                            download={file.output_file_name}>
+                            download={file.output_file_name}
+                          >
                             Download
                           </a>
                         </td>
@@ -1066,7 +1082,8 @@ const app = new Elysia({
                 onclick="downloadAll()"
                 {...(files.length !== job.num_files
                   ? { disabled: true, "aria-busy": "true" }
-                  : "")}>
+                  : "")}
+              >
                 {files.length === job.num_files
                   ? "Download All"
                   : "Converting..."}
@@ -1095,7 +1112,8 @@ const app = new Elysia({
                   <td>
                     <a
                       class="text-lime-500 underline hover:text-lime-400"
-                      href={`/download/${outputPath}${file.output_file_name}`}>
+                      href={`/download/${outputPath}${file.output_file_name}`}
+                    >
                       View
                     </a>
                   </td>
@@ -1103,7 +1121,8 @@ const app = new Elysia({
                     <a
                       class="text-lime-500 underline hover:text-lime-400"
                       href={`/download/${outputPath}${file.output_file_name}`}
-                      download={file.output_file_name}>
+                      download={file.output_file_name}
+                    >
                       Download
                     </a>
                   </td>
@@ -1240,7 +1259,7 @@ if (process.env.NODE_ENV !== "production") {
   await import("./helpers/tailwind").then(async ({ generateTailwind }) => {
     const result = await generateTailwind();
 
-    app.get("/style.css", ({ set }) => {
+    app.get("/generated.css", ({ set }) => {
       set.headers["content-type"] = "text/css";
       return result;
     });
