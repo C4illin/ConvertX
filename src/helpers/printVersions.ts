@@ -83,6 +83,16 @@ if (process.env.NODE_ENV === "production") {
     }
   });
 
+  exec("assimp version", (error, stdout) => {
+    if (error) {
+      console.error("assimp is not installed");
+    }
+
+    if (stdout) {
+      console.log(`assimp v${stdout.split("\n")[5]}`);
+    }
+  });
+
   exec("bun -v", (error, stdout) => {
     if (error) {
       console.error("Bun is not installed. wait what");
