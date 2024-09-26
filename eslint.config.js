@@ -49,6 +49,7 @@ export default tseslint.config(
           ],
         },
       ],
+      "import/no-named-as-default": "off",
     },
   },
 );

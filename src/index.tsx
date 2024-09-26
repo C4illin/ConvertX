@@ -565,7 +565,7 @@ const app = new Elysia({
                     {Object.entries(getAllTargets()).map(
                       ([converter, targets]) => (
                         <article
-                          class="convert_to_group w-full border-b border-gray-700 p-4"
+                          class="convert_to_group w-full border-b border-gray-700 p-4 flex flex-col"
                           data-converter={converter}
                         >
                           <header class="mb-2 w-full text-xl font-bold" safe>
@@ -633,7 +633,7 @@ const app = new Elysia({
             {Object.entries(getPossibleTargets(body.fileType)).map(
               ([converter, targets]) => (
                 <article
-                  class="convert_to_group w-full border-b border-gray-700 p-4"
+                  class="convert_to_group w-full border-b border-gray-700 p-4 flex flex-col"
                   data-converter={converter}
                 >
                   <header class="mb-2 w-full text-xl font-bold" safe>
