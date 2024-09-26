@@ -7,7 +7,7 @@
 ![Docker container size](https://ghcr-badge.egpl.dev/c4illin/convertx/size?color=%230375b6&tag=latest&label=image+size&trim=)
 ![GitHub top language](https://img.shields.io/github/languages/top/C4illin/ConvertX)
 
-A self-hosted online file converter. Supports 831 different formats. Written with TypeScript, Bun and Elysia.
+A self-hosted online file converter. Supports over a thousand different formats. Written with TypeScript, Bun and Elysia.
 
 ## Features
 
@@ -23,6 +23,7 @@ A self-hosted online file converter. Supports 831 different formats. Written wit
 | [libjxl](https://github.com/libjxl/libjxl)                                   | JPEG XL       | 11            | 11          |
 | [resvg](https://github.com/RazrFalcon/resvg)                                 | SVG           | 1             | 1           |
 | [Vips](https://github.com/libvips/libvips)                                   | Images        | 45            | 23          |
+| [Assimp](https://github.com/assimp/assimp)                                   | 3D Assets     | 70            | 24          |
 | [XeLaTeX](https://tug.org/xetex/)                                            | LaTeX         | 1             | 1           |
 | [Pandoc](https://pandoc.org/)                                                | Documents     | 43            | 65          |
 | [GraphicsMagick](http://www.graphicsmagick.org/)                             | Images        | 166           | 133         |

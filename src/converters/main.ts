@@ -1,4 +1,7 @@
-import { convert as convertImage, properties as propertiesImage } from "./vips";
+import { 
+  convert as convertImage,
+  properties as propertiesImage
+} from "./vips";
 
 import {
   convert as convertPandoc,
@@ -29,6 +32,11 @@ import {
   convert as convertresvg,
   properties as propertiesresvg,
 } from "./resvg";
+
+import {
+  convert as convertassimp,
+  properties as propertiesassimp,
+} from "./assimp";
 
 import { normalizeFiletype } from "../helpers/normalizeFiletype";
 
@@ -77,6 +85,10 @@ const properties: Record<string, {
   graphicsmagick: {
     properties: propertiesGraphicsmagick,
     converter: convertGraphicsmagick,
+  },
+  assimp: {
+    properties: propertiesassimp,
+    converter: convertassimp,
   },
   ffmpeg: {
     properties: propertiesFFmpeg,
