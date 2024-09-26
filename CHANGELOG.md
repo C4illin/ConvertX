@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.0](https://github.com/C4illin/ConvertX/compare/v0.6.0...v0.7.0) (2024-09-26)
+
+
+### Features
+
+* Add support for 3d assets through assimp converter ([63a4328](https://github.com/C4illin/ConvertX/commit/63a4328d4a1e01df3e0ec4a877bad8c8ffe71129))
+
+
+### Bug Fixes
+
+* wrong layout on search with few options ([8817389](https://github.com/C4illin/ConvertX/commit/88173891ba2d69da46eda46f3f598a9b54f26f96))
+
 ## [0.6.0](https://github.com/C4illin/ConvertX/compare/v0.5.0...v0.6.0) (2024-09-25)
 
 
