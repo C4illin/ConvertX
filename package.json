@@ -16,7 +16,7 @@
     "@elysiajs/html": "1.0.2",
     "@elysiajs/jwt": "^1.1.1",
     "@elysiajs/static": "1.0.3",
-    "elysia": "^1.1.16"
+    "elysia": "^1.1.17"
   },
   "module": "src/index.tsx",
   "type": "module",
@@ -36,7 +36,7 @@
     "@types/eslint": "^9.6.1",
     "@types/eslint-plugin-tailwindcss": "^3.17.0",
     "@types/eslint__js": "^8.42.3",
-    "@types/node": "^22.6.1",
+    "@types/node": "^22.7.4",
     "@typescript-eslint/eslint-plugin": "^8.7.0",
     "@typescript-eslint/parser": "^8.7.0",
     "autoprefixer": "^10.4.20",
@@ -50,7 +50,7 @@
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-tailwindcss": "^3.17.4",
     "globals": "^15.9.0",
-    "knip": "^5.30.5",
+    "knip": "^5.30.6",
     "npm-run-all2": "^6.2.3",
     "postcss": "^8.4.47",
     "postcss-cli": "^11.0.0",
