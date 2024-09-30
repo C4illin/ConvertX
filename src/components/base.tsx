@@ -27,6 +27,6 @@ export const BaseHtml = ({
       />
       <link rel="manifest" href="/site.webmanifest" />
     </head>
-    <body class="w-full bg-gray-900 text-gray-200">{children}</body>
+    <body class="w-full bg-neutral-900 text-neutral-200">{children}</body>
   </html>
 );
