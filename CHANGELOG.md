@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.8.0](https://github.com/C4illin/ConvertX/compare/v0.7.0...v0.8.0) (2024-09-30)
+
+
+### Features
+
+* add light theme, fixes [#156](https://github.com/C4illin/ConvertX/issues/156) ([72636c5](https://github.com/C4illin/ConvertX/commit/72636c5059ebf09c8fece2e268293650b2f8ccf6))
+
+
+### Bug Fixes
+
+* add support for usd for assimp, [#144](https://github.com/C4illin/ConvertX/issues/144) ([2057167](https://github.com/C4illin/ConvertX/commit/20571675766209ad1251f07e687d29a6791afc8b))
+* cleanup formats and add opus, fixes [#159](https://github.com/C4illin/ConvertX/issues/159) ([ae1dfaf](https://github.com/C4illin/ConvertX/commit/ae1dfafc9d9116a57b08c2f7fc326990e00824b0))
+* support .awb and clean up, fixes [#153](https://github.com/C4illin/ConvertX/issues/153), [#92](https://github.com/C4illin/ConvertX/issues/92) ([1c9e67f](https://github.com/C4illin/ConvertX/commit/1c9e67fc3201e0e5dee91e8981adf34daaabf33a))
+
 ## [0.7.0](https://github.com/C4illin/ConvertX/compare/v0.6.0...v0.7.0) (2024-09-26)
 
 
