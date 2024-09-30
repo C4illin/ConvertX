@@ -23,6 +23,9 @@ export const normalizeOutputFiletype = (filetype: string): string => {
       return "jpg";
     case "latex":
       return "tex";
+    case "markdown_phpextra":
+    case "markdown_strict":
+    case "markdown_mmd":
     case "markdown":
       return "md";
     default:
