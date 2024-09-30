@@ -8,14 +8,14 @@ export const Header = ({
       <ul class="flex gap-4 ">
         <li>
           <a
-            class="text-lime-600 transition-all hover:text-lime-500 hover:underline"
+            class="text-accent-600 transition-all hover:text-accent-500 hover:underline"
             href="/history">
             History
           </a>
         </li>
         <li>
           <a
-            class="text-lime-600 transition-all hover:text-lime-500 hover:underline"
+            class="text-accent-600 transition-all hover:text-accent-500 hover:underline"
             href="/logoff">
             Logout
           </a>
@@ -27,7 +27,7 @@ export const Header = ({
       <ul class="flex gap-4">
         <li>
           <a
-            class="text-lime-600 transition-all hover:text-lime-500 hover:underline"
+            class="text-accent-600 transition-all hover:text-accent-500 hover:underline"
             href="/login">
             Login
           </a>
@@ -35,7 +35,7 @@ export const Header = ({
         {accountRegistration ? (
           <li>
             <a
-              class="text-lime-600 transition-all hover:text-lime-500 hover:underline"
+              class="text-accent-600 transition-all hover:text-accent-500 hover:underline"
               href="/register">
               Register
             </a>
@@ -47,7 +47,7 @@ export const Header = ({
 
   return (
     <header class="w-full p-4">
-      <nav class="mx-auto flex max-w-4xl justify-between rounded bg-gray-900 p-4">
+      <nav class="mx-auto flex max-w-4xl justify-between rounded bg-neutral-900 p-4">
         <ul>
           <li>
             <strong>
