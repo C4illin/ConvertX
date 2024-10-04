@@ -43,6 +43,7 @@
     "eslint-plugin-deprecation": "^3.0.0",
     "eslint-plugin-isaacscript": "^4.0.0",
     "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-readable-tailwind": "^1.8.1",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-tailwindcss": "^3.17.4",
     "globals": "^15.9.0",
