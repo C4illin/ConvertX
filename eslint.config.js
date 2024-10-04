@@ -1,28 +1,22 @@
-import comments from "@eslint-community/eslint-plugin-eslint-comments/configs";
 import { fixupPluginRules } from "@eslint/compat";
-import js from "@eslint/js";
+import eslint from '@eslint/js';
 import deprecationPlugin from "eslint-plugin-deprecation";
-import importPlugin from "eslint-plugin-import";
 import simpleImportSortPlugin from "eslint-plugin-simple-import-sort";
 import tailwind from "eslint-plugin-tailwindcss";
 import globals from "globals";
-import tseslint from "typescript-eslint";
+import tseslint from 'typescript-eslint';
 
 
 export default tseslint.config(
-  js.configs.recommended,
-  importPlugin.flatConfigs.recommended,
-  comments.recommended,
+  eslint.configs.recommended,
   ...tseslint.configs.recommended,
   ...tailwind.configs["flat/recommended"],
   {
     plugins: {
-      "@typescript-eslint": tseslint.plugin,
       deprecation: fixupPluginRules(deprecationPlugin),
-      import: fixupPluginRules(importPlugin),
       "simple-import-sort": simpleImportSortPlugin,
     },
-    ignores: ["**/node_modules/**", "**/public/**"],
+    ignores: ["**/node_modules/**"],
     languageOptions: {
       parserOptions: {
         projectService: true,
@@ -36,12 +30,11 @@ export default tseslint.config(
         ...globals.browser,
       },
     },
-    files: ["**/*.{js,mjs,cjs}"],
+    files: ["**/*.{js,mjs,cjs,tsx}"],
     rules: {
       "tailwindcss/no-custom-classname": [
-        "error",
+        "warn",
         {
-          config: "./tailwind.config.js",
           whitelist: [
             "select_container",
             "convert_to_popup",
@@ -51,7 +44,6 @@ export default tseslint.config(
           ],
         },
       ],
-      "import/no-named-as-default": "off",
     },
   },
 );

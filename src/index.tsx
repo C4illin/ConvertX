@@ -141,7 +141,9 @@ const app = new Elysia({
         <main class="mx-auto w-full max-w-4xl px-4">
           <h1 class="my-8 text-3xl">Welcome to ConvertX!</h1>
           <article class="article p-0">
-            <header class="w-full bg-neutral-800 p-4">Create your account</header>
+            <header class="w-full bg-neutral-800 p-4">
+              Create your account
+            </header>
             <form method="post" action="/register" class="p-4">
               <fieldset class="mb-4 flex flex-col gap-4">
                 <label class="flex flex-col gap-1">
@@ -565,7 +567,7 @@ const app = new Elysia({
                     {Object.entries(getAllTargets()).map(
                       ([converter, targets]) => (
                         <article
-                          class="convert_to_group w-full border-b border-neutral-700 p-4 flex flex-col"
+                          class="convert_to_group flex w-full flex-col border-b border-neutral-700 p-4"
                           data-converter={converter}
                         >
                           <header class="mb-2 w-full text-xl font-bold" safe>
@@ -633,7 +635,7 @@ const app = new Elysia({
             {Object.entries(getPossibleTargets(body.fileType)).map(
               ([converter, targets]) => (
                 <article
-                  class="convert_to_group w-full border-b border-neutral-700 p-4 flex flex-col"
+                  class="convert_to_group flex w-full flex-col border-b border-neutral-700 p-4"
                   data-converter={converter}
                 >
                   <header class="mb-2 w-full text-xl font-bold" safe>
@@ -713,7 +715,7 @@ const app = new Elysia({
             await Bun.write(`${userUploadsDir}${file.name}`, file);
           }
         } else {
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/dot-notation
+           
           await Bun.write(`${userUploadsDir}${body.file["name"]}`, body.file);
         }
       }

@@ -689,7 +689,8 @@ export async function convert(
   fileType: string,
   convertTo: string,
   targetPath: string,
-  options?: any,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  options?: unknown,
 ): Promise<string> {
   const command = `ffmpeg -i "${filePath}" "${targetPath}"`;
 

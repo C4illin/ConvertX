@@ -4,12 +4,12 @@
   "scripts": {
     "dev": "bun run --watch src/index.tsx",
     "hot": "bun run --hot src/index.tsx",
-    "format": "eslint --fix ./src",
-    "build": "postcss  ./src/main.css -o ./src/public/generated.css",
+    "format": "eslint --fix .",
+    "build": "postcss ./src/main.css -o ./src/public/generated.css",
     "lint": "run-p 'lint:*'",
     "lint:tsc": "tsc --noEmit",
     "lint:knip": "knip",
-    "lint:eslint": "eslint ./src",
+    "lint:eslint": "eslint ."
   },
   "dependencies": {
     "@elysiajs/cookie": "^0.8.0",
@@ -24,12 +24,10 @@
     "start": "bun run src/index.tsx"
   },
   "devDependencies": {
-    "@eslint-community/eslint-plugin-eslint-comments": "^4.4.0",
     "@eslint/compat": "^1.1.1",
-    "@eslint/js": "^9.11.1",
+    "@eslint/js": "^9.12.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
     "@kitajs/ts-html-plugin": "^4.1.0",
-    "@picocss/pico": "^2.0.6",
     "@total-typescript/ts-reset": "^0.6.1",
     "@types/bun": "^1.1.10",
     "@types/eslint": "^9.6.1",
@@ -40,10 +38,9 @@
     "@typescript-eslint/parser": "^8.7.0",
     "autoprefixer": "^10.4.20",
     "cssnano": "^7.0.6",
-    "eslint": "^9.11.1",
+    "eslint": "^9.12.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-deprecation": "^3.0.0",
-    "eslint-plugin-import": "^2.30.0",
     "eslint-plugin-isaacscript": "^4.0.0",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-simple-import-sort": "^12.1.1",
@@ -58,6 +55,6 @@
     "tailwind-scrollbar": "^3.1.0",
     "tailwindcss": "^3.4.13",
     "typescript": "^5.6.2",
-    "typescript-eslint": "^8.7.0"
+    "typescript-eslint": "^8.8.0"
   }
 }

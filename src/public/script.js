@@ -4,11 +4,11 @@ const dropZone = document.getElementById("dropzone");
 const fileNames = [];
 let fileType;
 
-dropZone.addEventListener("dragover", (e) => {
+dropZone.addEventListener("dragover", () => {
   dropZone.classList.add("dragover");
 });
 
-dropZone.addEventListener("dragleave", (e) => {
+dropZone.addEventListener("dragleave", () => {
   dropZone.classList.remove("dragover");
 });
 
@@ -153,6 +153,7 @@ const setTitle = () => {
 };
 
 // Add a onclick for the delete button
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const deleteRow = (target) => {
   const filename = target.parentElement.parentElement.children[0].textContent;
   const row = target.parentElement.parentElement;
@@ -203,7 +204,7 @@ const uploadFiles = (files) => {
 
 const formConvert = document.querySelector("form[action='/convert']");
 
-formConvert.addEventListener("submit", (e) => {
+formConvert.addEventListener("submit", () => {
   const hiddenInput = document.querySelector("input[name='file_names']");
   hiddenInput.value = JSON.stringify(fileNames);
 });

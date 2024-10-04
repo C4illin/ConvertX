@@ -54,10 +54,9 @@ const properties: Record<
       fileType: string,
       convertTo: string,
       targetPath: string,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
       options?: unknown,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ) => any;
+    ) => unknown;
   }
 > = {
   libjxl: {
@@ -97,17 +96,14 @@ const properties: Record<
 export async function mainConverter(
   inputFilePath: string,
   fileTypeOriginal: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  convertTo: any,
+  convertTo: string,
   targetPath: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   options?: unknown,
   converterName?: string,
 ) {
   const fileType = normalizeFiletype(fileTypeOriginal);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let converterFunc: any;
+  let converterFunc: ((filePath: string, fileType: string, convertTo: string, targetPath: string, options?: unknown) => unknown) | undefined;
   // let converterName = converterName;
 
   if (converterName) {
@@ -211,6 +207,7 @@ for (const converterName in properties) {
 }
 possibleInputs.sort();
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getPossibleInputs = () => {
   return possibleInputs;
 };
