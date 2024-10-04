@@ -22,6 +22,7 @@ const updateSearchBar = () => {
   const convertToGroupElements = document.querySelectorAll(".convert_to_group");
   const convertToGroups = {};
   const convertToElement = document.querySelector("select[name='convert_to']");
+  const convertButton = document.querySelector("input[type='submit']");
 
   const showMatching = (search) => {
     for (const [targets, groupElement] of Object.values(convertToGroups)) {
@@ -57,6 +58,7 @@ const updateSearchBar = () => {
       target.onmousedown = () => {
         convertToElement.value = target.dataset.value;
         convertToInput.value = `${target.dataset.target} using ${target.dataset.converter}`;
+        convertButton.disabled = false;
         showMatching("");
       };
     }
@@ -66,6 +68,11 @@ const updateSearchBar = () => {
 
   convertToInput.addEventListener("input", (e) => {
     showMatching(e.target.value.toLowerCase());
+  });
+
+  convertToInput.addEventListener("search", () => {
+    // when the user clears the search bar using the 'x' button
+    convertButton.disabled = true;
   });
 
   convertToInput.addEventListener("blur", (e) => {

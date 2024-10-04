@@ -575,11 +575,13 @@ const app = new Elysia({
                   class="w-full rounded bg-neutral-800 p-4"
                 />
                 <div class="select_container relative">
-                  <article class={`
-                    convert_to_popup absolute z-[2] m-0 hidden h-[30vh] max-h-[50vh] w-full flex-col
-                    overflow-y-auto overflow-x-hidden rounded bg-neutral-800
-                    sm:h-[30vh]
-                  `}>
+                  <article
+                    class={`
+                      convert_to_popup absolute z-[2] m-0 hidden h-[30vh] max-h-[50vh] w-full
+                      flex-col overflow-y-auto overflow-x-hidden rounded bg-neutral-800
+                      sm:h-[30vh]
+                    `}
+                  >
                     {Object.entries(getAllTargets()).map(
                       ([converter, targets]) => (
                         <article
@@ -639,7 +641,15 @@ const app = new Elysia({
                   </select>
                 </div>
               </article>
-              <input class="btn-primary w-full" type="submit" value="Convert" />
+              <input
+                class={`
+                  btn-primary w-full
+                  disabled:cursor-not-allowed disabled:opacity-50
+                `}
+                type="submit"
+                value="Convert"
+                disabled
+              />
             </form>
           </main>
           <script src="script.js" defer />
@@ -652,11 +662,13 @@ const app = new Elysia({
     ({ body }) => {
       return (
         <>
-          <article class={`
-            convert_to_popup absolute z-[2] m-0 hidden h-[50vh] max-h-[50vh] w-full flex-col
-            overflow-y-auto overflow-x-hidden rounded bg-neutral-800
-            sm:h-[30vh]
-          `}>
+          <article
+            class={`
+              convert_to_popup absolute z-[2] m-0 hidden h-[50vh] max-h-[50vh] w-full flex-col
+              overflow-y-auto overflow-x-hidden rounded bg-neutral-800
+              sm:h-[30vh]
+            `}
+          >
             {Object.entries(getPossibleTargets(body.fileType)).map(
               ([converter, targets]) => (
                 <article
@@ -743,7 +755,6 @@ const app = new Elysia({
             await Bun.write(`${userUploadsDir}${file.name}`, file);
           }
         } else {
-           
           await Bun.write(`${userUploadsDir}${body.file["name"]}`, body.file);
         }
       }
@@ -923,11 +934,13 @@ const app = new Elysia({
           <main class="w-full px-4">
             <article class="article">
               <h1 class="mb-4 text-xl">Results</h1>
-              <table class={`
-                w-full table-auto rounded bg-neutral-900 text-left
-                [&_td]:p-4
-                [&_tr]:rounded [&_tr]:border-b [&_tr]:border-neutral-800
-              `}>
+              <table
+                class={`
+                  w-full table-auto rounded bg-neutral-900 text-left
+                  [&_td]:p-4
+                  [&_tr]:rounded [&_tr]:border-b [&_tr]:border-neutral-800
+                `}
+              >
                 <thead>
                   <tr>
                     <th class="px-4 py-2">Time</th>
@@ -1036,11 +1049,13 @@ const app = new Elysia({
                     [&[value]::-webkit-progress-value]:transition-[inline-size]
                   `}
                 />
-                <table class={`
-                  w-full table-auto rounded bg-neutral-900 text-left
-                  [&_td]:p-4
-                  [&_tr]:rounded [&_tr]:border-b [&_tr]:border-neutral-800
-                `}>
+                <table
+                  class={`
+                    w-full table-auto rounded bg-neutral-900 text-left
+                    [&_td]:p-4
+                    [&_tr]:rounded [&_tr]:border-b [&_tr]:border-neutral-800
+                  `}
+                >
                   <thead>
                     <tr>
                       <th class="px-4 py-2">Converted File Name</th>
@@ -1156,11 +1171,13 @@ const app = new Elysia({
               [&[value]::-webkit-progress-value]:transition-[inline-size]
             `}
           />
-          <table class={`
-            w-full table-auto rounded bg-neutral-900 text-left
-            [&_td]:p-4
-            [&_tr]:rounded [&_tr]:border-b [&_tr]:border-neutral-800
-          `}>
+          <table
+            class={`
+              w-full table-auto rounded bg-neutral-900 text-left
+              [&_td]:p-4
+              [&_tr]:rounded [&_tr]:border-b [&_tr]:border-neutral-800
+            `}
+          >
             <thead>
               <tr>
                 <th class="px-4 py-2">Converted File Name</th>
@@ -1250,12 +1267,14 @@ const app = new Elysia({
           <main class="w-full px-4">
             <article class="article">
               <h1 class="mb-4 text-xl">Converters</h1>
-              <table class={`
-                w-full table-auto rounded bg-neutral-900 text-left
-                [&_td]:p-4
-                [&_tr]:rounded [&_tr]:border-b [&_tr]:border-neutral-800
-                [&_ul]:list-inside [&_ul]:list-disc
-              `}>
+              <table
+                class={`
+                  w-full table-auto rounded bg-neutral-900 text-left
+                  [&_td]:p-4
+                  [&_tr]:rounded [&_tr]:border-b [&_tr]:border-neutral-800
+                  [&_ul]:list-inside [&_ul]:list-disc
+                `}
+              >
                 <thead>
                   <tr>
                     <th class="mx-4 my-2">Converter</th>
