@@ -2,6 +2,7 @@ export const normalizeFiletype = (filetype: string): string => {
   const lowercaseFiletype = filetype.toLowerCase();
 
   switch (lowercaseFiletype) {
+    case "jfif":
     case "jpg":
       return "jpeg";
     case "htm":
