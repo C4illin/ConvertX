@@ -689,10 +689,18 @@ export async function convert(
   fileType: string,
   convertTo: string,
   targetPath: string,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  options?: any,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _options?: unknown,
 ): Promise<string> {
-  const command = `ffmpeg -i "${filePath}" "${targetPath}"`;
+
+  let extra = "";
+
+  if (convertTo === "ico") {
+    // make sure image is 256x256 or smaller
+    extra = `-filter:v "scale='min(256,iw)':min'(256,ih)':force_original_aspect_ratio=decrease"`
+  }
+
+  const command = `ffmpeg -i "${filePath}" ${extra} "${targetPath}"`;
 
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
