@@ -8,6 +8,7 @@ import tailwind from "eslint-plugin-tailwindcss";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
+
 export default tseslint.config(
   js.configs.recommended,
   importPlugin.flatConfigs.recommended,
@@ -32,6 +33,7 @@ export default tseslint.config(
       },
       globals: {
         ...globals.node,
+        ...globals.browser,
       },
     },
     files: ["**/*.{js,mjs,cjs}"],
