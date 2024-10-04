@@ -14,8 +14,8 @@ export function convert(
   fileType: string,
   convertTo: string,
   targetPath: string,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  options?: any,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  options?: unknown,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     // const fileName: string = (targetPath.split("/").pop() as string).replace(".pdf", "")

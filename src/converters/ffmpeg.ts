@@ -690,7 +690,7 @@ export async function convert(
   convertTo: string,
   targetPath: string,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _options?: unknown,
+  options?: unknown,
 ): Promise<string> {
 
   let extra = "";

@@ -1,67 +1,64 @@
-import { 
-  convert as convertImage,
-  properties as propertiesImage
-} from "./vips";
-
+import { normalizeFiletype } from "../helpers/normalizeFiletype";
 import {
-  convert as convertPandoc,
-  properties as propertiesPandoc,
-} from "./pandoc";
-
+  convert as convertassimp,
+  properties as propertiesassimp,
+} from "./assimp";
 import {
   convert as convertFFmpeg,
   properties as propertiesFFmpeg,
 } from "./ffmpeg";
-
 import {
   convert as convertGraphicsmagick,
   properties as propertiesGraphicsmagick,
 } from "./graphicsmagick";
-
+import {
+  convert as convertLibjxl,
+  properties as propertiesLibjxl,
+} from "./libjxl";
+import {
+  convert as convertPandoc,
+  properties as propertiesPandoc,
+} from "./pandoc";
+import {
+  convert as convertresvg,
+  properties as propertiesresvg,
+} from "./resvg";
+import { convert as convertImage, properties as propertiesImage } from "./vips";
 import {
   convert as convertxelatex,
   properties as propertiesxelatex,
 } from "./xelatex";
 
-import {
-  convert as convertLibjxl,
-  properties as propertiesLibjxl,
-} from "./libjxl";
-
-import {
-  convert as convertresvg,
-  properties as propertiesresvg,
-} from "./resvg";
-
-import {
-  convert as convertassimp,
-  properties as propertiesassimp,
-} from "./assimp";
-
-import { normalizeFiletype } from "../helpers/normalizeFiletype";
-
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
 
-const properties: Record<string, {
+const properties: Record<
+  string,
+  {
     properties: {
       from: Record<string, string[]>;
       to: Record<string, string[]>;
-      options?: Record<string, Record<string, {
+      options?: Record<
+        string,
+        Record<
+          string,
+          {
             description: string;
             type: string;
             default: number;
-          }>>;
+          }
+        >
+      >;
     };
     converter: (
       filePath: string,
       fileType: string,
       convertTo: string,
       targetPath: string,
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-      options?: any,
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    ) => any;
-  }> = {
+
+      options?: unknown,
+    ) => unknown;
+  }
+> = {
   libjxl: {
     properties: propertiesLibjxl,
     converter: convertLibjxl,
@@ -99,24 +96,20 @@ const properties: Record<string, {
 export async function mainConverter(
   inputFilePath: string,
   fileTypeOriginal: string,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  convertTo: any,
+  convertTo: string,
   targetPath: string,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  options?: any,
+  options?: unknown,
   converterName?: string,
 ) {
   const fileType = normalizeFiletype(fileTypeOriginal);
 
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  let converterFunc: any;
+  let converterFunc: ((filePath: string, fileType: string, convertTo: string, targetPath: string, options?: unknown) => unknown) | undefined;
   // let converterName = converterName;
 
   if (converterName) {
     converterFunc = properties[converterName]?.converter;
   } else {
     // Iterate over each converter in properties
-    // biome-ignore lint/style/noParameterAssign: <explanation>
     for (converterName in properties) {
       const converterObj = properties[converterName];
 
@@ -190,9 +183,7 @@ for (const converterName in properties) {
   }
 }
 
-export const getPossibleTargets = (
-  from: string,
-): Record<string, string[]> => {
+export const getPossibleTargets = (from: string): Record<string, string[]> => {
   const fromClean = normalizeFiletype(from);
 
   return possibleTargets[fromClean] || {};
@@ -216,6 +207,7 @@ for (const converterName in properties) {
 }
 possibleInputs.sort();
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getPossibleInputs = () => {
   return possibleInputs;
 };
