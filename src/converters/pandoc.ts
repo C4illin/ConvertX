@@ -124,8 +124,8 @@ export function convert(
   fileType: string,
   convertTo: string,
   targetPath: string,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  options?: any,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  options?: unknown,
 ): Promise<string> {
   // set xelatex here
   const xelatex = ["pdf", "latex"];

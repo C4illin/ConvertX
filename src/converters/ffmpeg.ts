@@ -689,7 +689,6 @@ export async function convert(
   fileType: string,
   convertTo: string,
   targetPath: string,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   options?: any,
 ): Promise<string> {
   const command = `ffmpeg -i "${filePath}" "${targetPath}"`;
