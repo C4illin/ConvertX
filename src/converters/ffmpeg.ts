@@ -1,6 +1,5 @@
 import { exec } from "node:child_process";
 
-
 // This could be done dynamically by running `ffmpeg -formats` and parsing the output
 export const properties = {
   from: {
@@ -692,12 +691,13 @@ export async function convert(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   options?: unknown,
 ): Promise<string> {
-
   let extra = "";
+  let message = "Done";
 
   if (convertTo === "ico") {
     // make sure image is 256x256 or smaller
-    extra = `-filter:v "scale='min(256,iw)':min'(256,ih)':force_original_aspect_ratio=decrease"`
+    extra = `-filter:v "scale='min(256,iw)':min'(256,ih)':force_original_aspect_ratio=decrease"`;
+    message = "Done: resized to 256x256";
   }
 
   const command = `ffmpeg -i "${filePath}" ${extra} "${targetPath}"`;
@@ -716,7 +716,7 @@ export async function convert(
         console.error(`stderr: ${stderr}`);
       }
 
-      resolve("success");
+      resolve(message);
     });
   });
 }

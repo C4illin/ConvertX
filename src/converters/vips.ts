@@ -134,7 +134,7 @@ export function convert(
           console.error(`stderr: ${stderr}`);
         }
 
-        resolve("success");
+        resolve("Done");
       },
     );
   });
