@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.8.1](https://github.com/C4illin/ConvertX/compare/v0.8.0...v0.8.1) (2024-10-05)
+
+
+### Bug Fixes
+
+* disable convert button when input is empty ([78844d7](https://github.com/C4illin/ConvertX/commit/78844d7bd55990789ed07c81e49043e688cbe656)), closes [#151](https://github.com/C4illin/ConvertX/issues/151)
+* resize to fit for ico ([b4e53db](https://github.com/C4illin/ConvertX/commit/b4e53dbb8e70b3a95b44e5b756759d16117a87e1)), closes [#157](https://github.com/C4illin/ConvertX/issues/157)
+* treat jfif as jpeg ([339b79f](https://github.com/C4illin/ConvertX/commit/339b79f786131deb93f0d5683e03178fdcab1ef5)), closes [#163](https://github.com/C4illin/ConvertX/issues/163)
+
 ## [0.8.0](https://github.com/C4illin/ConvertX/compare/v0.7.0...v0.8.0) (2024-09-30)
 
 
