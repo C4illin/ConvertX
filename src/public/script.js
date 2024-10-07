@@ -12,6 +12,10 @@ dropZone.addEventListener("dragleave", () => {
   dropZone.classList.remove("dragover");
 });
 
+dropZone.addEventListener("drop", () => {
+  dropZone.classList.remove("dragover");
+});
+
 const selectContainer = document.querySelector("form .select_container");
 
 const updateSearchBar = () => {
@@ -112,12 +116,11 @@ fileInput.addEventListener("change", (e) => {
     row.innerHTML = `
       <td>${file.name}</td>
       <td>${(file.size / 1024).toFixed(2)} kB</td>
-      <td><a class="secondary" onclick="deleteRow(this)" style="cursor: pointer">Remove</a></td>
+      <td><a onclick="deleteRow(this)">Remove</a></td>
     `;
 
     if (!fileType) {
       fileType = file.name.split(".").pop();
-      console.log("fileType", fileType);
       fileInput.setAttribute("accept", `.${fileType}`);
       setTitle();
 
