@@ -5,6 +5,7 @@
 ![GitHub commits since latest release](https://img.shields.io/github/commits-since/C4illin/ConvertX/latest)
 ![GitHub repo size](https://img.shields.io/github/repo-size/C4illin/ConvertX)
 ![Docker container size](https://ghcr-badge.egpl.dev/c4illin/convertx/size?color=%230375b6&tag=latest&label=image+size&trim=)
+![Dev image size](https://ghcr-badge.egpl.dev/c4illin/convertx/size?color=%230375b6&tag=main&label=dev+image&trim=)
 ![GitHub top language](https://img.shields.io/github/languages/top/C4illin/ConvertX)
 
 A self-hosted online file converter. Supports over a thousand different formats. Written with TypeScript, Bun and Elysia.
