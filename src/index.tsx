@@ -2,7 +2,7 @@ import { randomInt, randomUUID } from "node:crypto";
 import { rmSync } from "node:fs";
 import { mkdir, unlink } from "node:fs/promises";
 import cookie from "@elysiajs/cookie";
-import { html } from "@elysiajs/html";
+import { html, Html } from "@elysiajs/html";
 import { jwt, type JWTPayloadSpec } from "@elysiajs/jwt";
 import { staticPlugin } from "@elysiajs/static";
 import { Database } from "bun:sqlite";
@@ -131,6 +131,18 @@ const app = new Elysia({
       prefix: "/",
     }),
   )
+  .get("/test", () => {
+    return (
+      <html lang="en">
+        <head>
+          <title>Hello World</title>
+        </head>
+        <body>
+          <h1>Hello</h1>
+        </body>
+      </html>
+    );
+  })
   .get("/setup", ({ redirect }) => {
     if (!FIRST_RUN) {
       return redirect("/login", 302);

@@ -1,7 +1,12 @@
+import { Html } from "@elysiajs/html";
+
 export const BaseHtml = ({
   children,
   title = "ConvertX",
-}: { children: JSX.Element; title?: string }) => (
+}: {
+  children: JSX.Element;
+  title?: string;
+}) => (
   <html lang="en">
     <head>
       <meta charset="UTF-8" />

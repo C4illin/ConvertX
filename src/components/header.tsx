@@ -1,7 +1,12 @@
+import { Html } from "@kitajs/html";
+
 export const Header = ({
   loggedIn,
   accountRegistration,
-}: { loggedIn?: boolean; accountRegistration?: boolean }) => {
+}: {
+  loggedIn?: boolean;
+  accountRegistration?: boolean;
+}) => {
   let rightNav: JSX.Element;
   if (loggedIn) {
     rightNav = (
@@ -12,7 +17,8 @@ export const Header = ({
               text-accent-600 transition-all
               hover:text-accent-500 hover:underline
             `}
-            href="/history">
+            href="/history"
+          >
             History
           </a>
         </li>
@@ -22,7 +28,8 @@ export const Header = ({
               text-accent-600 transition-all
               hover:text-accent-500 hover:underline
             `}
-            href="/logoff">
+            href="/logoff"
+          >
             Logout
           </a>
         </li>
@@ -37,7 +44,8 @@ export const Header = ({
               text-accent-600 transition-all
               hover:text-accent-500 hover:underline
             `}
-            href="/login">
+            href="/login"
+          >
             Login
           </a>
         </li>
@@ -48,7 +56,8 @@ export const Header = ({
                 text-accent-600 transition-all
                 hover:text-accent-500 hover:underline
               `}
-              href="/register">
+              href="/register"
+            >
               Register
             </a>
           </li>
