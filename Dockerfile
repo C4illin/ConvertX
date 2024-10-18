@@ -57,7 +57,7 @@ RUN apk --no-cache add  \
 
 COPY --from=install /temp/prod/node_modules node_modules
 COPY --from=builder /root/.cargo/bin/resvg /usr/local/bin/resvg
-COPY --from=prerelease /app/src/public/generated.css /app/src/public/
+COPY --from=prerelease /app/public/generated.css /app/public/
 # COPY --from=prerelease /app/src/index.tsx /app/src/
 # COPY --from=prerelease /app/package.json .
 COPY . .

@@ -5,7 +5,7 @@
     "dev": "bun run --watch src/index.tsx",
     "hot": "bun run --hot src/index.tsx",
     "format": "eslint --fix .",
-    "build": "postcss ./src/main.css -o ./src/public/generated.css",
+    "build": "postcss ./src/main.css -o ./public/generated.css",
     "lint": "run-p 'lint:*'",
     "lint:tsc": "tsc --noEmit",
     "lint:knip": "knip",
@@ -15,7 +15,7 @@
     "@elysiajs/cookie": "^0.8.0",
     "@elysiajs/html": "^1.1.1",
     "@elysiajs/jwt": "^1.1.1",
-    "@elysiajs/static": "1.0.3",
+    "@elysiajs/static": "^1.1.1",
     "elysia": "^1.1.22"
   },
   "module": "src/index.tsx",

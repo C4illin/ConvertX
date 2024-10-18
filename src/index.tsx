@@ -127,8 +127,8 @@ const app = new Elysia({
   )
   .use(
     staticPlugin({
-      assets: "src/public/",
-      prefix: "/",
+      assets: "public",
+      prefix: "",
     }),
   )
   .get("/test", () => {

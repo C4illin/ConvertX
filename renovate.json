@@ -3,5 +3,9 @@
   "extends": [
     "config:recommended",
     ":disableDependencyDashboard"
-  ]
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true
+  }
 }
