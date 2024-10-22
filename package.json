@@ -48,7 +48,7 @@
     "eslint-plugin-tailwindcss": "^3.17.5",
     "globals": "^15.11.0",
     "knip": "^5.33.3",
-    "npm-run-all2": "^6.2.4",
+    "npm-run-all2": "^7.0.0",
     "postcss": "^8.4.47",
     "postcss-cli": "^11.0.0",
     "postcss-lightningcss": "^1.0.1",
