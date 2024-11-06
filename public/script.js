@@ -1,3 +1,5 @@
+const webroot = document.querySelector("meta[name='webroot']").content;
+
 // Select the file input element
 const fileInput = document.querySelector('input[type="file"]');
 const dropZone = document.getElementById("dropzone");
@@ -132,7 +134,7 @@ fileInput.addEventListener("change", (e) => {
       //   }
       // }
 
-      fetch("/conversions", {
+      fetch(`${webroot}/conversions`, {
         method: "POST",
         body: JSON.stringify({ fileType: fileType }),
         headers: {
@@ -180,7 +182,7 @@ const deleteRow = (target) => {
     setTitle();
   }
 
-  fetch("/delete", {
+  fetch(`${webroot}/delete`, {
     method: "POST",
     body: JSON.stringify({ filename: filename }),
     headers: {
@@ -201,7 +203,7 @@ const uploadFiles = (files) => {
     formData.append("file", file, file.name);
   }
 
-  fetch("/upload", {
+  fetch(`${webroot}/upload`, {
     method: "POST",
     body: formData,
   })
@@ -212,7 +214,7 @@ const uploadFiles = (files) => {
     .catch((err) => console.log(err));
 };
 
-const formConvert = document.querySelector("form[action='/convert']");
+const formConvert = document.querySelector(`form[action='${webroot}/convert']`);
 
 formConvert.addEventListener("submit", () => {
   const hiddenInput = document.querySelector("input[name='file_names']");

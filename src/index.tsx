@@ -37,6 +37,8 @@ const AUTO_DELETE_EVERY_N_HOURS = process.env.AUTO_DELETE_EVERY_N_HOURS
   ? Number(process.env.AUTO_DELETE_EVERY_N_HOURS)
   : 24;
 
+const WEBROOT = process.env.WEBROOT ?? "";
+
 // fileNames: fileNames,
 // filesToConvert: fileNames.length,
 // convertedFiles : 0,
@@ -112,6 +114,7 @@ const app = new Elysia({
   serve: {
     maxRequestBodySize: Number.MAX_SAFE_INTEGER,
   },
+  prefix: WEBROOT,
 })
   .use(cookie())
   .use(html())
@@ -145,18 +148,18 @@ const app = new Elysia({
   })
   .get("/setup", ({ redirect }) => {
     if (!FIRST_RUN) {
-      return redirect("/login", 302);
+      return redirect(`${WEBROOT}/login`, 302);
     }
 
     return (
-      <BaseHtml title="ConvertX | Setup">
+      <BaseHtml title="ConvertX | Setup" webroot={WEBROOT}>
         <main class="mx-auto w-full max-w-4xl px-4">
           <h1 class="my-8 text-3xl">Welcome to ConvertX!</h1>
           <article class="article p-0">
             <header class="w-full bg-neutral-800 p-4">
               Create your account
             </header>
-            <form method="post" action="/register" class="p-4">
+            <form method="post" action={`${WEBROOT}/register`} class="p-4">
               <fieldset class="mb-4 flex flex-col gap-4">
                 <label class="flex flex-col gap-1">
                   Email
@@ -203,13 +206,16 @@ const app = new Elysia({
   })
   .get("/register", ({ redirect }) => {
     if (!ACCOUNT_REGISTRATION) {
-      return redirect("/login", 302);
+      return redirect(`${WEBROOT}/login`, 302);
     }
 
     return (
-      <BaseHtml title="ConvertX | Register">
+      <BaseHtml webroot={WEBROOT} title="ConvertX | Register">
         <>
-          <Header accountRegistration={ACCOUNT_REGISTRATION} />
+          <Header
+            webroot={WEBROOT}
+            accountRegistration={ACCOUNT_REGISTRATION}
+          />
           <main class="w-full px-4">
             <article class="article">
               <form method="post" class="flex flex-col gap-4">
@@ -253,7 +259,7 @@ const app = new Elysia({
     "/register",
     async ({ body, set, redirect, jwt, cookie: { auth } }) => {
       if (!ACCOUNT_REGISTRATION && !FIRST_RUN) {
-        return redirect("/login", 302);
+        return redirect(`${WEBROOT}/login`, 302);
       }
 
       if (FIRST_RUN) {
@@ -308,13 +314,13 @@ const app = new Elysia({
         sameSite: "strict",
       });
 
-      return redirect("/", 302);
+      return redirect(`${WEBROOT}/`, 302);
     },
     { body: t.Object({ email: t.String(), password: t.String() }) },
   )
   .get("/login", async ({ jwt, redirect, cookie: { auth } }) => {
     if (FIRST_RUN) {
-      return redirect("/setup", 302);
+      return redirect(`${WEBROOT}/setup`, 302);
     }
 
     // if already logged in, redirect to home
@@ -322,16 +328,19 @@ const app = new Elysia({
       const user = await jwt.verify(auth.value);
 
       if (user) {
-        return redirect("/", 302);
+        return redirect(`${WEBROOT}/`, 302);
       }
 
       auth.remove();
     }
 
     return (
-      <BaseHtml title="ConvertX | Login">
+      <BaseHtml webroot={WEBROOT} title="ConvertX | Login">
         <>
-          <Header accountRegistration={ACCOUNT_REGISTRATION} />
+          <Header
+            webroot={WEBROOT}
+            accountRegistration={ACCOUNT_REGISTRATION}
+          />
           <main class="w-full px-4">
             <article class="article">
               <form method="post" class="flex flex-col gap-4">
@@ -362,7 +371,7 @@ const app = new Elysia({
                 <div role="group">
                   {ACCOUNT_REGISTRATION ? (
                     <a
-                      href="/register"
+                      href={`${WEBROOT}/register`}
                       role="button"
                       class="btn-primary w-full"
                     >
@@ -429,7 +438,7 @@ const app = new Elysia({
         sameSite: "strict",
       });
 
-      return redirect("/", 302);
+      return redirect(`${WEBROOT}/`, 302);
     },
     { body: t.Object({ email: t.String(), password: t.String() }) },
   )
@@ -438,22 +447,22 @@ const app = new Elysia({
       auth.remove();
     }
 
-    return redirect("/login", 302);
+    return redirect(`${WEBROOT}/login`, 302);
   })
   .post("/logoff", ({ redirect, cookie: { auth } }) => {
     if (auth?.value) {
       auth.remove();
     }
 
-    return redirect("/login", 302);
+    return redirect(`${WEBROOT}/login`, 302);
   })
   .get("/", async ({ jwt, redirect, cookie: { auth, jobId } }) => {
     if (FIRST_RUN) {
-      return redirect("/setup", 302);
+      return redirect(`${WEBROOT}/setup`, 302);
     }
 
     if (!auth?.value && !ALLOW_UNAUTHENTICATED) {
-      return redirect("/login", 302);
+      return redirect(`${WEBROOT}/login`, 302);
     }
 
     // validate jwt
@@ -473,7 +482,7 @@ const app = new Elysia({
             if (auth?.value) {
               auth.remove();
             }
-            return redirect("/login", 302);
+            return redirect(`${WEBROOT}/login`, 302);
           }
         }
       }
@@ -506,7 +515,7 @@ const app = new Elysia({
     }
 
     if (!user) {
-      return redirect("/login", 302);
+      return redirect(`${WEBROOT}/login`, 302);
     }
 
     // create a new job
@@ -536,9 +545,9 @@ const app = new Elysia({
     console.log("jobId set to:", id);
 
     return (
-      <BaseHtml>
+      <BaseHtml webroot={WEBROOT}>
         <>
-          <Header loggedIn />
+          <Header webroot={WEBROOT} loggedIn />
           <main class="w-full px-4">
             <article class="article">
               <h1 class="mb-4 text-xl">Convert</h1>
@@ -574,7 +583,7 @@ const app = new Elysia({
             </article>
             <form
               method="post"
-              action="/convert"
+              action={`${WEBROOT}/convert`}
               class="relative mx-auto mb-[35vh] w-full max-w-4xl"
             >
               <input type="hidden" name="file_names" id="file_names" />
@@ -739,16 +748,16 @@ const app = new Elysia({
     "/upload",
     async ({ body, redirect, jwt, cookie: { auth, jobId } }) => {
       if (!auth?.value) {
-        return redirect("/login", 302);
+        return redirect(`${WEBROOT}/login`, 302);
       }
 
       const user = await jwt.verify(auth.value);
       if (!user) {
-        return redirect("/login", 302);
+        return redirect(`${WEBROOT}/login`, 302);
       }
 
       if (!jobId?.value) {
-        return redirect("/", 302);
+        return redirect(`${WEBROOT}/`, 302);
       }
 
       const existingJob = await db
@@ -756,7 +765,7 @@ const app = new Elysia({
         .get(jobId.value, user.id);
 
       if (!existingJob) {
-        return redirect("/", 302);
+        return redirect(`${WEBROOT}/`, 302);
       }
 
       const userUploadsDir = `${uploadsDir}${user.id}/${jobId.value}/`;
@@ -781,16 +790,16 @@ const app = new Elysia({
     "/delete",
     async ({ body, redirect, jwt, cookie: { auth, jobId } }) => {
       if (!auth?.value) {
-        return redirect("/login", 302);
+        return redirect(`${WEBROOT}/login`, 302);
       }
 
       const user = await jwt.verify(auth.value);
       if (!user) {
-        return redirect("/login", 302);
+        return redirect(`${WEBROOT}/login`, 302);
       }
 
       if (!jobId?.value) {
-        return redirect("/", 302);
+        return redirect(`${WEBROOT}/`, 302);
       }
 
       const existingJob = await db
@@ -798,7 +807,7 @@ const app = new Elysia({
         .get(jobId.value, user.id);
 
       if (!existingJob) {
-        return redirect("/", 302);
+        return redirect(`${WEBROOT}/`, 302);
       }
 
       const userUploadsDir = `${uploadsDir}${user.id}/${jobId.value}/`;
@@ -811,16 +820,16 @@ const app = new Elysia({
     "/convert",
     async ({ body, redirect, jwt, cookie: { auth, jobId } }) => {
       if (!auth?.value) {
-        return redirect("/login", 302);
+        return redirect(`${WEBROOT}/login`, 302);
       }
 
       const user = await jwt.verify(auth.value);
       if (!user) {
-        return redirect("/login", 302);
+        return redirect(`${WEBROOT}/login`, 302);
       }
 
       if (!jobId?.value) {
-        return redirect("/", 302);
+        return redirect(`${WEBROOT}/`, 302);
       }
 
       const existingJob = db
@@ -829,7 +838,7 @@ const app = new Elysia({
         .get(jobId.value, user.id);
 
       if (!existingJob) {
-        return redirect("/", 302);
+        return redirect(`${WEBROOT}/`, 302);
       }
 
       const userUploadsDir = `${uploadsDir}${user.id}/${jobId.value}/`;
@@ -850,7 +859,7 @@ const app = new Elysia({
       const fileNames = JSON.parse(body.file_names) as string[];
 
       if (!Array.isArray(fileNames) || fileNames.length === 0) {
-        return redirect("/", 302);
+        return redirect(`${WEBROOT}/`, 302);
       }
 
       db.query(
@@ -903,7 +912,7 @@ const app = new Elysia({
         });
 
       // Redirect the client immediately
-      return redirect(`/results/${jobId.value}`, 302);
+      return redirect(`${WEBROOT}/results/${jobId.value}`, 302);
     },
     {
       body: t.Object({
@@ -914,12 +923,12 @@ const app = new Elysia({
   )
   .get("/history", async ({ jwt, redirect, cookie: { auth } }) => {
     if (!auth?.value) {
-      return redirect("/login", 302);
+      return redirect(`${WEBROOT}/login`, 302);
     }
     const user = await jwt.verify(auth.value);
 
     if (!user) {
-      return redirect("/login", 302);
+      return redirect(`${WEBROOT}/login`, 302);
     }
 
     let userJobs = db
@@ -940,9 +949,9 @@ const app = new Elysia({
     userJobs = userJobs.filter((job) => job.num_files > 0);
 
     return (
-      <BaseHtml title="ConvertX | Results">
+      <BaseHtml webroot={WEBROOT} title="ConvertX | Results">
         <>
-          <Header loggedIn />
+          <Header webroot={WEBROOT} loggedIn />
           <main class="w-full px-4">
             <article class="article">
               <h1 class="mb-4 text-xl">Results</h1>
@@ -975,7 +984,7 @@ const app = new Elysia({
                             text-accent-500 underline
                             hover:text-accent-400
                           `}
-                          href={`/results/${job.id}`}
+                          href={`${WEBROOT}/results/${job.id}`}
                         >
                           View
                         </a>
@@ -994,7 +1003,7 @@ const app = new Elysia({
     "/results/:jobId",
     async ({ params, jwt, set, redirect, cookie: { auth, job_id } }) => {
       if (!auth?.value) {
-        return redirect("/login", 302);
+        return redirect(`${WEBROOT}/login`, 302);
       }
 
       if (job_id?.value) {
@@ -1004,7 +1013,7 @@ const app = new Elysia({
 
       const user = await jwt.verify(auth.value);
       if (!user) {
-        return redirect("/login", 302);
+        return redirect(`${WEBROOT}/login`, 302);
       }
 
       const job = db
@@ -1027,9 +1036,9 @@ const app = new Elysia({
         .all(params.jobId);
 
       return (
-        <BaseHtml title="ConvertX | Result">
+        <BaseHtml webroot={WEBROOT} title="ConvertX | Result">
           <>
-            <Header loggedIn />
+            <Header webroot={WEBROOT} loggedIn />
             <main class="w-full px-4">
               <article class="article">
                 <div class="mb-4 flex items-center justify-between">
@@ -1087,7 +1096,7 @@ const app = new Elysia({
                               text-accent-500 underline
                               hover:text-accent-400
                             `}
-                            href={`/download/${outputPath}${file.output_file_name}`}
+                            href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
                           >
                             View
                           </a>
@@ -1098,7 +1107,7 @@ const app = new Elysia({
                               text-accent-500 underline
                               hover:text-accent-400
                             `}
-                            href={`/download/${outputPath}${file.output_file_name}`}
+                            href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
                             download={file.output_file_name}
                           >
                             Download
@@ -1110,7 +1119,7 @@ const app = new Elysia({
                 </table>
               </article>
             </main>
-            <script src="/results.js" defer />
+            <script src={`${WEBROOT}/results.js`} defer />
           </>
         </BaseHtml>
       );
@@ -1120,7 +1129,7 @@ const app = new Elysia({
     "/progress/:jobId",
     async ({ jwt, set, params, redirect, cookie: { auth, job_id } }) => {
       if (!auth?.value) {
-        return redirect("/login", 302);
+        return redirect(`${WEBROOT}/login`, 302);
       }
 
       if (job_id?.value) {
@@ -1130,7 +1139,7 @@ const app = new Elysia({
 
       const user = await jwt.verify(auth.value);
       if (!user) {
-        return redirect("/login", 302);
+        return redirect(`${WEBROOT}/login`, 302);
       }
 
       const job = db
@@ -1209,7 +1218,7 @@ const app = new Elysia({
                         text-accent-500 underline
                         hover:text-accent-400
                       `}
-                      href={`/download/${outputPath}${file.output_file_name}`}
+                      href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
                     >
                       View
                     </a>
@@ -1220,7 +1229,7 @@ const app = new Elysia({
                         text-accent-500 underline
                         hover:text-accent-400
                       `}
-                      href={`/download/${outputPath}${file.output_file_name}`}
+                      href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
                       download={file.output_file_name}
                     >
                       Download
@@ -1238,12 +1247,12 @@ const app = new Elysia({
     "/download/:userId/:jobId/:fileName",
     async ({ params, jwt, redirect, cookie: { auth } }) => {
       if (!auth?.value) {
-        return redirect("/login", 302);
+        return redirect(`${WEBROOT}/login`, 302);
       }
 
       const user = await jwt.verify(auth.value);
       if (!user) {
-        return redirect("/login", 302);
+        return redirect(`${WEBROOT}/login`, 302);
       }
 
       const job = await db
@@ -1251,7 +1260,7 @@ const app = new Elysia({
         .get(user.id, params.jobId);
 
       if (!job) {
-        return redirect("/results", 302);
+        return redirect(`${WEBROOT}/results`, 302);
       }
       // parse from url encoded string
       const userId = decodeURIComponent(params.userId);
@@ -1264,18 +1273,18 @@ const app = new Elysia({
   )
   .get("/converters", async ({ jwt, redirect, cookie: { auth } }) => {
     if (!auth?.value) {
-      return redirect("/login", 302);
+      return redirect(`${WEBROOT}/login`, 302);
     }
 
     const user = await jwt.verify(auth.value);
     if (!user) {
-      return redirect("/login", 302);
+      return redirect(`${WEBROOT}/login`, 302);
     }
 
     return (
-      <BaseHtml title="ConvertX | Converters">
+      <BaseHtml webroot={WEBROOT} title="ConvertX | Converters">
         <>
-          <Header loggedIn />
+          <Header webroot={WEBROOT} loggedIn />
           <main class="w-full px-4">
             <article class="article">
               <h1 class="mb-4 text-xl">Converters</h1>
@@ -1334,12 +1343,12 @@ const app = new Elysia({
     async ({ params, jwt, redirect, cookie: { auth } }) => {
       // TODO: Implement zip download
       if (!auth?.value) {
-        return redirect("/login", 302);
+        return redirect(`${WEBROOT}/login`, 302);
       }
 
       const user = await jwt.verify(auth.value);
       if (!user) {
-        return redirect("/login", 302);
+        return redirect(`${WEBROOT}/login`, 302);
       }
 
       const job = await db
@@ -1347,12 +1356,12 @@ const app = new Elysia({
         .get(user.id, params.jobId);
 
       if (!job) {
-        return redirect("/results", 302);
+        return redirect(`${WEBROOT}/results`, 302);
       }
 
       // const userId = decodeURIComponent(params.userId);
       // const jobId = decodeURIComponent(params.jobId);
-      // const outputPath = `${outputDir}${userId}/${jobId}/`;
+      // const outputPath = `${outputDir}${userId}/`{jobId}/);
 
       // return Bun.zip(outputPath);
     },
@@ -1376,7 +1385,7 @@ if (process.env.NODE_ENV !== "production") {
 app.listen(3000);
 
 console.log(
-  `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,
+  `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}${WEBROOT}`,
 );
 
 const clearJobs = () => {

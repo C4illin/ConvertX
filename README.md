@@ -47,12 +47,8 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
-    environment: # Defaults are listed below. All are optional.
-      - ACCOUNT_REGISTRATION=false # true or false, doesn't matter for the first account (e.g. keep this to false if you only want one account)
-      - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234 # will use randomUUID() by default
-      - HTTP_ALLOWED=false # setting this to true is unsafe, only set this to true locally
-      - ALLOW_UNAUTHENTICATED=false # allows anyone to use the service without logging in, only set this to true locally
-      - AUTO_DELETE_EVERY_N_HOURS=24 # checks every n hours for files older then n hours and deletes them, set to 0 to disable
+    environment:
+      - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234 # will use randomUUID() if unset
     volumes:
       - convertx:/app/data
 ```
@@ -66,6 +62,19 @@ docker run -p 3000:3000 -v ./data:/app/data ghcr.io/c4illin/convertx
 Then visit `http://localhost:3000` in your browser and create your account. Don't leave it unconfigured and open, as anyone can register the first account.
 
 If you get unable to open database file run `chown -R $USER:$USER path` on the path you choose.
+
+### Environment variables
+
+All are optional, JWT_SECRET is recommended to be set.
+
+| Name                      | Default | Description |
+|---------------------------|---------|-------------|
+| JWT_SECRET                | when unset it will use the value from randomUUID() | A long and secret string used to sign the JSON Web Token |
+| ACCOUNT_REGISTRATION      | false | Allow users to register accounts |
+| HTTP_ALLOWED              | false | Allow HTTP connections, only set this to true locally |
+| ALLOW_UNAUTHENTICATED     | false | Allow unauthenticated users to use the service, only set this to true locally |
+| AUTO_DELETE_EVERY_N_HOURS | 24 | Checks every n hours for files older then n hours and deletes them, set to 0 to disable |
+| WEBROOT                   | "" | The address to the root path setting this to "/convert" will serve the website on "example.com/convert/" |
 
 ### Tutorial
 
