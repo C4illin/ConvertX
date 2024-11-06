@@ -1,3 +1,5 @@
+const webroot = document.querySelector("meta[name='webroot']").content;
+
 window.downloadAll = function () {
   // Get all download links
   const downloadLinks = document.querySelectorAll("a[download]");
@@ -18,7 +20,7 @@ let progressElem = document.querySelector("progress");
 const refreshData = () => {
   // console.log("Refreshing data...", progressElem.value, progressElem.max);
   if (progressElem.value !== progressElem.max) {
-    fetch(`/progress/${jobId}`, {
+    fetch(`${webroot}/progress/${jobId}`, {
       method: "POST",
     })
       .then((res) => res.text())
