@@ -37,7 +37,7 @@ const AUTO_DELETE_EVERY_N_HOURS = process.env.AUTO_DELETE_EVERY_N_HOURS
   ? Number(process.env.AUTO_DELETE_EVERY_N_HOURS)
   : 24;
 
-const WEBROOT = process.env.WEBROOT ?? "/convertx";
+const WEBROOT = process.env.WEBROOT ?? "";
 
 // fileNames: fileNames,
 // filesToConvert: fileNames.length,
