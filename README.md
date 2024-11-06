@@ -1,5 +1,7 @@
 ![ConvertX](images/logo.png)
+
 # ConvertX
+
 [![Docker](https://github.com/C4illin/ConvertX/actions/workflows/docker-publish.yml/badge.svg?branch=main)](https://github.com/C4illin/ConvertX/actions/workflows/docker-publish.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/C4illin/ConvertX)](https://github.com/C4illin/ConvertX/pkgs/container/convertx)
 ![GitHub commits since latest release](https://img.shields.io/github/commits-since/C4illin/ConvertX/latest)
@@ -67,7 +69,7 @@ If you get unable to open database file run `chown -R $USER:$USER path` on the p
 
 ### Tutorial
 
-Tutorial in french: https://belginux.com/installer-convertx-avec-docker/
+Tutorial in french: <https://belginux.com/installer-convertx-avec-docker/>
 
 ## Screenshots
 
@@ -83,6 +85,7 @@ Tutorial in french: https://belginux.com/installer-convertx-avec-docker/
 Pull requests are welcome! See below and open issues for the list of todos.
 
 ## Todo
+
 - [x] Add messages for errors in converters
 - [x] Add searchable list of formats
 - [ ] Add options for converters
@@ -98,7 +101,7 @@ Pull requests are welcome! See below and open issues for the list of todos.
 ## Contributors
 
 <a href="https://github.com/C4illin/ConvertX/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=C4illin/ConvertX" />
+  <img src="https://contrib.rocks/image?repo=C4illin/ConvertX" alt="Image with all contributors"/>
 </a>
 
 ## Star History
