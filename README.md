@@ -79,6 +79,7 @@ All are optional, JWT_SECRET is recommended to be set.
 ### Tutorial
 
 Tutorial in french: <https://belginux.com/installer-convertx-avec-docker/>
+Tutorial in chinese: <https://xzllll.com/24092901/>
 
 ## Screenshots
 
