@@ -1,8 +1,7 @@
 const webroot = document.querySelector("meta[name='webroot']").content;
-
-// Select the file input element
 const fileInput = document.querySelector('input[type="file"]');
 const dropZone = document.getElementById("dropzone");
+const convertButton = document.querySelector("input[type='submit']");
 const fileNames = [];
 let fileType;
 
@@ -28,7 +27,6 @@ const updateSearchBar = () => {
   const convertToGroupElements = document.querySelectorAll(".convert_to_group");
   const convertToGroups = {};
   const convertToElement = document.querySelector("select[name='convert_to']");
-  const convertButton = document.querySelector("input[type='submit']");
 
   const showMatching = (search) => {
     for (const [targets, groupElement] of Object.values(convertToGroups)) {
@@ -100,11 +98,8 @@ const updateSearchBar = () => {
   });
 };
 
-// const convertFromSelect = document.querySelector("select[name='convert_from']");
-
 // Add a 'change' event listener to the file input element
 fileInput.addEventListener("change", (e) => {
-  // console.log(e.target.files);
   // Get the selected files from the event target
   const files = e.target.files;
 
@@ -197,6 +192,9 @@ const deleteRow = (target) => {
 };
 
 const uploadFiles = (files) => {
+  convertButton.disabled = true;
+  convertButton.textContent = "Uploading...";
+
   const formData = new FormData();
 
   for (const file of files) {
@@ -209,6 +207,8 @@ const uploadFiles = (files) => {
   })
     .then((res) => res.json())
     .then((data) => {
+      convertButton.disabled = false;
+      convertButton.textContent = "Convert";
       console.log(data);
     })
     .catch((err) => console.log(err));
