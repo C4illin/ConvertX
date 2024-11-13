@@ -11,6 +11,8 @@ export const normalizeFiletype = (filetype: string): string => {
       return "latex";
     case "md":
       return "markdown";
+    case "unknown":
+      return "m4a";
     default:
       return lowercaseFiletype;
   }
