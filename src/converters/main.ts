@@ -2,6 +2,7 @@ import { normalizeFiletype } from "../helpers/normalizeFiletype";
 import { convert as convertassimp, properties as propertiesassimp } from "./assimp";
 import { convert as convertFFmpeg, properties as propertiesFFmpeg } from "./ffmpeg";
 import { convert as convertGraphicsmagick, properties as propertiesGraphicsmagick } from "./graphicsmagick";
+import { convert as convertInkscape, properties as propertiesInkscape } from "./inkscape";
 import { convert as convertLibjxl, properties as propertiesLibjxl } from "./libjxl";
 import { convert as convertPandoc, properties as propertiesPandoc } from "./pandoc";
 import { convert as convertresvg, properties as propertiesresvg } from "./resvg";
@@ -62,6 +63,10 @@ const properties: Record<
   graphicsmagick: {
     properties: propertiesGraphicsmagick,
     converter: convertGraphicsmagick,
+  },
+  inkscape: {
+    properties: propertiesInkscape,
+    converter: convertInkscape,
   },
   assimp: {
     properties: propertiesassimp,
