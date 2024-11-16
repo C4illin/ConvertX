@@ -30,6 +30,7 @@ A self-hosted online file converter. Supports over a thousand different formats.
 | [XeLaTeX](https://tug.org/xetex/)                                            | LaTeX         | 1             | 1           |
 | [Pandoc](https://pandoc.org/)                                                | Documents     | 43            | 65          |
 | [GraphicsMagick](http://www.graphicsmagick.org/)                             | Images        | 166           | 133         |
+| [Inkscape](https://inkscape.org/)                                            | Vector images | 7             | 17          |
 | [FFmpeg](https://ffmpeg.org/)                                                | Video         | ~473          | ~280        |
 
 <!-- many ffmpeg fileformats are duplicates -->

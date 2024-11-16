@@ -50,7 +50,8 @@ RUN apk --no-cache add  \
   vips-poppler \
   vips-jxl \
   libjxl-tools \
-  assimp
+  assimp \
+  inkscape
 
 # this might be needed for some latex use cases, will add it if needed.
 #   texmf-dist-fontsextra \

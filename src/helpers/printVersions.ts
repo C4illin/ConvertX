@@ -53,6 +53,16 @@ if (process.env.NODE_ENV === "production") {
     }
   });
 
+  exec("inkscape --version", (error, stdout) => {
+    if (error) {
+      console.error("Inkscape is not installed.");
+    }
+
+    if (stdout) {
+      console.log(stdout.split("\n")[0]);
+    }
+  });
+
   exec("djxl --version", (error, stdout) => {
     if (error) {
       console.error("libjxl-tools is not installed.");
