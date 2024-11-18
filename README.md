@@ -77,9 +77,13 @@ All are optional, JWT_SECRET is recommended to be set.
 | AUTO_DELETE_EVERY_N_HOURS | 24 | Checks every n hours for files older then n hours and deletes them, set to 0 to disable |
 | WEBROOT                   | "" | The address to the root path setting this to "/convert" will serve the website on "example.com/convert/" |
 
+> [!WARNING]
+> If you can't login, make sure you are accessing the service over https or set HTTP_ALLOWED=true
+
 ### Tutorial
 
 Tutorial in french: <https://belginux.com/installer-convertx-avec-docker/>
+
 Tutorial in chinese: <https://xzllll.com/24092901/>
 
 ## Screenshots
