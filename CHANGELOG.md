@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.9.0](https://github.com/C4illin/ConvertX/compare/v0.8.1...v0.9.0) (2024-11-21)
+
+
+### Features
+
+* add inkscape for vector images ([f3740e9](https://github.com/C4illin/ConvertX/commit/f3740e9ded100b8500f3613517960248bbd3c210))
+* Allow to chose webroot ([36cb6cc](https://github.com/C4illin/ConvertX/commit/36cb6cc589d80d0a87fa8dbe605db71a9a2570f9)), closes [#180](https://github.com/C4illin/ConvertX/issues/180)
+* disable convert when uploading ([58e220e](https://github.com/C4illin/ConvertX/commit/58e220e82d7f9c163d6ea4dc31092c08a3e254f4)), closes [#177](https://github.com/C4illin/ConvertX/issues/177)
+
+
+### Bug Fixes
+
+* treat unknown as m4a ([1a442d6](https://github.com/C4illin/ConvertX/commit/1a442d6e69606afef63b1e7df36aa83d111fa23d)), closes [#178](https://github.com/C4illin/ConvertX/issues/178)
+* wait for both upload and selection ([4c05fd7](https://github.com/C4illin/ConvertX/commit/4c05fd72bbbf91ee02327f6fcbf749b78272376b)), closes [#177](https://github.com/C4illin/ConvertX/issues/177)
+
 ## [0.8.1](https://github.com/C4illin/ConvertX/compare/v0.8.0...v0.8.1) (2024-10-05)
 
 
