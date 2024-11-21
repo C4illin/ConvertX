@@ -4,6 +4,8 @@ const dropZone = document.getElementById("dropzone");
 const convertButton = document.querySelector("input[type='submit']");
 const fileNames = [];
 let fileType;
+let pendingFiles = 0;
+let formatSelected = false;
 
 dropZone.addEventListener("dragover", () => {
   dropZone.classList.add("dragover");
@@ -62,7 +64,10 @@ const updateSearchBar = () => {
       target.onmousedown = () => {
         convertToElement.value = target.dataset.value;
         convertToInput.value = `${target.dataset.target} using ${target.dataset.converter}`;
-        convertButton.disabled = false;
+        formatSelected = true;
+        if (pendingFiles === 0 && fileNames.length > 0) {
+          convertButton.disabled = false;
+        }
         showMatching("");
       };
     }
@@ -77,6 +82,7 @@ const updateSearchBar = () => {
   convertToInput.addEventListener("search", () => {
     // when the user clears the search bar using the 'x' button
     convertButton.disabled = true;
+    formatSelected = false;
   });
 
   convertToInput.addEventListener("blur", (e) => {
@@ -170,10 +176,14 @@ const deleteRow = (target) => {
   const index = fileNames.indexOf(filename);
   fileNames.splice(index, 1);
 
+  // reset fileInput
+  fileInput.value = "";
+
   // if fileNames is empty, reset fileType
   if (fileNames.length === 0) {
     fileType = null;
     fileInput.removeAttribute("accept");
+    convertButton.disabled = true;
     setTitle();
   }
 
@@ -184,16 +194,13 @@ const deleteRow = (target) => {
       "Content-Type": "application/json",
     },
   })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log(data);
-    })
     .catch((err) => console.log(err));
 };
 
 const uploadFiles = (files) => {
   convertButton.disabled = true;
   convertButton.textContent = "Uploading...";
+  pendingFiles += 1;
 
   const formData = new FormData();
 
@@ -207,8 +214,13 @@ const uploadFiles = (files) => {
   })
     .then((res) => res.json())
     .then((data) => {
-      convertButton.disabled = false;
-      convertButton.textContent = "Convert";
+      pendingFiles -= 1;
+      if (pendingFiles === 0) {
+        if (formatSelected) {
+          convertButton.disabled = false;
+        }
+        convertButton.textContent = "Convert";
+      }
       console.log(data);
     })
     .catch((err) => console.log(err));
