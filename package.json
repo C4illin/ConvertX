@@ -16,7 +16,7 @@
     "@elysiajs/html": "^1.1.1",
     "@elysiajs/jwt": "^1.1.1",
     "@elysiajs/static": "^1.1.1",
-    "elysia": "^1.1.24"
+    "elysia": "^1.1.25"
   },
   "module": "src/index.tsx",
   "type": "module",
@@ -24,8 +24,8 @@
     "start": "bun run src/index.tsx"
   },
   "devDependencies": {
-    "@eslint/compat": "^1.2.2",
-    "@eslint/js": "^9.14.0",
+    "@eslint/compat": "^1.2.3",
+    "@eslint/js": "^9.15.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.4.0",
     "@kitajs/ts-html-plugin": "^4.1.0",
     "@total-typescript/ts-reset": "^0.6.1",
@@ -33,12 +33,12 @@
     "@types/eslint": "^9.6.1",
     "@types/eslint-plugin-tailwindcss": "^3.17.0",
     "@types/eslint__js": "^8.42.3",
-    "@types/node": "^22.9.0",
-    "@typescript-eslint/eslint-plugin": "^8.14.0",
-    "@typescript-eslint/parser": "^8.14.0",
+    "@types/node": "^22.9.1",
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
     "autoprefixer": "^10.4.20",
     "cssnano": "^7.0.6",
-    "eslint": "^9.14.0",
+    "eslint": "^9.15.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-deprecation": "^3.0.0",
     "eslint-plugin-isaacscript": "^4.0.0",
@@ -47,15 +47,15 @@
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-tailwindcss": "^3.17.5",
     "globals": "^15.12.0",
-    "knip": "^5.36.7",
+    "knip": "^5.37.1",
     "npm-run-all2": "^7.0.1",
     "postcss": "^8.4.49",
     "postcss-cli": "^11.0.0",
     "postcss-lightningcss": "^1.0.1",
     "prettier": "^3.3.3",
     "tailwind-scrollbar": "^3.1.0",
-    "tailwindcss": "^3.4.14",
+    "tailwindcss": "^3.4.15",
     "typescript": "^5.6.3",
-    "typescript-eslint": "^8.14.0"
+    "typescript-eslint": "^8.15.0"
   }
 }
