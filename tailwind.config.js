@@ -1,7 +1,8 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
 /** @type {import('tailwindcss').Config} */
- 
-module.exports = {
+
+import tailwindScrollbar from "tailwind-scrollbar";
+
+export default {
   content: ["./src/**/*.{html,js,tsx,jsx,cjs,mjs}"],
   theme: {
     extend: {
@@ -22,5 +23,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwind-scrollbar")],
+  plugins: [tailwindScrollbar],
 };
