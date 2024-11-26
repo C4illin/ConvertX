@@ -26,12 +26,12 @@ A self-hosted online file converter. Supports over a thousand different formats.
 | [libjxl](https://github.com/libjxl/libjxl)                                   | JPEG XL       | 11            | 11          |
 | [resvg](https://github.com/RazrFalcon/resvg)                                 | SVG           | 1             | 1           |
 | [Vips](https://github.com/libvips/libvips)                                   | Images        | 45            | 23          |
-| [Assimp](https://github.com/assimp/assimp)                                   | 3D Assets     | 70            | 24          |
 | [XeLaTeX](https://tug.org/xetex/)                                            | LaTeX         | 1             | 1           |
 | [Pandoc](https://pandoc.org/)                                                | Documents     | 43            | 65          |
-| [GraphicsMagick](http://www.graphicsmagick.org/)                             | Images        | 166           | 133         |
+| [GraphicsMagick](http://www.graphicsmagick.org/)                             | Images        | 167           | 130         |
 | [Inkscape](https://inkscape.org/)                                            | Vector images | 7             | 17          |
-| [FFmpeg](https://ffmpeg.org/)                                                | Video         | ~473          | ~280        |
+| [Assimp](https://github.com/assimp/assimp)                                   | 3D Assets     | 77            | 23          |
+| [FFmpeg](https://ffmpeg.org/)                                                | Video         | ~472          | ~199        |
 
 <!-- many ffmpeg fileformats are duplicates -->
 
