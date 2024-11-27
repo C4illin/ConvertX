@@ -4,7 +4,7 @@
 
 [![Docker](https://github.com/C4illin/ConvertX/actions/workflows/docker-publish.yml/badge.svg?branch=main)](https://github.com/C4illin/ConvertX/actions/workflows/docker-publish.yml)
 [![ghcr.io Pulls](https://img.shields.io/badge/dynamic/json?logo=github&url=https%3A%2F%2Fipitio.github.io%2Fbackage%2FC4illin%2FConvertX%2Fconvertx.json&query=%24.downloads&label=ghcr.io%20pulls&cacheSeconds=14400)](https://github.com/C4illin/ConvertX/pkgs/container/ConvertX)
-![Docker Pulls](https://img.shields.io/docker/pulls/c4illin/convertx?style=flat&logo=docker&label=Dockerhub%20pulls&link=https%3A%2F%2Fhub.docker.com%2Frepository%2Fdocker%2Fc4illin%2Fconvertx%2Fgeneral)
+[![Docker Pulls](https://img.shields.io/docker/pulls/c4illin/convertx?style=flat&logo=docker&label=dockerhub%20pulls&link=https%3A%2F%2Fhub.docker.com%2Frepository%2Fdocker%2Fc4illin%2Fconvertx%2Fgeneral)](https://hub.docker.com/r/c4illin/convertx)
 [![GitHub Release](https://img.shields.io/github/v/release/C4illin/ConvertX)](https://github.com/C4illin/ConvertX/pkgs/container/convertx)
 ![GitHub commits since latest release](https://img.shields.io/github/commits-since/C4illin/ConvertX/latest)
 ![GitHub repo size](https://img.shields.io/github/repo-size/C4illin/ConvertX)
@@ -80,6 +80,21 @@ All are optional, JWT_SECRET is recommended to be set.
 
 > [!WARNING]
 > If you can't login, make sure you are accessing the service over https or set HTTP_ALLOWED=true
+
+### Docker images
+
+There is a `:latest` tag that is updated with every release and a `:main` tag that is updated with every push to the main branch. `:latest` is recommended for normal use.
+
+The image is available on [GitHub Container Registry](https://github.com/C4illin/ConvertX/pkgs/container/ConvertX) and [Docker Hub](https://hub.docker.com/r/c4illin/convertx).
+
+| Image | What it is |
+|-------|------------|
+| `image: ghcr.io/c4illin/convertx` | The latest release on ghcr |
+| `image: ghcr.io/c4illin/convertx:main` | The latest commit on ghcr |
+| `image: c4illin/convertx` | The latest release on docker hub |
+| `image: c4illin/convertx:main` | The latest commit on docker hub |
+
+<!-- Dockerhub was introduced in 0.9.0 and older releases -->
 
 ### Tutorial
 
