@@ -103,6 +103,16 @@ if (process.env.NODE_ENV === "production") {
     }
   });
 
+  exec("ebook-convert --version", (error, stdout) => {
+    if (error) {
+      console.error("ebook-convert (calibre) is not installed");
+    }
+
+    if (stdout) {
+      console.log(stdout.split("\n")[0]);
+    }
+  });
+
   exec("bun -v", (error, stdout) => {
     if (error) {
       console.error("Bun is not installed. wait what");

@@ -8,6 +8,7 @@ import { convert as convertPandoc, properties as propertiesPandoc } from "./pand
 import { convert as convertresvg, properties as propertiesresvg } from "./resvg";
 import { convert as convertImage, properties as propertiesImage } from "./vips";
 import { convert as convertxelatex, properties as propertiesxelatex } from "./xelatex";
+import { convert as convertCalibre, properties as propertiesCalibre } from "./calibre";
 
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
@@ -55,6 +56,10 @@ const properties: Record<
   xelatex: {
     properties: propertiesxelatex,
     converter: convertxelatex,
+  },
+  calibre: {
+    properties: propertiesCalibre,
+    converter: convertCalibre,
   },
   pandoc: {
     properties: propertiesPandoc,

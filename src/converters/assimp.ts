@@ -1,9 +1,8 @@
 import { exec } from "node:child_process";
 
-// This could be done dynamically by running `ffmpeg -formats` and parsing the output
 export const properties = {
   from: {
-    muxer: [
+    object: [
       "3d",
       "3ds",
       "3mf",
@@ -84,7 +83,7 @@ export const properties = {
     ],
   },
   to: {
-    muxer: [
+    object: [
       "3ds",
       "3mf",
       "assbin",
@@ -120,8 +119,6 @@ export async function convert(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   options?: unknown,
 ): Promise<string> {
-  // let command = "ffmpeg";
-
   const command = `assimp export "${filePath}" "${targetPath}"`;
 
   return new Promise((resolve, reject) => {

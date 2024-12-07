@@ -51,7 +51,10 @@ RUN apk --no-cache add  \
   vips-jxl \
   libjxl-tools \
   assimp \
-  inkscape
+  inkscape \
+  poppler-utils
+
+RUN apk --no-cache add calibre --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/
 
 # this might be needed for some latex use cases, will add it if needed.
 #   texmf-dist-fontsextra \
