@@ -28,6 +28,7 @@ A self-hosted online file converter. Supports over a thousand different formats.
 | [resvg](https://github.com/RazrFalcon/resvg)                                 | SVG           | 1             | 1           |
 | [Vips](https://github.com/libvips/libvips)                                   | Images        | 45            | 23          |
 | [XeLaTeX](https://tug.org/xetex/)                                            | LaTeX         | 1             | 1           |
+| [Calibre](https://calibre-ebook.com/)                                        | E-books       | 26            | 19          |
 | [Pandoc](https://pandoc.org/)                                                | Documents     | 43            | 65          |
 | [GraphicsMagick](http://www.graphicsmagick.org/)                             | Images        | 167           | 130         |
 | [Inkscape](https://inkscape.org/)                                            | Vector images | 7             | 17          |
@@ -76,7 +77,8 @@ All are optional, JWT_SECRET is recommended to be set.
 | HTTP_ALLOWED              | false | Allow HTTP connections, only set this to true locally |
 | ALLOW_UNAUTHENTICATED     | false | Allow unauthenticated users to use the service, only set this to true locally |
 | AUTO_DELETE_EVERY_N_HOURS | 24 | Checks every n hours for files older then n hours and deletes them, set to 0 to disable |
-| WEBROOT                   | "" | The address to the root path setting this to "/convert" will serve the website on "example.com/convert/" |
+| WEBROOT                   |  | The address to the root path setting this to "/convert" will serve the website on "example.com/convert/" |
+| FFMPEG_ARGS               |  | Arguments to pass to ffmpeg, e.g. `-preset veryfast` |
 
 > [!WARNING]
 > If you can't login, make sure you are accessing the service over https or set HTTP_ALLOWED=true
