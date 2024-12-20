@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.10.0](https://github.com/C4illin/ConvertX/compare/v0.9.0...v0.10.0) (2024-12-20)
+
+
+### Features
+
+* add calibre ([03d3edf](https://github.com/C4illin/ConvertX/commit/03d3edfff65c252dd4b8922fc98257c089c1ff74)), closes [#191](https://github.com/C4illin/ConvertX/issues/191)
+
+
+### Bug Fixes
+
+* add FFMPEG_ARGS env variable ([f537c81](https://github.com/C4illin/ConvertX/commit/f537c81db7815df8017f834e3162291197e1c40f)), closes [#190](https://github.com/C4illin/ConvertX/issues/190)
+
 ## [0.9.0](https://github.com/C4illin/ConvertX/compare/v0.8.1...v0.9.0) (2024-11-21)
 
 
