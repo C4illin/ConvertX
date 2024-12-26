@@ -53,7 +53,7 @@ services:
     environment:
       - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234 # will use randomUUID() if unset
     volumes:
-      - convertx:/app/data
+      - ./data:/app/data
 ```
 
 or
