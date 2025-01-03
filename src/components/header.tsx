@@ -3,10 +3,12 @@ import { Html } from "@kitajs/html";
 export const Header = ({
   loggedIn,
   accountRegistration,
+  allowUnauthenticated,
   webroot = "",
 }: {
   loggedIn?: boolean;
   accountRegistration?: boolean;
+  allowUnauthenticated?: boolean;
   webroot?: string;
 }) => {
   let rightNav: JSX.Element;
@@ -24,17 +26,19 @@ export const Header = ({
             History
           </a>
         </li>
-        <li>
-          <a
-            class={`
-              text-accent-600 transition-all
-              hover:text-accent-500 hover:underline
-            `}
-            href={`${webroot}/logoff`}
-          >
-            Logout
-          </a>
-        </li>
+        {!allowUnauthenticated ? (
+          <li>
+            <a
+              class={`
+                text-accent-600 transition-all
+                hover:text-accent-500 hover:underline
+              `}
+              href={`${webroot}/logoff`}
+            >
+              Logout
+            </a>
+          </li>
+        ) : null}
       </ul>
     );
   } else {
