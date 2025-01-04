@@ -54,6 +54,8 @@ RUN apk --no-cache add  \
   inkscape \
   poppler-utils
 
+RUN apk --no-cache add qt6-qtbase-private-dev --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community/
+
 RUN apk --no-cache add calibre --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/
 
 # this might be needed for some latex use cases, will add it if needed.
