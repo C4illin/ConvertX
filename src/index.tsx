@@ -215,6 +215,7 @@ const app = new Elysia({
           <Header
             webroot={WEBROOT}
             accountRegistration={ACCOUNT_REGISTRATION}
+            allowUnauthenticated={ALLOW_UNAUTHENTICATED}
           />
           <main class="w-full px-4">
             <article class="article">
@@ -340,6 +341,7 @@ const app = new Elysia({
           <Header
             webroot={WEBROOT}
             accountRegistration={ACCOUNT_REGISTRATION}
+            allowUnauthenticated={ALLOW_UNAUTHENTICATED}
           />
           <main class="w-full px-4">
             <article class="article">
@@ -457,36 +459,19 @@ const app = new Elysia({
     return redirect(`${WEBROOT}/login`, 302);
   })
   .get("/", async ({ jwt, redirect, cookie: { auth, jobId } }) => {
-    if (FIRST_RUN) {
-      return redirect(`${WEBROOT}/setup`, 302);
-    }
+    if (!ALLOW_UNAUTHENTICATED) {
+      if (FIRST_RUN) {
+        return redirect(`${WEBROOT}/setup`, 302);
+      }
 
-    if (!auth?.value && !ALLOW_UNAUTHENTICATED) {
-      return redirect(`${WEBROOT}/login`, 302);
+      if (!auth?.value) {
+        return redirect(`${WEBROOT}/login`, 302);
+      }
     }
 
     // validate jwt
     let user: ({ id: string } & JWTPayloadSpec) | false = false;
-    if (auth?.value) {
-      user = await jwt.verify(auth.value);
-
-      if (user !== false && user.id) {
-        if (Number.parseInt(user.id) < 2 ** 24 || !ALLOW_UNAUTHENTICATED) {
-          // make sure user exists in db
-          const existingUser = db
-            .query("SELECT * FROM users WHERE id = ?")
-            .as(User)
-            .get(user.id);
-
-          if (!existingUser) {
-            if (auth?.value) {
-              auth.remove();
-            }
-            return redirect(`${WEBROOT}/login`, 302);
-          }
-        }
-      }
-    } else if (ALLOW_UNAUTHENTICATED) {
+    if (ALLOW_UNAUTHENTICATED) {
       const newUserId = String(
         randomInt(
           2 ** 24,
@@ -512,6 +497,25 @@ const app = new Elysia({
         maxAge: 24 * 60 * 60,
         sameSite: "strict",
       });
+    } else if (auth?.value) {
+      user = await jwt.verify(auth.value);
+
+      if (user !== false && user.id) {
+        if (Number.parseInt(user.id) < 2 ** 24 || !ALLOW_UNAUTHENTICATED) {
+          // make sure user exists in db
+          const existingUser = db
+            .query("SELECT * FROM users WHERE id = ?")
+            .as(User)
+            .get(user.id);
+
+          if (!existingUser) {
+            if (auth?.value) {
+              auth.remove();
+            }
+            return redirect(`${WEBROOT}/login`, 302);
+          }
+        }
+      }
     }
 
     if (!user) {
@@ -547,7 +551,11 @@ const app = new Elysia({
     return (
       <BaseHtml webroot={WEBROOT}>
         <>
-          <Header webroot={WEBROOT} loggedIn />
+          <Header
+            webroot={WEBROOT}
+            allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+            loggedIn
+          />
           <main class="w-full px-4">
             <article class="article">
               <h1 class="mb-4 text-xl">Convert</h1>
@@ -951,7 +959,11 @@ const app = new Elysia({
     return (
       <BaseHtml webroot={WEBROOT} title="ConvertX | Results">
         <>
-          <Header webroot={WEBROOT} loggedIn />
+          <Header
+            webroot={WEBROOT}
+            allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+            loggedIn
+          />
           <main class="w-full px-4">
             <article class="article">
               <h1 class="mb-4 text-xl">Results</h1>
@@ -1038,7 +1050,11 @@ const app = new Elysia({
       return (
         <BaseHtml webroot={WEBROOT} title="ConvertX | Result">
           <>
-            <Header webroot={WEBROOT} loggedIn />
+            <Header
+              webroot={WEBROOT}
+              allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+              loggedIn
+            />
             <main class="w-full px-4">
               <article class="article">
                 <div class="mb-4 flex items-center justify-between">
@@ -1284,7 +1300,11 @@ const app = new Elysia({
     return (
       <BaseHtml webroot={WEBROOT} title="ConvertX | Converters">
         <>
-          <Header webroot={WEBROOT} loggedIn />
+          <Header
+            webroot={WEBROOT}
+            allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+            loggedIn
+          />
           <main class="w-full px-4">
             <article class="article">
               <h1 class="mb-4 text-xl">Converters</h1>
