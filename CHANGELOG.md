@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/C4illin/ConvertX/compare/v0.10.0...v0.10.1) (2025-01-21)
+
+
+### Bug Fixes
+
+* ffmpeg works without ffmpeg_args ([3b7ea88](https://github.com/C4illin/ConvertX/commit/3b7ea88b7382f7c21b120bdc9bda5bb10547f55d)), closes [#212](https://github.com/C4illin/ConvertX/issues/212)
+
 ## [0.10.0](https://github.com/C4illin/ConvertX/compare/v0.9.0...v0.10.0) (2025-01-18)
 
 
