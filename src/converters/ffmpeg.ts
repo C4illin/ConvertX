@@ -700,7 +700,7 @@ export async function convert(
     message = "Done: resized to 256x256";
   }
 
-  const command = `ffmpeg ${process.env.FFMPEG_ARGS} -i "${filePath}" ${extra} "${targetPath}"`;
+  const command = `ffmpeg ${process.env.FFMPEG_ARGS || ""} -i "${filePath}" ${extra} "${targetPath}"`;
 
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
