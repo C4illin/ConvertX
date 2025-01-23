@@ -30,19 +30,19 @@
     "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
     "@kitajs/ts-html-plugin": "^4.1.1",
     "@total-typescript/ts-reset": "^0.6.1",
-    "@types/bun": "^1.1.16",
+    "@types/bun": "^1.2.0",
     "@types/eslint-plugin-tailwindcss": "^3.17.0",
     "@types/eslint__js": "^8.42.3",
-    "@types/node": "^22.10.7",
+    "@types/node": "^22.10.10",
     "autoprefixer": "^10.4.20",
     "cssnano": "^7.0.6",
     "eslint": "^9.18.0",
     "eslint-plugin-deprecation": "^3.0.0",
-    "eslint-plugin-readable-tailwind": "^1.8.2",
+    "eslint-plugin-readable-tailwind": "^1.9.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
-    "eslint-plugin-tailwindcss": "^3.17.5",
+    "eslint-plugin-tailwindcss": "^3.18.0",
     "globals": "^15.14.0",
-    "knip": "^5.42.1",
+    "knip": "^5.43.1",
     "npm-run-all2": "^7.0.2",
     "postcss": "^8.5.1",
     "postcss-cli": "^11.0.0",
@@ -50,6 +50,6 @@
     "tailwind-scrollbar": "^3.1.0",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.20.0"
+    "typescript-eslint": "^8.21.0"
   }
 }
