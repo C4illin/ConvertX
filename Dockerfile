@@ -52,7 +52,9 @@ RUN apk --no-cache add  \
   libjxl-tools \
   assimp \
   inkscape \
-  poppler-utils
+  poppler-utils \
+  gcompat \
+  libva-utils
 
 RUN apk --no-cache add qt6-qtbase-private-dev --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community/
 
