@@ -1,4 +1,4 @@
-FROM oven/bun:1.2.0-alpine AS base
+FROM oven/bun:1.2.1-alpine AS base
 LABEL org.opencontainers.image.source="https://github.com/C4illin/ConvertX"
 WORKDIR /app
 
