@@ -99,7 +99,7 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(`assimp v${stdout.split("\n")[5]}`);
+      console.log(`assimp ${stdout.split("\n")[5]}`);
     }
   });
 
