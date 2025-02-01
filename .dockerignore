@@ -2,7 +2,6 @@
 .editorconfig
 .env
 .git
-.gitignore
 .idea
 .vscode
 CHANGELOG.md
