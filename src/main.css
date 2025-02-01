@@ -1,14 +1,47 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-@layer components {
-  .article {
-    @apply p-4 mb-4 bg-neutral-800/40 w-full mx-auto max-w-4xl rounded;
+@plugin 'tailwind-scrollbar';
+
+@theme {
+  --color-contrast: rgba(var(--contrast));
+  --color-neutral-900: rgba(var(--neutral-900));
+  --color-neutral-800: rgba(var(--neutral-800));
+  --color-neutral-700: rgba(var(--neutral-700));
+  --color-neutral-600: rgba(var(--neutral-600));
+  --color-neutral-500: rgba(var(--neutral-500));
+  --color-neutral-400: rgba(var(--neutral-400));
+  --color-neutral-300: rgba(var(--neutral-300));
+  --color-neutral-200: rgba(var(--neutral-200));
+  --color-neutral-100: rgba(var(--neutral-100));
+  --color-accent-600: rgba(var(--accent-600));
+  --color-accent-500: rgba(var(--accent-500));
+  --color-accent-400: rgba(var(--accent-400));
+}
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
   }
-  .btn-primary {
-    @apply bg-accent-500 text-contrast rounded p-4 hover:bg-accent-400 cursor-pointer transition-colors;
-  }
+}
+
+@utility article {
+  @apply p-4 mb-4 bg-neutral-800/40 w-full mx-auto max-w-4xl rounded-sm;
+}
+
+@utility btn-primary {
+  @apply bg-accent-500 text-contrast rounded-sm p-4 hover:bg-accent-400 cursor-pointer transition-colors;
 }
 
 :root {

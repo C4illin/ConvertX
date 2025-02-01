@@ -166,7 +166,7 @@ const app = new Elysia({
                   <input
                     type="email"
                     name="email"
-                    class="rounded bg-neutral-800 p-3"
+                    class="rounded-sm bg-neutral-800 p-3"
                     placeholder="Email"
                     autocomplete="email"
                     required
@@ -177,7 +177,7 @@ const app = new Elysia({
                   <input
                     type="password"
                     name="password"
-                    class="rounded bg-neutral-800 p-3"
+                    class="rounded-sm bg-neutral-800 p-3"
                     placeholder="Password"
                     autocomplete="current-password"
                     required
@@ -226,7 +226,7 @@ const app = new Elysia({
                     <input
                       type="email"
                       name="email"
-                      class="rounded bg-neutral-800 p-3"
+                      class="rounded-sm bg-neutral-800 p-3"
                       placeholder="Email"
                       autocomplete="email"
                       required
@@ -237,7 +237,7 @@ const app = new Elysia({
                     <input
                       type="password"
                       name="password"
-                      class="rounded bg-neutral-800 p-3"
+                      class="rounded-sm bg-neutral-800 p-3"
                       placeholder="Password"
                       autocomplete="current-password"
                       required
@@ -352,7 +352,7 @@ const app = new Elysia({
                     <input
                       type="email"
                       name="email"
-                      class="rounded bg-neutral-800 p-3"
+                      class="rounded-sm bg-neutral-800 p-3"
                       placeholder="Email"
                       autocomplete="email"
                       required
@@ -363,7 +363,7 @@ const app = new Elysia({
                     <input
                       type="password"
                       name="password"
-                      class="rounded bg-neutral-800 p-3"
+                      class="rounded-sm bg-neutral-800 p-3"
                       placeholder="Password"
                       autocomplete="current-password"
                       required
@@ -565,7 +565,7 @@ const app = new Elysia({
                   class={`
                     w-full table-auto rounded bg-neutral-900
                     [&_td]:p-4
-                    [&_tr]:rounded [&_tr]:border-b [&_tr]:border-neutral-800
+                    [&_tr]:rounded-sm [&_tr]:border-b [&_tr]:border-neutral-800
                   `}
                 />
               </div>
@@ -601,12 +601,12 @@ const app = new Elysia({
                   name="convert_to_search"
                   placeholder="Search for conversions"
                   autocomplete="off"
-                  class="w-full rounded bg-neutral-800 p-4"
+                  class="w-full rounded-sm bg-neutral-800 p-4"
                 />
                 <div class="select_container relative">
                   <article
                     class={`
-                      convert_to_popup absolute z-[2] m-0 hidden h-[30vh] max-h-[50vh] w-full
+                      convert_to_popup absolute z-2 m-0 hidden h-[30vh] max-h-[50vh] w-full
                       flex-col overflow-y-auto overflow-x-hidden rounded bg-neutral-800
                       sm:h-[30vh]
                     `}
@@ -693,7 +693,7 @@ const app = new Elysia({
         <>
           <article
             class={`
-              convert_to_popup absolute z-[2] m-0 hidden h-[50vh] max-h-[50vh] w-full flex-col
+              convert_to_popup absolute z-2 m-0 hidden h-[50vh] max-h-[50vh] w-full flex-col
               overflow-y-auto overflow-x-hidden rounded bg-neutral-800
               sm:h-[30vh]
             `}
@@ -971,7 +971,7 @@ const app = new Elysia({
                 class={`
                   w-full table-auto rounded bg-neutral-900 text-left
                   [&_td]:p-4
-                  [&_tr]:rounded [&_tr]:border-b [&_tr]:border-neutral-800
+                  [&_tr]:rounded-sm [&_tr]:border-b [&_tr]:border-neutral-800
                 `}
               >
                 <thead>
@@ -1090,7 +1090,7 @@ const app = new Elysia({
                   class={`
                     w-full table-auto rounded bg-neutral-900 text-left
                     [&_td]:p-4
-                    [&_tr]:rounded [&_tr]:border-b [&_tr]:border-neutral-800
+                    [&_tr]:rounded-sm [&_tr]:border-b [&_tr]:border-neutral-800
                   `}
                 >
                   <thead>
@@ -1212,7 +1212,7 @@ const app = new Elysia({
             class={`
               w-full table-auto rounded bg-neutral-900 text-left
               [&_td]:p-4
-              [&_tr]:rounded [&_tr]:border-b [&_tr]:border-neutral-800
+              [&_tr]:rounded-sm [&_tr]:border-b [&_tr]:border-neutral-800
             `}
           >
             <thead>
@@ -1312,7 +1312,7 @@ const app = new Elysia({
                 class={`
                   w-full table-auto rounded bg-neutral-900 text-left
                   [&_td]:p-4
-                  [&_tr]:rounded [&_tr]:border-b [&_tr]:border-neutral-800
+                  [&_tr]:rounded-sm [&_tr]:border-b [&_tr]:border-neutral-800
                   [&_ul]:list-inside [&_ul]:list-disc
                 `}
               >

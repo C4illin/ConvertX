@@ -5,7 +5,7 @@
     "dev": "bun run --watch src/index.tsx",
     "hot": "bun run --hot src/index.tsx",
     "format": "eslint --fix .",
-    "build": "postcss ./src/main.css -o ./public/generated.css",
+    "build": "bunx @tailwindcss/cli -i ./src/main.css -o ./public/generated.css",
     "lint": "run-p 'lint:*'",
     "lint:tsc": "tsc --noEmit",
     "lint:knip": "knip",
@@ -29,6 +29,8 @@
     "@eslint/js": "^9.18.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
     "@kitajs/ts-html-plugin": "^4.1.1",
+    "@tailwindcss/cli": "^4.0.3",
+    "@tailwindcss/postcss": "^4.0.3",
     "@total-typescript/ts-reset": "^0.6.1",
     "@types/bun": "^1.2.0",
     "@types/eslint-plugin-tailwindcss": "^3.17.0",
@@ -47,8 +49,8 @@
     "postcss": "^8.5.1",
     "postcss-cli": "^11.0.0",
     "prettier": "^3.4.2",
-    "tailwind-scrollbar": "^3.1.0",
-    "tailwindcss": "^3.4.17",
+    "tailwind-scrollbar": "^4.0.0",
+    "tailwindcss": "^4.0.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.21.0"
   }

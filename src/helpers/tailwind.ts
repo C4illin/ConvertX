@@ -1,4 +1,4 @@
-import tw from "tailwindcss";
+import tailwind from "@tailwindcss/postcss";
 import postcss from "postcss";
 
 export const generateTailwind = async () => {
@@ -7,7 +7,7 @@ export const generateTailwind = async () => {
     .then((sourceText) => {
       const config = "./tailwind.config.js";
 
-      return postcss([tw(config)]).process(sourceText, {
+      return postcss([tailwind]).process(sourceText, {
         from: "./src/main.css",
         to: "./public/generated.css",
       });
