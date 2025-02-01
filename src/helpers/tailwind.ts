@@ -5,8 +5,6 @@ export const generateTailwind = async () => {
   const result = await Bun.file("./src/main.css")
     .text()
     .then((sourceText) => {
-      const config = "./tailwind.config.js";
-
       return postcss([tailwind]).process(sourceText, {
         from: "./src/main.css",
         to: "./public/generated.css",

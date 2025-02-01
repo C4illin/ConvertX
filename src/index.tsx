@@ -606,8 +606,8 @@ const app = new Elysia({
                 <div class="select_container relative">
                   <article
                     class={`
-                      convert_to_popup absolute z-2 m-0 hidden h-[30vh] max-h-[50vh] w-full
-                      flex-col overflow-y-auto overflow-x-hidden rounded bg-neutral-800
+                      convert_to_popup absolute z-2 m-0 hidden h-[30vh] max-h-[50vh] w-full flex-col
+                      overflow-x-hidden overflow-y-auto rounded bg-neutral-800
                       sm:h-[30vh]
                     `}
                   >
@@ -694,7 +694,7 @@ const app = new Elysia({
           <article
             class={`
               convert_to_popup absolute z-2 m-0 hidden h-[50vh] max-h-[50vh] w-full flex-col
-              overflow-y-auto overflow-x-hidden rounded bg-neutral-800
+              overflow-x-hidden overflow-y-auto rounded bg-neutral-800
               sm:h-[30vh]
             `}
           >
