@@ -1420,8 +1420,14 @@ const clearJobs = () => {
 
   for (const job of jobs) {
     // delete the directories
-    rmSync(`${outputDir}${job.user_id}/${job.id}`, { recursive: true });
-    rmSync(`${uploadsDir}${job.user_id}/${job.id}`, { recursive: true });
+    rmSync(`${outputDir}${job.user_id}/${job.id}`, {
+      recursive: true,
+      force: true,
+    });
+    rmSync(`${uploadsDir}${job.user_id}/${job.id}`, {
+      recursive: true,
+      force: true,
+    });
 
     // delete the job
     db.query("DELETE FROM jobs WHERE id = ?").run(job.id);
