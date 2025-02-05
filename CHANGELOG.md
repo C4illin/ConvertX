@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.11.0](https://github.com/C4illin/ConvertX/compare/v0.10.1...v0.11.0) (2025-02-05)
+
+
+### Features
+
+* add deps for vaapi ([2bbbd03](https://github.com/C4illin/ConvertX/commit/2bbbd03554d384a4488143f29e5fc863cfdf333b)), closes [#192](https://github.com/C4illin/ConvertX/issues/192)
+
+
+### Bug Fixes
+
+* don't crash if file is not found ([16f27c1](https://github.com/C4illin/ConvertX/commit/16f27c13bbc1c0e5fa2316f3db11d0918524053b))
+* install numpy for inkscape ([0e61051](https://github.com/C4illin/ConvertX/commit/0e61051fc6be188164c3865b4fb579c140859fdc))
+
 ## [0.10.1](https://github.com/C4illin/ConvertX/compare/v0.10.0...v0.10.1) (2025-01-21)
 
 
