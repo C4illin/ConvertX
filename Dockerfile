@@ -54,7 +54,8 @@ RUN apk --no-cache add  \
   inkscape \
   poppler-utils \
   gcompat \
-  libva-utils
+  libva-utils \
+  py3-numpy
 
 RUN apk --no-cache add qt6-qtbase-private-dev --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community/
 
