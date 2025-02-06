@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @plugin 'tailwind-scrollbar';
 
@@ -37,28 +37,28 @@
 }
 
 @utility article {
-  @apply p-4 mb-4 bg-neutral-800/40 w-full mx-auto max-w-4xl rounded-sm;
+  @apply px-2 sm:px-4 py-4 mb-4 bg-neutral-800/40 w-full mx-auto max-w-4xl rounded-sm;
 }
 
 @utility btn-primary {
-  @apply bg-accent-500 text-contrast rounded-sm p-4 hover:bg-accent-400 cursor-pointer transition-colors;
+  @apply bg-accent-500 text-contrast rounded-sm p-2 sm:p-4 hover:bg-accent-400 cursor-pointer transition-colors;
 }
 
 :root {
-    --contrast: 255, 255, 255;
-    --neutral-900: 243, 244, 246;
-    --neutral-800: 229, 231, 235;
-    --neutral-700: 209, 213, 219;
-    --neutral-600: 156, 163, 175;
-    --neutral-500: 180, 180, 180;
-    --neutral-400: 75, 85, 99;
-    --neutral-300: 55, 65, 81;
-    --neutral-200: 31, 41, 55;
-    --neutral-100: 17, 24, 39;
-    --accent-400: 132, 204, 22;
-    --accent-500: 101, 163, 13;
-    --accent-600: 77, 124, 15;
-  }
+  --contrast: 255, 255, 255;
+  --neutral-900: 243, 244, 246;
+  --neutral-800: 229, 231, 235;
+  --neutral-700: 209, 213, 219;
+  --neutral-600: 156, 163, 175;
+  --neutral-500: 180, 180, 180;
+  --neutral-400: 75, 85, 99;
+  --neutral-300: 55, 65, 81;
+  --neutral-200: 31, 41, 55;
+  --neutral-100: 17, 24, 39;
+  --accent-400: 132, 204, 22;
+  --accent-500: 101, 163, 13;
+  --accent-600: 77, 124, 15;
+}
 
 @media (prefers-color-scheme: dark) {
   :root {

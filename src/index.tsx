@@ -153,7 +153,12 @@ const app = new Elysia({
 
     return (
       <BaseHtml title="ConvertX | Setup" webroot={WEBROOT}>
-        <main class="mx-auto w-full max-w-4xl px-4">
+        <main
+          class={`
+            mx-auto w-full max-w-4xl px-2
+            sm:px-4
+          `}
+        >
           <h1 class="my-8 text-3xl">Welcome to ConvertX!</h1>
           <article class="article p-0">
             <header class="w-full bg-neutral-800 p-4">
@@ -217,7 +222,12 @@ const app = new Elysia({
             accountRegistration={ACCOUNT_REGISTRATION}
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
           />
-          <main class="w-full px-4">
+          <main
+            class={`
+              w-full px-2
+              sm:px-4
+            `}
+          >
             <article class="article">
               <form method="post" class="flex flex-col gap-4">
                 <fieldset class="mb-4 flex flex-col gap-4">
@@ -343,7 +353,12 @@ const app = new Elysia({
             accountRegistration={ACCOUNT_REGISTRATION}
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
           />
-          <main class="w-full px-4">
+          <main
+            class={`
+              w-full px-2
+              sm:px-4
+            `}
+          >
             <article class="article">
               <form method="post" class="flex flex-col gap-4">
                 <fieldset class="mb-4 flex flex-col gap-4">
@@ -556,7 +571,12 @@ const app = new Elysia({
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
             loggedIn
           />
-          <main class="w-full px-4">
+          <main
+            class={`
+              w-full px-2
+              sm:px-4
+            `}
+          >
             <article class="article">
               <h1 class="mb-4 text-xl">Convert</h1>
               <div class="mb-4 max-h-[50vh] overflow-y-auto scrollbar-thin">
@@ -564,7 +584,7 @@ const app = new Elysia({
                   id="file-list"
                   class={`
                     w-full table-auto rounded bg-neutral-900
-                    [&_td]:p-4
+                    [&_td]:p-4 [&_td]:first:max-w-[30vw] [&_td]:first:truncate
                     [&_tr]:rounded-sm [&_tr]:border-b [&_tr]:border-neutral-800
                   `}
                 />
@@ -942,7 +962,8 @@ const app = new Elysia({
     let userJobs = db
       .query("SELECT * FROM jobs WHERE user_id = ?")
       .as(Jobs)
-      .all(user.id);
+      .all(user.id)
+      .reverse();
 
     for (const job of userJobs) {
       const files = db
@@ -964,31 +985,75 @@ const app = new Elysia({
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
             loggedIn
           />
-          <main class="w-full px-4">
+          <main
+            class={`
+              w-full px-2
+              sm:px-4
+            `}
+          >
             <article class="article">
               <h1 class="mb-4 text-xl">Results</h1>
               <table
                 class={`
-                  w-full table-auto rounded bg-neutral-900 text-left
+                  w-full table-auto overflow-y-auto rounded bg-neutral-900 text-left
                   [&_td]:p-4
                   [&_tr]:rounded-sm [&_tr]:border-b [&_tr]:border-neutral-800
                 `}
               >
                 <thead>
                   <tr>
-                    <th class="px-4 py-2">Time</th>
-                    <th class="px-4 py-2">Files</th>
-                    <th class="px-4 py-2">Files Done</th>
-                    <th class="px-4 py-2">Status</th>
-                    <th class="px-4 py-2">View</th>
+                    <th
+                      class={`
+                        px-2 py-2
+                        sm:px-4
+                      `}
+                    >
+                      Time
+                    </th>
+                    <th
+                      class={`
+                        px-2 py-2
+                        sm:px-4
+                      `}
+                    >
+                      Files
+                    </th>
+                    <th
+                      class={`
+                        px-2 py-2
+                        max-sm:hidden
+                        sm:px-4
+                      `}
+                    >
+                      Files Done
+                    </th>
+                    <th
+                      class={`
+                        px-2 py-2
+                        sm:px-4
+                      `}
+                    >
+                      Status
+                    </th>
+                    <th
+                      class={`
+                        px-2 py-2
+                        sm:px-4
+                      `}
+                    >
+                      View
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {userJobs.map((job) => (
                     <tr>
-                      <td safe>{job.date_created}</td>
+                      <td safe>
+                        {job.date_created.split("T")[1]?.split(".")[0] ??
+                          job.date_created}
+                      </td>
                       <td>{job.num_files}</td>
-                      <td>{job.finished_files}</td>
+                      <td class="max-sm:hidden">{job.finished_files}</td>
                       <td safe>{job.status}</td>
                       <td>
                         <a
@@ -1055,7 +1120,12 @@ const app = new Elysia({
               allowUnauthenticated={ALLOW_UNAUTHENTICATED}
               loggedIn
             />
-            <main class="w-full px-4">
+            <main
+              class={`
+                w-full px-2
+                sm:px-4
+              `}
+            >
               <article class="article">
                 <div class="mb-4 flex items-center justify-between">
                   <h1 class="text-xl">Results</h1>
@@ -1095,16 +1165,46 @@ const app = new Elysia({
                 >
                   <thead>
                     <tr>
-                      <th class="px-4 py-2">Converted File Name</th>
-                      <th class="px-4 py-2">Status</th>
-                      <th class="px-4 py-2">View</th>
-                      <th class="px-4 py-2">Download</th>
+                      <th
+                        class={`
+                          px-2 py-2
+                          sm:px-4
+                        `}
+                      >
+                        Converted File Name
+                      </th>
+                      <th
+                        class={`
+                          px-2 py-2
+                          sm:px-4
+                        `}
+                      >
+                        Status
+                      </th>
+                      <th
+                        class={`
+                          px-2 py-2
+                          sm:px-4
+                        `}
+                      >
+                        View
+                      </th>
+                      <th
+                        class={`
+                          px-2 py-2
+                          sm:px-4
+                        `}
+                      >
+                        Download
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {files.map((file) => (
                       <tr>
-                        <td safe>{file.output_file_name}</td>
+                        <td safe class="max-w-[20vw] truncate">
+                          {file.output_file_name}
+                        </td>
                         <td safe>{file.status}</td>
                         <td>
                           <a
@@ -1217,16 +1317,46 @@ const app = new Elysia({
           >
             <thead>
               <tr>
-                <th class="px-4 py-2">Converted File Name</th>
-                <th class="px-4 py-2">Status</th>
-                <th class="px-4 py-2">View</th>
-                <th class="px-4 py-2">Download</th>
+                <th
+                  class={`
+                    px-2 py-2
+                    sm:px-4
+                  `}
+                >
+                  Converted File Name
+                </th>
+                <th
+                  class={`
+                    px-2 py-2
+                    sm:px-4
+                  `}
+                >
+                  Status
+                </th>
+                <th
+                  class={`
+                    px-2 py-2
+                    sm:px-4
+                  `}
+                >
+                  View
+                </th>
+                <th
+                  class={`
+                    px-2 py-2
+                    sm:px-4
+                  `}
+                >
+                  Download
+                </th>
               </tr>
             </thead>
             <tbody>
               {files.map((file) => (
                 <tr>
-                  <td safe>{file.output_file_name}</td>
+                  <td safe class="max-w-[20vw] truncate">
+                    {file.output_file_name}
+                  </td>
                   <td safe>{file.status}</td>
                   <td>
                     <a
@@ -1305,7 +1435,12 @@ const app = new Elysia({
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
             loggedIn
           />
-          <main class="w-full px-4">
+          <main
+            class={`
+              w-full px-2
+              sm:px-4
+            `}
+          >
             <article class="article">
               <h1 class="mb-4 text-xl">Converters</h1>
               <table
