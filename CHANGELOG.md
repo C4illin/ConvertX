@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1](https://github.com/C4illin/ConvertX/compare/v0.11.0...v0.11.1) (2025-02-07)
+
+
+### Bug Fixes
+
+* mobile view overflow ([bec58ac](https://github.com/C4illin/ConvertX/commit/bec58ac59f9600e35385b9e21d174f3ab1b42b1d))
+
 ## [0.11.0](https://github.com/C4illin/ConvertX/compare/v0.10.1...v0.11.0) (2025-02-05)
 
 
