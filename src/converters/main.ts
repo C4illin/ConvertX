@@ -9,6 +9,7 @@ import { convert as convertresvg, properties as propertiesresvg } from "./resvg"
 import { convert as convertImage, properties as propertiesImage } from "./vips";
 import { convert as convertxelatex, properties as propertiesxelatex } from "./xelatex";
 import { convert as convertCalibre, properties as propertiesCalibre } from "./calibre";
+import { convert as convertLibheif, properties as propertiesLibheif } from "./libheif";
 
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
@@ -48,6 +49,10 @@ const properties: Record<
   resvg: {
     properties: propertiesresvg,
     converter: convertresvg,
+  },
+  libheif: {
+    properties: propertiesLibheif,
+    converter: convertLibheif,
   },
   vips: {
     properties: propertiesImage,

@@ -26,6 +26,7 @@ A self-hosted online file converter. Supports over a thousand different formats.
 |------------------------------------------------------------------------------|---------------|---------------|-------------|
 | [libjxl](https://github.com/libjxl/libjxl)                                   | JPEG XL       | 11            | 11          |
 | [resvg](https://github.com/RazrFalcon/resvg)                                 | SVG           | 1             | 1           |
+| [libheif](https://github.com/strukturag/libheif)                             | HEIF          | 7             | 6           |
 | [Vips](https://github.com/libvips/libvips)                                   | Images        | 45            | 23          |
 | [XeLaTeX](https://tug.org/xetex/)                                            | LaTeX         | 1             | 1           |
 | [Calibre](https://calibre-ebook.com/)                                        | E-books       | 26            | 19          |
