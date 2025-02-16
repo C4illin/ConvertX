@@ -2,10 +2,6 @@ FROM oven/bun:1.2.2-alpine AS base
 LABEL org.opencontainers.image.source="https://github.com/C4illin/ConvertX"
 WORKDIR /app
 
-RUN apk --no-cache add  \
-  gettext \
-  libc6-compat 
-
 # install dependencies into temp directory
 # this will cache them and speed up future builds
 FROM base AS install
@@ -18,21 +14,19 @@ RUN mkdir -p /temp/prod
 COPY package.json bun.lock /temp/prod/
 RUN cd /temp/prod && bun install --frozen-lockfile --production
 
-FROM base AS builder
+FROM base AS resvg
 RUN apk --no-cache add curl gcc
 ENV PATH=/root/.cargo/bin:$PATH
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 RUN cargo install resvg
 
+FROM base AS dcraw
 # build dcraw
-RUN cd /tmp ; \
-  wget https://www.dechifro.org/dcraw/archive/dcraw-9.28.0.tar.gz ; \
-  tar -xzvf dcraw-*.tar.gz ; \
-  cd /tmp/dcraw ; \
-  sed 's/-llcms2/-llcms2 -lintl/' <install >install.new && mv install.new install ; \
-  chmod 755 install ;
-RUN cd /tmp/dcraw ; \
-  ./install ;
+RUN apk --no-cache add build-base wget tar jasper-dev jpeg-dev lcms2-dev libc6-compat gettext libintl gettext-dev gettext-libs gettext-lang gettext-static
+RUN mkdir -p /temp
+WORKDIR /temp
+RUN wget https://www.dechifro.org/dcraw/archive/dcraw-9.28.0.tar.gz ; \
+  tar -xzvf dcraw-*.tar.gz ; cd dcraw ; chmod 755 install ; ./install ; 
 
 # copy node_modules from temp directory
 # then copy all (non-ignored) project files into the image
@@ -81,8 +75,8 @@ RUN apk --no-cache add calibre --repository=http://dl-cdn.alpinelinux.org/alpine
 #   texmf-dist-fontsextra \
 
 COPY --from=install /temp/prod/node_modules node_modules
-COPY --from=builder /root/.cargo/bin/resvg /usr/local/bin/resvg
-COPY --from=builder /usr/local/bin/dcraw /usr/local/bin/dcraw
+COPY --from=resvg /root/.cargo/bin/resvg /usr/local/bin/resvg
+COPY --from=dcraw /usr/local/bin/dcraw /usr/local/bin/dcraw
 COPY --from=prerelease /app/public/generated.css /app/public/
 # COPY --from=prerelease /app/src/index.tsx /app/src/
 # COPY --from=prerelease /app/package.json .
