@@ -49,13 +49,16 @@ RUN apk --no-cache add  \
   vips-tools \
   vips-poppler \
   vips-jxl \
+  vips-heif \
+  vips-magick \
   libjxl-tools \
   assimp \
   inkscape \
   poppler-utils \
   gcompat \
   libva-utils \
-  py3-numpy
+  py3-numpy \
+  libheif-tools
 
 RUN apk --no-cache add qt6-qtbase-private-dev --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community/
 
