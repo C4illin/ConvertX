@@ -2,6 +2,10 @@ FROM oven/bun:1.2.2-alpine AS base
 LABEL org.opencontainers.image.source="https://github.com/C4illin/ConvertX"
 WORKDIR /app
 
+RUN apk --no-cache add  \
+  gettext \
+  libc6-compat 
+
 # install dependencies into temp directory
 # this will cache them and speed up future builds
 FROM base AS install
@@ -19,6 +23,16 @@ RUN apk --no-cache add curl gcc
 ENV PATH=/root/.cargo/bin:$PATH
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 RUN cargo install resvg
+
+# build dcraw
+RUN cd /tmp ; \
+  wget https://www.dechifro.org/dcraw/archive/dcraw-9.28.0.tar.gz ; \
+  tar -xzvf dcraw-*.tar.gz ; \
+  cd /tmp/dcraw ; \
+  sed 's/-llcms2/-llcms2 -lintl/' <install >install.new && mv install.new install ; \
+  chmod 755 install ;
+RUN cd /tmp/dcraw ; \
+  ./install ;
 
 # copy node_modules from temp directory
 # then copy all (non-ignored) project files into the image
@@ -68,6 +82,7 @@ RUN apk --no-cache add calibre --repository=http://dl-cdn.alpinelinux.org/alpine
 
 COPY --from=install /temp/prod/node_modules node_modules
 COPY --from=builder /root/.cargo/bin/resvg /usr/local/bin/resvg
+COPY --from=builder /usr/local/bin/dcraw /usr/local/bin/dcraw
 COPY --from=prerelease /app/public/generated.css /app/public/
 # COPY --from=prerelease /app/src/index.tsx /app/src/
 # COPY --from=prerelease /app/package.json .
