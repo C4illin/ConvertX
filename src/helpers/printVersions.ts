@@ -1,5 +1,6 @@
 import { exec } from "node:child_process";
 import { version } from "../../package.json";
+
 console.log(`ConvertX v${version}`);
 
 if (process.env.NODE_ENV === "production") {
@@ -110,6 +111,16 @@ if (process.env.NODE_ENV === "production") {
 
     if (stdout) {
       console.log(stdout.split("\n")[0]);
+    }
+  });
+
+  exec("heif-info -v", (error, stdout) => {
+    if (error) {
+      console.error("libheif is not installed");
+    }
+
+    if (stdout) {
+      console.log(`libheif v${stdout.split("\n")[0]}`);
     }
   });
 
