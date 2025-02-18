@@ -37,6 +37,8 @@ LABEL maintainer="Emrik Östling (C4illin)"
 LABEL description="ConvertX: self-hosted online file converter supporting 700+ file formats."
 LABEL repo="https://github.com/C4illin/ConvertX"
 
+RUN apk --no-cache add qt6-qtbase-private-dev libheif-tools --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community/
+
 # install additional dependencies
 RUN apk --no-cache add  \
   pandoc \
@@ -57,10 +59,7 @@ RUN apk --no-cache add  \
   poppler-utils \
   gcompat \
   libva-utils \
-  py3-numpy \
-  libheif-tools
-
-RUN apk --no-cache add qt6-qtbase-private-dev --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community/
+  py3-numpy
 
 RUN apk --no-cache add calibre --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/
 
