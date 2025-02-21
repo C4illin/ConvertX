@@ -41,7 +41,7 @@
     "eslint-plugin-readable-tailwind": "^2.0.0-beta.1",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-tailwindcss": "4.0.0-alpha.0",
-    "globals": "^15.14.0",
+    "globals": "^16.0.0",
     "knip": "^5.43.6",
     "npm-run-all2": "^7.0.2",
     "postcss": "^8.5.1",
