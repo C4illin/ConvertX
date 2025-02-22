@@ -33,7 +33,7 @@
     "@total-typescript/ts-reset": "^0.6.1",
     "@types/bun": "^1.2.2",
     "@types/eslint-plugin-tailwindcss": "^3.17.0",
-    "@types/eslint__js": "^8.42.3",
+    "@types/eslint__js": "^9.0.0",
     "@types/node": "^22.13.1",
     "autoprefixer": "^10.4.20",
     "cssnano": "^7.0.6",
