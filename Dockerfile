@@ -23,7 +23,7 @@ RUN cargo install resvg
 # copy node_modules from temp directory
 # then copy all (non-ignored) project files into the image
 # will switch to alpine again when it works
-FROM oven/bun:1.2.2-slim AS prerelease
+FROM oven/bun:1.2.3-slim AS prerelease
 WORKDIR /app
 COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
