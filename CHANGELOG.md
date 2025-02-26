@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.2](https://github.com/C4illin/ConvertX/compare/v0.11.1...v0.11.2) (2025-02-26)
+
+
+### Bug Fixes
+
+* add libheif ([decfea5](https://github.com/C4illin/ConvertX/commit/decfea5dc9627b216bb276a9e1578c32cfa1deb6)), closes [#202](https://github.com/C4illin/ConvertX/issues/202)
+* update libheif to 1.19.5 ([fba5e21](https://github.com/C4illin/ConvertX/commit/fba5e212e8d0eaba8971e239e35aeb521f3cd813)), closes [#202](https://github.com/C4illin/ConvertX/issues/202)
+
 ## [0.11.1](https://github.com/C4illin/ConvertX/compare/v0.11.0...v0.11.1) (2025-02-07)
 
 
