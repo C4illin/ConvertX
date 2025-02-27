@@ -50,13 +50,13 @@ const properties: Record<
     properties: propertiesresvg,
     converter: convertresvg,
   },
-  libheif: {
-    properties: propertiesLibheif,
-    converter: convertLibheif,
-  },
   vips: {
     properties: propertiesImage,
     converter: convertImage,
+  },
+  libheif: {
+    properties: propertiesLibheif,
+    converter: convertLibheif,
   },
   xelatex: {
     properties: propertiesxelatex,
