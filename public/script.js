@@ -248,6 +248,10 @@ const uploadFiles = (files) => {
       }
     };
 
+  xhr.onerror = (e) => {
+    console.log(e);
+  };
+
   xhr.send(formData);
 };
 
