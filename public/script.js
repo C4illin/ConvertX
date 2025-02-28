@@ -118,6 +118,7 @@ fileInput.addEventListener("change", (e) => {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${file.name}</td>
+      <td><progress max="100"></progress></td>
       <td>${(file.size / 1024).toFixed(2)} kB</td>
       <td><a onclick="deleteRow(this)">Remove</a></td>
     `;
@@ -153,11 +154,15 @@ fileInput.addEventListener("change", (e) => {
     // Append the row to the file-list table
     fileList.appendChild(row);
 
+    //Imbed row into the file to reference later
+    file.htmlRow = row;
+
+
     // Append the file to the hidden input
     fileNames.push(file.name);
-  }
 
-  uploadFiles(files);
+    uploadFile(file);
+  }
 });
 
 const setTitle = () => {
@@ -197,33 +202,49 @@ const deleteRow = (target) => {
     .catch((err) => console.log(err));
 };
 
-const uploadFiles = (files) => {
+const uploadFile = (file) => {
   convertButton.disabled = true;
   convertButton.textContent = "Uploading...";
   pendingFiles += 1;
 
   const formData = new FormData();
+  formData.append("file", file, file.name);
 
-  for (const file of files) {
-    formData.append("file", file, file.name);
-  }
+  let xhr = new XMLHttpRequest(); 
 
-  fetch(`${webroot}/upload`, {
-    method: "POST",
-    body: formData,
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      pendingFiles -= 1;
-      if (pendingFiles === 0) {
-        if (formatSelected) {
-          convertButton.disabled = false;
-        }
-        convertButton.textContent = "Convert";
+  xhr.open("POST", `${webroot}/upload`, true);
+
+  xhr.onload = (e) => {
+    let data = JSON.parse(xhr.responseText);
+
+    pendingFiles -= 1;
+    if (pendingFiles === 0) {
+      if (formatSelected) {
+        convertButton.disabled = false;
       }
-      console.log(data);
-    })
-    .catch((err) => console.log(err));
+      convertButton.textContent = "Convert";
+    }
+
+    //Remove the progress bar when upload is done
+    let progressbar = file.htmlRow.getElementsByTagName("progress");
+    progressbar[0].parentElement.remove();
+    console.log(data);
+  };
+
+  xhr.upload.onprogress = (e) => {
+    let sent = e.loaded;
+    let total = e.total;
+    console.log(`upload progress (${file.name}):`, (100 * sent) / total);
+
+    let progressbar = file.htmlRow.getElementsByTagName("progress");
+    progressbar[0].value = ((100 * sent) / total);
+  };
+
+  xhr.onerror = (e) => {
+    console.log(e);
+  };
+
+  xhr.send(formData);
 };
 
 const formConvert = document.querySelector(`form[action='${webroot}/convert']`);
