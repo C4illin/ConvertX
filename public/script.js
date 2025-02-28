@@ -162,7 +162,9 @@ fileInput.addEventListener("change", (e) => {
     fileNames.push(file.name);
   }
 
-  uploadFiles(files);
+  for (const file of files) {
+    uploadFiles([file]);
+  }
 });
 
 const setTitle = () => {
@@ -237,16 +239,17 @@ const uploadFiles = (files) => {
   };
 
   xhr.upload.onprogress = (e) => {
-      //All files upload together are binded by the same progress. The loop should probably be on the call to this function to track each upload individually.
-      let sent = e.loaded;
-      let total = e.total;
-      console.log("upload progress:", (100 * sent) / total);
+    //All files upload together are binded by the same progress. The loop should probably be on the call to this function (uploadFiles) to track each upload individually.
+    //This will consequently only allow a single file uploaded per request.
+    let sent = e.loaded;
+    let total = e.total;
+    console.log(`upload progress (${files[0].name}):`, (100 * sent) / total);
 
-      for (const file of files) {
-        let progressbar = file.htmlRow.getElementsByTagName("progress");
-        progressbar[0].value = ((100 * sent) / total);
-      }
-    };
+    for (const file of files) {
+      let progressbar = file.htmlRow.getElementsByTagName("progress");
+      progressbar[0].value = ((100 * sent) / total);
+    }
+  };
 
   xhr.onerror = (e) => {
     console.log(e);
