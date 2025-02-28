@@ -160,10 +160,8 @@ fileInput.addEventListener("change", (e) => {
 
     // Append the file to the hidden input
     fileNames.push(file.name);
-  }
 
-  for (const file of files) {
-    uploadFiles([file]);
+    uploadFile(file);
   }
 });
 
@@ -204,16 +202,13 @@ const deleteRow = (target) => {
     .catch((err) => console.log(err));
 };
 
-const uploadFiles = (files) => {
+const uploadFile = (file) => {
   convertButton.disabled = true;
   convertButton.textContent = "Uploading...";
   pendingFiles += 1;
 
   const formData = new FormData();
-
-  for (const file of files) {
-    formData.append("file", file, file.name);
-  }
+  formData.append("file", file, file.name);
 
   let xhr = new XMLHttpRequest(); 
 
@@ -231,24 +226,18 @@ const uploadFiles = (files) => {
     }
 
     //Remove the progress bar when upload is done
-    for (const file of files) {
-      let progressbar = file.htmlRow.getElementsByTagName("progress");
-      progressbar[0].parentElement.remove();
-    }
+    let progressbar = file.htmlRow.getElementsByTagName("progress");
+    progressbar[0].parentElement.remove();
     console.log(data);
   };
 
   xhr.upload.onprogress = (e) => {
-    //All files upload together are binded by the same progress. The loop should probably be on the call to this function (uploadFiles) to track each upload individually.
-    //This will consequently only allow a single file uploaded per request.
     let sent = e.loaded;
     let total = e.total;
-    console.log(`upload progress (${files[0].name}):`, (100 * sent) / total);
+    console.log(`upload progress (${file.name}):`, (100 * sent) / total);
 
-    for (const file of files) {
-      let progressbar = file.htmlRow.getElementsByTagName("progress");
-      progressbar[0].value = ((100 * sent) / total);
-    }
+    let progressbar = file.htmlRow.getElementsByTagName("progress");
+    progressbar[0].value = ((100 * sent) / total);
   };
 
   xhr.onerror = (e) => {
