@@ -7,6 +7,7 @@ import { jwt, type JWTPayloadSpec } from "@elysiajs/jwt";
 import { staticPlugin } from "@elysiajs/static";
 import { Database } from "bun:sqlite";
 import { Elysia, t } from "elysia";
+import sanitize from "sanitize-filename";
 import { BaseHtml } from "./components/base";
 import { Header } from "./components/header";
 import {
@@ -886,6 +887,10 @@ const app = new Elysia({
       const converterName = body.convert_to.split(",")[1];
       const fileNames = JSON.parse(body.file_names) as string[];
 
+      for (let i = 0; i < fileNames.length; i++) {
+        fileNames[i] = sanitize(fileNames[i] || "");
+      }
+
       if (!Array.isArray(fileNames) || fileNames.length === 0) {
         return redirect(`${WEBROOT}/`, 302);
       }
@@ -1411,7 +1416,7 @@ const app = new Elysia({
       // parse from url encoded string
       const userId = decodeURIComponent(params.userId);
       const jobId = decodeURIComponent(params.jobId);
-      const fileName = decodeURIComponent(params.fileName);
+      const fileName = sanitize(decodeURIComponent(params.fileName));
 
       const filePath = `${outputDir}${userId}/${jobId}/${fileName}`;
       return Bun.file(filePath);

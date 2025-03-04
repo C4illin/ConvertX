@@ -17,7 +17,8 @@
     "@elysiajs/jwt": "^1.2.0",
     "@elysiajs/static": "^1.2.0",
     "@kitajs/html": "^4.2.7",
-    "elysia": "^1.2.12"
+    "elysia": "^1.2.12",
+    "sanitize-filename": "^1.6.3"
   },
   "module": "src/index.tsx",
   "type": "module",
