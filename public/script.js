@@ -214,7 +214,7 @@ const uploadFile = (file) => {
 
   xhr.open("POST", `${webroot}/upload`, true);
 
-  xhr.onload = (e) => {
+  xhr.onload = () => {
     let data = JSON.parse(xhr.responseText);
 
     pendingFiles -= 1;
