@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.12.0](https://github.com/C4illin/ConvertX/compare/v0.11.1...v0.12.0) (2025-03-06)
+
+
+### Features
+
+* added progress bar for file upload ([db60f35](https://github.com/C4illin/ConvertX/commit/db60f355b2973f43f8e5990e6fe4e351b959b659))
+* made every upload file independent ([cc54bdc](https://github.com/C4illin/ConvertX/commit/cc54bdcbe764c41cc3273485d072fd3178ad2dca))
+* replace exec with execFile ([9263d17](https://github.com/C4illin/ConvertX/commit/9263d17609dc4b2b367eb7fee67b3182e283b3a3))
+
+
+### Bug Fixes
+
+* add libheif ([6b92540](https://github.com/C4illin/ConvertX/commit/6b9254047c0598963aee1d99e20ba1650a0368bf))
+* add libheif ([decfea5](https://github.com/C4illin/ConvertX/commit/decfea5dc9627b216bb276a9e1578c32cfa1deb6)), closes [#202](https://github.com/C4illin/ConvertX/issues/202)
+* added onerror log ([ae4bbc8](https://github.com/C4illin/ConvertX/commit/ae4bbc8baacbaf67763c62ea44140bb21cc17230))
+* refactored uploadFile to only accept a single file instead of multiple ([dc82a43](https://github.com/C4illin/ConvertX/commit/dc82a438d4104b79ff423d502a6779a43928968a))
+* update libheif to 1.19.5 ([fba5e21](https://github.com/C4illin/ConvertX/commit/fba5e212e8d0eaba8971e239e35aeb521f3cd813)), closes [#202](https://github.com/C4illin/ConvertX/issues/202)
+
 ## [0.11.1](https://github.com/C4illin/ConvertX/compare/v0.11.0...v0.11.1) (2025-02-07)
 
 
