@@ -1,5 +1,4 @@
-import { exec } from "node:child_process";
-
+import { execFile } from "node:child_process";
 
 // declare possible conversions
 export const properties = {
@@ -120,8 +119,9 @@ export function convert(
   }
 
   return new Promise((resolve, reject) => {
-    exec(
-      `vips ${action} "${filePath}" "${targetPath}"`,
+    execFile(
+      "vips",
+      [action, filePath, targetPath],
       (error, stdout, stderr) => {
         if (error) {
           reject(`error: ${error}`);

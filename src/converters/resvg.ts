@@ -1,4 +1,4 @@
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
 
 export const properties = {
   from: {
@@ -18,7 +18,7 @@ export function convert(
   options?: unknown,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    exec(`resvg "${filePath}" "${targetPath}"`, (error, stdout, stderr) => {
+    execFile("resvg", [filePath, targetPath], (error, stdout, stderr) => {
       if (error) {
         reject(`error: ${error}`);
       }

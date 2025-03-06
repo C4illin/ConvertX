@@ -1,4 +1,4 @@
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
 
 export const properties = {
   from: {
@@ -119,10 +119,8 @@ export async function convert(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   options?: unknown,
 ): Promise<string> {
-  const command = `assimp export "${filePath}" "${targetPath}"`;
-
   return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
+    execFile("assimp", ["export", filePath, targetPath], (error, stdout, stderr) => {
       if (error) {
         reject(`error: ${error}`);
       }

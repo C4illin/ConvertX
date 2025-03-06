@@ -1,4 +1,4 @@
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
 
 export const properties = {
   from: {
@@ -129,28 +129,34 @@ export function convert(
 ): Promise<string> {
   // set xelatex here
   const xelatex = ["pdf", "latex"];
-  let option = "";
+
+  // Build arguments array
+  const args: string[] = [];
+
   if (xelatex.includes(convertTo)) {
-    option = "--pdf-engine=xelatex";
+    args.push("--pdf-engine=xelatex");
   }
+
+  args.push(filePath);
+  args.push("-f", fileType);
+  args.push("-t", convertTo);
+  args.push("-o", targetPath);
+
   return new Promise((resolve, reject) => {
-    exec(
-      `pandoc ${option} "${filePath}" -f ${fileType} -t ${convertTo} -o "${targetPath}"`,
-      (error, stdout, stderr) => {
-        if (error) {
-          reject(`error: ${error}`);
-        }
+    execFile("pandoc", args, (error, stdout, stderr) => {
+      if (error) {
+        reject(`error: ${error}`);
+      }
 
-        if (stdout) {
-          console.log(`stdout: ${stdout}`);
-        }
+      if (stdout) {
+        console.log(`stdout: ${stdout}`);
+      }
 
-        if (stderr) {
-          console.error(`stderr: ${stderr}`);
-        }
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+      }
 
-        resolve("Done");
-      },
-    );
+      resolve("Done");
+    });
   });
 }

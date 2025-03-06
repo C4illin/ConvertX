@@ -1,4 +1,4 @@
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
 
 export const properties = {
   from: {
@@ -24,8 +24,15 @@ export function convert(
       .slice(0, -1)
       .join("/")
       .replace("./", "");
-    exec(
-      `latexmk -xelatex -interaction=nonstopmode -output-directory="${outputPath}" "${filePath}"`,
+
+    execFile(
+      "latexmk",
+      [
+        "-xelatex",
+        "-interaction=nonstopmode",
+        `-output-directory=${outputPath}`,
+        filePath,
+      ],
       (error, stdout, stderr) => {
         if (error) {
           reject(`error: ${error}`);

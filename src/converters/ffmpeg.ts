@@ -1,4 +1,4 @@
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
 
 // This could be done dynamically by running `ffmpeg -formats` and parsing the output
 export const properties = {
@@ -691,19 +691,28 @@ export async function convert(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   options?: unknown,
 ): Promise<string> {
-  let extra = "";
+  let extraArgs: string[] = [];
   let message = "Done";
 
   if (convertTo === "ico") {
     // make sure image is 256x256 or smaller
-    extra = `-filter:v "scale='min(256,iw)':min'(256,ih)':force_original_aspect_ratio=decrease"`;
+    extraArgs = ['-filter:v', "scale='min(256,iw)':min'(256,ih)':force_original_aspect_ratio=decrease"];
     message = "Done: resized to 256x256";
   }
 
-  const command = `ffmpeg ${process.env.FFMPEG_ARGS || ""} -i "${filePath}" ${extra} "${targetPath}"`;
+  // Parse FFMPEG_ARGS environment variable into array
+  const ffmpegArgs = process.env.FFMPEG_ARGS ? process.env.FFMPEG_ARGS.split(/\s+/) : [];
+  
+  // Build arguments array
+  const args = [
+    ...ffmpegArgs,
+    "-i", filePath,
+    ...extraArgs,
+    targetPath
+  ];
 
   return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
+    execFile("ffmpeg", args, (error, stdout, stderr) => {
       if (error) {
         reject(`error: ${error}`);
       }

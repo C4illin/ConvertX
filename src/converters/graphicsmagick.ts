@@ -1,4 +1,4 @@
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
 
 export const properties = {
   from: {
@@ -317,8 +317,9 @@ export function convert(
   options?: unknown,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    exec(
-      `gm convert "${filePath}" "${targetPath}"`,
+    execFile(
+      "gm",
+      ["convert", filePath, targetPath],
       (error, stdout, stderr) => {
         if (error) {
           reject(`error: ${error}`);
