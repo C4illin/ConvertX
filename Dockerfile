@@ -22,7 +22,7 @@ RUN cargo install resvg
 
 FROM base AS dcraw
 # build dcraw
-RUN apk --no-cache add build-base wget tar jasper-dev jpeg-dev lcms2-dev libc6-compat gettext libintl gettext-dev gettext-libs gettext-lang gettext-static
+RUN apk --no-cache add build-base wget tar jasper-dev jpeg-dev lcms2-dev libc6-compat gettext libintl gettext-dev gettext-libs gettext-lang gettext-static intltool linux-tools-dev
 RUN mkdir -p /temp
 WORKDIR /temp
 RUN wget https://www.dechifro.org/dcraw/archive/dcraw-9.28.0.tar.gz ; \
