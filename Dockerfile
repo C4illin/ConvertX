@@ -69,8 +69,6 @@ RUN apk --no-cache add calibre --repository=http://dl-cdn.alpinelinux.org/alpine
 COPY --from=install /temp/prod/node_modules node_modules
 COPY --from=builder /root/.cargo/bin/resvg /usr/local/bin/resvg
 COPY --from=prerelease /app/public/generated.css /app/public/
-# COPY --from=prerelease /app/src/index.tsx /app/src/
-# COPY --from=prerelease /app/package.json .
 COPY . .
 
 EXPOSE 3000/tcp

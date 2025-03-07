@@ -1,7 +1,6 @@
 import { randomInt, randomUUID } from "node:crypto";
 import { rmSync } from "node:fs";
 import { mkdir, unlink } from "node:fs/promises";
-import cookie from "@elysiajs/cookie";
 import { html, Html } from "@elysiajs/html";
 import { jwt, type JWTPayloadSpec } from "@elysiajs/jwt";
 import { staticPlugin } from "@elysiajs/static";
@@ -117,7 +116,6 @@ const app = new Elysia({
   },
   prefix: WEBROOT,
 })
-  .use(cookie())
   .use(html())
   .use(
     jwt({
