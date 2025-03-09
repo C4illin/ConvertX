@@ -20,10 +20,7 @@ ENV PATH=/root/.cargo/bin:$PATH
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 RUN cargo install resvg
 
-# copy node_modules from temp directory
-# then copy all (non-ignored) project files into the image
-# will switch to alpine again when it works
-FROM oven/bun:1.2.4-slim AS prerelease
+FROM base AS prerelease
 WORKDIR /app
 COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
