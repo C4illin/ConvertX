@@ -691,7 +691,7 @@ const app = new Elysia({
               </article>
               <input
                 class={`
-                  btn-primary w-full
+                  btn-primary w-full opacity-100
                   disabled:cursor-not-allowed disabled:opacity-50
                 `}
                 type="submit"
