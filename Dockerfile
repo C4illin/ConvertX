@@ -30,9 +30,6 @@ RUN bun run build
 
 # copy production dependencies and source code into final image
 FROM base AS release
-LABEL maintainer="Emrik Östling (C4illin)"
-LABEL description="ConvertX: self-hosted online file converter supporting 700+ file formats."
-LABEL repo="https://github.com/C4illin/ConvertX"
 
 RUN apk --no-cache add qt6-qtbase-private-dev libheif-tools --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community/
 
