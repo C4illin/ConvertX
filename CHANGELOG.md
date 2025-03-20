@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.12.1](https://github.com/C4illin/ConvertX/compare/v0.12.0...v0.12.1) (2025-03-20)
+
+
+### Bug Fixes
+
+* change to canary bun ([20c6f82](https://github.com/C4illin/ConvertX/commit/20c6f8249e03e03f4517e5b8b0d421cb6291bc1a))
+* change to canary bun ([8f0ea2a](https://github.com/C4illin/ConvertX/commit/8f0ea2a592f01af176caa745020f0a3514945357)), closes [#235](https://github.com/C4illin/ConvertX/issues/235)
+
 ## [0.12.0](https://github.com/C4illin/ConvertX/compare/v0.11.1...v0.12.0) (2025-03-06)
 
 
