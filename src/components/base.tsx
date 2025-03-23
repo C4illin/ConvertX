@@ -4,16 +4,19 @@ export const BaseHtml = ({
   children,
   title = "ConvertX",
   webroot = "",
+  userId = "",
 }: {
   children: JSX.Element;
   title?: string;
   webroot?: string;
+  userId?: string;
 }) => (
   <html lang="en">
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <meta name="webroot" content={webroot} />
+      <meta name="user-id" content={userId} />
       <title safe>{title}</title>
       <link rel="stylesheet" href={`${webroot}/generated.css`} />
       <link
