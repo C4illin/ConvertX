@@ -578,7 +578,7 @@ const app = new Elysia({
           >
             <article class="article">
               <h1 class="mb-4 text-xl">Convert</h1>
-              <div class="mb-4 max-h-[50vh] overflow-y-auto scrollbar-thin">
+              <div class="scrollbar-thin mb-4 max-h-[50vh] overflow-y-auto">
                 <table
                   id="file-list"
                   class={`
@@ -593,8 +593,8 @@ const app = new Elysia({
                 class={`
                   relative flex h-48 w-full items-center justify-center rounded border border-dashed
                   border-neutral-700 transition-all
-                  [&.dragover]:border-4 [&.dragover]:border-neutral-500
                   hover:border-neutral-600
+                  [&.dragover]:border-4 [&.dragover]:border-neutral-500
                 `}
               >
                 <span>
@@ -1151,12 +1151,12 @@ const app = new Elysia({
                   max={job.num_files}
                   value={files.length}
                   class={`
-                    mb-4 inline-block h-2 w-full appearance-none overflow-hidden rounded-full
-                    border-0 bg-neutral-700 bg-none text-accent-500 accent-accent-500
-                    [&::-moz-progress-bar]:bg-neutral-700 [&::-webkit-progress-value]:rounded-full
-                    [&::-webkit-progress-value]:[background:none]
+                    text-accent-500 accent-accent-500 mb-4 inline-block h-2 w-full appearance-none
+                    overflow-hidden rounded-full border-0 bg-neutral-700 bg-none
                     [&[value]::-webkit-progress-value]:bg-accent-500
                     [&[value]::-webkit-progress-value]:transition-[inline-size]
+                    [&::-moz-progress-bar]:bg-neutral-700 [&::-webkit-progress-value]:rounded-full
+                    [&::-webkit-progress-value]:[background:none]
                   `}
                 />
                 <table
@@ -1303,12 +1303,12 @@ const app = new Elysia({
             max={job.num_files}
             value={files.length}
             class={`
-              mb-4 inline-block h-2 w-full appearance-none overflow-hidden rounded-full border-0
-              bg-neutral-700 bg-none text-accent-500 accent-accent-500
-              [&::-moz-progress-bar]:bg-neutral-700 [&::-webkit-progress-value]:rounded-full
-              [&::-webkit-progress-value]:[background:none]
+              text-accent-500 accent-accent-500 mb-4 inline-block h-2 w-full appearance-none
+              overflow-hidden rounded-full border-0 bg-neutral-700 bg-none
               [&[value]::-webkit-progress-value]:bg-accent-500
               [&[value]::-webkit-progress-value]:transition-[inline-size]
+              [&::-moz-progress-bar]:bg-neutral-700 [&::-webkit-progress-value]:rounded-full
+              [&::-webkit-progress-value]:[background:none]
             `}
           />
           <table
