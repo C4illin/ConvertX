@@ -36,6 +36,8 @@ const ALLOW_UNAUTHENTICATED =
 const AUTO_DELETE_EVERY_N_HOURS = process.env.AUTO_DELETE_EVERY_N_HOURS
   ? Number(process.env.AUTO_DELETE_EVERY_N_HOURS)
   : 24;
+const HIDE_HISTORY =
+  process.env.HIDE_HISTORY?.toLowerCase() === "true" || false;
 
 const WEBROOT = process.env.WEBROOT ?? "";
 
@@ -351,6 +353,7 @@ const app = new Elysia({
             webroot={WEBROOT}
             accountRegistration={ACCOUNT_REGISTRATION}
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+            hideHistory={HIDE_HISTORY}
           />
           <main
             class={`
@@ -953,6 +956,10 @@ const app = new Elysia({
     },
   )
   .get("/history", async ({ jwt, redirect, cookie: { auth } }) => {
+    if (HIDE_HISTORY) {
+      return redirect(`${WEBROOT}/`, 302);
+    }
+    
     if (!auth?.value) {
       return redirect(`${WEBROOT}/login`, 302);
     }
@@ -986,6 +993,7 @@ const app = new Elysia({
           <Header
             webroot={WEBROOT}
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+            hideHistory={HIDE_HISTORY}
             loggedIn
           />
           <main
