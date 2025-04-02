@@ -13,5 +13,6 @@ services:
       - AUTO_DELETE_EVERY_N_HOURS=1 # checks every n hours for files older then n hours and deletes them, set to 0 to disable
       # - FFMPEG_ARGS=-hwaccel vulkan # additional arguments to pass to ffmpeg
       # - WEBROOT=/convertx # the root path of the web interface, leave empty to disable
+      # - HIDE_HISTORY=true # hides the history tab in the web interface, defaults to false
     ports:
       - 3000:3000
