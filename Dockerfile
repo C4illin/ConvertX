@@ -53,7 +53,8 @@ RUN apk --no-cache add  \
   poppler-utils \
   gcompat \
   libva-utils \
-  py3-numpy
+  py3-numpy \
+  zip 
 
 RUN apk --no-cache add calibre --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/
 

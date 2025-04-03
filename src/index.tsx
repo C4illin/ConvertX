@@ -20,6 +20,7 @@ import {
   normalizeOutputFiletype,
 } from "./helpers/normalizeFiletype";
 import "./helpers/printVersions";
+import { zip } from "./helpers/zip";
 
 mkdir("./data", { recursive: true }).catch(console.error);
 const db = new Database("./data/mydb.sqlite", { create: true });
@@ -566,7 +567,7 @@ const app = new Elysia({
     console.log("jobId set to:", id);
 
     return (
-      <BaseHtml webroot={WEBROOT}>
+      <BaseHtml webroot={WEBROOT} userId={user.id}>
         <>
           <Header
             webroot={WEBROOT}
@@ -988,7 +989,7 @@ const app = new Elysia({
     userJobs = userJobs.filter((job) => job.num_files > 0);
 
     return (
-      <BaseHtml webroot={WEBROOT} title="ConvertX | Results">
+      <BaseHtml webroot={WEBROOT} title="ConvertX | Results" userId={user.id}>
         <>
           <Header
             webroot={WEBROOT}
@@ -1124,7 +1125,7 @@ const app = new Elysia({
         .all(params.jobId);
 
       return (
-        <BaseHtml webroot={WEBROOT} title="ConvertX | Result">
+        <BaseHtml webroot={WEBROOT} title="ConvertX | Result" userId={user.id}>
           <>
             <Header
               webroot={WEBROOT}
@@ -1140,7 +1141,7 @@ const app = new Elysia({
               <article class="article">
                 <div class="mb-4 flex items-center justify-between">
                   <h1 class="text-xl">Results</h1>
-                  <div>
+                  <div class="flex items-center gap-2">
                     <button
                       type="button"
                       class="btn-primary float-right w-40"
@@ -1152,6 +1153,16 @@ const app = new Elysia({
                       {files.length === job.num_files
                         ? "Download All"
                         : "Converting..."}
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-primary float-right w-40"
+                      onclick="downloadZip()"
+                      {...(files.length !== job.num_files
+                        ? { disabled: true, "aria-busy": "true" }
+                        : "")}
+                    >
+                      Download Zip
                     </button>
                   </div>
                 </div>
@@ -1439,7 +1450,7 @@ const app = new Elysia({
     }
 
     return (
-      <BaseHtml webroot={WEBROOT} title="ConvertX | Converters">
+      <BaseHtml webroot={WEBROOT} title="ConvertX | Converters" userId={user.id}>
         <>
           <Header
             webroot={WEBROOT}
@@ -1507,7 +1518,6 @@ const app = new Elysia({
   .get(
     "/zip/:userId/:jobId",
     async ({ params, jwt, redirect, cookie: { auth } }) => {
-      // TODO: Implement zip download
       if (!auth?.value) {
         return redirect(`${WEBROOT}/login`, 302);
       }
@@ -1525,16 +1535,24 @@ const app = new Elysia({
         return redirect(`${WEBROOT}/results`, 302);
       }
 
-      // const userId = decodeURIComponent(params.userId);
-      // const jobId = decodeURIComponent(params.jobId);
-      // const outputPath = `${outputDir}${userId}/`{jobId}/);
+      const userId = decodeURIComponent(params.userId);
+      const jobId = decodeURIComponent(params.jobId);
+      const outputPath = `${outputDir}${userId}/${jobId}/`;
+      const zipPath = `${outputPath}/convertx-${userId}-${jobId}.zip`;
 
-      // return Bun.zip(outputPath);
+      await zip(outputPath, zipPath);
+
+      return Bun.file(zipPath);
     },
   )
-  .onError(({ error }) => {
+  .onError(({ error, set }) => {
     // log.error(` ${request.method} ${request.url}`, code, error);
     console.error(error);
+
+    set.status = 500;
+    return {
+      message: "Internal Server Error",
+    };
   });
 
 if (process.env.NODE_ENV !== "production") {
