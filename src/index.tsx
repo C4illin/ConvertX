@@ -959,7 +959,7 @@ const app = new Elysia({
     if (HIDE_HISTORY) {
       return redirect(`${WEBROOT}/`, 302);
     }
-    
+
     if (!auth?.value) {
       return redirect(`${WEBROOT}/login`, 302);
     }
@@ -1060,8 +1060,7 @@ const app = new Elysia({
                   {userJobs.map((job) => (
                     <tr>
                       <td safe>
-                        {job.date_created.split("T")[1]?.split(".")[0] ??
-                          job.date_created}
+                        {new Date(job.date_created).toLocaleTimeString()}
                       </td>
                       <td>{job.num_files}</td>
                       <td class="max-sm:hidden">{job.finished_files}</td>
