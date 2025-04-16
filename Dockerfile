@@ -31,7 +31,7 @@ RUN bun run build
 # copy production dependencies and source code into final image
 FROM base AS release
 
-RUN apk --no-cache add qt6-qtbase-private-dev libheif-tools --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community/
+RUN apk --no-cache add libheif-tools --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community/
 
 # install additional dependencies
 RUN apk --no-cache add  \

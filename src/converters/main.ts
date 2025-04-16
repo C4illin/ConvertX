@@ -8,7 +8,7 @@ import { convert as convertPandoc, properties as propertiesPandoc } from "./pand
 import { convert as convertresvg, properties as propertiesresvg } from "./resvg";
 import { convert as convertImage, properties as propertiesImage } from "./vips";
 import { convert as convertxelatex, properties as propertiesxelatex } from "./xelatex";
-import { convert as convertCalibre, properties as propertiesCalibre } from "./calibre";
+// import { convert as convertCalibre, properties as propertiesCalibre } from "./calibre";
 import { convert as convertLibheif, properties as propertiesLibheif } from "./libheif";
 
 
@@ -62,10 +62,10 @@ const properties: Record<
     properties: propertiesxelatex,
     converter: convertxelatex,
   },
-  calibre: {
-    properties: propertiesCalibre,
-    converter: convertCalibre,
-  },
+  // calibre: {
+  //   properties: propertiesCalibre,
+  //   converter: convertCalibre,
+  // },
   pandoc: {
     properties: propertiesPandoc,
     converter: convertPandoc,
