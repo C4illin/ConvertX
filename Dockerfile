@@ -55,7 +55,7 @@ RUN apk --no-cache add  \
   libva-utils \
   py3-numpy
 
-RUN apk --no-cache add calibre --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/
+# RUN apk --no-cache add calibre@testing --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main/
 
 # this might be needed for some latex use cases, will add it if needed.
 #   texmf-dist-fontsextra \
