@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.13.0](https://github.com/C4illin/ConvertX/compare/v0.12.1...v0.13.0) (2025-04-17)
+
+
+### Features
+
+* add HIDE_HISTORY option to control visibility of history page ([bed52ce](https://github.com/C4illin/ConvertX/commit/bed52cef17ff68ec5e8770705a1fdf038e02e607))
+* add HIDE_HISTORY option to control visibility of history page ([9d1c931](https://github.com/C4illin/ConvertX/commit/9d1c93155cc33ed6c83f9e5122afff8f28d0e4bf))
+
+
+### Bug Fixes
+
+* add timezone support ([4b5c732](https://github.com/C4illin/ConvertX/commit/4b5c732380bc844dccf340ea1eb4f8bfe3bb44a5)), closes [#258](https://github.com/C4illin/ConvertX/issues/258)
+
 ## [0.12.1](https://github.com/C4illin/ConvertX/compare/v0.12.0...v0.12.1) (2025-03-20)
 
 
