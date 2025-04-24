@@ -104,6 +104,9 @@ The image is available on [GitHub Container Registry](https://github.com/C4illin
 
 ### Tutorial
 
+> [!NOTE]
+> These are written by other people, and may be outdated, incorrect or wrong.
+
 Tutorial in french: <https://belginux.com/installer-convertx-avec-docker/>
 
 Tutorial in chinese: <https://xzllll.com/24092901/>
