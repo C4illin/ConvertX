@@ -98,6 +98,8 @@ The image is available on [GitHub Container Registry](https://github.com/C4illin
 | `image: c4illin/convertx` | The latest release on docker hub |
 | `image: c4illin/convertx:main` | The latest commit on docker hub |
 
+![Release image size](https://ghcr-badge.egpl.dev/c4illin/convertx/size?color=%230375b6&tag=latest&label=release+image&trim=)
+![Dev image size](https://ghcr-badge.egpl.dev/c4illin/convertx/size?color=%230375b6&tag=main&label=dev+image&trim=)
 <!-- Dockerhub was introduced in 0.9.0 and older releases -->
 
 ### Tutorial
