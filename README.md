@@ -42,6 +42,9 @@ Any missing converter? Open an issue or pull request!
 
 ## Deployment
 
+> [!WARNING]
+> If you can't login, make sure you are accessing the service over localhost or https otherwise set HTTP_ALLOWED=true
+
 ```yml
 # docker-compose.yml
 services:
@@ -81,9 +84,6 @@ All are optional, JWT_SECRET is recommended to be set.
 | WEBROOT                   |  | The address to the root path setting this to "/convert" will serve the website on "example.com/convert/" |
 | FFMPEG_ARGS               |  | Arguments to pass to ffmpeg, e.g. `-preset veryfast` |
 | HIDE_HISTORY             | false | Hide the history page |
-
-> [!WARNING]
-> If you can't login, make sure you are accessing the service over https or set HTTP_ALLOWED=true
 
 ### Docker images
 
