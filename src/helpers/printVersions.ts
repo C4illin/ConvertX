@@ -124,6 +124,16 @@ if (process.env.NODE_ENV === "production") {
     }
   });
 
+  exec("potrace -v", (error, stdout) => {
+    if (error) {
+      console.error("potrace is not installed");
+    }
+
+    if (stdout) {
+      console.log(stdout.split("\n")[0]);
+    }
+  });
+
   exec("bun -v", (error, stdout) => {
     if (error) {
       console.error("Bun is not installed. wait what");
