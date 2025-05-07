@@ -87,12 +87,13 @@ RUN apt-get update && apt-get install -y  \
   inkscape \
   poppler-utils \
   libva2 \
-  python3-numpy
+  python3-numpy \
+  libopengl0 && \
+  rm -rf /var/lib/apt/lists/*
 
 # install calibre
 COPY --from=builder-calibre /opt/calibre /opt/calibre
-RUN apt install -y libopengl0 && \
-  /opt/calibre/calibre_postinstall
+RUN /opt/calibre/calibre_postinstall
 
 # this might be needed for some latex use cases, will add it if needed.
 #   texmf-dist-fontsextra \
@@ -106,4 +107,4 @@ COPY . .
 
 EXPOSE 3000/tcp
 ENV NODE_ENV=production
-CMD [ "run", "./src/index.tsx" ]
+ENTRYPOINT [ "bun", "run", "./src/index.tsx" ]
