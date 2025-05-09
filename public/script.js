@@ -7,7 +7,8 @@ let fileType;
 let pendingFiles = 0;
 let formatSelected = false;
 
-dropZone.addEventListener("dragover", () => {
+dropZone.addEventListener("dragover", (e) => {
+  e.preventDefault();
   dropZone.classList.add("dragover");
 });
 
@@ -15,9 +16,58 @@ dropZone.addEventListener("dragleave", () => {
   dropZone.classList.remove("dragover");
 });
 
-dropZone.addEventListener("drop", () => {
-  dropZone.classList.remove("dragover");
+dropZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropZone.classList.remove("dragover");
+  
+    const files = e.dataTransfer.files;
+  
+    if (files.length === 0) {
+      console.warn("No files dropped — likely a URL or unsupported source.");
+      return;
+    }
+  
+    for (const file of files) {
+      console.log("Handling dropped file:", file.name);
+      handleFile(file);
+    }
 });
+
+// Extracted handleFile function for reusability in drag-and-drop and file input
+function handleFile(file) {
+  const fileList = document.querySelector("#file-list");
+
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td>${file.name}</td>
+    <td><progress max="100"></progress></td>
+    <td>${(file.size / 1024).toFixed(2)} kB</td>
+    <td><a onclick="deleteRow(this)">Remove</a></td>
+  `;
+
+  if (!fileType) {
+    fileType = file.name.split(".").pop();
+    fileInput.setAttribute("accept", `.${fileType}`);
+    setTitle();
+
+    fetch(`${webroot}/conversions`, {
+      method: "POST",
+      body: JSON.stringify({ fileType }),
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((res) => res.text())
+      .then((html) => {
+        selectContainer.innerHTML = html;
+        updateSearchBar();
+      })
+      .catch(console.error);
+  }
+
+  fileList.appendChild(row);
+  file.htmlRow = row;
+  fileNames.push(file.name);
+  uploadFile(file);
+}
 
 const selectContainer = document.querySelector("form .select_container");
 
@@ -106,62 +156,9 @@ const updateSearchBar = () => {
 
 // Add a 'change' event listener to the file input element
 fileInput.addEventListener("change", (e) => {
-  // Get the selected files from the event target
   const files = e.target.files;
-
-  // Select the file-list table
-  const fileList = document.querySelector("#file-list");
-
-  // Loop through the selected files
   for (const file of files) {
-    // Create a new table row for each file
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${file.name}</td>
-      <td><progress max="100"></progress></td>
-      <td>${(file.size / 1024).toFixed(2)} kB</td>
-      <td><a onclick="deleteRow(this)">Remove</a></td>
-    `;
-
-    if (!fileType) {
-      fileType = file.name.split(".").pop();
-      fileInput.setAttribute("accept", `.${fileType}`);
-      setTitle();
-
-      // choose the option that matches the file type
-      // for (const option of convertFromSelect.children) {
-      //   console.log(option.value);
-      //   if (option.value === fileType) {
-      //     option.selected = true;
-      //   }
-      // }
-
-      fetch(`${webroot}/conversions`, {
-        method: "POST",
-        body: JSON.stringify({ fileType: fileType }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((res) => res.text())
-        .then((html) => {
-          selectContainer.innerHTML = html;
-          updateSearchBar();
-        })
-        .catch((err) => console.log(err));
-    }
-
-    // Append the row to the file-list table
-    fileList.appendChild(row);
-
-    //Imbed row into the file to reference later
-    file.htmlRow = row;
-
-
-    // Append the file to the hidden input
-    fileNames.push(file.name);
-
-    uploadFile(file);
+    handleFile(file);
   }
 });
 
