@@ -34,6 +34,7 @@ A self-hosted online file converter. Supports over a thousand different formats.
 | [Inkscape](https://inkscape.org/)                                            | Vector images | 7             | 17          |
 | [Assimp](https://github.com/assimp/assimp)                                   | 3D Assets     | 77            | 23          |
 | [FFmpeg](https://ffmpeg.org/)                                                | Video         | ~472          | ~199        |
+| [Potrace](https://potrace.sourceforge.net/)                                  | Raster to vector | 4          | 11          |
 
 <!-- | [Calibre](https://calibre-ebook.com/)                                        | E-books       | 26            | 19          | -->
 
