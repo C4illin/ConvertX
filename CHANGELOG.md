@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.13.0](https://github.com/C4illin/ConvertX/compare/v0.12.1...v0.13.0) (2025-05-14)
+
+
+### Features
+
+* add HIDE_HISTORY option to control visibility of history page ([bed52ce](https://github.com/C4illin/ConvertX/commit/bed52cef17ff68ec5e8770705a1fdf038e02e607))
+* add HIDE_HISTORY option to control visibility of history page ([9d1c931](https://github.com/C4illin/ConvertX/commit/9d1c93155cc33ed6c83f9e5122afff8f28d0e4bf))
+* add potrace converter ([bdbd4a1](https://github.com/C4illin/ConvertX/commit/bdbd4a122c09559b089b985ea12c5f3e085107da))
+* Add support for .HIF files ([a5eaaa4](https://github.com/C4illin/ConvertX/commit/a5eaaa422a64506dd16d90d48a240556de33bc93))
+* Add support for .HIF files ([70705c1](https://github.com/C4illin/ConvertX/commit/70705c1850d470296df85958c02a01fb5bc3a25f))
+* add support for drag/drop of images ([ff2ef74](https://github.com/C4illin/ConvertX/commit/ff2ef7413542cf10ba7a6e246763bcecd6829ec1))
+
+
+### Bug Fixes
+
+* add timezone support ([4b5c732](https://github.com/C4illin/ConvertX/commit/4b5c732380bc844dccf340ea1eb4f8bfe3bb44a5)), closes [#258](https://github.com/C4illin/ConvertX/issues/258)
+
 ## [0.12.1](https://github.com/C4illin/ConvertX/compare/v0.12.0...v0.12.1) (2025-03-20)
 
 
