@@ -11,6 +11,7 @@ export const properties = {
       "heics",
       "heif",
       "heifs",
+      "hif",
       "mkv",
       "mp4",
     ],
