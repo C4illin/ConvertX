@@ -531,7 +531,7 @@ const app = new Elysia({
                       name="newPassword"
                       class="rounded-sm bg-neutral-800 p-3"
                       placeholder="Password"
-                      autocomplete="current-password"
+                      autocomplete="new-password"
                     />
                   </label>
                   <label class="flex flex-col gap-1">
