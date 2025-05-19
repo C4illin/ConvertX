@@ -599,6 +599,14 @@ const app = new Elysia({
       const values = [];
 
       if (body.email) {
+        // Enforce unique email constraint
+        const existingUser = await db.query(
+          "SELECT id FROM users WHERE email = ?",
+        ).get(body.email);
+        if (existingUser && existingUser.id !== user.id) {
+          set.status = 409;
+          return { message: "Email already in use." };
+        }
         fields.push("email");
         values.push(body.email);
       }
