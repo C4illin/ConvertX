@@ -475,6 +475,153 @@ const app = new Elysia({
 
     return redirect(`${WEBROOT}/login`, 302);
   })
+  .get("/account", async ({ jwt, redirect, cookie: { auth } }) => {
+    if (!auth?.value) {
+      return redirect(`${WEBROOT}/`);
+    }
+    const user = await jwt.verify(auth.value);
+
+    if (!user) {
+      return redirect(`${WEBROOT}/`, 302);
+    }
+
+    const userData = db
+      .query("SELECT * FROM users WHERE id = ?")
+      .as(User)
+      .get(user.id);
+
+    if (!userData) {
+      return redirect(`${WEBROOT}/`, 302);
+    }
+
+    return (
+      <BaseHtml webroot={WEBROOT} title="ConvertX | Login">
+        <>
+          <Header
+            webroot={WEBROOT}
+            accountRegistration={ACCOUNT_REGISTRATION}
+            allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+            hideHistory={HIDE_HISTORY}
+          />
+          <main
+            class={`
+              w-full px-2
+              sm:px-4
+            `}
+          >
+            <article class="article">
+              <form method="post" class="flex flex-col gap-4">
+                <fieldset class="mb-4 flex flex-col gap-4">
+                  <label class="flex flex-col gap-1">
+                    Email
+                    <input
+                      type="email"
+                      name="email"
+                      class="rounded-sm bg-neutral-800 p-3"
+                      placeholder="Email"
+                      autocomplete="email"
+                      value={userData.email}
+                      required
+                    />
+                  </label>
+                  <label class="flex flex-col gap-1">
+                    Password (leave blank for unchanged)
+                    <input
+                      type="password"
+                      name="newPassword"
+                      class="rounded-sm bg-neutral-800 p-3"
+                      placeholder="Password"
+                      autocomplete="current-password"
+                    />
+                  </label>
+                  <label class="flex flex-col gap-1">
+                    Current Password
+                    <input
+                      type="password"
+                      name="password"
+                      class="rounded-sm bg-neutral-800 p-3"
+                      placeholder="Password"
+                      autocomplete="current-password"
+                      required
+                    />
+                  </label>
+                </fieldset>
+                <div role="group">
+                  <input
+                    type="submit"
+                    value="Update"
+                    class="btn-primary w-full"
+                  />
+                </div>
+              </form>
+            </article>
+          </main>
+        </>
+      </BaseHtml>
+    );
+  })
+  .post(
+    "/account",
+    async function handler({ body, set, redirect, jwt, cookie: { auth } }) {
+      if (!auth?.value) {
+        return redirect(`${WEBROOT}/login`, 302);
+      }
+
+      const user = await jwt.verify(auth.value);
+      if (!user) {
+        return redirect(`${WEBROOT}/login`, 302);
+      }
+      const existingUser = db
+        .query("SELECT * FROM users WHERE id = ?")
+        .as(User)
+        .get(user.id);
+
+      if (!existingUser) {
+        if (auth?.value) {
+          auth.remove();
+        }
+        return redirect(`${WEBROOT}/login`, 302);
+      }
+
+      const validPassword = await Bun.password.verify(
+        body.password,
+        existingUser.password,
+      );
+
+      if (!validPassword) {
+        set.status = 403;
+        return {
+          message: "Invalid credentials.",
+        };
+      }
+
+      const fields = [];
+      const values = [];
+
+      if (body.email) {
+        fields.push("email");
+        values.push(body.email);
+      }
+      if (body.newPassword) {
+        fields.push("password");
+        values.push(await Bun.password.hash(body.newPassword));
+      }
+
+      db.query(
+        `UPDATE users SET ${fields.map((field) => `${field}=?`).join(", ")} WHERE id=?`,
+      ).run(...values, user.id);
+
+      return redirect(`${WEBROOT}/`, 302);
+    },
+    {
+      body: t.Object({
+        email: t.MaybeEmpty(t.String()),
+        newPassword: t.MaybeEmpty(t.String()),
+        password: t.String(),
+      }),
+    },
+  )
+
   .get("/", async ({ jwt, redirect, cookie: { auth, jobId } }) => {
     if (!ALLOW_UNAUTHENTICATED) {
       if (FIRST_RUN) {

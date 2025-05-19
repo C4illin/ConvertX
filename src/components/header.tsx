@@ -37,6 +37,19 @@ export const Header = ({
                 text-accent-600 transition-all
                 hover:text-accent-500 hover:underline
               `}
+              href={`${webroot}/account`}
+            >
+              Account
+            </a>
+          </li>
+        ) : null}
+        {!allowUnauthenticated ? (
+          <li>
+            <a
+              class={`
+                text-accent-600 transition-all
+                hover:text-accent-500 hover:underline
+              `}
               href={`${webroot}/logoff`}
             >
               Logout
