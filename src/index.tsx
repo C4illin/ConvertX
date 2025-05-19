@@ -599,11 +599,11 @@ const app = new Elysia({
       const values = [];
 
       if (body.email) {
-        // Enforce unique email constraint
-        const existingUser = await db.query(
-          "SELECT id FROM users WHERE email = ?",
-        ).get(body.email);
-        if (existingUser && existingUser.id !== user.id) {
+        const existingUser = await db
+          .query("SELECT id FROM users WHERE email = ?")
+          .as(User)
+          .get(body.email);
+        if (existingUser && existingUser.id.toString() !== user.id) {
           set.status = 409;
           return { message: "Email already in use." };
         }
@@ -615,9 +615,11 @@ const app = new Elysia({
         values.push(await Bun.password.hash(body.newPassword));
       }
 
-      db.query(
-        `UPDATE users SET ${fields.map((field) => `${field}=?`).join(", ")} WHERE id=?`,
-      ).run(...values, user.id);
+      if (fields.length < 1) {
+        db.query(
+          `UPDATE users SET ${fields.map((field) => `${field}=?`).join(", ")} WHERE id=?`,
+        ).run(...values, user.id);
+      }
 
       return redirect(`${WEBROOT}/`, 302);
     },
