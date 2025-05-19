@@ -615,7 +615,7 @@ const app = new Elysia({
         values.push(await Bun.password.hash(body.newPassword));
       }
 
-      if (fields.length < 1) {
+      if (fields.length > 0) {
         db.query(
           `UPDATE users SET ${fields.map((field) => `${field}=?`).join(", ")} WHERE id=?`,
         ).run(...values, user.id);
