@@ -126,6 +126,8 @@ Tutorial in chinese: <https://xzllll.com/24092901/>
 
 Pull requests are welcome! See below and open issues for the list of todos.
 
+Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#summary) for commit messages.
+
 ## Todo
 
 - [x] Add messages for errors in converters
