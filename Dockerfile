@@ -1,6 +1,16 @@
-FROM oven/bun:1.2.2-alpine AS base
+FROM debian:trixie-slim AS base
 LABEL org.opencontainers.image.source="https://github.com/C4illin/ConvertX"
 WORKDIR /app
+
+# install bun
+ENV BUN_INSTALL=/etc/.bun
+ENV PATH=$BUN_INSTALL/bin:$PATH
+ENV BUN_RUNTIME_TRANSPILER_CACHE_PATH=0
+RUN apt-get update && apt-get install -y \
+  curl \
+  unzip \
+  && rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL https://bun.sh/install | bash -s "bun-v1.2.2"
 
 # install dependencies into temp directory
 # this will cache them and speed up future builds
@@ -14,12 +24,6 @@ RUN mkdir -p /temp/prod
 COPY package.json bun.lock /temp/prod/
 RUN cd /temp/prod && bun install --frozen-lockfile --production
 
-FROM base AS builder
-RUN apk --no-cache add curl gcc
-ENV PATH=/root/.cargo/bin:$PATH
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-RUN cargo install resvg
-
 FROM base AS prerelease
 WORKDIR /app
 COPY --from=install /temp/dev/node_modules node_modules
@@ -31,38 +35,31 @@ RUN bun run build
 # copy production dependencies and source code into final image
 FROM base AS release
 
-RUN apk --no-cache add libheif-tools --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community/
-
 # install additional dependencies
-RUN apk --no-cache add  \
-  pandoc \
-  texlive \
-  texlive-xetex \
-  texmf-dist-latexextra \
+RUN apt-get update && apt-get install -y \
+  assimp-utils \
+  calibre \
+  dcraw \
   ffmpeg \
-  graphicsmagick \
   ghostscript \
-  vips-tools \
-  vips-poppler \
-  vips-jxl \
-  vips-heif \
-  vips-magick \
-  libjxl-tools \
-  assimp \
+  graphicsmagick \
   inkscape \
+  libheif-examples \
+  libjxl-tools \
+  libva2 \
+  libvips-tools \
+  pandoc \
   poppler-utils \
-  gcompat \
-  libva-utils \
-  py3-numpy \
-  potrace
-
-# RUN apk --no-cache add calibre@testing --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main/
-
-# this might be needed for some latex use cases, will add it if needed.
-#   texmf-dist-fontsextra \
+  potrace \
+  python3-numpy \
+  resvg \
+  texlive \
+  texlive-latex-extra \
+  texlive-xetex \
+  --no-install-recommends \
+  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=install /temp/prod/node_modules node_modules
-COPY --from=builder /root/.cargo/bin/resvg /usr/local/bin/resvg
 COPY --from=prerelease /app/public/generated.css /app/public/
 COPY . .
 
