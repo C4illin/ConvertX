@@ -44,6 +44,16 @@ if (process.env.NODE_ENV === "production") {
     }
   });
 
+  exec("magick --version", (error, stdout) => {
+    if (error) {
+      console.error("ImageMagick is not installed.");
+    }
+
+    if (stdout) {
+      console.log(stdout.split("\n")[0]?.replace("Version: ", ""));
+    }
+  });
+
   exec("gm version", (error, stdout) => {
     if (error) {
       console.error("GraphicsMagick is not installed.");

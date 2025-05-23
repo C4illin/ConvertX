@@ -10,7 +10,8 @@ import { convert as convertImage, properties as propertiesImage } from "./vips";
 import { convert as convertxelatex, properties as propertiesxelatex } from "./xelatex";
 import { convert as convertCalibre, properties as propertiesCalibre } from "./calibre";
 import { convert as convertLibheif, properties as propertiesLibheif } from "./libheif";
-import { convert as convertpotrace, properties as propertiespotrace } from "./potrace";
+import { convert as convertPotrace, properties as propertiesPotrace } from "./potrace";
+import { convert as convertImagemagick, properties as propertiesImagemagick } from "./imagemagick";
 
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
@@ -71,6 +72,10 @@ const properties: Record<
     properties: propertiesPandoc,
     converter: convertPandoc,
   },
+  imagemagick: {
+    properties: propertiesImagemagick,
+    converter: convertImagemagick,
+  },
   graphicsmagick: {
     properties: propertiesGraphicsmagick,
     converter: convertGraphicsmagick,
@@ -88,8 +93,8 @@ const properties: Record<
     converter: convertFFmpeg,
   },
   potrace: {
-    properties: propertiespotrace,
-    converter: convertpotrace,
+    properties: propertiesPotrace,
+    converter: convertPotrace,
   },
 };
 

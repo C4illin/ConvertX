@@ -48,6 +48,7 @@ RUN apt-get update && apt-get install -y \
   libjxl-tools \
   libva2 \
   libvips-tools \
+  imagemagick-7.q16 \
   pandoc \
   poppler-utils \
   potrace \
