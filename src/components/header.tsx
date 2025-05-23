@@ -87,7 +87,7 @@ export const Header = ({
             </strong>
           </li>
           <li>
-            <a href="#" safe>{`v${version}`}</a>
+            <span class="version">{`v${version}`}</span>
           </li>
         </ul>
         {rightNav}
