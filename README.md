@@ -33,6 +33,7 @@ A self-hosted online file converter. Supports over a thousand different formats.
 | [XeLaTeX](https://tug.org/xetex/)                                            | LaTeX         | 1             | 1           |
 | [Calibre](https://calibre-ebook.com/)                                        | E-books       | 26            | 19          |
 | [Pandoc](https://pandoc.org/)                                                | Documents     | 43            | 65          |
+| [ImageMagick](https://imagemagick.org/)                                      | Images        | 245           | 183         |
 | [GraphicsMagick](http://www.graphicsmagick.org/)                             | Images        | 167           | 130         |
 | [Inkscape](https://inkscape.org/)                                            | Vector images | 7             | 17          |
 | [Assimp](https://github.com/assimp/assimp)                                   | 3D Assets     | 77            | 23          |
