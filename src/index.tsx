@@ -387,14 +387,14 @@ const app = new Elysia({
                     />
                   </label>
                 </fieldset>
-                <div role="group">
+                <div class="flex flex-row gap-4">
                   {ACCOUNT_REGISTRATION ? (
                     <a
                       href={`${WEBROOT}/register`}
                       role="button"
-                      class="btn-primary w-full"
+                      class="btn-secondary w-full text-center"
                     >
-                      Register an account
+                      Register
                     </a>
                   ) : null}
                   <input

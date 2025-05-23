@@ -44,6 +44,10 @@
   @apply bg-accent-500 text-contrast rounded-sm p-2 sm:p-4 hover:bg-accent-400 cursor-pointer transition-colors;
 }
 
+@utility btn-secondary {
+  @apply bg-neutral-400 text-contrast rounded-sm p-2 sm:p-4 hover:bg-neutral-300 cursor-pointer transition-colors;
+}
+
 :root {
   --contrast: 255, 255, 255;
   --neutral-900: 243, 244, 246;
