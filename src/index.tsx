@@ -135,18 +135,6 @@ const app = new Elysia({
       prefix: "",
     }),
   )
-  .get("/test", () => {
-    return (
-      <html lang="en">
-        <head>
-          <title>Hello World</title>
-        </head>
-        <body>
-          <h1>Hello</h1>
-        </body>
-      </html>
-    );
-  })
   .get("/setup", ({ redirect }) => {
     if (!FIRST_RUN) {
       return redirect(`${WEBROOT}/login`, 302);
@@ -156,7 +144,7 @@ const app = new Elysia({
       <BaseHtml title="ConvertX | Setup" webroot={WEBROOT}>
         <main
           class={`
-            mx-auto w-full max-w-4xl px-2
+            mx-auto w-full max-w-4xl flex-1 px-2
             sm:px-4
           `}
         >
@@ -222,10 +210,11 @@ const app = new Elysia({
             webroot={WEBROOT}
             accountRegistration={ACCOUNT_REGISTRATION}
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+            hideHistory={HIDE_HISTORY}
           />
           <main
             class={`
-              w-full px-2
+              w-full flex-1 px-2
               sm:px-4
             `}
           >
@@ -357,7 +346,7 @@ const app = new Elysia({
           />
           <main
             class={`
-              w-full px-2
+              w-full flex-1 px-2
               sm:px-4
             `}
           >
@@ -502,10 +491,11 @@ const app = new Elysia({
             accountRegistration={ACCOUNT_REGISTRATION}
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
             hideHistory={HIDE_HISTORY}
+            loggedIn
           />
           <main
             class={`
-              w-full px-2
+              w-full flex-1 px-2
               sm:px-4
             `}
           >
@@ -727,12 +717,14 @@ const app = new Elysia({
         <>
           <Header
             webroot={WEBROOT}
+            accountRegistration={ACCOUNT_REGISTRATION}
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+            hideHistory={HIDE_HISTORY}
             loggedIn
           />
           <main
             class={`
-              w-full px-2
+              w-full flex-1 px-2
               sm:px-4
             `}
           >
@@ -1155,7 +1147,7 @@ const app = new Elysia({
           />
           <main
             class={`
-              w-full px-2
+              w-full flex-1 px-2
               sm:px-4
             `}
           >
@@ -1289,7 +1281,7 @@ const app = new Elysia({
             />
             <main
               class={`
-                w-full px-2
+                w-full flex-1 px-2
                 sm:px-4
               `}
             >
@@ -1604,7 +1596,7 @@ const app = new Elysia({
           />
           <main
             class={`
-              w-full px-2
+              w-full flex-1 px-2
               sm:px-4
             `}
           >

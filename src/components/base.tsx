@@ -1,4 +1,5 @@
 import { Html } from "@elysiajs/html";
+import { version } from "../../package.json";
 
 export const BaseHtml = ({
   children,
@@ -35,6 +36,23 @@ export const BaseHtml = ({
       />
       <link rel="manifest" href={`${webroot}/site.webmanifest`} />
     </head>
-    <body class="w-full bg-neutral-900 text-neutral-200">{children}</body>
+    <body class="flex min-h-screen w-full flex-col bg-neutral-900 text-neutral-200">
+      {children}
+      <footer class="w-full">
+        <div class="p-4 text-center text-sm text-neutral-500">
+          <span>Powered by </span>
+          <a
+            href="https://github.com/C4illin/ConvertX"
+            class={`
+              hover:text-accent-500
+              text-neutral-400
+            `}
+          >
+            ConvertX{" "}
+          </a>
+          <span safe>v{version || ""}</span>
+        </div>
+      </footer>
+    </body>
   </html>
 );
