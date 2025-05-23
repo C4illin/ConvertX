@@ -1,4 +1,5 @@
 import { Html } from "@kitajs/html";
+import { version } from "../../package.json";
 
 export const Header = ({
   loggedIn,
@@ -84,6 +85,9 @@ export const Header = ({
             <strong>
               <a href={`${webroot}/`}>ConvertX</a>
             </strong>
+          </li>
+          <li>
+            <a href="#" safe>{`v${version}`}</a>
           </li>
         </ul>
         {rightNav}
