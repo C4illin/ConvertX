@@ -495,7 +495,7 @@ const app = new Elysia({
     }
 
     return (
-      <BaseHtml webroot={WEBROOT} title="ConvertX | Login">
+      <BaseHtml webroot={WEBROOT} title="ConvertX | Account">
         <>
           <Header
             webroot={WEBROOT}
