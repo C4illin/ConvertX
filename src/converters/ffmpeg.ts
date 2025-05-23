@@ -508,7 +508,8 @@ export const properties = {
       "ast",
       "au",
       "aud",
-      "av1",
+      "av1.mkv",
+      "av1.mp4",
       "avi",
       "avif",
       "avs",
@@ -546,9 +547,11 @@ export const properties = {
       "gxf",
       "h261",
       "h263",
-      "h264",
-      "h265",
-      "h266",
+      "h264.mkv",
+      "h264.mp4",
+      "h265.mkv",
+      "h265.mp4",
+      "h266.mkv",
       "hdr",
       "hevc",
       "ico",
@@ -696,36 +699,58 @@ export async function convert(
 
   if (convertTo === "ico") {
     // make sure image is 256x256 or smaller
-    extraArgs = ['-filter:v', "scale='min(256,iw)':min'(256,ih)':force_original_aspect_ratio=decrease"];
+    extraArgs = [
+      "-filter:v",
+      "scale='min(256,iw)':min'(256,ih)':force_original_aspect_ratio=decrease",
+    ];
     message = "Done: resized to 256x256";
   }
 
+  if (convertTo.split(".").length > 1) {
+    // support av1.mkv and av1.mp4 and h265.mp4 etc.
+    const split = convertTo.split(".");
+    const codec_short = split[0];
+
+    switch (codec_short) {
+      case "av1":
+        extraArgs.push("-c:v", "libaom-av1");
+        break;
+      case "h264":
+        extraArgs.push("-c:v", "libx264");
+        break;
+      case "h265":
+        extraArgs.push("-c:v", "libx265");
+        break;
+      case "h266":
+        extraArgs.push("-c:v", "libx266");
+        break;
+    }
+  }
+
   // Parse FFMPEG_ARGS environment variable into array
-  const ffmpegArgs = process.env.FFMPEG_ARGS ? process.env.FFMPEG_ARGS.split(/\s+/) : [];
-  
-  // Build arguments array
-  const args = [
-    ...ffmpegArgs,
-    "-i", filePath,
-    ...extraArgs,
-    targetPath
-  ];
+  const ffmpegArgs = process.env.FFMPEG_ARGS
+    ? process.env.FFMPEG_ARGS.split(/\s+/)
+    : [];
 
   return new Promise((resolve, reject) => {
-    execFile("ffmpeg", args, (error, stdout, stderr) => {
-      if (error) {
-        reject(`error: ${error}`);
-      }
+    execFile(
+      "ffmpeg",
+      [...ffmpegArgs, "-i", filePath, ...extraArgs, targetPath],
+      (error, stdout, stderr) => {
+        if (error) {
+          reject(`error: ${error}`);
+        }
 
-      if (stdout) {
-        console.log(`stdout: ${stdout}`);
-      }
+        if (stdout) {
+          console.log(`stdout: ${stdout}`);
+        }
 
-      if (stderr) {
-        console.error(`stderr: ${stderr}`);
-      }
+        if (stderr) {
+          console.error(`stderr: ${stderr}`);
+        }
 
-      resolve(message);
-    });
+        resolve(message);
+      },
+    );
   });
 }
