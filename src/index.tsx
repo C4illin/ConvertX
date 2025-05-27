@@ -1169,7 +1169,9 @@ const app = new Elysia({
                         px-2 py-2
                         sm:px-4
                       `}
-                    />
+                    >
+                      <span class="sr-only">Expand details</span>
+                    </th>
                     <th
                       class={`
                         px-2 py-2
@@ -1216,10 +1218,10 @@ const app = new Elysia({
                 <tbody>
                   {userJobs.map((job) => (
                     <>
-                      <tr id={`job-row-${job.id}`}>
+                      <tr key={`job-${job.id}` as any} id={`job-row-${job.id}`}>
                         <td
-                          class="cursor-pointer"
-                          onclick={`toggleJobDetails(${job.id})`}
+                          class="job-details-toggle cursor-pointer"
+                          data-job-id={job.id}
                         >
                           <svg
                             id={`arrow-${job.id}`}
@@ -1261,36 +1263,41 @@ const app = new Elysia({
                             <div class="mb-1 font-semibold">
                               Detailed File Information:
                             </div>
-                            {job.files_detailed.map((file: Filename) => (
-                              <div class="flex items-center">
-                                <span
-                                  class="w-5/12 truncate"
-                                  title={file.file_name}
-                                  safe
+                            {job.files_detailed.map(
+                              (file: Filename, index: number) => (
+                                <div
+                                  key={String(file.id) as any}
+                                  class="flex items-center"
                                 >
-                                  {file.file_name}
-                                </span>
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  viewBox="0 0 20 20"
-                                  fill="currentColor"
-                                  class="w-4 h-4 inline-block mx-2 text-neutral-500"
-                                >
-                                  <path
-                                    fill-rule="evenodd"
-                                    d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
-                                    clip-rule="evenodd"
-                                  />
-                                </svg>
-                                <span
-                                  class="w-5/12 truncate"
-                                  title={file.output_file_name}
-                                  safe
-                                >
-                                  {file.output_file_name}
-                                </span>
-                              </div>
-                            ))}
+                                  <span
+                                    class="w-5/12 truncate"
+                                    title={file.file_name}
+                                    safe
+                                  >
+                                    {file.file_name}
+                                  </span>
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    class="w-4 h-4 inline-block mx-2 text-neutral-500"
+                                  >
+                                    <path
+                                      fill-rule="evenodd"
+                                      d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+                                      clip-rule="evenodd"
+                                    />
+                                  </svg>
+                                  <span
+                                    class="w-5/12 truncate"
+                                    title={file.output_file_name}
+                                    safe
+                                  >
+                                    {file.output_file_name}
+                                  </span>
+                                </div>
+                              ),
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -1302,18 +1309,28 @@ const app = new Elysia({
           </main>
           <script>
             {`
-              function toggleJobDetails(jobId) {
-                const detailsRow = document.getElementById(\`details-\${jobId}\`);
-                const arrow = document.getElementById(\`arrow-\${jobId}\`);
-                if (detailsRow && arrow) {
-                  detailsRow.classList.toggle("hidden");
-                  if (detailsRow.classList.contains("hidden")) {
-                    arrow.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />';
-                  } else {
-                    arrow.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />';
-                  }
-                }
-              }
+              document.addEventListener('DOMContentLoaded', () => {
+                const toggles = document.querySelectorAll('.job-details-toggle');
+                toggles.forEach(toggle => {
+                  toggle.addEventListener('click', function() {
+                    const jobId = this.dataset.jobId;
+                    const detailsRow = document.getElementById(\`details-\${jobId}\`);
+                    // The arrow SVG itself has the ID arrow-\${jobId}
+                    const arrow = document.getElementById(\`arrow-\${jobId}\`);
+
+                    if (detailsRow && arrow) {
+                      detailsRow.classList.toggle("hidden");
+                      if (detailsRow.classList.contains("hidden")) {
+                        // Right-facing arrow (collapsed)
+                        arrow.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />';
+                      } else {
+                        // Down-facing arrow (expanded)
+                        arrow.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />';
+                      }
+                    }
+                  });
+                });
+              });
             `}
           </script>
         </>
