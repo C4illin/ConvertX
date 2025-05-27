@@ -74,7 +74,7 @@ jobs:
 
       - name: Build and push by digest
         id: build
-        uses: docker/build-push-action@v6.17.0
+        uses: docker/build-push-action@v6.18.0
         env:
           DOCKER_BUILDKIT: 1
         with:
