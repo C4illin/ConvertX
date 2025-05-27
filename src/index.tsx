@@ -107,6 +107,7 @@ class Jobs {
   date_created!: string;
   status!: string;
   num_files!: number;
+  files_detailed!: Filename[];
 }
 
 // enable WAL mode
@@ -1131,6 +1132,7 @@ const app = new Elysia({
         .all(job.id);
 
       job.finished_files = files.length;
+      job.files_detailed = files;
     }
 
     // filter out jobs with no files
@@ -1162,6 +1164,12 @@ const app = new Elysia({
               >
                 <thead>
                   <tr>
+                    <th
+                      class={`
+                        px-2 py-2
+                        sm:px-4
+                      `}
+                    />
                     <th
                       class={`
                         px-2 py-2
@@ -1207,30 +1215,107 @@ const app = new Elysia({
                 </thead>
                 <tbody>
                   {userJobs.map((job) => (
-                    <tr>
-                      <td safe>
-                        {new Date(job.date_created).toLocaleTimeString()}
-                      </td>
-                      <td>{job.num_files}</td>
-                      <td class="max-sm:hidden">{job.finished_files}</td>
-                      <td safe>{job.status}</td>
-                      <td>
-                        <a
-                          class={`
-                            text-accent-500 underline
-                            hover:text-accent-400
-                          `}
-                          href={`${WEBROOT}/results/${job.id}`}
+                    <>
+                      <tr id={`job-row-${job.id}`}>
+                        <td
+                          class="cursor-pointer"
+                          onclick={`toggleJobDetails(${job.id})`}
                         >
-                          View
-                        </a>
-                      </td>
-                    </tr>
+                          <svg
+                            id={`arrow-${job.id}`}
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.5"
+                            stroke="currentColor"
+                            class="inline-block h-4 w-4"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                            />
+                          </svg>
+                        </td>
+                        <td safe>
+                          {new Date(job.date_created).toLocaleTimeString()}
+                        </td>
+                        <td>{job.num_files}</td>
+                        <td class="max-sm:hidden">{job.finished_files}</td>
+                        <td safe>{job.status}</td>
+                        <td>
+                          <a
+                            class={`
+                              text-accent-500 underline
+                              hover:text-accent-400
+                            `}
+                            href={`${WEBROOT}/results/${job.id}`}
+                          >
+                            View
+                          </a>
+                        </td>
+                      </tr>
+                      <tr id={`details-${job.id}`} class="hidden">
+                        <td colspan="6">
+                          <div class="p-2 text-sm text-neutral-500">
+                            <div class="mb-1 font-semibold">
+                              Detailed File Information:
+                            </div>
+                            {job.files_detailed.map((file: Filename) => (
+                              <div class="flex items-center">
+                                <span
+                                  class="w-5/12 truncate"
+                                  title={file.file_name}
+                                  safe
+                                >
+                                  {file.file_name}
+                                </span>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 20 20"
+                                  fill="currentColor"
+                                  class="w-4 h-4 inline-block mx-2 text-neutral-500"
+                                >
+                                  <path
+                                    fill-rule="evenodd"
+                                    d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+                                    clip-rule="evenodd"
+                                  />
+                                </svg>
+                                <span
+                                  class="w-5/12 truncate"
+                                  title={file.output_file_name}
+                                  safe
+                                >
+                                  {file.output_file_name}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    </>
                   ))}
                 </tbody>
               </table>
             </article>
           </main>
+          <script>
+            {`
+              function toggleJobDetails(jobId) {
+                const detailsRow = document.getElementById(\`details-\${jobId}\`);
+                const arrow = document.getElementById(\`arrow-\${jobId}\`);
+                if (detailsRow && arrow) {
+                  detailsRow.classList.toggle("hidden");
+                  if (detailsRow.classList.contains("hidden")) {
+                    arrow.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />';
+                  } else {
+                    arrow.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />';
+                  }
+                }
+              }
+            `}
+          </script>
         </>
       </BaseHtml>
     );
