@@ -1218,7 +1218,7 @@ const app = new Elysia({
                 <tbody>
                   {userJobs.map((job) => (
                     <>
-                      <tr key={`job-${job.id}` as any} id={`job-row-${job.id}`}>
+                      <tr id={`job-row-${job.id}`}>
                         <td
                           class="job-details-toggle cursor-pointer"
                           data-job-id={job.id}
@@ -1264,9 +1264,8 @@ const app = new Elysia({
                               Detailed File Information:
                             </div>
                             {job.files_detailed.map(
-                              (file: Filename, index: number) => (
+                              (file: Filename) => (
                                 <div
-                                  key={String(file.id) as any}
                                   class="flex items-center"
                                 >
                                   <span
@@ -1280,7 +1279,7 @@ const app = new Elysia({
                                     xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 20 20"
                                     fill="currentColor"
-                                    class="w-4 h-4 inline-block mx-2 text-neutral-500"
+                                    class="mx-2 inline-block h-4 w-4 text-neutral-500"
                                   >
                                     <path
                                       fill-rule="evenodd"
