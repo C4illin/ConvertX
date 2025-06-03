@@ -1,7 +1,7 @@
 import js from "@eslint/js";
 import eslintParserTypeScript from "@typescript-eslint/parser";
 import type { Linter } from "eslint";
-import eslintPluginReadableTailwind from "eslint-plugin-readable-tailwind";
+import eslintPluginBetterTailwindcss from "eslint-plugin-better-tailwindcss";
 import simpleImportSortPlugin from "eslint-plugin-simple-import-sort";
 import globals from "globals";
 import tseslint from "typescript-eslint";
@@ -13,7 +13,7 @@ export default [
   {
     plugins: {
       "simple-import-sort": simpleImportSortPlugin,
-      "readable-tailwind": eslintPluginReadableTailwind,
+      "better-tailwindcss": eslintPluginBetterTailwindcss,
     },
     ignores: ["**/node_modules/**"],
     languageOptions: {
@@ -30,28 +30,37 @@ export default [
       },
     },
     files: ["**/*.{js,mjs,cjs,jsx,tsx,ts}"],
+    settings: {
+      "better-tailwindcss": {
+        entryPoint: "src/main.css",
+      },
+    },
     rules: {
-      ...eslintPluginReadableTailwind.configs.warning.rules,
+      ...eslintPluginBetterTailwindcss.configs["recommended-warn"]?.rules,
+      ...eslintPluginBetterTailwindcss.configs["stylistic-warn"]?.rules,
       // "tailwindcss/classnames-order": "off",
-      "readable-tailwind/multiline": [
+      "better-tailwindcss/multiline": [
         "warn",
         {
           group: "newLine",
           printWidth: 100,
         },
       ],
-      // "tailwindcss/no-custom-classname": [
-      //   "warn",
-      //   {
-      //     whitelist: [
-      //       "select_container",
-      //       "convert_to_popup",
-      //       "convert_to_group",
-      //       "target",
-      //       "convert_to_target",
-      //     ],
-      //   },
-      // ],
+      "better-tailwindcss/no-unregistered-classes": [
+        "warn",
+        {
+          ignore: [
+            "^group(?:\\/(\\S*))?$",
+            "^peer(?:\\/(\\S*))?$",
+            "select_container",
+            "convert_to_popup",
+            "convert_to_group",
+            "target",
+            "convert_to_target",
+            "job-details-toggle",
+          ],
+        },
+      ],
     },
   },
 ] as Linter.Config[];

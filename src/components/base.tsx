@@ -44,8 +44,8 @@ export const BaseHtml = ({
           <a
             href="https://github.com/C4illin/ConvertX"
             class={`
-              hover:text-accent-500
               text-neutral-400
+              hover:text-accent-500
             `}
           >
             ConvertX{" "}
