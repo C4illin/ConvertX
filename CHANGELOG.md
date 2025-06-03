@@ -2,23 +2,20 @@
 
 ## [0.14.0](https://github.com/C4illin/ConvertX/compare/v0.13.0...v0.14.0) (2025-06-03)
 
-
 ### Features
 
-* add dvisvgm ([625e1a5](https://github.com/C4illin/ConvertX/commit/625e1a51f620fe9da79d0127eb6c95f468d9ea2b))
-* add ImageMagick ([b47e575](https://github.com/C4illin/ConvertX/commit/b47e5755f677056e8acecad54c0c2e28a5e137f3))
-* enhance job details display with file information ([50725ed](https://github.com/C4illin/ConvertX/commit/50725edd021bb9a7f58c85b79c1eab355ad22ced))
-* improve job details interaction and accessibility ([2a3b084](https://github.com/C4illin/ConvertX/commit/2a3b08487ec4bf215e1e80059dbdc1dcccea68c8))
-* improve job details interaction and accessibility ([29ba229](https://github.com/C4illin/ConvertX/commit/29ba229bc23d2019d2ee9829da7852f884ffa611))
-* show version in footer ([9a49ded](https://github.com/C4illin/ConvertX/commit/9a49dedacac7e67a432b6da0daf1967038d97d26))
-
+- add dvisvgm ([625e1a5](https://github.com/C4illin/ConvertX/commit/625e1a51f620fe9da79d0127eb6c95f468d9ea2b))
+- add ImageMagick ([b47e575](https://github.com/C4illin/ConvertX/commit/b47e5755f677056e8acecad54c0c2e28a5e137f3)), closes [#295](https://github.com/C4illin/ConvertX/issues/295), closes [#269](https://github.com/C4illin/ConvertX/issues/269)
+- enhance job details display with file information ([50725ed](https://github.com/C4illin/ConvertX/commit/50725edd021bb9a7f58c85b79c1eab355ad22ced)), closes [#251](https://github.com/C4illin/ConvertX/issues/251)
+- improve job details interaction and accessibility ([29ba229](https://github.com/C4illin/ConvertX/commit/29ba229bc23d2019d2ee9829da7852f884ffa611))
+- show version in footer ([9a49ded](https://github.com/C4illin/ConvertX/commit/9a49dedacac7e67a432b6da0daf1967038d97d26))
 
 ### Bug Fixes
 
-* add av1 and h26X with containers ([af5c768](https://github.com/C4illin/ConvertX/commit/af5c768dc74b3124fd7ef4b29e27c83a5d19ad49))
-* progress bars on firefox ([ff2c005](https://github.com/C4illin/ConvertX/commit/ff2c0057e890b9ecb552df30914333349ea20eb7))
-* register button style ([b9bbf77](https://github.com/C4illin/ConvertX/commit/b9bbf7792f01fcaa77e3520925de107e856926f1))
-* switch from alpine to debian trixie ([4e4c029](https://github.com/C4illin/ConvertX/commit/4e4c029cb800df86affb99c3a82dda9e6708bdde))
+- add av1 and h26X with containers ([af5c768](https://github.com/C4illin/ConvertX/commit/af5c768dc74b3124fd7ef4b29e27c83a5d19ad49)), closes [#287](https://github.com/C4illin/ConvertX/issues/287), closes [#293](https://github.com/C4illin/ConvertX/issues/293)
+- progress bars on firefox ([ff2c005](https://github.com/C4illin/ConvertX/commit/ff2c0057e890b9ecb552df30914333349ea20eb7))
+- register button style ([b9bbf77](https://github.com/C4illin/ConvertX/commit/b9bbf7792f01fcaa77e3520925de107e856926f1))
+- switch from alpine to debian trixie ([4e4c029](https://github.com/C4illin/ConvertX/commit/4e4c029cb800df86affb99c3a82dda9e6708bdde)), closes [#234](https://github.com/C4illin/ConvertX/issues/234), closes [#199](https://github.com/C4illin/ConvertX/issues/199)
 
 ## [0.13.0](https://github.com/C4illin/ConvertX/compare/v0.12.1...v0.13.0) (2025-05-14)
 
