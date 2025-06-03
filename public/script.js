@@ -72,9 +72,7 @@ function handleFile(file) {
 const selectContainer = document.querySelector("form .select_container");
 
 const updateSearchBar = () => {
-  const convertToInput = document.querySelector(
-    "input[name='convert_to_search']",
-  );
+  const convertToInput = document.querySelector("input[name='convert_to_search']");
   const convertToPopup = document.querySelector(".convert_to_popup");
   const convertToGroupElements = document.querySelectorAll(".convert_to_group");
   const convertToGroups = {};
@@ -195,8 +193,7 @@ const deleteRow = (target) => {
     headers: {
       "Content-Type": "application/json",
     },
-  })
-    .catch((err) => console.log(err));
+  }).catch((err) => console.log(err));
 };
 
 const uploadFile = (file) => {
@@ -234,7 +231,7 @@ const uploadFile = (file) => {
     console.log(`upload progress (${file.name}):`, (100 * sent) / total);
 
     let progressbar = file.htmlRow.getElementsByTagName("progress");
-    progressbar[0].value = ((100 * sent) / total);
+    progressbar[0].value = (100 * sent) / total;
   };
 
   xhr.onerror = (e) => {

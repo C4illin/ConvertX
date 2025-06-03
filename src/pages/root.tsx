@@ -1,14 +1,20 @@
-import { Elysia } from "elysia";
-import { Html } from "@elysiajs/html";
-import { FIRST_RUN, userService } from "./user";
-import { ACCOUNT_REGISTRATION, ALLOW_UNAUTHENTICATED, HIDE_HISTORY, HTTP_ALLOWED, WEBROOT } from "../helpers/env";
-import { JWTPayloadSpec } from "@elysiajs/jwt";
 import { randomInt } from "node:crypto";
+import { Html } from "@elysiajs/html";
+import { JWTPayloadSpec } from "@elysiajs/jwt";
+import { Elysia } from "elysia";
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import { getAllTargets } from "../converters/main";
 import db from "../db/db";
 import { User } from "../db/types";
+import {
+  ACCOUNT_REGISTRATION,
+  ALLOW_UNAUTHENTICATED,
+  HIDE_HISTORY,
+  HTTP_ALLOWED,
+  WEBROOT,
+} from "../helpers/env";
+import { FIRST_RUN, userService } from "./user";
 
 export const root = new Elysia()
   .use(userService)
@@ -27,10 +33,7 @@ export const root = new Elysia()
     let user: ({ id: string } & JWTPayloadSpec) | false = false;
     if (ALLOW_UNAUTHENTICATED) {
       const newUserId = String(
-        randomInt(
-          2 ** 24,
-          Math.min(2 ** 48 + 2 ** 24 - 1, Number.MAX_SAFE_INTEGER),
-        ),
+        randomInt(2 ** 24, Math.min(2 ** 48 + 2 ** 24 - 1, Number.MAX_SAFE_INTEGER)),
       );
       const accessToken = await jwt.sign({
         id: newUserId,
@@ -54,20 +57,19 @@ export const root = new Elysia()
     } else if (auth?.value) {
       user = await jwt.verify(auth.value);
 
-      if (user !== false && user.id) {
-        if (Number.parseInt(user.id) < 2 ** 24 || !ALLOW_UNAUTHENTICATED) {
-          // make sure user exists in db
-          const existingUser = db
-            .query("SELECT * FROM users WHERE id = ?")
-            .as(User)
-            .get(user.id);
+      if (
+        user !== false &&
+        user.id &&
+        (Number.parseInt(user.id) < 2 ** 24 || !ALLOW_UNAUTHENTICATED)
+      ) {
+        // make sure user exists in db
+        const existingUser = db.query("SELECT * FROM users WHERE id = ?").as(User).get(user.id);
 
-          if (!existingUser) {
-            if (auth?.value) {
-              auth.remove();
-            }
-            return redirect(`${WEBROOT}/login`, 302);
+        if (!existingUser) {
+          if (auth?.value) {
+            auth.remove();
           }
+          return redirect(`${WEBROOT}/login`, 302);
         }
       }
     }
@@ -82,11 +84,9 @@ export const root = new Elysia()
       new Date().toISOString(),
     );
 
-    const id = (
-      db
-        .query("SELECT id FROM jobs WHERE user_id = ? ORDER BY id DESC")
-        .get(user.id) as { id: number }
-    ).id;
+    const { id } = db
+      .query("SELECT id FROM jobs WHERE user_id = ? ORDER BY id DESC")
+      .get(user.id) as { id: number };
 
     if (!jobId) {
       return { message: "Cookies should be enabled to use this app." };
@@ -172,62 +172,53 @@ export const root = new Elysia()
                       sm:h-[30vh]
                     `}
                   >
-                    {Object.entries(getAllTargets()).map(
-                      ([converter, targets]) => (
-                        <article
-                          class={`
-                            convert_to_group flex w-full flex-col border-b border-neutral-700 p-4
-                          `}
-                          data-converter={converter}
-                        >
-                          <header class="mb-2 w-full text-xl font-bold" safe>
-                            {converter}
-                          </header>
-                          <ul class="convert_to_target flex flex-row flex-wrap gap-1">
-                            {targets.map((target) => (
-                              <button
-                                // https://stackoverflow.com/questions/121499/when-a-blur-event-occurs-how-can-i-find-out-which-element-focus-went-to#comment82388679_33325953
-                                tabindex={0}
-                                class={`
-                                  target rounded bg-neutral-700 p-1 text-base
-                                  hover:bg-neutral-600
-                                `}
-                                data-value={`${target},${converter}`}
-                                data-target={target}
-                                data-converter={converter}
-                                type="button"
-                                safe
-                              >
-                                {target}
-                              </button>
-                            ))}
-                          </ul>
-                        </article>
-                      ),
-                    )}
+                    {Object.entries(getAllTargets()).map(([converter, targets]) => (
+                      <article
+                        class={`
+                          convert_to_group flex w-full flex-col border-b border-neutral-700 p-4
+                        `}
+                        data-converter={converter}
+                      >
+                        <header class="mb-2 w-full text-xl font-bold" safe>
+                          {converter}
+                        </header>
+                        <ul class="convert_to_target flex flex-row flex-wrap gap-1">
+                          {targets.map((target) => (
+                            <button
+                              // https://stackoverflow.com/questions/121499/when-a-blur-event-occurs-how-can-i-find-out-which-element-focus-went-to#comment82388679_33325953
+                              tabindex={0}
+                              class={`
+                                target rounded bg-neutral-700 p-1 text-base
+                                hover:bg-neutral-600
+                              `}
+                              data-value={`${target},${converter}`}
+                              data-target={target}
+                              data-converter={converter}
+                              type="button"
+                              safe
+                            >
+                              {target}
+                            </button>
+                          ))}
+                        </ul>
+                      </article>
+                    ))}
                   </article>
 
                   {/* Hidden element which determines the format to convert the file too and the converter to use */}
-                  <select
-                    name="convert_to"
-                    aria-label="Convert to"
-                    required
-                    hidden
-                  >
+                  <select name="convert_to" aria-label="Convert to" required hidden>
                     <option selected disabled value="">
                       Convert to
                     </option>
-                    {Object.entries(getAllTargets()).map(
-                      ([converter, targets]) => (
-                        <optgroup label={converter}>
-                          {targets.map((target) => (
-                            <option value={`${target},${converter}`} safe>
-                              {target}
-                            </option>
-                          ))}
-                        </optgroup>
-                      ),
-                    )}
+                    {Object.entries(getAllTargets()).map(([converter, targets]) => (
+                      <optgroup label={converter}>
+                        {targets.map((target) => (
+                          <option value={`${target},${converter}`} safe>
+                            {target}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
                   </select>
                 </div>
               </article>
@@ -246,4 +237,4 @@ export const root = new Elysia()
         </>
       </BaseHtml>
     );
-  })
+  });

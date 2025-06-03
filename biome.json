@@ -10,10 +10,7 @@
     "attributePosition": "auto"
   },
   "files": {
-    "ignore": [
-      "**/node_modules/**",
-      "**/pico.lime.min.css"
-    ]
+    "ignore": ["**/node_modules/**", "**/pico.lime.min.css"]
   },
   "organizeImports": {
     "enabled": true

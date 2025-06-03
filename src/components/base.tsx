@@ -17,23 +17,9 @@ export const BaseHtml = ({
       <meta name="webroot" content={webroot} />
       <title safe>{title}</title>
       <link rel="stylesheet" href={`${webroot}/generated.css`} />
-      <link
-        rel="apple-touch-icon"
-        sizes="180x180"
-        href={`${webroot}/apple-touch-icon.png`}
-      />
-      <link
-        rel="icon"
-        type="image/png"
-        sizes="32x32"
-        href={`${webroot}/favicon-32x32.png`}
-      />
-      <link
-        rel="icon"
-        type="image/png"
-        sizes="16x16"
-        href={`${webroot}/favicon-16x16.png`}
-      />
+      <link rel="apple-touch-icon" sizes="180x180" href={`${webroot}/apple-touch-icon.png`} />
+      <link rel="icon" type="image/png" sizes="32x32" href={`${webroot}/favicon-32x32.png`} />
+      <link rel="icon" type="image/png" sizes="16x16" href={`${webroot}/favicon-16x16.png`} />
       <link rel="manifest" href={`${webroot}/site.webmanifest`} />
     </head>
     <body class="flex min-h-screen w-full flex-col bg-neutral-900 text-neutral-200">

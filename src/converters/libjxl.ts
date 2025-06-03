@@ -4,32 +4,10 @@ import { execFile } from "node:child_process";
 export const properties = {
   from: {
     jxl: ["jxl"],
-    images: [
-      "apng",
-      "exr",
-      "gif",
-      "jpeg",
-      "pam",
-      "pfm",
-      "pgm",
-      "pgx",
-      "png",
-      "ppm",
-    ],
+    images: ["apng", "exr", "gif", "jpeg", "pam", "pfm", "pgm", "pgx", "png", "ppm"],
   },
   to: {
-    jxl: [
-      "apng",
-      "exr",
-      "gif",
-      "jpeg",
-      "pam",
-      "pfm",
-      "pgm",
-      "pgx",
-      "png",
-      "ppm",
-    ],
+    jxl: ["apng", "exr", "gif", "jpeg", "pam", "pfm", "pgm", "pgx", "png", "ppm"],
     images: ["jxl"],
   },
 };

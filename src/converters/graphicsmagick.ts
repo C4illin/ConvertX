@@ -317,24 +317,20 @@ export function convert(
   options?: unknown,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    execFile(
-      "gm",
-      ["convert", filePath, targetPath],
-      (error, stdout, stderr) => {
-        if (error) {
-          reject(`error: ${error}`);
-        }
+    execFile("gm", ["convert", filePath, targetPath], (error, stdout, stderr) => {
+      if (error) {
+        reject(`error: ${error}`);
+      }
 
-        if (stdout) {
-          console.log(`stdout: ${stdout}`);
-        }
+      if (stdout) {
+        console.log(`stdout: ${stdout}`);
+      }
 
-        if (stderr) {
-          console.error(`stderr: ${stderr}`);
-        }
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+      }
 
-        resolve("Done");
-      },
-    );
+      resolve("Done");
+    });
   });
 }

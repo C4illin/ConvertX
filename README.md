@@ -11,6 +11,7 @@
 ![Docker container size](https://ghcr-badge.egpl.dev/c4illin/convertx/size?color=%230375b6&tag=latest&label=image+size&trim=)
 
 <a href="https://trendshift.io/repositories/13818" target="_blank"><img src="https://trendshift.io/api/badge/repositories/13818" alt="C4illin%2FConvertX | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+
 <!-- ![Dev image size](https://ghcr-badge.egpl.dev/c4illin/convertx/size?color=%230375b6&tag=main&label=dev+image&trim=) -->
 
 A self-hosted online file converter. Supports over a thousand different formats. Written with TypeScript, Bun and Elysia.
@@ -24,23 +25,22 @@ A self-hosted online file converter. Supports over a thousand different formats.
 
 ## Converters supported
 
-| Converter                                                                    | Use case      | Converts from | Converts to |
-|------------------------------------------------------------------------------|---------------|---------------|-------------|
-| [libjxl](https://github.com/libjxl/libjxl)                                   | JPEG XL       | 11            | 11          |
-| [resvg](https://github.com/RazrFalcon/resvg)                                 | SVG           | 1             | 1           |
-| [Vips](https://github.com/libvips/libvips)                                   | Images        | 45            | 23          |
-| [libheif](https://github.com/strukturag/libheif)                             | HEIF          | 2             | 4           |
-| [XeLaTeX](https://tug.org/xetex/)                                            | LaTeX         | 1             | 1           |
-| [Calibre](https://calibre-ebook.com/)                                        | E-books       | 26            | 19          |
-| [Pandoc](https://pandoc.org/)                                                | Documents     | 43            | 65          |
-| [dvisvgm](https://dvisvgm.de/)                                               | Vector images | 4             | 2           |
-| [ImageMagick](https://imagemagick.org/)                                      | Images        | 245           | 183         |
-| [GraphicsMagick](http://www.graphicsmagick.org/)                             | Images        | 167           | 130         |
-| [Inkscape](https://inkscape.org/)                                            | Vector images | 7             | 17          |
-| [Assimp](https://github.com/assimp/assimp)                                   | 3D Assets     | 77            | 23          |
-| [FFmpeg](https://ffmpeg.org/)                                                | Video         | ~472          | ~199        |
-| [Potrace](https://potrace.sourceforge.net/)                                  | Raster to vector | 4          | 11          |
-
+| Converter                                        | Use case         | Converts from | Converts to |
+| ------------------------------------------------ | ---------------- | ------------- | ----------- |
+| [libjxl](https://github.com/libjxl/libjxl)       | JPEG XL          | 11            | 11          |
+| [resvg](https://github.com/RazrFalcon/resvg)     | SVG              | 1             | 1           |
+| [Vips](https://github.com/libvips/libvips)       | Images           | 45            | 23          |
+| [libheif](https://github.com/strukturag/libheif) | HEIF             | 2             | 4           |
+| [XeLaTeX](https://tug.org/xetex/)                | LaTeX            | 1             | 1           |
+| [Calibre](https://calibre-ebook.com/)            | E-books          | 26            | 19          |
+| [Pandoc](https://pandoc.org/)                    | Documents        | 43            | 65          |
+| [dvisvgm](https://dvisvgm.de/)                   | Vector images    | 4             | 2           |
+| [ImageMagick](https://imagemagick.org/)          | Images           | 245           | 183         |
+| [GraphicsMagick](http://www.graphicsmagick.org/) | Images           | 167           | 130         |
+| [Inkscape](https://inkscape.org/)                | Vector images    | 7             | 17          |
+| [Assimp](https://github.com/assimp/assimp)       | 3D Assets        | 77            | 23          |
+| [FFmpeg](https://ffmpeg.org/)                    | Video            | ~472          | ~199        |
+| [Potrace](https://potrace.sourceforge.net/)      | Raster to vector | 4             | 11          |
 
 <!-- many ffmpeg fileformats are duplicates -->
 
@@ -54,7 +54,7 @@ Any missing converter? Open an issue or pull request!
 ```yml
 # docker-compose.yml
 services:
-  convertx: 
+  convertx:
     image: ghcr.io/c4illin/convertx
     container_name: convertx
     restart: unless-stopped
@@ -80,16 +80,16 @@ If you get unable to open database file run `chown -R $USER:$USER path` on the p
 
 All are optional, JWT_SECRET is recommended to be set.
 
-| Name                      | Default | Description |
-|---------------------------|---------|-------------|
-| JWT_SECRET                | when unset it will use the value from randomUUID() | A long and secret string used to sign the JSON Web Token |
-| ACCOUNT_REGISTRATION      | false | Allow users to register accounts |
-| HTTP_ALLOWED              | false | Allow HTTP connections, only set this to true locally |
-| ALLOW_UNAUTHENTICATED     | false | Allow unauthenticated users to use the service, only set this to true locally |
-| AUTO_DELETE_EVERY_N_HOURS | 24 | Checks every n hours for files older then n hours and deletes them, set to 0 to disable |
-| WEBROOT                   |  | The address to the root path setting this to "/convert" will serve the website on "example.com/convert/" |
-| FFMPEG_ARGS               |  | Arguments to pass to ffmpeg, e.g. `-preset veryfast` |
-| HIDE_HISTORY              | false | Hide the history page |
+| Name                      | Default                                            | Description                                                                                              |
+| ------------------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| JWT_SECRET                | when unset it will use the value from randomUUID() | A long and secret string used to sign the JSON Web Token                                                 |
+| ACCOUNT_REGISTRATION      | false                                              | Allow users to register accounts                                                                         |
+| HTTP_ALLOWED              | false                                              | Allow HTTP connections, only set this to true locally                                                    |
+| ALLOW_UNAUTHENTICATED     | false                                              | Allow unauthenticated users to use the service, only set this to true locally                            |
+| AUTO_DELETE_EVERY_N_HOURS | 24                                                 | Checks every n hours for files older then n hours and deletes them, set to 0 to disable                  |
+| WEBROOT                   |                                                    | The address to the root path setting this to "/convert" will serve the website on "example.com/convert/" |
+| FFMPEG_ARGS               |                                                    | Arguments to pass to ffmpeg, e.g. `-preset veryfast`                                                     |
+| HIDE_HISTORY              | false                                              | Hide the history page                                                                                    |
 
 ### Docker images
 
@@ -97,15 +97,16 @@ There is a `:latest` tag that is updated with every release and a `:main` tag th
 
 The image is available on [GitHub Container Registry](https://github.com/C4illin/ConvertX/pkgs/container/ConvertX) and [Docker Hub](https://hub.docker.com/r/c4illin/convertx).
 
-| Image | What it is |
-|-------|------------|
-| `image: ghcr.io/c4illin/convertx` | The latest release on ghcr |
-| `image: ghcr.io/c4illin/convertx:main` | The latest commit on ghcr |
-| `image: c4illin/convertx` | The latest release on docker hub |
-| `image: c4illin/convertx:main` | The latest commit on docker hub |
+| Image                                  | What it is                       |
+| -------------------------------------- | -------------------------------- |
+| `image: ghcr.io/c4illin/convertx`      | The latest release on ghcr       |
+| `image: ghcr.io/c4illin/convertx:main` | The latest commit on ghcr        |
+| `image: c4illin/convertx`              | The latest release on docker hub |
+| `image: c4illin/convertx:main`         | The latest commit on docker hub  |
 
 ![Release image size](https://ghcr-badge.egpl.dev/c4illin/convertx/size?color=%230375b6&tag=latest&label=release+image&trim=)
 ![Dev image size](https://ghcr-badge.egpl.dev/c4illin/convertx/size?color=%230375b6&tag=main&label=dev+image&trim=)
+
 <!-- Dockerhub was introduced in 0.9.0 and older releases -->
 
 ### Tutorial

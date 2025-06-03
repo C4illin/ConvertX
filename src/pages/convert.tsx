@@ -3,14 +3,11 @@ import { Elysia, t } from "elysia";
 import sanitize from "sanitize-filename";
 import { outputDir, uploadsDir } from "..";
 import { mainConverter } from "../converters/main";
-import { WEBROOT } from "../helpers/env";
 import db from "../db/db";
-import {
-  normalizeFiletype,
-  normalizeOutputFiletype,
-} from "../helpers/normalizeFiletype";
-import { userService } from "./user";
 import { Jobs } from "../db/types";
+import { WEBROOT } from "../helpers/env";
+import { normalizeFiletype, normalizeOutputFiletype } from "../helpers/normalizeFiletype";
+import { userService } from "./user";
 
 export const convert = new Elysia().use(userService).post(
   "/convert",
@@ -44,10 +41,7 @@ export const convert = new Elysia().use(userService).post(
     try {
       await mkdir(userOutputDir, { recursive: true });
     } catch (error) {
-      console.error(
-        `Failed to create the output directory: ${userOutputDir}.`,
-        error,
-      );
+      console.error(`Failed to create the output directory: ${userOutputDir}.`, error);
     }
 
     const convertTo = normalizeFiletype(body.convert_to.split(",")[0] ?? "");
@@ -62,9 +56,10 @@ export const convert = new Elysia().use(userService).post(
       return redirect(`${WEBROOT}/`, 302);
     }
 
-    db.query(
-      "UPDATE jobs SET num_files = ?1, status = 'pending' WHERE id = ?2",
-    ).run(fileNames.length, jobId.value);
+    db.query("UPDATE jobs SET num_files = ?1, status = 'pending' WHERE id = ?2").run(
+      fileNames.length,
+      jobId.value,
+    );
 
     const query = db.query(
       "INSERT INTO file_names (job_id, file_name, output_file_name, status) VALUES (?1, ?2, ?3, ?4)",
@@ -99,9 +94,7 @@ export const convert = new Elysia().use(userService).post(
       .then(() => {
         // All conversions are done, update the job status to 'completed'
         if (jobId.value) {
-          db.query("UPDATE jobs SET status = 'completed' WHERE id = ?1").run(
-            jobId.value,
-          );
+          db.query("UPDATE jobs SET status = 'completed' WHERE id = ?1").run(jobId.value);
         }
 
         // delete all uploaded files in userUploadsDir

@@ -1,13 +1,10 @@
-import Elysia from "elysia";
-import { userService } from "./user";
 import { Html } from "@elysiajs/html";
-import { ALLOW_UNAUTHENTICATED, WEBROOT } from "../helpers/env";
+import Elysia from "elysia";
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
-import {
-  getAllInputs,
-  getAllTargets,
-} from "../converters/main";
+import { getAllInputs, getAllTargets } from "../converters/main";
+import { ALLOW_UNAUTHENTICATED, WEBROOT } from "../helpers/env";
+import { userService } from "./user";
 
 export const listConverters = new Elysia()
   .use(userService)
@@ -24,11 +21,7 @@ export const listConverters = new Elysia()
     return (
       <BaseHtml webroot={WEBROOT} title="ConvertX | Converters">
         <>
-          <Header
-            webroot={WEBROOT}
-            allowUnauthenticated={ALLOW_UNAUTHENTICATED}
-            loggedIn
-          />
+          <Header webroot={WEBROOT} allowUnauthenticated={ALLOW_UNAUTHENTICATED} loggedIn />
           <main
             class={`
               w-full flex-1 px-2
@@ -53,32 +46,30 @@ export const listConverters = new Elysia()
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.entries(getAllTargets()).map(
-                    ([converter, targets]) => {
-                      const inputs = getAllInputs(converter);
-                      return (
-                        <tr>
-                          <td safe>{converter}</td>
-                          <td>
-                            Count: {inputs.length}
-                            <ul>
-                              {inputs.map((input) => (
-                                <li safe>{input}</li>
-                              ))}
-                            </ul>
-                          </td>
-                          <td>
-                            Count: {targets.length}
-                            <ul>
-                              {targets.map((target) => (
-                                <li safe>{target}</li>
-                              ))}
-                            </ul>
-                          </td>
-                        </tr>
-                      );
-                    },
-                  )}
+                  {Object.entries(getAllTargets()).map(([converter, targets]) => {
+                    const inputs = getAllInputs(converter);
+                    return (
+                      <tr>
+                        <td safe>{converter}</td>
+                        <td>
+                          Count: {inputs.length}
+                          <ul>
+                            {inputs.map((input) => (
+                              <li safe>{input}</li>
+                            ))}
+                          </ul>
+                        </td>
+                        <td>
+                          Count: {targets.length}
+                          <ul>
+                            {targets.map((target) => (
+                              <li safe>{target}</li>
+                            ))}
+                          </ul>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </article>
@@ -86,4 +77,4 @@ export const listConverters = new Elysia()
         </>
       </BaseHtml>
     );
-  })
+  });

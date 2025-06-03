@@ -2,22 +2,21 @@ import { rmSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import { html } from "@elysiajs/html";
 import { staticPlugin } from "@elysiajs/static";
-
 import { Elysia } from "elysia";
 import "./helpers/printVersions";
-import { AUTO_DELETE_EVERY_N_HOURS, WEBROOT } from "./helpers/env";
-import { user } from "./pages/user";
-import { root } from "./pages/root"
-import { upload } from "./pages/upload"
-import { history } from "./pages/history";
-import { convert } from "./pages/convert"
-import { download } from "./pages/download"
-import { results } from "./pages/results";
-import { deleteFile } from "./pages/deleteFile";
-import { listConverters } from "./pages/listConverters";
-import { chooseConverter } from "./pages/chooseConverter";
 import db from "./db/db";
 import { Jobs } from "./db/types";
+import { AUTO_DELETE_EVERY_N_HOURS, WEBROOT } from "./helpers/env";
+import { chooseConverter } from "./pages/chooseConverter";
+import { convert } from "./pages/convert";
+import { deleteFile } from "./pages/deleteFile";
+import { download } from "./pages/download";
+import { history } from "./pages/history";
+import { listConverters } from "./pages/listConverters";
+import { results } from "./pages/results";
+import { root } from "./pages/root";
+import { upload } from "./pages/upload";
+import { user } from "./pages/user";
 
 mkdir("./data", { recursive: true }).catch(console.error);
 
@@ -64,19 +63,13 @@ if (process.env.NODE_ENV !== "production") {
 
 app.listen(3000);
 
-console.log(
-  `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}${WEBROOT}`,
-);
+console.log(`🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}${WEBROOT}`);
 
 const clearJobs = () => {
   const jobs = db
     .query("SELECT * FROM jobs WHERE date_created < ?")
     .as(Jobs)
-    .all(
-      new Date(
-        Date.now() - AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000,
-      ).toISOString(),
-    );
+    .all(new Date(Date.now() - AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000).toISOString());
 
   for (const job of jobs) {
     // delete the directories

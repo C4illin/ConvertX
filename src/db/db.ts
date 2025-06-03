@@ -1,4 +1,5 @@
 import { Database } from "bun:sqlite";
+
 const db = new Database("./data/mydb.sqlite", { create: true });
 
 if (!db.query("SELECT * FROM sqlite_master WHERE type='table'").get()) {
@@ -27,13 +28,9 @@ CREATE TABLE IF NOT EXISTS jobs (
 PRAGMA user_version = 1;`);
 }
 
-const dbVersion = (
-  db.query("PRAGMA user_version").get() as { user_version?: number }
-).user_version;
+const dbVersion = (db.query("PRAGMA user_version").get() as { user_version?: number }).user_version;
 if (dbVersion === 0) {
-  db.exec(
-    "ALTER TABLE file_names ADD COLUMN status TEXT DEFAULT 'not started';",
-  );
+  db.exec("ALTER TABLE file_names ADD COLUMN status TEXT DEFAULT 'not started';");
   db.exec("PRAGMA user_version = 1;");
   console.log("Updated database to version 1.");
 }

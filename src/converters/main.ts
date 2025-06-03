@@ -1,19 +1,21 @@
 import { normalizeFiletype } from "../helpers/normalizeFiletype";
 import { convert as convertassimp, properties as propertiesassimp } from "./assimp";
+import { convert as convertCalibre, properties as propertiesCalibre } from "./calibre";
+import { convert as convertDvisvgm, properties as propertiesDvisvgm } from "./dvisvgm";
 import { convert as convertFFmpeg, properties as propertiesFFmpeg } from "./ffmpeg";
-import { convert as convertGraphicsmagick, properties as propertiesGraphicsmagick } from "./graphicsmagick";
+import {
+  convert as convertGraphicsmagick,
+  properties as propertiesGraphicsmagick,
+} from "./graphicsmagick";
+import { convert as convertImagemagick, properties as propertiesImagemagick } from "./imagemagick";
 import { convert as convertInkscape, properties as propertiesInkscape } from "./inkscape";
+import { convert as convertLibheif, properties as propertiesLibheif } from "./libheif";
 import { convert as convertLibjxl, properties as propertiesLibjxl } from "./libjxl";
 import { convert as convertPandoc, properties as propertiesPandoc } from "./pandoc";
+import { convert as convertPotrace, properties as propertiesPotrace } from "./potrace";
 import { convert as convertresvg, properties as propertiesresvg } from "./resvg";
 import { convert as convertImage, properties as propertiesImage } from "./vips";
 import { convert as convertxelatex, properties as propertiesxelatex } from "./xelatex";
-import { convert as convertCalibre, properties as propertiesCalibre } from "./calibre";
-import { convert as convertLibheif, properties as propertiesLibheif } from "./libheif";
-import { convert as convertPotrace, properties as propertiesPotrace } from "./potrace";
-import { convert as convertImagemagick, properties as propertiesImagemagick } from "./imagemagick";
-import { convert as convertDvisvgm, properties as propertiesDvisvgm } from "./dvisvgm";
-
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
 
@@ -113,7 +115,7 @@ export async function mainConverter(
 ) {
   const fileType = normalizeFiletype(fileTypeOriginal);
 
-  let converterFunc: typeof properties["libjxl"]["converter"] | undefined;
+  let converterFunc: (typeof properties)["libjxl"]["converter"] | undefined;
 
   if (converterName) {
     converterFunc = properties[converterName]?.converter;
@@ -139,20 +141,12 @@ export async function mainConverter(
   }
 
   if (!converterFunc) {
-    console.log(
-      `No available converter supports converting from ${fileType} to ${convertTo}.`,
-    );
+    console.log(`No available converter supports converting from ${fileType} to ${convertTo}.`);
     return "File type not supported";
   }
 
   try {
-    const result = await converterFunc(
-      inputFilePath,
-      fileType,
-      convertTo,
-      targetPath,
-      options,
-    );
+    const result = await converterFunc(inputFilePath, fileType, convertTo, targetPath, options);
 
     console.log(
       `Converted ${inputFilePath} from ${fileType} to ${convertTo} successfully using ${converterName}.`,
@@ -192,8 +186,7 @@ for (const converterName in properties) {
         possibleTargets[extension] = {};
       }
 
-      possibleTargets[extension][converterName] =
-        converterProperties.to[key] || [];
+      possibleTargets[extension][converterName] = converterProperties.to[key] || [];
     }
   }
 }

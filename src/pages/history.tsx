@@ -1,11 +1,11 @@
+import { Html } from "@elysiajs/html";
 import { Elysia } from "elysia";
 import { BaseHtml } from "../components/base";
-import { Html } from "@elysiajs/html";
 import { Header } from "../components/header";
-import { userService } from "./user";
-import { ALLOW_UNAUTHENTICATED, HIDE_HISTORY, WEBROOT } from "../helpers/env";
-import { Filename, Jobs } from "../db/types";
 import db from "../db/db";
+import { Filename, Jobs } from "../db/types";
+import { ALLOW_UNAUTHENTICATED, HIDE_HISTORY, WEBROOT } from "../helpers/env";
+import { userService } from "./user";
 
 export const history = new Elysia()
   .use(userService)
@@ -23,17 +23,10 @@ export const history = new Elysia()
       return redirect(`${WEBROOT}/login`, 302);
     }
 
-    let userJobs = db
-      .query("SELECT * FROM jobs WHERE user_id = ?")
-      .as(Jobs)
-      .all(user.id)
-      .reverse();
+    let userJobs = db.query("SELECT * FROM jobs WHERE user_id = ?").as(Jobs).all(user.id).reverse();
 
     for (const job of userJobs) {
-      const files = db
-        .query("SELECT * FROM file_names WHERE job_id = ?")
-        .as(Filename)
-        .all(job.id);
+      const files = db.query("SELECT * FROM file_names WHERE job_id = ?").as(Filename).all(job.id);
 
       job.finished_files = files.length;
       job.files_detailed = files;
@@ -123,10 +116,7 @@ export const history = new Elysia()
                   {userJobs.map((job) => (
                     <>
                       <tr id={`job-row-${job.id}`}>
-                        <td
-                          class="job-details-toggle cursor-pointer"
-                          data-job-id={job.id}
-                        >
+                        <td class="job-details-toggle cursor-pointer" data-job-id={job.id}>
                           <svg
                             id={`arrow-${job.id}`}
                             xmlns="http://www.w3.org/2000/svg"
@@ -143,9 +133,7 @@ export const history = new Elysia()
                             />
                           </svg>
                         </td>
-                        <td safe>
-                          {new Date(job.date_created).toLocaleTimeString()}
-                        </td>
+                        <td safe>{new Date(job.date_created).toLocaleTimeString()}</td>
                         <td>{job.num_files}</td>
                         <td class="max-sm:hidden">{job.finished_files}</td>
                         <td safe>{job.status}</td>
@@ -164,43 +152,29 @@ export const history = new Elysia()
                       <tr id={`details-${job.id}`} class="hidden">
                         <td colspan="6">
                           <div class="p-2 text-sm text-neutral-500">
-                            <div class="mb-1 font-semibold">
-                              Detailed File Information:
-                            </div>
-                            {job.files_detailed.map(
-                              (file: Filename) => (
-                                <div
-                                  class="flex items-center"
+                            <div class="mb-1 font-semibold">Detailed File Information:</div>
+                            {job.files_detailed.map((file: Filename) => (
+                              <div class="flex items-center">
+                                <span class="w-5/12 truncate" title={file.file_name} safe>
+                                  {file.file_name}
+                                </span>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 20 20"
+                                  fill="currentColor"
+                                  class="mx-2 inline-block h-4 w-4 text-neutral-500"
                                 >
-                                  <span
-                                    class="w-5/12 truncate"
-                                    title={file.file_name}
-                                    safe
-                                  >
-                                    {file.file_name}
-                                  </span>
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 20 20"
-                                    fill="currentColor"
-                                    class="mx-2 inline-block h-4 w-4 text-neutral-500"
-                                  >
-                                    <path
-                                      fill-rule="evenodd"
-                                      d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
-                                      clip-rule="evenodd"
-                                    />
-                                  </svg>
-                                  <span
-                                    class="w-5/12 truncate"
-                                    title={file.output_file_name}
-                                    safe
-                                  >
-                                    {file.output_file_name}
-                                  </span>
-                                </div>
-                              ),
-                            )}
+                                  <path
+                                    fill-rule="evenodd"
+                                    d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+                                    clip-rule="evenodd"
+                                  />
+                                </svg>
+                                <span class="w-5/12 truncate" title={file.output_file_name} safe>
+                                  {file.output_file_name}
+                                </span>
+                              </div>
+                            ))}
                           </div>
                         </td>
                       </tr>
@@ -239,4 +213,4 @@ export const history = new Elysia()
         </>
       </BaseHtml>
     );
-  })
+  });

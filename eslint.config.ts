@@ -36,8 +36,8 @@ export default [
       },
     },
     rules: {
-      ...eslintPluginBetterTailwindcss.configs["recommended-warn"]?.rules,
-      ...eslintPluginBetterTailwindcss.configs["stylistic-warn"]?.rules,
+      ...(eslintPluginBetterTailwindcss.configs["recommended-warn"] ?? {}).rules,
+      ...(eslintPluginBetterTailwindcss.configs["stylistic-warn"] ?? {}).rules,
       // "tailwindcss/classnames-order": "off",
       "better-tailwindcss/multiline": [
         "warn",

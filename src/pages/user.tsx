@@ -1,17 +1,22 @@
-import { Elysia, t } from "elysia";
+import { randomUUID } from "node:crypto";
 import { Html } from "@elysiajs/html";
+import { jwt } from "@elysiajs/jwt";
+import { Elysia, t } from "elysia";
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
-import { jwt } from "@elysiajs/jwt";
-import { randomUUID } from "node:crypto";
-
-import { ACCOUNT_REGISTRATION, WEBROOT, HIDE_HISTORY, ALLOW_UNAUTHENTICATED, HTTP_ALLOWED } from "../helpers/env";
 import db from "../db/db";
 import { User } from "../db/types";
+import {
+  ACCOUNT_REGISTRATION,
+  ALLOW_UNAUTHENTICATED,
+  HIDE_HISTORY,
+  HTTP_ALLOWED,
+  WEBROOT,
+} from "../helpers/env";
 
 export let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
 
-export const userService = new Elysia({ name: 'user/service' })
+export const userService = new Elysia({ name: "user/service" })
   .use(
     jwt({
       name: "jwt",
@@ -25,35 +30,31 @@ export const userService = new Elysia({ name: 'user/service' })
   .model({
     signIn: t.Object({
       email: t.String(),
-      password: t.String()
+      password: t.String(),
     }),
   })
   .macro({
     isSignIn(enabled: boolean) {
-      if (!enabled) return
+      if (!enabled) return;
 
       return {
-        async beforeHandle({
-          status,
-          jwt,
-          cookie: { auth },
-        }) {
+        async beforeHandle({ status, jwt, cookie: { auth } }) {
           if (auth?.value) {
             const user = await jwt.verify(auth.value);
             return {
               success: true,
-              user
-            }
+              user,
+            };
           }
 
           return status(401, {
             success: false,
-            message: 'Unauthorized'
-          })
-        }
-      }
-    }
-  })
+            message: "Unauthorized",
+          });
+        },
+      };
+    },
+  });
 
 export const user = new Elysia()
   .use(userService)
@@ -72,9 +73,7 @@ export const user = new Elysia()
         >
           <h1 class="my-8 text-3xl">Welcome to ConvertX!</h1>
           <article class="article p-0">
-            <header class="w-full bg-neutral-800 p-4">
-              Create your account
-            </header>
+            <header class="w-full bg-neutral-800 p-4">Create your account</header>
             <form method="post" action={`${WEBROOT}/register`} class="p-4">
               <fieldset class="mb-4 flex flex-col gap-4">
                 <label class="flex flex-col gap-1">
@@ -166,11 +165,7 @@ export const user = new Elysia()
                     />
                   </label>
                 </fieldset>
-                <input
-                  type="submit"
-                  value="Register"
-                  class="w-full btn-primary"
-                />
+                <input type="submit" value="Register" class="w-full btn-primary" />
               </form>
             </article>
           </main>
@@ -189,9 +184,7 @@ export const user = new Elysia()
         FIRST_RUN = false;
       }
 
-      const existingUser = await db
-        .query("SELECT * FROM users WHERE email = ?")
-        .get(email);
+      const existingUser = await db.query("SELECT * FROM users WHERE email = ?").get(email);
       if (existingUser) {
         set.status = 400;
         return {
@@ -200,15 +193,9 @@ export const user = new Elysia()
       }
       const savedPassword = await Bun.password.hash(password);
 
-      db.query("INSERT INTO users (email, password) VALUES (?, ?)").run(
-        email,
-        savedPassword,
-      );
+      db.query("INSERT INTO users (email, password) VALUES (?, ?)").run(email, savedPassword);
 
-      const user = db
-        .query("SELECT * FROM users WHERE email = ?")
-        .as(User)
-        .get(email);
+      const user = db.query("SELECT * FROM users WHERE email = ?").as(User).get(email);
 
       if (!user) {
         set.status = 500;
@@ -239,7 +226,7 @@ export const user = new Elysia()
 
       return redirect(`${WEBROOT}/`, 302);
     },
-    { body: 'signIn' },
+    { body: "signIn" },
   )
   .get("/login", async ({ jwt, redirect, cookie: { auth } }) => {
     if (FIRST_RUN) {
@@ -308,11 +295,7 @@ export const user = new Elysia()
                       Register
                     </a>
                   ) : null}
-                  <input
-                    type="submit"
-                    value="Login"
-                    class="w-full btn-primary"
-                  />
+                  <input type="submit" value="Login" class="w-full btn-primary" />
                 </div>
               </form>
             </article>
@@ -324,10 +307,7 @@ export const user = new Elysia()
   .post(
     "/login",
     async function handler({ body, set, redirect, jwt, cookie: { auth } }) {
-      const existingUser = db
-        .query("SELECT * FROM users WHERE email = ?")
-        .as(User)
-        .get(body.email);
+      const existingUser = db.query("SELECT * FROM users WHERE email = ?").as(User).get(body.email);
 
       if (!existingUser) {
         set.status = 403;
@@ -336,10 +316,7 @@ export const user = new Elysia()
         };
       }
 
-      const validPassword = await Bun.password.verify(
-        body.password,
-        existingUser.password,
-      );
+      const validPassword = await Bun.password.verify(body.password, existingUser.password);
 
       if (!validPassword) {
         set.status = 403;
@@ -370,7 +347,7 @@ export const user = new Elysia()
 
       return redirect(`${WEBROOT}/`, 302);
     },
-    { body: 'signIn' },
+    { body: "signIn" },
   )
   .get("/logoff", ({ redirect, cookie: { auth } }) => {
     if (auth?.value) {
@@ -396,10 +373,7 @@ export const user = new Elysia()
       return redirect(`${WEBROOT}/`, 302);
     }
 
-    const userData = db
-      .query("SELECT * FROM users WHERE id = ?")
-      .as(User)
-      .get(user.id);
+    const userData = db.query("SELECT * FROM users WHERE id = ?").as(User).get(user.id);
 
     if (!userData) {
       return redirect(`${WEBROOT}/`, 302);
@@ -459,11 +433,7 @@ export const user = new Elysia()
                   </label>
                 </fieldset>
                 <div role="group">
-                  <input
-                    type="submit"
-                    value="Update"
-                    class="w-full btn-primary"
-                  />
+                  <input type="submit" value="Update" class="w-full btn-primary" />
                 </div>
               </form>
             </article>
@@ -483,10 +453,7 @@ export const user = new Elysia()
       if (!user) {
         return redirect(`${WEBROOT}/login`, 302);
       }
-      const existingUser = db
-        .query("SELECT * FROM users WHERE id = ?")
-        .as(User)
-        .get(user.id);
+      const existingUser = db.query("SELECT * FROM users WHERE id = ?").as(User).get(user.id);
 
       if (!existingUser) {
         if (auth?.value) {
@@ -495,10 +462,7 @@ export const user = new Elysia()
         return redirect(`${WEBROOT}/login`, 302);
       }
 
-      const validPassword = await Bun.password.verify(
-        body.password,
-        existingUser.password,
-      );
+      const validPassword = await Bun.password.verify(body.password, existingUser.password);
 
       if (!validPassword) {
         set.status = 403;
@@ -542,4 +506,4 @@ export const user = new Elysia()
         password: t.String(),
       }),
     },
-  )
+  );

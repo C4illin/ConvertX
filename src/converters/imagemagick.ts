@@ -452,12 +452,7 @@ export function convert(
   let inputArgs: string[] = [];
 
   if (convertTo === "ico") {
-    outputArgs = [
-      "-define",
-      "icon:auto-resize=256,128,64,48,32,16",
-      "-background",
-      "none",
-    ];
+    outputArgs = ["-define", "icon:auto-resize=256,128,64,48,32,16", "-background", "none"];
 
     if (fileType === "svg") {
       // this might be a bit too much, but it works
