@@ -40,15 +40,17 @@ RUN apt-get update && apt-get install -y \
   assimp-utils \
   calibre \
   dcraw \
+  dvisvgm \
   ffmpeg \
   ghostscript \
   graphicsmagick \
+  imagemagick-7.q16 \
   inkscape \
   libheif-examples \
   libjxl-tools \
   libva2 \
   libvips-tools \
-  imagemagick-7.q16 \
+  mupdf-tools \
   pandoc \
   poppler-utils \
   potrace \

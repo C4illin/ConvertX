@@ -12,6 +12,7 @@ import { convert as convertCalibre, properties as propertiesCalibre } from "./ca
 import { convert as convertLibheif, properties as propertiesLibheif } from "./libheif";
 import { convert as convertPotrace, properties as propertiesPotrace } from "./potrace";
 import { convert as convertImagemagick, properties as propertiesImagemagick } from "./imagemagick";
+import { convert as convertDvisvgm, properties as propertiesDvisvgm } from "./dvisvgm";
 
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
@@ -71,6 +72,10 @@ const properties: Record<
   pandoc: {
     properties: propertiesPandoc,
     converter: convertPandoc,
+  },
+  dvisvgm: {
+    properties: propertiesDvisvgm,
+    converter: convertDvisvgm,
   },
   imagemagick: {
     properties: propertiesImagemagick,

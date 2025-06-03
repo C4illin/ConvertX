@@ -33,6 +33,7 @@ A self-hosted online file converter. Supports over a thousand different formats.
 | [XeLaTeX](https://tug.org/xetex/)                                            | LaTeX         | 1             | 1           |
 | [Calibre](https://calibre-ebook.com/)                                        | E-books       | 26            | 19          |
 | [Pandoc](https://pandoc.org/)                                                | Documents     | 43            | 65          |
+| [dvisvgm](https://dvisvgm.de/)                                               | Vector images | 4             | 2           |
 | [ImageMagick](https://imagemagick.org/)                                      | Images        | 245           | 183         |
 | [GraphicsMagick](http://www.graphicsmagick.org/)                             | Images        | 167           | 130         |
 | [Inkscape](https://inkscape.org/)                                            | Vector images | 7             | 17          |
@@ -88,7 +89,7 @@ All are optional, JWT_SECRET is recommended to be set.
 | AUTO_DELETE_EVERY_N_HOURS | 24 | Checks every n hours for files older then n hours and deletes them, set to 0 to disable |
 | WEBROOT                   |  | The address to the root path setting this to "/convert" will serve the website on "example.com/convert/" |
 | FFMPEG_ARGS               |  | Arguments to pass to ffmpeg, e.g. `-preset veryfast` |
-| HIDE_HISTORY             | false | Hide the history page |
+| HIDE_HISTORY              | false | Hide the history page |
 
 ### Docker images
 
@@ -133,17 +134,12 @@ Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#summar
 
 ## Todo
 
-- [x] Add messages for errors in converters
-- [x] Add searchable list of formats
 - [ ] Add options for converters
-- [ ] Divide index.tsx into smaller components
 - [ ] Add tests
-- [ ] Make the upload button nicer and more easy to drop files on. Support copy paste as well if possible.
 - [ ] Make errors logs visible from the web ui
 - [ ] Add more converters:
   - [ ] [deark](https://github.com/jsummers/deark)
   - [ ] LibreOffice
-  - [ ] [dvisvgm](https://github.com/mgieseki/dvisvgm)
 
 ## Contributors
 
