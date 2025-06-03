@@ -17,20 +17,20 @@ dropZone.addEventListener("dragleave", () => {
 });
 
 dropZone.addEventListener("drop", (e) => {
-    e.preventDefault();
-    dropZone.classList.remove("dragover");
-  
-    const files = e.dataTransfer.files;
-  
-    if (files.length === 0) {
-      console.warn("No files dropped — likely a URL or unsupported source.");
-      return;
-    }
-  
-    for (const file of files) {
-      console.log("Handling dropped file:", file.name);
-      handleFile(file);
-    }
+  e.preventDefault();
+  dropZone.classList.remove("dragover");
+
+  const files = e.dataTransfer.files;
+
+  if (files.length === 0) {
+    console.warn("No files dropped — likely a URL or unsupported source.");
+    return;
+  }
+
+  for (const file of files) {
+    console.log("Handling dropped file:", file.name);
+    handleFile(file);
+  }
 });
 
 // Extracted handleFile function for reusability in drag-and-drop and file input
@@ -40,7 +40,7 @@ function handleFile(file) {
   const row = document.createElement("tr");
   row.innerHTML = `
     <td>${file.name}</td>
-    <td><progress max="100"></progress></td>
+    <td><progress max="100" class="inline-block h-2 appearance-none overflow-hidden rounded-full border-0 bg-neutral-700 bg-none text-accent-500 accent-accent-500 [&::-moz-progress-bar]:bg-accent-500 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:[background:none] [&[value]::-webkit-progress-value]:bg-accent-500 [&[value]::-webkit-progress-value]:transition-[inline-size]"></progress></td>
     <td>${(file.size / 1024).toFixed(2)} kB</td>
     <td><a onclick="deleteRow(this)">Remove</a></td>
   `;
@@ -207,7 +207,7 @@ const uploadFile = (file) => {
   const formData = new FormData();
   formData.append("file", file, file.name);
 
-  let xhr = new XMLHttpRequest(); 
+  let xhr = new XMLHttpRequest();
 
   xhr.open("POST", `${webroot}/upload`, true);
 

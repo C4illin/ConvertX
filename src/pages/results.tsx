@@ -7,6 +7,112 @@ import { Header } from "../components/header";
 import { BaseHtml } from "../components/base";
 import db from "../db/db";
 
+function ResultsArticle({ job, files, outputPath }: { job: Jobs, files: Filename[], outputPath: string }) {
+  return (<article class="article">
+    <div class="mb-4 flex items-center justify-between">
+      <h1 class="text-xl">Results</h1>
+      <div>
+        <button
+          type="button"
+          class="float-right w-40 btn-primary"
+          onclick="downloadAll()"
+          {...(files.length !== job.num_files
+            ? { disabled: true, "aria-busy": "true" }
+            : "")}
+        >
+          {files.length === job.num_files
+            ? "Download All"
+            : "Converting..."}
+        </button>
+      </div>
+    </div>
+    <progress
+      max={job.num_files}
+      value={files.length}
+      class={`
+              mb-4 inline-block h-2 w-full appearance-none overflow-hidden rounded-full border-0
+              bg-neutral-700 bg-none text-accent-500 accent-accent-500
+              [&::-moz-progress-bar]:bg-accent-500 [&::-webkit-progress-value]:rounded-full
+              [&::-webkit-progress-value]:[background:none]
+              [&[value]::-webkit-progress-value]:bg-accent-500
+              [&[value]::-webkit-progress-value]:transition-[inline-size]
+            `}
+    />
+    <table class={`
+              w-full table-auto rounded bg-neutral-900 text-left
+              [&_td]:p-4
+              [&_tr]:rounded-sm [&_tr]:border-b [&_tr]:border-neutral-800
+            `}
+    >
+      <thead>
+        <tr>
+          <th class={`
+                    px-2 py-2
+                    sm:px-4
+                  `}
+          >
+            Converted File Name
+          </th>
+          <th class={`
+                    px-2 py-2
+                    sm:px-4
+                  `}
+          >
+            Status
+          </th>
+          <th class={`
+                    px-2 py-2
+                    sm:px-4
+                  `}
+          >
+            View
+          </th>
+          <th class={`
+                    px-2 py-2
+                    sm:px-4
+                  `}>
+            Download
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {files.map((file) => (
+          <tr>
+            <td safe class="max-w-[20vw] truncate">
+              {file.output_file_name}
+            </td>
+            <td safe>{file.status}</td>
+            <td>
+              <a
+                class={`
+                        text-accent-500 underline
+                        hover:text-accent-400
+                      `}
+                href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
+              >
+                View
+              </a>
+            </td>
+            <td>
+              <a
+                class={`
+                        text-accent-500 underline
+                        hover:text-accent-400
+                      `}
+                href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
+                download={file.output_file_name}
+              >
+                Download
+              </a>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </article>
+  )
+}
+
 export const results = new Elysia()
   .use(userService)
   .get(
@@ -59,114 +165,7 @@ export const results = new Elysia()
                 sm:px-4
               `}
             >
-              <article class="article">
-                <div class="mb-4 flex items-center justify-between">
-                  <h1 class="text-xl">Results</h1>
-                  <div>
-                    <button
-                      type="button"
-                      class="float-right w-40 btn-primary"
-                      onclick="downloadAll()"
-                      {...(files.length !== job.num_files
-                        ? { disabled: true, "aria-busy": "true" }
-                        : "")}
-                    >
-                      {files.length === job.num_files
-                        ? "Download All"
-                        : "Converting..."}
-                    </button>
-                  </div>
-                </div>
-                <progress
-                  max={job.num_files}
-                  value={files.length}
-                  class={`
-                    mb-4 inline-block h-2 w-full appearance-none overflow-hidden rounded-full
-                    border-0 bg-neutral-700 bg-none text-accent-500 accent-accent-500
-                    [&::-moz-progress-bar]:bg-neutral-700 [&::-webkit-progress-value]:rounded-full
-                    [&::-webkit-progress-value]:[background:none]
-                    [&[value]::-webkit-progress-value]:bg-accent-500
-                    [&[value]::-webkit-progress-value]:transition-[inline-size]
-                  `}
-                />
-                <table
-                  class={`
-                    w-full table-auto rounded bg-neutral-900 text-left
-                    [&_td]:p-4
-                    [&_tr]:rounded-sm [&_tr]:border-b [&_tr]:border-neutral-800
-                  `}
-                >
-                  <thead>
-                    <tr>
-                      <th
-                        class={`
-                          px-2 py-2
-                          sm:px-4
-                        `}
-                      >
-                        Converted File Name
-                      </th>
-                      <th
-                        class={`
-                          px-2 py-2
-                          sm:px-4
-                        `}
-                      >
-                        Status
-                      </th>
-                      <th
-                        class={`
-                          px-2 py-2
-                          sm:px-4
-                        `}
-                      >
-                        View
-                      </th>
-                      <th
-                        class={`
-                          px-2 py-2
-                          sm:px-4
-                        `}
-                      >
-                        Download
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {files.map((file) => (
-                      <tr>
-                        <td safe class="max-w-[20vw] truncate">
-                          {file.output_file_name}
-                        </td>
-                        <td safe>{file.status}</td>
-                        <td>
-                          <a
-                            class={`
-                              text-accent-500 underline
-                              hover:text-accent-400
-                            `}
-                            href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
-                          >
-                            View
-                          </a>
-                        </td>
-                        <td>
-                          <a
-                            class={`
-                              text-accent-500 underline
-                              hover:text-accent-400
-                            `}
-                            href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
-                            download={file.output_file_name}
-                          >
-                            Download
-                          </a>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </article>
+              <ResultsArticle job={job} files={files} outputPath={outputPath} />
             </main>
             <script src={`${WEBROOT}/results.js`} defer />
           </>
@@ -210,115 +209,6 @@ export const results = new Elysia()
         .as(Filename)
         .all(params.jobId);
 
-      return (
-        <article class="article">
-          <div class="mb-4 flex items-center justify-between">
-            <h1 class="text-xl">Results</h1>
-            <div>
-              <button
-                type="button"
-                class="float-right w-40 btn-primary"
-                onclick="downloadAll()"
-                {...(files.length !== job.num_files
-                  ? { disabled: true, "aria-busy": "true" }
-                  : "")}
-              >
-                {files.length === job.num_files
-                  ? "Download All"
-                  : "Converting..."}
-              </button>
-            </div>
-          </div>
-          <progress
-            max={job.num_files}
-            value={files.length}
-            class={`
-              mb-4 inline-block h-2 w-full appearance-none overflow-hidden rounded-full border-0
-              bg-neutral-700 bg-none text-accent-500 accent-accent-500
-              [&::-moz-progress-bar]:bg-neutral-700 [&::-webkit-progress-value]:rounded-full
-              [&::-webkit-progress-value]:[background:none]
-              [&[value]::-webkit-progress-value]:bg-accent-500
-              [&[value]::-webkit-progress-value]:transition-[inline-size]
-            `}
-          />
-          <table
-            class={`
-              w-full table-auto rounded bg-neutral-900 text-left
-              [&_td]:p-4
-              [&_tr]:rounded-sm [&_tr]:border-b [&_tr]:border-neutral-800
-            `}
-          >
-            <thead>
-              <tr>
-                <th
-                  class={`
-                    px-2 py-2
-                    sm:px-4
-                  `}
-                >
-                  Converted File Name
-                </th>
-                <th
-                  class={`
-                    px-2 py-2
-                    sm:px-4
-                  `}
-                >
-                  Status
-                </th>
-                <th
-                  class={`
-                    px-2 py-2
-                    sm:px-4
-                  `}
-                >
-                  View
-                </th>
-                <th
-                  class={`
-                    px-2 py-2
-                    sm:px-4
-                  `}
-                >
-                  Download
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {files.map((file) => (
-                <tr>
-                  <td safe class="max-w-[20vw] truncate">
-                    {file.output_file_name}
-                  </td>
-                  <td safe>{file.status}</td>
-                  <td>
-                    <a
-                      class={`
-                        text-accent-500 underline
-                        hover:text-accent-400
-                      `}
-                      href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
-                    >
-                      View
-                    </a>
-                  </td>
-                  <td>
-                    <a
-                      class={`
-                        text-accent-500 underline
-                        hover:text-accent-400
-                      `}
-                      href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
-                      download={file.output_file_name}
-                    >
-                      Download
-                    </a>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </article>
-      );
+      return <ResultsArticle job={job} files={files} outputPath={outputPath} />;
     },
   )
