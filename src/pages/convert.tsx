@@ -1,7 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import { Elysia, t } from "elysia";
 import sanitize from "sanitize-filename";
-import { Jobs, outputDir, uploadsDir } from "..";
+import { outputDir, uploadsDir } from "..";
 import { mainConverter } from "../converters/main";
 import { WEBROOT } from "../helpers/env";
 import db from "../db/db";
@@ -10,6 +10,7 @@ import {
   normalizeOutputFiletype,
 } from "../helpers/normalizeFiletype";
 import { userService } from "./user";
+import { Jobs } from "../db/types";
 
 export const convert = new Elysia().use(userService).post(
   "/convert",

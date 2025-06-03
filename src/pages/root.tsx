@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { Html } from "@elysiajs/html";
-import { FIRST_RUN, User, userService } from "./user";
+import { FIRST_RUN, userService } from "./user";
 import { ACCOUNT_REGISTRATION, ALLOW_UNAUTHENTICATED, HIDE_HISTORY, HTTP_ALLOWED, WEBROOT } from "../helpers/env";
 import { JWTPayloadSpec } from "@elysiajs/jwt";
 import { randomInt } from "node:crypto";
@@ -8,6 +8,7 @@ import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import { getAllTargets } from "../converters/main";
 import db from "../db/db";
+import { User } from "../db/types";
 
 export const root = new Elysia()
   .use(userService)

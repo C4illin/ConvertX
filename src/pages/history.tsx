@@ -4,7 +4,7 @@ import { Html } from "@elysiajs/html";
 import { Header } from "../components/header";
 import { userService } from "./user";
 import { ALLOW_UNAUTHENTICATED, HIDE_HISTORY, WEBROOT } from "../helpers/env";
-import { Filename, Jobs } from "..";
+import { Filename, Jobs } from "../db/types";
 import db from "../db/db";
 
 export const history = new Elysia()

@@ -7,12 +7,7 @@ import { randomUUID } from "node:crypto";
 
 import { ACCOUNT_REGISTRATION, WEBROOT, HIDE_HISTORY, ALLOW_UNAUTHENTICATED, HTTP_ALLOWED } from "../helpers/env";
 import db from "../db/db";
-
-export class User {
-  id!: number;
-  email!: string;
-  password!: string;
-}
+import { User } from "../db/types";
 
 export let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
 

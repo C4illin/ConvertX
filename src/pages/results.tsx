@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import { userService } from "./user";
 import { Html } from "@elysiajs/html";
 import { ALLOW_UNAUTHENTICATED, WEBROOT } from "../helpers/env";
-import { Filename, Jobs } from "..";
+import { Filename, Jobs } from "../db/types";
 import { Header } from "../components/header";
 import { BaseHtml } from "../components/base";
 import db from "../db/db";

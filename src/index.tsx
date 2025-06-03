@@ -17,32 +17,12 @@ import { deleteFile } from "./pages/deleteFile";
 import { listConverters } from "./pages/listConverters";
 import { chooseConverter } from "./pages/chooseConverter";
 import db from "./db/db";
+import { Jobs } from "./db/types";
 
 mkdir("./data", { recursive: true }).catch(console.error);
 
 export const uploadsDir = "./data/uploads/";
 export const outputDir = "./data/output/";
-
-// init db if not exists
-
-
-export class Filename {
-  id!: number;
-  job_id!: number;
-  file_name!: string;
-  output_file_name!: string;
-  status!: string;
-}
-
-export class Jobs {
-  finished_files!: number;
-  id!: number;
-  user_id!: number;
-  date_created!: string;
-  status!: string;
-  num_files!: number;
-  files_detailed!: Filename[];
-}
 
 const app = new Elysia({
   serve: {
