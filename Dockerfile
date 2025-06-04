@@ -3,14 +3,22 @@ LABEL org.opencontainers.image.source="https://github.com/C4illin/ConvertX"
 WORKDIR /app
 
 # install bun
-ENV BUN_INSTALL=/etc/.bun
-ENV PATH=$BUN_INSTALL/bin:$PATH
-ENV BUN_RUNTIME_TRANSPILER_CACHE_PATH=0
 RUN apt-get update && apt-get install -y \
   curl \
   unzip \
   && rm -rf /var/lib/apt/lists/*
-RUN curl -fsSL https://bun.sh/install | bash -s "bun-v1.2.2"
+
+# if architecture is arm64, use the arm64 version of bun
+RUN ARCH=$(uname -m) && \
+  if [ "$ARCH" = "aarch64" ]; then \
+    curl -fsSL -o bun-linux-aarch64.zip https://github.com/oven-sh/bun/releases/download/bun-v1.2.2/bun-linux-aarch64.zip; \
+  else \
+    curl -fsSL -o bun-linux-x64-baseline.zip https://github.com/oven-sh/bun/releases/download/bun-v1.2.2/bun-linux-x64-baseline.zip; \
+  fi
+
+RUN unzip -j bun-linux-*.zip -d /usr/local/bin && \
+  rm bun-linux-*.zip && \
+  chmod +x /usr/local/bin/bun
 
 # install dependencies into temp directory
 # this will cache them and speed up future builds

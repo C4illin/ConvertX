@@ -7,7 +7,7 @@
     "format": "run-p 'format:*'",
     "format:eslint": "eslint --fix .",
     "format:prettier": "prettier --write .",
-    "build": "bunx @tailwindcss/cli -i ./src/main.css -o ./public/generated.css",
+    "build": "bun x @tailwindcss/cli -i ./src/main.css -o ./public/generated.css",
     "lint": "run-p 'lint:*'",
     "lint:tsc": "tsc --noEmit",
     "lint:knip": "knip",
