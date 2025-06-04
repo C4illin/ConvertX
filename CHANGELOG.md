@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.1](https://github.com/C4illin/ConvertX/compare/v0.14.0...v0.14.1) (2025-06-04)
+
+
+### Bug Fixes
+
+* change to baseline build ([6ea3058](https://github.com/C4illin/ConvertX/commit/6ea3058e66262f7a14633bddcecd5573948f524a)), closes [#311](https://github.com/C4illin/ConvertX/issues/311)
+
 ## [0.14.0](https://github.com/C4illin/ConvertX/compare/v0.13.0...v0.14.0) (2025-06-03)
 
 ### Features
