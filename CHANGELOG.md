@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.2](https://github.com/C4illin/ConvertX/compare/v0.14.1...v0.14.2) (2025-06-06)
+
+
+### Bug Fixes
+
+* add language env ([f789d9d](https://github.com/C4illin/ConvertX/commit/f789d9dfe381780dcc715b70bcf304d570a73e3f))
+
 ## [0.14.1](https://github.com/C4illin/ConvertX/compare/v0.14.0...v0.14.1) (2025-06-04)
 
 
