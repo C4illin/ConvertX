@@ -78,5 +78,7 @@ COPY --from=prerelease /app/public/generated.css /app/public/
 COPY . .
 
 EXPOSE 3000/tcp
+# used for calibre
+ENV QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox"
 ENV NODE_ENV=production
 ENTRYPOINT [ "bun", "run", "./src/index.tsx" ]
