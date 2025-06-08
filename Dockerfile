@@ -58,6 +58,7 @@ RUN apt-get update && apt-get install -y \
   libjxl-tools \
   libva2 \
   libvips-tools \
+  lmodern \
   mupdf-tools \
   pandoc \
   poppler-utils \
@@ -65,7 +66,9 @@ RUN apt-get update && apt-get install -y \
   python3-numpy \
   resvg \
   texlive \
+  texlive-fonts-recommended \
   texlive-latex-extra \
+  texlive-latex-recommended \
   texlive-xetex \
   --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
