@@ -1,21 +1,21 @@
 @import "tailwindcss";
 
-@plugin 'tailwind-scrollbar';
+@plugin "tailwind-scrollbar";
 
 @theme {
-  --color-contrast: rgba(var(--contrast));
-  --color-neutral-900: rgba(var(--neutral-900));
-  --color-neutral-800: rgba(var(--neutral-800));
-  --color-neutral-700: rgba(var(--neutral-700));
-  --color-neutral-600: rgba(var(--neutral-600));
-  --color-neutral-500: rgba(var(--neutral-500));
-  --color-neutral-400: rgba(var(--neutral-400));
-  --color-neutral-300: rgba(var(--neutral-300));
-  --color-neutral-200: rgba(var(--neutral-200));
-  --color-neutral-100: rgba(var(--neutral-100));
-  --color-accent-600: rgba(var(--accent-600));
-  --color-accent-500: rgba(var(--accent-500));
-  --color-accent-400: rgba(var(--accent-400));
+  --color-contrast: var(--contrast);
+  --color-neutral-900: var(--neutral-900);
+  --color-neutral-800: var(--neutral-800);
+  --color-neutral-700: var(--neutral-700);
+  --color-neutral-600: var(--neutral-600);
+  --color-neutral-500: var(--neutral-500);
+  --color-neutral-400: var(--neutral-400);
+  --color-neutral-300: var(--neutral-300);
+  --color-neutral-200: var(--neutral-200);
+  --color-neutral-100: var(--neutral-100);
+  --color-accent-600: var(--accent-600);
+  --color-accent-500: var(--accent-500);
+  --color-accent-400: var(--accent-400);
 }
 
 @utility article {
@@ -31,34 +31,49 @@
 }
 
 :root {
-  --contrast: 255, 255, 255;
-  --neutral-900: 243, 244, 246;
-  --neutral-800: 229, 231, 235;
-  --neutral-700: 209, 213, 219;
-  --neutral-600: 156, 163, 175;
-  --neutral-500: 180, 180, 180;
-  --neutral-400: 75, 85, 99;
-  --neutral-300: 55, 65, 81;
-  --neutral-200: 31, 41, 55;
-  --neutral-100: 17, 24, 39;
-  --accent-400: 132, 204, 22;
-  --accent-500: 101, 163, 13;
-  --accent-600: 77, 124, 15;
+  /* Light mode */
+  --contrast: oklch(100% 0 0);
+  /* Neutral colors - Gray */
+  --neutral-950: oklch(98.5% 0.002 247.839);
+  --neutral-900: oklch(96.7% 0.003 264.542);
+  --neutral-800: oklch(92.8% 0.006 264.531);
+  --neutral-700: oklch(87.2% 0.01 258.338);
+  --neutral-600: oklch(70.7% 0.022 261.325);
+  --neutral-500: oklch(55.1% 0.027 264.364);
+  --neutral-400: oklch(44.6% 0.03 256.802);
+  --neutral-300: oklch(37.3% 0.034 259.733);
+  --neutral-200: oklch(26.9% 0 0);
+  --neutral-100: oklch(21% 0.034 264.665);
+  --neutral-50: oklch(13% 0.028 261.692);
+  /* lime-700 */
+  --accent-600: oklch(53.2% 0.157 131.589);
+  /* lime-600 */
+  --accent-500: oklch(64.8% 0.2 131.684);
+  /* lime-500 */
+  --accent-400: oklch(76.8% 0.233 130.85);
 }
 
 @media (prefers-color-scheme: dark) {
+  /* Dark mode */
   :root {
-    --contrast: 0, 0, 0;
-    --neutral-900: 17, 24, 39;
-    --neutral-800: 31, 41, 55;
-    --neutral-700: 55, 65, 81;
-    --neutral-600: 75, 85, 99;
-    --neutral-500: 107, 114, 128;
-    --neutral-300: 209, 213, 219;
-    --neutral-400: 156, 163, 175;
-    --neutral-200: 229, 231, 235;
-    --accent-600: 101, 163, 13;
-    --accent-500: 132, 204, 22;
-    --accent-400: 163, 230, 53;
+    --contrast: oklch(0% 0 0);
+    /* Neutral colors - Gray */
+    --neutral-950: oklch(13% 0.028 261.692);
+    --neutral-900: oklch(21% 0.034 264.665);
+    --neutral-800: oklch(27.8% 0.033 256.848);
+    --neutral-700: oklch(37.3% 0.034 259.733);
+    --neutral-600: oklch(44.6% 0.03 256.802);
+    --neutral-500: oklch(55.1% 0.027 264.364);
+    --neutral-400: oklch(70.7% 0.022 261.325);
+    --neutral-300: oklch(87.2% 0.01 258.338);
+    --neutral-200: oklch(92.8% 0.006 264.531);
+    --neutral-100: oklch(96.7% 0.003 264.542);
+    --neutral-50: oklch(98.5% 0.002 247.839);
+    /* lime-600 */
+    --accent-600: oklch(64.8% 0.2 131.684);
+    /* lime-500 */
+    --accent-500: oklch(76.8% 0.233 130.85);
+    /* lime-400 */
+    --accent-400: oklch(84.1% 0.238 128.85);
   }
 }

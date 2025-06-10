@@ -36,19 +36,19 @@
     "@total-typescript/ts-reset": "^0.6.1",
     "@types/bun": "^1.2.15",
     "@types/node": "^24.0.0",
-    "@typescript-eslint/parser": "^8.33.1",
+    "@typescript-eslint/parser": "^8.34.0",
     "eslint": "^9.28.0",
     "eslint-plugin-better-tailwindcss": "^3.1.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "globals": "^16.2.0",
-    "knip": "^5.59.1",
+    "knip": "^5.60.2",
     "npm-run-all2": "^8.0.4",
     "postcss": "^8.5.4",
     "prettier": "^3.5.3",
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.1.8",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.33.1"
+    "typescript-eslint": "^8.34.0"
   },
   "trustedDependencies": [
     "@parcel/watcher",
