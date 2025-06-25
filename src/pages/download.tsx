@@ -60,6 +60,6 @@ export const download = new Elysia()
     const outputPath = `${outputDir}${userId}/${jobId}`;
     const outputTar = path.join(outputPath, `converted_files_${jobId}.tar`)
 
-    await tar.create({file: outputTar, cwd: outputPath, filter: (path) => { return path.match(".*\\.tar") ? false : true; }}, ["."]);
+    await tar.create({file: outputTar, cwd: outputPath, filter: (path) => { return !path.match(".*\\.tar"); }}, ["."]);
     return Bun.file(outputTar);
   });
