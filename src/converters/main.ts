@@ -131,8 +131,8 @@ export async function handleConvert(
 
 
   for (const chunk of chunks(fileNames, MAX_CONVERT_PROCESS)) {
+    const toProcess: Promise<string>[] = [];
     for(const fileName of chunk) {
-      const toProcess: Promise<string>[] = [];
       const filePath = `${userUploadsDir}${fileName}`;
       const fileTypeOrig = fileName.split(".").pop() ?? "";
       const fileType = normalizeFiletype(fileTypeOrig);
@@ -159,9 +159,8 @@ export async function handleConvert(
             }).catch(c => reject(c));
         })
       );
-      
-      await Promise.all(toProcess);
     }
+    await Promise.all(toProcess);
   }
 }
 
