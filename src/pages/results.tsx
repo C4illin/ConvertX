@@ -6,12 +6,17 @@ import db from "../db/db";
 import { Filename, Jobs } from "../db/types";
 import { ALLOW_UNAUTHENTICATED, WEBROOT } from "../helpers/env";
 import { userService } from "./user";
+import { JWTPayloadSpec } from "@elysiajs/jwt";
 
 function ResultsArticle({
+  user,
   job,
   files,
   outputPath,
 }: {
+  user: {
+    id: string;
+  } & JWTPayloadSpec;
   job: Jobs;
   files: Filename[];
   outputPath: string;
@@ -21,14 +26,19 @@ function ResultsArticle({
       <div class="mb-4 flex items-center justify-between">
         <h1 class="text-xl">Results</h1>
         <div>
-          <button
-            type="button"
-            class="float-right w-40 btn-primary"
-            onclick="downloadAll()"
-            {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
+          <a  
+            style={files.length !== job.num_files ? "pointer-events: none;" : ""}
+            href={`${WEBROOT}/archive/${user.id}/${job.id}`}
+            download={`converted_files_${job.id}.tar`}
           >
-            {files.length === job.num_files ? "Download All" : "Converting..."}
-          </button>
+            <button
+              type="button"
+              class="float-right w-40 btn-primary"
+              {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
+              >
+              {files.length === job.num_files ? "Download All" : "Converting..."}
+            </button>
+          </a>
         </div>
       </div>
       <progress
@@ -170,7 +180,7 @@ export const results = new Elysia()
               sm:px-4
             `}
           >
-            <ResultsArticle job={job} files={files} outputPath={outputPath} />
+            <ResultsArticle user={user} job={job} files={files} outputPath={outputPath} />
           </main>
           <script src={`${WEBROOT}/results.js`} defer />
         </>
@@ -211,5 +221,5 @@ export const results = new Elysia()
       .as(Filename)
       .all(params.jobId);
 
-    return <ResultsArticle job={job} files={files} outputPath={outputPath} />;
+    return <ResultsArticle user={user} job={job} files={files} outputPath={outputPath} />;
   });

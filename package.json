@@ -20,7 +20,8 @@
     "@elysiajs/static": "^1.3.0",
     "@kitajs/html": "^4.2.9",
     "elysia": "^1.3.4",
-    "sanitize-filename": "^1.6.3"
+    "sanitize-filename": "^1.6.3",
+    "tar": "^7.4.3"
   },
   "module": "src/index.tsx",
   "type": "module",

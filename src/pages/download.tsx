@@ -4,6 +4,8 @@ import { outputDir } from "..";
 import db from "../db/db";
 import { WEBROOT } from "../helpers/env";
 import { userService } from "./user";
+import path from "node:path";
+import * as tar from "tar";
 
 export const download = new Elysia()
   .use(userService)
@@ -35,8 +37,7 @@ export const download = new Elysia()
       return Bun.file(filePath);
     },
   )
-  .get("/zip/:userId/:jobId", async ({ params, jwt, redirect, cookie: { auth } }) => {
-    // TODO: Implement zip download
+  .get("/archive/:userId/:jobId", async ({ params, jwt, redirect, cookie: { auth } }) => {
     if (!auth?.value) {
       return redirect(`${WEBROOT}/login`, 302);
     }
@@ -54,9 +55,11 @@ export const download = new Elysia()
       return redirect(`${WEBROOT}/results`, 302);
     }
 
-    // const userId = decodeURIComponent(params.userId);
-    // const jobId = decodeURIComponent(params.jobId);
-    // const outputPath = `${outputDir}${userId}/`{jobId}/);
+    const userId = decodeURIComponent(params.userId);
+    const jobId = decodeURIComponent(params.jobId);
+    const outputPath = `${outputDir}${userId}/${jobId}`;
+    const outputTar = path.join(outputPath, `converted_files_${jobId}.tar`)
 
-    // return Bun.zip(outputPath);
+    await tar.create({file: outputTar, cwd: outputPath, filter: (path) => { return !path.match(".*\\.tar"); }}, ["."]);
+    return Bun.file(outputTar);
   });
