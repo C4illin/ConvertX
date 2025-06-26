@@ -11,6 +11,7 @@ import { convert as convertImagemagick, properties as propertiesImagemagick } fr
 import { convert as convertInkscape, properties as propertiesInkscape } from "./inkscape";
 import { convert as convertLibheif, properties as propertiesLibheif } from "./libheif";
 import { convert as convertLibjxl, properties as propertiesLibjxl } from "./libjxl";
+import { convert as convertLibreOffice, properties as propertiesLibreOffice } from "./libreoffice";
 import { convert as convertPandoc, properties as propertiesPandoc } from "./pandoc";
 import { convert as convertPotrace, properties as propertiesPotrace } from "./potrace";
 import { convert as convertresvg, properties as propertiesresvg } from "./resvg";
@@ -70,6 +71,10 @@ const properties: Record<
   calibre: {
     properties: propertiesCalibre,
     converter: convertCalibre,
+  },
+  libreoffice: {
+    properties: propertiesLibreOffice,
+    converter: convertLibreOffice,
   },
   pandoc: {
     properties: propertiesPandoc,
