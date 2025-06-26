@@ -2,20 +2,71 @@ import { execFile } from "node:child_process";
 
 export const properties = {
   from: {
-    text: ["docx", "txt"],
+    text: [
+      "602",
+      "abw",
+      "csv",
+      "cwk",
+      "doc",
+      "docm",
+      "docx",
+      "dot",
+      "dotx",
+      "dotm",
+      "epub",
+      "fb2",
+      "fodt",
+      "htm",
+      "html",
+      "hwp",
+      "mcw",
+      "mw",
+      "mwd",
+      "lwp",
+      "lrf",
+      "odt",
+      "ott",
+      "pages",
+      "pdf",
+      "psw",
+      "rtf",
+      "sdw",
+      "stw",
+      "sxw",
+      "tab",
+      "tsv",
+      "txt",
+      "wn",
+      "wpd",
+      "wps",
+      "wpt",
+      "wri",
+      "xhtml",
+      "xml",
+      "zabw",
+    ],
   },
   to: {
     text: [
+      "csv",
       "doc",
+      "docm",
+      "docx",
       "dot",
+      "dotx",
+      "dotm",
+      "epub",
       "fodt",
       "htm",
       "html",
       "odt",
+      "ott",
       "pdf",
       "rtf",
-      "sxw", //bugged
+      "tab",
+      "tsv",
       "txt",
+      "wpd",
       "wps",
       "wpt",
       "xhtml",
@@ -24,22 +75,48 @@ export const properties = {
   },
 };
 
-const filterNames: Record<string, string> = {
-  //default
-  doc: "doc",
-  dot: "dot",
-  fodt: "fodt",
-  htm: "htm",
-  html: "html",
-  odt: "odt",
-  rtf: "rtf",
-  sxw: "sxw",
-  pdf: "pdf",
-  txt: "txt",
-  wps: "wps",
-  wpt: "wpt",
-  xhtml: "xhtml",
-  xml: "xml",
+// input/output files parsing method
+const filters: Record<string, string> = {
+  "602": "T602Document",
+  abw: "AbiWord",
+  csv: "Text",
+  cwk: "ClarisWorks",
+  doc: "MS Word 97",
+  docm: "MS Word 2007 XML VBA",
+  docx: "MS Word 2007 XML",
+  dot: "MS Word 97 Vorlage",
+  dotx: "MS Word 2007 XML Template",
+  dotm: "MS Word 2007 XML Template",
+  epub: "EPUB",
+  fb2: "Fictionbook 2",
+  fodt: "OpenDocument Text Flat XML",
+  htm: "HTML (StarWriter)",
+  html: "HTML (StarWriter)",
+  hwp: "writer_MIZI_Hwp_97",
+  mcw: "MacWrite",
+  mw: "MacWrite",
+  mwd: "Mariner_Write",
+  lwd: "LotusWordPro",
+  lrf: "BroadBand eBook",
+  odt: "writer8",
+  ott: "writer8_template",
+  pages: "Apple Pages",
+  //pdf should differentiate between import and export just leave as default for now
+  psw: "PocketWord File",
+  rtf: "Rich Text Format",
+  sdw: "StarOffice_Writer",
+  stw: "writer_StarOffice_XML_Writer_Template",
+  sxw: "StarOffice XML (Writer)",
+  tab: "Text",
+  tsv: "Text",
+  txt: "Text",
+  wn: "WriteNow",
+  wpd: "WordPerfect",
+  wps: "MS Word 97",
+  wpt: "MS Word 97 Vorlage",
+  wri: "MS_Write",
+  xhtml: "HTML (StarWriter)",
+  zabw: "AbiWord",
 };
 
 export function convert(
@@ -51,19 +128,23 @@ export function convert(
   options?: unknown,
 ): Promise<string> {
   const outputPath = targetPath.split("/").slice(0, -1).join("/").replace("./", "");
-  const filterName = filterNames[convertTo];
-
-  if (!filterName) {
-    console.error("Unable to resolve file extension to filtername");
-    return Promise.reject("Something went wrong");
-  }
 
   // Build arguments array
   const args: string[] = [];
 
   args.push("--headless");
-  args.push("--convert-to", filterName, filePath);
   args.push("--outdir", outputPath);
+
+  const inFilter = filters[fileType];
+  if (inFilter) {
+    args.push(`--infilter="${inFilter}"`);
+  }
+  const outFilter = filters[convertTo];
+  if (outFilter) {
+    args.push("--convert-to", `"${convertTo}:${outFilter}"`, filePath);
+  } else {
+    args.push("--convert-to", convertTo, filePath);
+  }
 
   return new Promise((resolve, reject) => {
     execFile("soffice", args, (error, stdout, stderr) => {
