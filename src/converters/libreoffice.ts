@@ -75,48 +75,61 @@ export const properties = {
   },
 };
 
-// input/output files parsing method
-const filters: Record<string, string> = {
-  "602": "T602Document",
-  abw: "AbiWord",
-  csv: "Text",
-  cwk: "ClarisWorks",
-  doc: "MS Word 97",
-  docm: "MS Word 2007 XML VBA",
-  docx: "MS Word 2007 XML",
-  dot: "MS Word 97 Vorlage",
-  dotx: "MS Word 2007 XML Template",
-  dotm: "MS Word 2007 XML Template",
-  epub: "EPUB",
-  fb2: "Fictionbook 2",
-  fodt: "OpenDocument Text Flat XML",
-  htm: "HTML (StarWriter)",
-  html: "HTML (StarWriter)",
-  hwp: "writer_MIZI_Hwp_97",
-  mcw: "MacWrite",
-  mw: "MacWrite",
-  mwd: "Mariner_Write",
-  lwd: "LotusWordPro",
-  lrf: "BroadBand eBook",
-  odt: "writer8",
-  ott: "writer8_template",
-  pages: "Apple Pages",
-  //pdf should differentiate between import and export just leave as default for now
-  psw: "PocketWord File",
-  rtf: "Rich Text Format",
-  sdw: "StarOffice_Writer",
-  stw: "writer_StarOffice_XML_Writer_Template",
-  sxw: "StarOffice XML (Writer)",
-  tab: "Text",
-  tsv: "Text",
-  txt: "Text",
-  wn: "WriteNow",
-  wpd: "WordPerfect",
-  wps: "MS Word 97",
-  wpt: "MS Word 97 Vorlage",
-  wri: "MS_Write",
-  xhtml: "HTML (StarWriter)",
-  zabw: "AbiWord",
+type FileCategories = "text" | "calc";
+
+const filters: Record<FileCategories, Record<string, string>> = {
+  text: {
+    "602": "T602Document",
+    abw: "AbiWord",
+    csv: "Text",
+    doc: "MS Word 97",
+    docm: "MS Word 2007 XML VBA",
+    docx: "MS Word 2007 XML",
+    dot: "MS Word 97 Vorlage",
+    dotx: "MS Word 2007 XML Template",
+    dotm: "MS Word 2007 XML Template",
+    epub: "EPUB",
+    fb2: "Fictionbook 2",
+    fodt: "OpenDocument Text Flat XML",
+    htm: "HTML (StarWriter)",
+    html: "HTML (StarWriter)",
+    hwp: "writer_MIZI_Hwp_97",
+    mcw: "MacWrite",
+    mw: "MacWrite",
+    mwd: "Mariner_Write",
+    lwd: "LotusWordPro",
+    lrf: "BroadBand eBook",
+    odt: "writer8",
+    ott: "writer8_template",
+    pages: "Apple Pages",
+    // pdf: "writer_pdf_import",
+    psw: "PocketWord File",
+    rtf: "Rich Text Format",
+    sdw: "StarOffice_Writer",
+    stw: "writer_StarOffice_XML_Writer_Template",
+    sxw: "StarOffice XML (Writer)",
+    tab: "Text",
+    tsv: "Text",
+    txt: "Text",
+    wn: "WriteNow",
+    wpd: "WordPerfect",
+    wps: "MS Word 97",
+    wpt: "MS Word 97 Vorlage",
+    wri: "MS_Write",
+    xhtml: "HTML (StarWriter)",
+    xml: "OpenDocument Text Flat XML",
+    zabw: "AbiWord",
+  },
+  calc: {},
+};
+
+const getFilters = (fileType: string, converto: string) => {
+  if (fileType in filters.text && converto in filters.text) {
+    return [filters.text[fileType], filters.text[converto]];
+  } else if (fileType in filters.calc && converto in filters.calc) {
+    return [filters.calc[fileType], filters.calc[converto]];
+  }
+  return [null, null];
 };
 
 export function convert(
@@ -131,19 +144,17 @@ export function convert(
 
   // Build arguments array
   const args: string[] = [];
-
   args.push("--headless");
-  args.push("--outdir", outputPath);
+  const [inFilter, outFilter] = getFilters(fileType, convertTo);
 
-  const inFilter = filters[fileType];
   if (inFilter) {
     args.push(`--infilter="${inFilter}"`);
   }
-  const outFilter = filters[convertTo];
+
   if (outFilter) {
-    args.push("--convert-to", `"${convertTo}:${outFilter}"`, filePath);
+    args.push("--convert-to", `${convertTo}:${outFilter}`, "--outdir", outputPath, filePath);
   } else {
-    args.push("--convert-to", convertTo, filePath);
+    args.push("--convert-to", convertTo, "--outdir", outputPath, filePath);
   }
 
   return new Promise((resolve, reject) => {
