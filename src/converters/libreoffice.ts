@@ -139,7 +139,7 @@ export function convert(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   options?: unknown,
 ): Promise<string> {
-  const outputPath = targetPath.split("/").slice(0, -1).join("/").replace("./", "");
+  const outputPath = targetPath.split("/").slice(0, -1).join("/").replace("./", "") ?? targetPath;
 
   // Build arguments array
   const args: string[] = [];
