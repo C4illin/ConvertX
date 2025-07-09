@@ -96,7 +96,7 @@ const filters: Record<FileCategories, Record<string, string>> = {
     mcw: "MacWrite",
     mw: "MacWrite",
     mwd: "Mariner_Write",
-    lwd: "LotusWordPro",
+    lwp: "LotusWordPro",
     lrf: "BroadBand eBook",
     odt: "writer8",
     ott: "writer8_template",
