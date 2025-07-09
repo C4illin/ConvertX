@@ -66,7 +66,6 @@ export const properties = {
       "tab",
       "tsv",
       "txt",
-      "wpd",
       "wps",
       "wpt",
       "xhtml",
