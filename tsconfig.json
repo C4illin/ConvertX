@@ -5,8 +5,9 @@
     "target": "ES2021",
     "moduleResolution": "bundler",
     "moduleDetection": "force",
-    "allowImportingTsExtensions": true,
-    "noEmit": true,
+    // "allowImportingTsExtensions": true,
+    "outDir": "dist",
+    "noEmit": false,
     "composite": true,
     "strict": true,
     "downlevelIteration": true,
@@ -24,7 +25,10 @@
     // "noUnusedParameters": true,
     "exactOptionalPropertyTypes": true,
     "noFallthroughCasesInSwitch": true,
-    "noImplicitOverride": true
+    "noImplicitOverride": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true
     // "noImplicitReturns": true
-  }
+  },
+  "include": ["src", "package.json"]
 }
