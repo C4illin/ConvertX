@@ -1,4 +1,6 @@
-import { normalizeFiletype } from "../helpers/normalizeFiletype";
+import db from "../db/db";
+import { MAX_CONVERT_PROCESS } from "../helpers/env";
+import { normalizeFiletype, normalizeOutputFiletype } from "../helpers/normalizeFiletype";
 import { convert as convertassimp, properties as propertiesassimp } from "./assimp";
 import { convert as convertCalibre, properties as propertiesCalibre } from "./calibre";
 import { convert as convertDvisvgm, properties as propertiesDvisvgm } from "./dvisvgm";
@@ -110,6 +112,63 @@ const properties: Record<
     converter: convertPotrace,
   },
 };
+
+function chunks<T>(arr: T[], size: number): T[][] {
+  if(size <= 0){
+    return [arr]
+  }
+  return Array.from({ length: Math.ceil(arr.length / size) }, (_: T, i: number) =>
+    arr.slice(i * size, i * size + size)
+  );
+}
+
+export async function handleConvert(
+  fileNames: string[],
+  userUploadsDir: string,
+  userOutputDir: string,
+  convertTo: string,
+  converterName: string,
+  jobId: any
+) {
+  
+  const query = db.query(
+    "INSERT INTO file_names (job_id, file_name, output_file_name, status) VALUES (?1, ?2, ?3, ?4)",
+  );
+
+
+  for (const chunk of chunks(fileNames, MAX_CONVERT_PROCESS)) {
+    const toProcess: Promise<string>[] = [];
+    for(const fileName of chunk) {
+      const filePath = `${userUploadsDir}${fileName}`;
+      const fileTypeOrig = fileName.split(".").pop() ?? "";
+      const fileType = normalizeFiletype(fileTypeOrig);
+      const newFileExt = normalizeOutputFiletype(convertTo);
+      const newFileName = fileName.replace(
+        new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`),
+        newFileExt,
+      );
+      const targetPath = `${userOutputDir}${newFileName}`;
+      toProcess.push(
+        new Promise((resolve, reject) => { 
+          mainConverter(
+              filePath,
+              fileType,
+              convertTo,
+              targetPath,
+              {},
+              converterName,
+            ).then(r =>  {
+              if (jobId.value) {
+                query.run(jobId.value, fileName, newFileName, r);
+              }
+              resolve(r);
+            }).catch(c => reject(c));
+        })
+      );
+    }
+    await Promise.all(toProcess);
+  }
+}
 
 export async function mainConverter(
   inputFilePath: string,

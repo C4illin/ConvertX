@@ -2,11 +2,11 @@ import { mkdir } from "node:fs/promises";
 import { Elysia, t } from "elysia";
 import sanitize from "sanitize-filename";
 import { outputDir, uploadsDir } from "..";
-import { mainConverter } from "../converters/main";
+import { handleConvert } from "../converters/main";
 import db from "../db/db";
 import { Jobs } from "../db/types";
 import { WEBROOT } from "../helpers/env";
-import { normalizeFiletype, normalizeOutputFiletype } from "../helpers/normalizeFiletype";
+import { normalizeFiletype } from "../helpers/normalizeFiletype";
 import { userService } from "./user";
 
 export const convert = new Elysia().use(userService).post(
@@ -61,36 +61,8 @@ export const convert = new Elysia().use(userService).post(
       jobId.value,
     );
 
-    const query = db.query(
-      "INSERT INTO file_names (job_id, file_name, output_file_name, status) VALUES (?1, ?2, ?3, ?4)",
-    );
-
     // Start the conversion process in the background
-    Promise.all(
-      fileNames.map(async (fileName) => {
-        const filePath = `${userUploadsDir}${fileName}`;
-        const fileTypeOrig = fileName.split(".").pop() ?? "";
-        const fileType = normalizeFiletype(fileTypeOrig);
-        const newFileExt = normalizeOutputFiletype(convertTo);
-        const newFileName = fileName.replace(
-          new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`),
-          newFileExt,
-        );
-        const targetPath = `${userOutputDir}${newFileName}`;
-
-        const result = await mainConverter(
-          filePath,
-          fileType,
-          convertTo,
-          targetPath,
-          {},
-          converterName,
-        );
-        if (jobId.value) {
-          query.run(jobId.value, fileName, newFileName, result);
-        }
-      }),
-    )
+    handleConvert(fileNames, userUploadsDir, userOutputDir, convertTo, converterName, jobId)
       .then(() => {
         // All conversions are done, update the job status to 'completed'
         if (jobId.value) {
