@@ -56,6 +56,7 @@ RUN apt-get update && apt-get install -y \
   inkscape \
   libheif-examples \
   libjxl-tools \
+  libreoffice \
   libva2 \
   libvips-tools \
   lmodern \
