@@ -460,6 +460,13 @@ export function convert(
     }
   }
 
+  // Handle EMF files specifically to avoid LibreOffice delegate issues
+  if (fileType === "emf") {
+    // Use direct conversion without delegates for EMF files
+    inputArgs = ["-define", "emf:delegate=false", "-density", "300"];
+    outputArgs = ["-background", "white", "-alpha", "remove"];
+  }
+
   return new Promise((resolve, reject) => {
     execFile(
       "magick",
