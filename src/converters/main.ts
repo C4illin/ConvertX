@@ -47,6 +47,11 @@ const properties: Record<
     ) => unknown;
   }
 > = {
+  // Prioritize Inkscape for EMF files as it handles them better than ImageMagick
+  inkscape: {
+    properties: propertiesInkscape,
+    converter: convertInkscape,
+  },
   libjxl: {
     properties: propertiesLibjxl,
     converter: convertLibjxl,
@@ -86,10 +91,6 @@ const properties: Record<
   graphicsmagick: {
     properties: propertiesGraphicsmagick,
     converter: convertGraphicsmagick,
-  },
-  inkscape: {
-    properties: propertiesInkscape,
-    converter: convertInkscape,
   },
   assimp: {
     properties: propertiesassimp,
