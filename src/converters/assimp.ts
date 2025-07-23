@@ -1,4 +1,10 @@
-import { execFile } from "node:child_process";
+import { execFile as execFileOriginal } from "node:child_process";
+
+type ExecFileFn = (
+  cmd: string,
+  args: string[],
+  callback: (err: Error | null, stdout: string, stderr: string) => void,
+) => void;
 
 export const properties = {
   from: {
@@ -116,8 +122,8 @@ export async function convert(
   fileType: string,
   convertTo: string,
   targetPath: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   options?: unknown,
+  execFile: ExecFileFn = execFileOriginal,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     execFile("assimp", ["export", filePath, targetPath], (error, stdout, stderr) => {
