@@ -1,6 +1,6 @@
 import { execFile as execFileOriginal } from "node:child_process";
 
-type ExecFileFn = (
+export type ExecFileFn = (
   cmd: string,
   args: string[],
   callback: (err: Error | null, stdout: string, stderr: string) => void,
