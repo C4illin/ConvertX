@@ -2,12 +2,7 @@ import type { ExecFileException } from "node:child_process";
 import { beforeEach, expect, test } from "bun:test";
 import { convert } from "../../src/converters/dvisvgm.ts";
 import { ExecFileFn } from "../../src/converters/types.ts";
-import {
-  runConvertFailTest,
-  runConvertLogsStderror,
-  runConvertLogsStderrorAndStdout,
-  runConvertSuccessTest,
-} from "./helpers/converters.ts";
+import { runCommonTests } from "./helpers/commonTests.ts";
 
 let calls: string[][] = [];
 
@@ -15,21 +10,7 @@ beforeEach(() => {
   calls = [];
 });
 
-test("convert resolves when execFile succeeds", async () => {
-  await runConvertSuccessTest(convert);
-});
-
-test("convert rejects when execFile fails", async () => {
-  await runConvertFailTest(convert);
-});
-
-test("convert logs stderr when present", async () => {
-  await runConvertLogsStderror(convert);
-});
-
-test("convert logs both stderr and stdout when present", async () => {
-  await runConvertLogsStderrorAndStdout(convert);
-});
+runCommonTests(convert);
 
 test("convert respects eps filetype", async () => {
   const originalConsoleLog = console.log;
