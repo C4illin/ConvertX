@@ -4,7 +4,7 @@ import {
   runConvertFailTest,
   runConvertLogsStderror,
   runConvertSuccessTest,
-} from "./convertersHelper.test.ts";
+} from "./helpers/converters.ts";
 
 test("convert resolves when execFile succeeds", async () => {
   await runConvertSuccessTest(convert);
