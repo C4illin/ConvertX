@@ -1,4 +1,5 @@
-import { execFile } from "node:child_process";
+import { execFile as execFileOriginal } from "node:child_process";
+import { ExecFileFn } from "./types.ts";
 
 export const properties = {
   from: {
@@ -62,28 +63,24 @@ export async function convert(
   fileType: string,
   convertTo: string,
   targetPath: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   options?: unknown,
+  execFile: ExecFileFn = execFileOriginal, // to make it mockable
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    execFile(
-      "ebook-convert",
-      [filePath, targetPath],
-      (error, stdout, stderr) => {
-        if (error) {
-          reject(`error: ${error}`);
-        }
+    execFile("ebook-convert", [filePath, targetPath], (error, stdout, stderr) => {
+      if (error) {
+        reject(`error: ${error}`);
+      }
 
-        if (stdout) {
-          console.log(`stdout: ${stdout}`);
-        }
+      if (stdout) {
+        console.log(`stdout: ${stdout}`);
+      }
 
-        if (stderr) {
-          console.error(`stderr: ${stderr}`);
-        }
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+      }
 
-        resolve("Done");
-      },
-    );
+      resolve("Done");
+    });
   });
 }
