@@ -26,22 +26,20 @@ export function convert(
       
       execFile("msgconvert", args, (error, stdout, stderr) => {
         if (error) {
-          reject(`error: ${error}`);
+          reject(new Error(`msgconvert failed: ${error.message}`));
           return;
         }
 
-        if (stdout) {
-          console.log(`stdout: ${stdout}`);
-        }
-
         if (stderr) {
-          console.error(`stderr: ${stderr}`);
+          // Log sanitized stderr to avoid exposing sensitive paths
+          const sanitizedStderr = stderr.replace(/(\/[^\s]+)/g, "[REDACTED_PATH]");
+          console.warn(`msgconvert stderr: ${sanitizedStderr.length > 200 ? sanitizedStderr.slice(0, 200) + '...' : sanitizedStderr}`);
         }
 
-        resolve("Done");
+        resolve(targetPath);
       });
     } else {
-      reject(`Unsupported conversion from ${fileType} to ${convertTo}. Only MSG to EML conversion is currently supported.`);
+      reject(new Error(`Unsupported conversion from ${fileType} to ${convertTo}. Only MSG to EML conversion is currently supported.`));
     }
   });
 }
