@@ -7,7 +7,6 @@ test("convert rejects conversion if input filetype is not msg and output type is
   const mockExecFile: ExecFileFn = (
     _cmd: string,
     _args: string[],
-    options: unknown,
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
     callback(null, "Fake stdout", "");
@@ -26,7 +25,6 @@ test("convert rejects conversion on error", async () => {
   const mockExecFile: ExecFileFn = (
     _cmd: string,
     _args: string[],
-    options: unknown,
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
     callback(new Error("Test error"), "", "");
@@ -50,7 +48,6 @@ test("convert logs stderr as warning", async () => {
   const mockExecFile = (
     _cmd: string,
     _args: string[],
-    options: unknown,
     callback: (err: Error | null, stdout: string, stderr: string) => void,
   ) => {
     callback(null, "", "Fake stderr");

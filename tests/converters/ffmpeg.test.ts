@@ -6,7 +6,6 @@ let calls: string[][] = [];
 function mockExecFile(
   _cmd: string,
   args: string[],
-  options: unknown,
   callback: (err: Error | null, stdout: string, stderr: string) => void,
 ) {
   calls.push(args);

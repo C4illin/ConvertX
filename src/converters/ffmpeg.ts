@@ -735,7 +735,6 @@ export async function convert(
     execFile(
       "ffmpeg",
       [...ffmpegArgs, "-i", filePath, ...extraArgs, targetPath],
-      options,
       (error, stdout, stderr) => {
         if (error) {
           reject(`error: ${error}`);

@@ -31,7 +31,7 @@ export function convert(
   }
 
   return new Promise((resolve, reject) => {
-    execFile(tool, [filePath, targetPath], options, (error, stdout, stderr) => {
+    execFile(tool, [filePath, targetPath], (error, stdout, stderr) => {
       if (error) {
         reject(`error: ${error}`);
       }

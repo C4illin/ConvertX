@@ -318,7 +318,7 @@ export function convert(
   execFile: ExecFileFn = execFileOriginal, // to make it mockable
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    execFile("gm", ["convert", filePath, targetPath], options, (error, stdout, stderr) => {
+    execFile("gm", ["convert", filePath, targetPath], (error, stdout, stderr) => {
       if (error) {
         reject(`error: ${error}`);
       }

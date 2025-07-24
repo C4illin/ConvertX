@@ -144,7 +144,7 @@ export function convert(
   args.push("-o", targetPath);
 
   return new Promise((resolve, reject) => {
-    execFile("pandoc", args, options, (error, stdout, stderr) => {
+    execFile("pandoc", args, (error, stdout, stderr) => {
       if (error) {
         reject(`error: ${error}`);
       }

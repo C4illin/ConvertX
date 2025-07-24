@@ -37,7 +37,7 @@ export function convert(
   execFile: ExecFileFn = execFileOriginal, // to make it mockable
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    execFile("inkscape", [filePath, "-o", targetPath], options, (error, stdout, stderr) => {
+    execFile("inkscape", [filePath, "-o", targetPath], (error, stdout, stderr) => {
       if (error) {
         reject(`error: ${error}`);
       }

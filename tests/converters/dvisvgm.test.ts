@@ -42,7 +42,6 @@ test("convert respects eps filetype", async () => {
   const mockExecFile: ExecFileFn = (
     _cmd: string,
     _args: string[],
-    options: unknown,
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
     calls.push(_args);
@@ -69,7 +68,6 @@ test("convert respects pdf filetype", async () => {
   const mockExecFile: ExecFileFn = (
     _cmd: string,
     _args: string[],
-    options: unknown,
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
     calls.push(_args);
@@ -96,7 +94,6 @@ test("convert respects svgz conversion target type", async () => {
   const mockExecFile: ExecFileFn = (
     _cmd: string,
     _args: string[],
-    options: unknown,
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
     calls.push(_args);

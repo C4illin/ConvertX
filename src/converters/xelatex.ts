@@ -25,7 +25,6 @@ export function convert(
     execFile(
       "latexmk",
       ["-xelatex", "-interaction=nonstopmode", `-output-directory=${outputPath}`, filePath],
-      options,
       (error, stdout, stderr) => {
         if (error) {
           reject(`error: ${error}`);
