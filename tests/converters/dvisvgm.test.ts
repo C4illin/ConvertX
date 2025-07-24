@@ -1,5 +1,5 @@
 import type { ExecFileException } from "node:child_process";
-import { expect, test } from "bun:test";
+import { beforeEach, expect, test } from "bun:test";
 import { convert } from "../../src/converters/dvisvgm.ts";
 import { ExecFileFn } from "../../src/converters/types.ts";
 import {
@@ -7,6 +7,12 @@ import {
   runConvertLogsStderror,
   runConvertSuccessTest,
 } from "./helpers/converters.ts";
+
+let calls: string[][] = [];
+
+beforeEach(() => {
+  calls = [];
+});
 
 test("convert resolves when execFile succeeds", async () => {
   await runConvertSuccessTest(convert);
@@ -33,14 +39,16 @@ test("convert respects eps filetype", async () => {
     _args: string[],
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
+    calls.push(_args);
     callback(null, "Fake stdout", "");
   };
 
-  const result = await convert("input.obj", "eps", "stl", "output.stl", undefined, mockExecFile);
+  const result = await convert("input.eps", "eps", "stl", "output.stl", undefined, mockExecFile);
 
   console.log = originalConsoleLog;
 
   expect(result).toBe("Done");
+  expect(calls[0]).toEqual(expect.arrayContaining(["--eps", "input.eps", "output.stl"]));
   expect(loggedMessage).toBe("stdout: Fake stdout");
 });
 
@@ -57,14 +65,16 @@ test("convert respects pdf filetype", async () => {
     _args: string[],
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
+    calls.push(_args);
     callback(null, "Fake stdout", "");
   };
 
-  const result = await convert("input.obj", "pdf", "stl", "output.stl", undefined, mockExecFile);
+  const result = await convert("input.pdf", "pdf", "stl", "output.stl", undefined, mockExecFile);
 
   console.log = originalConsoleLog;
 
   expect(result).toBe("Done");
+  expect(calls[0]).toEqual(expect.arrayContaining(["--pdf", "input.pdf", "output.stl"]));
   expect(loggedMessage).toBe("stdout: Fake stdout");
 });
 
@@ -81,13 +91,15 @@ test("convert respects svgz conversion target type", async () => {
     _args: string[],
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
+    calls.push(_args);
     callback(null, "Fake stdout", "");
   };
 
-  const result = await convert("input.obj", "eps", "svgz", "output.stl", undefined, mockExecFile);
+  const result = await convert("input.obj", "eps", "svgz", "output.svgz", undefined, mockExecFile);
 
   console.log = originalConsoleLog;
 
   expect(result).toBe("Done");
+  expect(calls[0]).toEqual(expect.arrayContaining(["-z", "input.obj", "output.svgz"]));
   expect(loggedMessage).toBe("stdout: Fake stdout");
 });
