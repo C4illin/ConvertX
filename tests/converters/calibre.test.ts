@@ -1,5 +1,5 @@
 import { test } from "bun:test";
-import { convert } from "../../src/converters/assimp.ts";
+import { convert } from "../../src/converters/calibre.ts";
 import {
   runConvertFailTest,
   runConvertLogsStderror,
