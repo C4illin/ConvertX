@@ -3,6 +3,7 @@ import { convert } from "../../src/converters/resvg.ts";
 import {
   runConvertFailTest,
   runConvertLogsStderror,
+  runConvertLogsStderrorAndStdout,
   runConvertSuccessTest,
 } from "./helpers/converters.ts";
 
@@ -16,4 +17,8 @@ test("convert rejects when execFile fails", async () => {
 
 test("convert logs stderr when present", async () => {
   await runConvertLogsStderror(convert);
+});
+
+test("convert logs both stderr and stdout when present", async () => {
+  await runConvertLogsStderrorAndStdout(convert);
 });

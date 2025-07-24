@@ -65,3 +65,34 @@ export async function runConvertLogsStderror(convertFn: ConvertFnWithExecFile) {
 
   expect(loggedMessage).toBe("stderr: Fake stderr");
 }
+
+export async function runConvertLogsStderrorAndStdout(convertFn: ConvertFnWithExecFile) {
+  const originalConsoleError = console.error;
+  const originalConsoleLog = console.log;
+
+  let loggedError = "";
+  let loggedMessage = "";
+  console.error = (msg) => {
+    loggedError = msg;
+  };
+  console.log = (msg) => {
+    loggedMessage = msg;
+  };
+
+  const mockExecFile = (
+    _cmd: string,
+    _args: string[],
+    options: unknown,
+    callback: (err: Error | null, stdout: string, stderr: string) => void,
+  ) => {
+    callback(null, "Fake stdout", "Fake stderr");
+  };
+
+  await convertFn("file.obj", "obj", "stl", "out.stl", undefined, mockExecFile);
+
+  console.error = originalConsoleError;
+  console.log = originalConsoleLog;
+
+  expect(loggedError).toBe("stderr: Fake stderr");
+  expect(loggedMessage).toBe("stdout: Fake stdout");
+}
