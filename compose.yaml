@@ -15,5 +15,6 @@ services:
       # - WEBROOT=/convertx # the root path of the web interface, leave empty to disable
       # - HIDE_HISTORY=true # hides the history tab in the web interface, defaults to false
       - TZ=Europe/Stockholm # set your timezone, defaults to UTC
+      # - UNAUTHENTICATED_USER_SHARING=true # for use with ALLOW_UNAUTHENTICATED=true to share history with all unauthenticated users / devices
     ports:
       - 3000:3000
