@@ -472,6 +472,7 @@ export function convert(
     execFile(
       "magick",
       [...inputArgs, filePath, ...outputArgs, targetPath],
+      options,
       (error, stdout, stderr) => {
         if (error) {
           reject(`error: ${error}`);

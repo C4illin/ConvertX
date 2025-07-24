@@ -37,6 +37,7 @@ test("convert uses djxl with input filetype being jxl", async () => {
   const mockExecFile: ExecFileFn = (
     _cmd: string,
     _args: string[],
+    options: unknown,
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
     command = _cmd;
@@ -63,6 +64,7 @@ test("convert uses cjxl with output filetype being jxl", async () => {
   const mockExecFile: ExecFileFn = (
     _cmd: string,
     _args: string[],
+    options: unknown,
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
     command = _cmd;
