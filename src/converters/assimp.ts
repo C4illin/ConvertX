@@ -1,10 +1,5 @@
 import { execFile as execFileOriginal } from "node:child_process";
-
-export type ExecFileFn = (
-  cmd: string,
-  args: string[],
-  callback: (err: Error | null, stdout: string, stderr: string) => void,
-) => void;
+import { ExecFileFn } from "./types.ts";
 
 export const properties = {
   from: {
@@ -123,7 +118,7 @@ export async function convert(
   convertTo: string,
   targetPath: string,
   options?: unknown,
-  execFile: ExecFileFn = execFileOriginal,
+  execFile: ExecFileFn = execFileOriginal, // to make it mockable
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     execFile("assimp", ["export", filePath, targetPath], (error, stdout, stderr) => {
