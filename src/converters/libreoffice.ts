@@ -158,7 +158,7 @@ export function convert(
   }
 
   return new Promise((resolve, reject) => {
-    execFile("soffice", args, options, (error, stdout, stderr) => {
+    execFile("soffice", args, (error, stdout, stderr) => {
       if (error) {
         reject(`error: ${error}`);
       }

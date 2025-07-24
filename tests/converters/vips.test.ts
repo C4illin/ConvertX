@@ -42,7 +42,6 @@ test("convert uses action pdfload with filetype being pdf", async () => {
   const mockExecFile: ExecFileFn = (
     _cmd: string,
     _args: string[],
-    options: unknown,
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
     calls.push(_args);
@@ -69,7 +68,6 @@ test("convert uses action copy with filetype being anything but pdf", async () =
   const mockExecFile: ExecFileFn = (
     _cmd: string,
     _args: string[],
-    options: unknown,
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
     calls.push(_args);

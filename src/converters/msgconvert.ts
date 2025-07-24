@@ -25,7 +25,7 @@ export function convert(
       // We need to use --outfile to specify the target path
       const args = ["--outfile", targetPath, filePath];
 
-      execFile("msgconvert", args, options, (error, stdout, stderr) => {
+      execFile("msgconvert", args, (error, stdout, stderr) => {
         if (error) {
           reject(new Error(`msgconvert failed: ${error.message}`));
           return;

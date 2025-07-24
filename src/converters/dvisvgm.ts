@@ -30,25 +30,20 @@ export function convert(
   }
 
   return new Promise((resolve, reject) => {
-    execFile(
-      "dvisvgm",
-      [...inputArgs, filePath, "-o", targetPath],
-      options,
-      (error, stdout, stderr) => {
-        if (error) {
-          reject(`error: ${error}`);
-        }
+    execFile("dvisvgm", [...inputArgs, filePath, "-o", targetPath], (error, stdout, stderr) => {
+      if (error) {
+        reject(`error: ${error}`);
+      }
 
-        if (stdout) {
-          console.log(`stdout: ${stdout}`);
-        }
+      if (stdout) {
+        console.log(`stdout: ${stdout}`);
+      }
 
-        if (stderr) {
-          console.error(`stderr: ${stderr}`);
-        }
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+      }
 
-        resolve("Done");
-      },
-    );
+      resolve("Done");
+    });
   });
 }

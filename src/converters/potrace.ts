@@ -31,25 +31,20 @@ export function convert(
   execFile: ExecFileFn = execFileOriginal, // to make it mockable
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    execFile(
-      "potrace",
-      [filePath, "-o", targetPath, "-b", convertTo],
-      options,
-      (error, stdout, stderr) => {
-        if (error) {
-          reject(`error: ${error}`);
-        }
+    execFile("potrace", [filePath, "-o", targetPath, "-b", convertTo], (error, stdout, stderr) => {
+      if (error) {
+        reject(`error: ${error}`);
+      }
 
-        if (stdout) {
-          console.log(`stdout: ${stdout}`);
-        }
+      if (stdout) {
+        console.log(`stdout: ${stdout}`);
+      }
 
-        if (stderr) {
-          console.error(`stderr: ${stderr}`);
-        }
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+      }
 
-        resolve("Done");
-      },
-    );
+      resolve("Done");
+    });
   });
 }
