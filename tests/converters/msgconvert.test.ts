@@ -32,12 +32,12 @@ test("convert rejects conversion on error", async () => {
     callback(new Error("Test error"), "", "");
   };
 
-  const expectedError = new Error("msgconvert failed: Test error")
+  const expectedError = new Error("msgconvert failed: Test error");
 
-  expect(
-    convert("input.msg", "msg", "eml", "output.eml", undefined, mockExecFile),
-  ).rejects.toEqual(expectedError);
-})
+  expect(convert("input.msg", "msg", "eml", "output.eml", undefined, mockExecFile)).rejects.toEqual(
+    expectedError,
+  );
+});
 
 test("convert logs stderr as warning", async () => {
   const originalConsoleWarn = console.warn;
@@ -61,4 +61,4 @@ test("convert logs stderr as warning", async () => {
   console.error = originalConsoleWarn;
 
   expect(loggedMessage).toBe("msgconvert stderr: Fake stderr");
-})
+});
