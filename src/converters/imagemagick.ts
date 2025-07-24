@@ -447,7 +447,7 @@ export function convert(
   convertTo: string,
   targetPath: string,
   options?: unknown,
-  execFile: ExecFileFn = execFileOriginal,
+  execFile: ExecFileFn = execFileOriginal, // to make it mockable
 ): Promise<string> {
   let outputArgs: string[] = [];
   let inputArgs: string[] = [];
