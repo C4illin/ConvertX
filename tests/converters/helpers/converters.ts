@@ -38,6 +38,33 @@ export async function runConvertFailTest(convertFn: ConvertFnWithExecFile) {
   expect(
     convertFn("input.obj", "obj", "stl", "output.stl", undefined, mockExecFile),
   ).rejects.toMatch(/error: Error: Test error/);
+
+  // Test with error object lacking 'message' property
+  const mockExecFileNoMessage: ExecFileFn = (
+    _cmd: string,
+    _args: string[],
+    callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
+  ) => {
+    // Simulate a non-standard error object
+    callback({ notMessage: true } as unknown as ExecFileException, "", "");
+  };
+
+  expect(
+    convertFn("input.obj", "obj", "stl", "output.stl", undefined, mockExecFileNoMessage),
+  ).rejects.toMatch(/error:/i);
+
+  // Test with a non-object error (e.g., a string)
+  const mockExecFileStringError: ExecFileFn = (
+    _cmd: string,
+    _args: string[],
+    callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
+  ) => {
+    callback("string error" as unknown as ExecFileException, "", "");
+  };
+
+  expect(
+    convertFn("input.obj", "obj", "stl", "output.stl", undefined, mockExecFileStringError),
+  ).rejects.toMatch(/error:/i);
 }
 
 export async function runConvertLogsStderror(convertFn: ConvertFnWithExecFile) {
