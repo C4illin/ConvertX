@@ -155,3 +155,27 @@ test("fails on exec error", async () => {
 
   expect(loggedMessage).toBe("stderr: Fake stderr: fail");
 });
+
+test("logs stderr when execFile returns only stderr and no error", async () => {
+  const originalConsoleError = console.error;
+
+  let loggedMessage = "";
+  console.error = (msg) => {
+    loggedMessage = msg;
+  };
+
+  // Mock execFile to call back with no error, no stdout, but with stderr
+  const mockExecFileStderrOnly = (
+    _cmd: string,
+    _args: string[],
+    callback: (err: Error | null, stdout: string, stderr: string) => void,
+  ) => {
+    callback(null, "", "Only stderr output");
+  };
+
+  await convert("input.mov", "mov", "mp4", "output.mp4", undefined, mockExecFileStderrOnly);
+
+  console.error = originalConsoleError;
+
+  expect(loggedMessage).toBe("stderr: Only stderr output");
+});
