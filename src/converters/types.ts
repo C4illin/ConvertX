@@ -1,7 +1,7 @@
 export type ExecFileFn = (
   cmd: string,
   args: string[],
-  options: import("child_process").ExecFileOptions | undefined,
+  options: import("child_process").ExecFileOptions | unknown | undefined | null,
   callback: (err: Error | null, stdout: string, stderr: string) => void,
 ) => void;
 

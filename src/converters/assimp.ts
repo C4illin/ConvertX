@@ -121,7 +121,7 @@ export async function convert(
   execFile: ExecFileFn = execFileOriginal, // to make it mockable
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    execFile("assimp", ["export", filePath, targetPath], (error, stdout, stderr) => {
+    execFile("assimp", ["export", filePath, targetPath], options, (error, stdout, stderr) => {
       if (error) {
         reject(`error: ${error}`);
       }

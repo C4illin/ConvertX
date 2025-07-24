@@ -37,6 +37,7 @@ test("convert respects ico conversion target type", async () => {
   const mockExecFile: ExecFileFn = (
     _cmd: string,
     _args: string[],
+    options: unknown,
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
     calls.push(_args);
@@ -72,6 +73,7 @@ test("convert respects ico conversion target type with svg as input filetype", a
   const mockExecFile: ExecFileFn = (
     _cmd: string,
     _args: string[],
+    options: unknown,
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
     calls.push(_args);
@@ -109,6 +111,7 @@ test("convert respects ico conversion target type with emf as input filetype", a
   const mockExecFile: ExecFileFn = (
     _cmd: string,
     _args: string[],
+    options: unknown,
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
     calls.push(_args);
@@ -150,6 +153,7 @@ test("convert respects emf as input filetype", async () => {
   const mockExecFile: ExecFileFn = (
     _cmd: string,
     _args: string[],
+    options: unknown,
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
     calls.push(_args);

@@ -13,6 +13,7 @@ export async function runConvertSuccessTest(convertFn: ConvertFnWithExecFile) {
   const mockExecFile: ExecFileFn = (
     _cmd: string,
     _args: string[],
+    options: unknown,
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
     callback(null, "Fake stdout", "");
@@ -30,6 +31,7 @@ export async function runConvertFailTest(convertFn: ConvertFnWithExecFile) {
   const mockExecFile: ExecFileFn = (
     _cmd: string,
     _args: string[],
+    options: unknown,
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
     callback(new Error("Test error"), "", "");
@@ -51,9 +53,10 @@ export async function runConvertLogsStderror(convertFn: ConvertFnWithExecFile) {
   const mockExecFile = (
     _cmd: string,
     _args: string[],
-    cb: (err: Error | null, stdout: string, stderr: string) => void,
+    options: unknown,
+    callback: (err: Error | null, stdout: string, stderr: string) => void,
   ) => {
-    cb(null, "", "Fake stderr");
+    callback(null, "", "Fake stderr");
   };
 
   await convertFn("file.obj", "obj", "stl", "out.stl", undefined, mockExecFile);
