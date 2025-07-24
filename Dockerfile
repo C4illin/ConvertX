@@ -59,6 +59,7 @@ RUN apt-get update && apt-get install -y \
   libreoffice \
   libva2 \
   libvips-tools \
+  libemail-outlook-message-perl \
   lmodern \
   mupdf-tools \
   pandoc \

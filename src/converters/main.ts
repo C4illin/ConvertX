@@ -14,6 +14,7 @@ import { convert as convertInkscape, properties as propertiesInkscape } from "./
 import { convert as convertLibheif, properties as propertiesLibheif } from "./libheif";
 import { convert as convertLibjxl, properties as propertiesLibjxl } from "./libjxl";
 import { convert as convertLibreOffice, properties as propertiesLibreOffice } from "./libreoffice";
+import { convert as convertMsgconvert, properties as propertiesMsgconvert } from "./msgconvert";
 import { convert as convertPandoc, properties as propertiesPandoc } from "./pandoc";
 import { convert as convertPotrace, properties as propertiesPotrace } from "./potrace";
 import { convert as convertresvg, properties as propertiesresvg } from "./resvg";
@@ -86,6 +87,10 @@ const properties: Record<
   pandoc: {
     properties: propertiesPandoc,
     converter: convertPandoc,
+  },
+  msgconvert: {
+    properties: propertiesMsgconvert,
+    converter: convertMsgconvert,
   },
   dvisvgm: {
     properties: propertiesDvisvgm,
