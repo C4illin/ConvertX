@@ -33,7 +33,7 @@ export const root = new Elysia()
     let user: ({ id: string } & JWTPayloadSpec) | false = false;
     if (ALLOW_UNAUTHENTICATED) {
       const newUserId = String(
-        randomInt(2 ** 24, Math.min(2 ** 48 + 2 ** 24 - 1, Number.MAX_SAFE_INTEGER)),
+        ACCOUNT_REGISTRATION ? randomInt(2 ** 24, Math.min(2 ** 48 + 2 ** 24 - 1, Number.MAX_SAFE_INTEGER)) : 0,
       );
       const accessToken = await jwt.sign({
         id: newUserId,
