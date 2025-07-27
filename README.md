@@ -62,6 +62,7 @@ services:
       - "3000:3000"
     environment:
       - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234 # will use randomUUID() if unset
+      # - HTTP_ALLOWED=true # uncomment this if accessing it over a non-https connection
     volumes:
       - ./data:/app/data
 ```
