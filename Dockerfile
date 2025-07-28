@@ -83,4 +83,10 @@ EXPOSE 3000/tcp
 # used for calibre
 ENV QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox"
 ENV NODE_ENV=production
+# Create a non-root user to run the application
+RUN useradd -r -u 1001 -g root -s /bin/false convertx
+
+# Switch to non-root user
+USER convertx
+
 ENTRYPOINT [ "bun", "run", "./src/index.tsx" ]
