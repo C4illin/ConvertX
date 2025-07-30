@@ -1,0 +1,136 @@
+version: '3.8'
+
+services:
+  # Production-like service
+  convertx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: release
+    image: convertx-openapi:local
+    container_name: convertx-prod
+    volumes:
+      - ./data:/app/data
+    environment:
+      - ACCOUNT_REGISTRATION=true
+      - JWT_SECRET=${JWT_SECRET:-aLongAndSecretStringUsedToSignTheJSONWebToken1234}
+      - HTTP_ALLOWED=${HTTP_ALLOWED:-false}
+      - ALLOW_UNAUTHENTICATED=${ALLOW_UNAUTHENTICATED:-false}
+      - AUTO_DELETE_EVERY_N_HOURS=${AUTO_DELETE_EVERY_N_HOURS:-24}
+      - WEBROOT=${WEBROOT:-}
+      - TZ=${TZ:-UTC}
+      # API-specific environment variables
+      - API_ENABLED=${API_ENABLED:-true}
+      - API_PREFIX=${API_PREFIX:-/api/v1}
+      - API_RATE_LIMIT=${API_RATE_LIMIT:-100}
+      - API_RATE_WINDOW=${API_RATE_WINDOW:-15m}
+      - API_KEY_ENABLED=${API_KEY_ENABLED:-true}
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Development service with hot reload
+  convertx-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    image: convertx-openapi:dev
+    container_name: convertx-dev
+    working_dir: /app
+    command: bun run --hot src/index.tsx
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./data:/app/data
+      - ./package.json:/app/package.json
+      - ./bun.lockb:/app/bun.lockb
+      - ./tsconfig.json:/app/tsconfig.json
+    environment:
+      - NODE_ENV=development
+      - ACCOUNT_REGISTRATION=true
+      - JWT_SECRET=dev-secret-key
+      - HTTP_ALLOWED=true
+      - ALLOW_UNAUTHENTICATED=true
+      - AUTO_DELETE_EVERY_N_HOURS=0
+      - WEBROOT=
+      - TZ=${TZ:-UTC}
+      # Development specific
+      - DEBUG=true
+      - LOG_LEVEL=debug
+    ports:
+      - "3001:3000"
+    profiles:
+      - dev
+
+  # API documentation server (when implemented)
+  api-docs:
+    image: swaggerapi/swagger-ui:latest
+    container_name: convertx-api-docs
+    environment:
+      - SWAGGER_JSON_URL=http://convertx:3000/api/v1/swagger.json
+      - BASE_URL=/api-docs
+    ports:
+      - "3002:8080"
+    depends_on:
+      - convertx
+    profiles:
+      - docs
+
+  # Database viewer for development
+  db-viewer:
+    image: sqlitebrowser/sqlitebrowser:latest
+    container_name: convertx-db-viewer
+    volumes:
+      - ./data:/data
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+    network_mode: host
+    profiles:
+      - debug
+
+  # Monitoring stack (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: convertx-prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - "9090:9090"
+    profiles:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: convertx-grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3003:3000"
+    depends_on:
+      - prometheus
+    profiles:
+      - monitoring
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  default:
+    name: convertx-network

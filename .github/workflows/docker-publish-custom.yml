@@ -1,0 +1,231 @@
+name: Docker (Custom Registry Support)
+
+# This workflow supports custom Docker registries while maintaining compatibility
+# with the original GHCR and Docker Hub setup
+
+on:
+  push:
+    branches: ["main"]
+    tags: ["v*.*.*"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+env:
+  # Custom registry configuration (set these in your repository secrets/variables)
+  # If CUSTOM_REGISTRY is not set, it will default to GHCR and Docker Hub
+  CUSTOM_REGISTRY: ${{ vars.DOCKER_REGISTRY || '' }}
+  CUSTOM_REGISTRY_USERNAME: ${{ vars.DOCKER_USERNAME || github.actor }}
+  CUSTOM_REGISTRY_PASSWORD: ${{ secrets.DOCKER_PASSWORD || secrets.GITHUB_TOKEN }}
+  
+  # Default registries (original behavior)
+  GHCR_IMAGE: ghcr.io/${{ github.repository_owner }}/convertx-openapi
+  DOCKERHUB_IMAGE: ${{ vars.DOCKERHUB_USERNAME || 'dmestas' }}/convertx-openapi
+  
+  # Feature flags
+  PUSH_TO_GHCR: ${{ vars.PUSH_TO_GHCR || 'true' }}
+  PUSH_TO_DOCKERHUB: ${{ vars.PUSH_TO_DOCKERHUB || 'false' }}
+  PUSH_TO_CUSTOM: ${{ vars.PUSH_TO_CUSTOM || 'false' }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm64
+
+    permissions:
+      contents: write
+      packages: write
+      attestations: write
+      checks: write
+      actions: read
+
+    runs-on: ${{ matrix.platform == 'linux/amd64' && 'ubuntu-24.04' || matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' }}
+
+    name: Build Docker image for ${{ matrix.platform }}
+
+    steps:
+      - name: Prepare environment
+        id: prepare
+        run: |
+          platform=${{ matrix.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+          
+          # Determine which image to use for building
+          if [[ "${{ env.PUSH_TO_CUSTOM }}" == "true" && -n "${{ env.CUSTOM_REGISTRY }}" ]]; then
+            echo "PRIMARY_IMAGE=${{ env.CUSTOM_REGISTRY }}/convertx-openapi" >> $GITHUB_ENV
+          else
+            echo "PRIMARY_IMAGE=${{ env.GHCR_IMAGE }}" >> $GITHUB_ENV
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.PRIMARY_IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,prefix={{branch}}-
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: ${{ matrix.platform }}
+
+      # Login to custom registry if configured
+      - name: Login to Custom Registry
+        if: env.PUSH_TO_CUSTOM == 'true' && env.CUSTOM_REGISTRY != ''
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.CUSTOM_REGISTRY }}
+          username: ${{ env.CUSTOM_REGISTRY_USERNAME }}
+          password: ${{ env.CUSTOM_REGISTRY_PASSWORD }}
+
+      # Login to GHCR if enabled
+      - name: Login to GitHub Container Registry
+        if: env.PUSH_TO_GHCR == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build and push by digest
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v6
+        env:
+          DOCKER_BUILDKIT: 1
+        with:
+          context: .
+          platforms: ${{ matrix.platform }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          outputs: type=image,name=${{ env.PRIMARY_IMAGE }},push-by-digest=true,name-canonical=true,push=true,oci-mediatypes=true
+          cache-from: type=gha,scope=${{ matrix.platform }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
+
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ env.PLATFORM_PAIR }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    name: Merge Docker manifests
+    runs-on: ubuntu-latest
+
+    permissions:
+      attestations: write
+      contents: read
+      packages: write
+
+    needs:
+      - build
+      
+    steps:
+      - name: Prepare environment
+        run: |
+          # Build image list based on enabled registries
+          IMAGES=""
+          
+          if [[ "${{ env.PUSH_TO_CUSTOM }}" == "true" && -n "${{ env.CUSTOM_REGISTRY }}" ]]; then
+            IMAGES="${{ env.CUSTOM_REGISTRY }}/convertx-openapi"
+            echo "PRIMARY_IMAGE=${{ env.CUSTOM_REGISTRY }}/convertx-openapi" >> $GITHUB_ENV
+          else
+            echo "PRIMARY_IMAGE=${{ env.GHCR_IMAGE }}" >> $GITHUB_ENV
+          fi
+          
+          if [[ "${{ env.PUSH_TO_GHCR }}" == "true" ]]; then
+            IMAGES="$IMAGES ${{ env.GHCR_IMAGE }}"
+          fi
+          
+          if [[ "${{ env.PUSH_TO_DOCKERHUB }}" == "true" ]]; then
+            IMAGES="$IMAGES ${{ env.DOCKERHUB_IMAGE }}"
+          fi
+          
+          echo "PUSH_IMAGES=$IMAGES" >> $GITHUB_ENV
+
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.PUSH_IMAGES }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,prefix={{branch}}-
+
+      # Login to all configured registries
+      - name: Login to Custom Registry
+        if: env.PUSH_TO_CUSTOM == 'true' && env.CUSTOM_REGISTRY != ''
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.CUSTOM_REGISTRY }}
+          username: ${{ env.CUSTOM_REGISTRY_USERNAME }}
+          password: ${{ env.CUSTOM_REGISTRY_PASSWORD }}
+
+      - name: Login to GitHub Container Registry
+        if: env.PUSH_TO_GHCR == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Docker Hub
+        if: env.PUSH_TO_DOCKERHUB == 'true' && secrets.DOCKERHUB_TOKEN != ''
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create \
+            $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            --annotation='index:org.opencontainers.image.description=ConvertX OpenAPI - File conversion service with API support' \
+            --annotation='index:org.opencontainers.image.created=${{ steps.timestamp.outputs.timestamp }}' \
+            --annotation='index:org.opencontainers.image.url=${{ github.event.repository.html_url }}' \
+            --annotation='index:org.opencontainers.image.source=${{ github.event.repository.html_url }}' \
+            $(printf '${{ env.PRIMARY_IMAGE }}@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect '${{ env.PRIMARY_IMAGE }}:${{ steps.meta.outputs.version }}'

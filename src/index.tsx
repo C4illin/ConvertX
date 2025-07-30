@@ -17,6 +17,7 @@ import { results } from "./pages/results";
 import { root } from "./pages/root";
 import { upload } from "./pages/upload";
 import { user } from "./pages/user";
+import { api } from "./api/v1";
 
 mkdir("./data", { recursive: true }).catch(console.error);
 
@@ -36,6 +37,7 @@ const app = new Elysia({
       prefix: "",
     }),
   )
+  .use(api)
   .use(user)
   .use(root)
   .use(upload)
@@ -61,7 +63,7 @@ if (process.env.NODE_ENV !== "production") {
   });
 }
 
-app.listen(3000);
+app.listen(3110);
 
 console.log(`🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}${WEBROOT}`);
 
