@@ -12,11 +12,14 @@ on:
 env:
   IMAGE_NAME: ${{ github.repository }}
   DOCKERHUB_USERNAME: c4illin
-  GHCR_USERNAME: c4illin
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: write
+  packages: write
 
 jobs:
   # The build job builds the Docker image for each platform specified in the matrix.
@@ -33,7 +36,7 @@ jobs:
       packages: write
       attestations: write
       checks: write
-      actions: read
+      actions: write
 
     runs-on: ${{ matrix.platform == 'linux/amd64' && 'ubuntu-24.04' || matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' }}
 
@@ -73,8 +76,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ env.GHCR_USERNAME }}
-          password: ${{ secrets.GHCR_TOKEN }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push by digest
         id: build
@@ -142,8 +145,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ env.GHCR_USERNAME }}
-          password: ${{ secrets.GHCR_TOKEN }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
