@@ -15,8 +15,8 @@ assignees: ''
 
 **Are you willing to add it?**
 <!-- Adding a converter is very easy just copy one of the existing and modify it -->
-[ ] Yes
-[ ] No
+- [ ] Yes
+- [ ] No
 
 **Additional context**
 <!-- Add any other context or screenshots about the feature request here. -->
