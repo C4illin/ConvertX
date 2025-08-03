@@ -133,18 +133,9 @@ Tutorial in chinese: <https://xzllll.com/24092901/>
 2. `bun install`
 3. `bun run dev`
 
-Pull requests are welcome! See below and open issues for the list of todos.
+Pull requests are welcome! See open issues for the list of todos. The ones tagged with "converter request" are quite easy. Help with docs and cleaning up in issues are also very welcome!
 
 Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#summary) for commit messages.
-
-## Todo
-
-- [ ] Add options for converters
-- [ ] Add tests
-- [ ] Make errors logs visible from the web ui
-- [ ] Add more converters:
-  - [ ] [deark](https://github.com/jsummers/deark)
-  - [ ] LibreOffice
 
 ## Contributors
 
