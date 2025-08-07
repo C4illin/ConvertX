@@ -6,7 +6,7 @@ labels: "converter request"
 assignees: ""
 ---
 
-**What file formats is missing?**
+**What file formats are missing?**
 
 <!-- Provide an example of what you would like to convert -->
 
