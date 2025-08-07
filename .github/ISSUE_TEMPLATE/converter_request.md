@@ -1,6 +1,6 @@
 ---
 name: Converter request
-about: Suggest an converter for this project
+about: Suggest a converter for this project
 title: "[Converter Request]"
 labels: "converter request"
 assignees: ""
