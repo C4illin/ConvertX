@@ -94,7 +94,6 @@ All are optional, JWT_SECRET is recommended to be set.
 | LANGUAGE                     | en                                                 | Language to format date strings in, specified as a [BCP 47 language tag](https://en.wikipedia.org/wiki/IETF_language_tag) |
 | UNAUTHENTICATED_USER_SHARING | false                                              | Shares conversion history between all unauthenticated users                                                               |
 
-
 ### Docker images
 
 There is a `:latest` tag that is updated with every release and a `:main` tag that is updated with every push to the main branch. `:latest` is recommended for normal use.
