@@ -17,10 +17,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: write
-  packages: write
-
 jobs:
   # The build job builds the Docker image for each platform specified in the matrix.
   build:
@@ -35,8 +31,7 @@ jobs:
       contents: write
       packages: write
       attestations: write
-      checks: write
-      actions: write
+      id-token: write
 
     runs-on: ${{ matrix.platform == 'linux/amd64' && 'ubuntu-24.04' || matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' }}
 
@@ -112,9 +107,10 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      attestations: write
-      contents: read
+      contents: write
       packages: write
+      attestations: write
+      id-token: write
 
     needs:
       - build
