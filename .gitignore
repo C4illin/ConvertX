@@ -46,6 +46,7 @@ package-lock.json
 /output
 /db
 /data
+/dist
 /Bruno
 /tsconfig.tsbuildinfo
 /public/generated.css

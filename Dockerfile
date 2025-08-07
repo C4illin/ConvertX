@@ -77,10 +77,13 @@ RUN apt-get update && apt-get install -y \
 
 COPY --from=install /temp/prod/node_modules node_modules
 COPY --from=prerelease /app/public/generated.css /app/public/
-COPY . .
+COPY --from=prerelease /app/dist /app/dist
+
+# COPY . .
+RUN mkdir data
 
 EXPOSE 3000/tcp
 # used for calibre
 ENV QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox"
 ENV NODE_ENV=production
-ENTRYPOINT [ "bun", "run", "./src/index.tsx" ]
+ENTRYPOINT [ "bun", "run", "dist/src/index.js" ]
