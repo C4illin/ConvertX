@@ -46,6 +46,11 @@ export const convert = new Elysia().use(userService).post(
 
     const convertTo = normalizeFiletype(body.convert_to.split(",")[0] ?? "");
     const converterName = body.convert_to.split(",")[1];
+
+    if (!converterName) {
+      return redirect(`${WEBROOT}/`, 302);
+    }
+
     const fileNames = JSON.parse(body.file_names) as string[];
 
     for (let i = 0; i < fileNames.length; i++) {

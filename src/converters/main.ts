@@ -1,3 +1,4 @@
+import { Cookie } from "elysia";
 import db from "../db/db";
 import { MAX_CONVERT_PROCESS } from "../helpers/env";
 import { normalizeFiletype, normalizeOutputFiletype } from "../helpers/normalizeFiletype";
@@ -119,11 +120,11 @@ const properties: Record<
 };
 
 function chunks<T>(arr: T[], size: number): T[][] {
-  if(size <= 0){
-    return [arr]
+  if (size <= 0) {
+    return [arr];
   }
   return Array.from({ length: Math.ceil(arr.length / size) }, (_: T, i: number) =>
-    arr.slice(i * size, i * size + size)
+    arr.slice(i * size, i * size + size),
   );
 }
 
@@ -133,17 +134,15 @@ export async function handleConvert(
   userOutputDir: string,
   convertTo: string,
   converterName: string,
-  jobId: any
+  jobId: Cookie<string | undefined>,
 ) {
-  
   const query = db.query(
     "INSERT INTO file_names (job_id, file_name, output_file_name, status) VALUES (?1, ?2, ?3, ?4)",
   );
 
-
   for (const chunk of chunks(fileNames, MAX_CONVERT_PROCESS)) {
     const toProcess: Promise<string>[] = [];
-    for(const fileName of chunk) {
+    for (const fileName of chunk) {
       const filePath = `${userUploadsDir}${fileName}`;
       const fileTypeOrig = fileName.split(".").pop() ?? "";
       const fileType = normalizeFiletype(fileTypeOrig);
@@ -154,21 +153,16 @@ export async function handleConvert(
       );
       const targetPath = `${userOutputDir}${newFileName}`;
       toProcess.push(
-        new Promise((resolve, reject) => { 
-          mainConverter(
-              filePath,
-              fileType,
-              convertTo,
-              targetPath,
-              {},
-              converterName,
-            ).then(r =>  {
+        new Promise((resolve, reject) => {
+          mainConverter(filePath, fileType, convertTo, targetPath, {}, converterName)
+            .then((r) => {
               if (jobId.value) {
                 query.run(jobId.value, fileName, newFileName, r);
               }
               resolve(r);
-            }).catch(c => reject(c));
-        })
+            })
+            .catch((c) => reject(c));
+        }),
       );
     }
     await Promise.all(toProcess);

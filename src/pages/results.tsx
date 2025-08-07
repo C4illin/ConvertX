@@ -1,4 +1,5 @@
 import { Html } from "@elysiajs/html";
+import { JWTPayloadSpec } from "@elysiajs/jwt";
 import { Elysia } from "elysia";
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
@@ -6,7 +7,6 @@ import db from "../db/db";
 import { Filename, Jobs } from "../db/types";
 import { ALLOW_UNAUTHENTICATED, WEBROOT } from "../helpers/env";
 import { userService } from "./user";
-import { JWTPayloadSpec } from "@elysiajs/jwt";
 
 function ResultsArticle({
   user,
@@ -26,7 +26,7 @@ function ResultsArticle({
       <div class="mb-4 flex items-center justify-between">
         <h1 class="text-xl">Results</h1>
         <div>
-          <a  
+          <a
             style={files.length !== job.num_files ? "pointer-events: none;" : ""}
             href={`${WEBROOT}/archive/${user.id}/${job.id}`}
             download={`converted_files_${job.id}.tar`}
@@ -35,7 +35,7 @@ function ResultsArticle({
               type="button"
               class="float-right w-40 btn-primary"
               {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
-              >
+            >
               {files.length === job.num_files ? "Download All" : "Converting..."}
             </button>
           </a>
