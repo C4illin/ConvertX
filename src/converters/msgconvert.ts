@@ -23,7 +23,7 @@ export function convert(
       // msgconvert will output to the same directory as the input file with .eml extension
       // We need to use --outfile to specify the target path
       const args = ["--outfile", targetPath, filePath];
-      
+
       execFile("msgconvert", args, (error, stdout, stderr) => {
         if (error) {
           reject(new Error(`msgconvert failed: ${error.message}`));
@@ -33,13 +33,19 @@ export function convert(
         if (stderr) {
           // Log sanitized stderr to avoid exposing sensitive paths
           const sanitizedStderr = stderr.replace(/(\/[^\s]+)/g, "[REDACTED_PATH]");
-          console.warn(`msgconvert stderr: ${sanitizedStderr.length > 200 ? sanitizedStderr.slice(0, 200) + '...' : sanitizedStderr}`);
+          console.warn(
+            `msgconvert stderr: ${sanitizedStderr.length > 200 ? sanitizedStderr.slice(0, 200) + "..." : sanitizedStderr}`,
+          );
         }
 
         resolve(targetPath);
       });
     } else {
-      reject(new Error(`Unsupported conversion from ${fileType} to ${convertTo}. Only MSG to EML conversion is currently supported.`));
+      reject(
+        new Error(
+          `Unsupported conversion from ${fileType} to ${convertTo}. Only MSG to EML conversion is currently supported.`,
+        ),
+      );
     }
   });
 }

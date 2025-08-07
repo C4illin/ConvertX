@@ -16,7 +16,10 @@ export const WEBROOT = process.env.WEBROOT ?? "";
 
 export const LANGUAGE = process.env.LANGUAGE?.toLowerCase() || "en";
 
-export const MAX_CONVERT_PROCESS = process.env.MAX_CONVERT_PROCESS && Number(process.env.MAX_CONVERT_PROCESS) > 0 ? Number(process.env.MAX_CONVERT_PROCESS) : 0
+export const MAX_CONVERT_PROCESS =
+  process.env.MAX_CONVERT_PROCESS && Number(process.env.MAX_CONVERT_PROCESS) > 0
+    ? Number(process.env.MAX_CONVERT_PROCESS)
+    : 0;
 
 export const UNAUTHENTICATED_USER_SHARING =
   process.env.UNAUTHENTICATED_USER_SHARING?.toLowerCase() === "true" || false;

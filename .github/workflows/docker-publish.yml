@@ -31,8 +31,7 @@ jobs:
       contents: write
       packages: write
       attestations: write
-      checks: write
-      actions: read
+      id-token: write
 
     runs-on: ${{ matrix.platform == 'linux/amd64' && 'ubuntu-24.04' || matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' }}
 
@@ -85,7 +84,8 @@ jobs:
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
-          outputs: type=image,name=ghcr.io/${{ env.REPO }},push-by-digest=true,name-canonical=true,push=true,oci-mediatypes=true
+          outputs: type=image,name=ghcr.io/${{ env.REPO }},push-by-digest=true,name-canonical=true,oci-mediatypes=true
+          push: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
           cache-from: type=gha,scope=${{ matrix.platform }}
           cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
 
@@ -104,19 +104,21 @@ jobs:
           retention-days: 1
 
   merge:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     name: Merge Docker manifests
     runs-on: ubuntu-latest
 
     permissions:
-      attestations: write
-      contents: read
+      contents: write
       packages: write
+      attestations: write
+      id-token: write
 
     needs:
       - build
     steps:
       - name: Download digests
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: /tmp/digests
           pattern: digests-*
