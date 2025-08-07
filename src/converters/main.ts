@@ -169,7 +169,7 @@ export async function handleConvert(
   }
 }
 
-export async function mainConverter(
+async function mainConverter(
   inputFilePath: string,
   fileTypeOriginal: string,
   convertTo: string,
