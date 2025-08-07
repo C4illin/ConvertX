@@ -4,5 +4,9 @@
   "lockFileMaintenance": {
     "enabled": true,
     "automerge": true
-  }
+  },
+  "ignoreDeps": [
+    "bun-types",
+    "@types/bun"
+  ]
 }
