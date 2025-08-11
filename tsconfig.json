@@ -30,5 +30,5 @@
     "esModuleInterop": true
     // "noImplicitReturns": true
   },
-  "include": ["src", "package.json", "reset.d.ts"]
+  "include": ["src", "tests", "package.json", "reset.d.ts"]
 }
