@@ -1,7 +1,7 @@
 import type { ExecFileException } from "node:child_process";
 import { expect, test } from "bun:test";
-import { convert } from "../../src/converters/msgconvert.ts";
-import { ExecFileFn } from "../../src/converters/types.ts";
+import { convert } from "../../src/converters/msgconvert";
+import { ExecFileFn } from "../../src/converters/types";
 
 test("convert rejects conversion if input filetype is not msg and output type is not eml", async () => {
   const mockExecFile: ExecFileFn = (

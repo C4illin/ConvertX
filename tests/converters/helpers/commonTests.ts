@@ -1,11 +1,11 @@
 import { test } from "bun:test";
-import { ConvertFnWithExecFile } from "../../../src/converters/types.ts";
+import { ConvertFnWithExecFile } from "../../../src/converters/types";
 import {
   runConvertFailTest,
   runConvertLogsStderror,
   runConvertLogsStderrorAndStdout,
   runConvertSuccessTest,
-} from "./converters.ts";
+} from "./converters";
 
 export function runCommonTests(convert: ConvertFnWithExecFile) {
   test("convert resolves when execFile succeeds", async () => {

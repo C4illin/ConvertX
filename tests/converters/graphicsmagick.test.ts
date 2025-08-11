@@ -1,6 +1,6 @@
 import { test } from "bun:test";
-import { convert } from "../../src/converters/graphicsmagick.ts";
-import { runCommonTests } from "./helpers/commonTests.ts";
+import { convert } from "../../src/converters/graphicsmagick";
+import { runCommonTests } from "./helpers/commonTests";
 
 runCommonTests(convert);
 

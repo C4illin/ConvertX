@@ -1,5 +1,5 @@
 import { beforeEach, expect, test } from "bun:test";
-import { convert } from "../../src/converters/ffmpeg.ts";
+import { convert } from "../../src/converters/ffmpeg";
 
 let calls: string[][] = [];
 

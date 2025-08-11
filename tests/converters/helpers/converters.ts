@@ -1,6 +1,6 @@
 import type { ExecFileException } from "node:child_process";
 import { expect } from "bun:test";
-import { ConvertFnWithExecFile, ExecFileFn } from "../../../src/converters/types.ts";
+import { ConvertFnWithExecFile, ExecFileFn } from "../../../src/converters/types";
 
 export async function runConvertSuccessTest(convertFn: ConvertFnWithExecFile) {
   const originalConsoleLog = console.log;

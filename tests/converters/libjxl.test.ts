@@ -1,8 +1,8 @@
 import type { ExecFileException } from "node:child_process";
 import { beforeEach, expect, test } from "bun:test";
-import { convert } from "../../src/converters/libjxl.ts";
-import { ExecFileFn } from "../../src/converters/types.ts";
-import { runCommonTests } from "./helpers/commonTests.ts";
+import { convert } from "../../src/converters/libjxl";
+import { ExecFileFn } from "../../src/converters/types";
+import { runCommonTests } from "./helpers/commonTests";
 
 let command: string = "";
 

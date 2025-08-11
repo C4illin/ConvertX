@@ -1,5 +1,5 @@
 import { execFile as execFileOriginal } from "node:child_process";
-import { ExecFileFn } from "./types.ts";
+import { ExecFileFn } from "./types";
 
 export const properties = {
   from: {

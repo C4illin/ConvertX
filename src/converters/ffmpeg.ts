@@ -1,5 +1,5 @@
 import { execFile as execFileOriginal } from "node:child_process";
-import { ExecFileFn } from "./types.ts";
+import { ExecFileFn } from "./types";
 
 // This could be done dynamically by running `ffmpeg -formats` and parsing the output
 export const properties = {

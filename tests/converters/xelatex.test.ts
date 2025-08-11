@@ -1,6 +1,6 @@
 import { test } from "bun:test";
-import { convert } from "../../src/converters/xelatex.ts";
-import { runCommonTests } from "./helpers/commonTests.ts";
+import { convert } from "../../src/converters/xelatex";
+import { runCommonTests } from "./helpers/commonTests";
 
 runCommonTests(convert);
 

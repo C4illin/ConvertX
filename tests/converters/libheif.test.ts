@@ -1,6 +1,6 @@
 import { test } from "bun:test";
-import { convert } from "../../src/converters/libheif.ts";
-import { runCommonTests } from "./helpers/commonTests.ts";
+import { convert } from "../../src/converters/libheif";
+import { runCommonTests } from "./helpers/commonTests";
 
 runCommonTests(convert);
 
