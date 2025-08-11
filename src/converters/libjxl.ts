@@ -1,4 +1,5 @@
-import { execFile } from "node:child_process";
+import { execFile as execFileOriginal } from "node:child_process";
+import { ExecFileFn } from "./types";
 
 // declare possible conversions
 export const properties = {
@@ -17,8 +18,8 @@ export function convert(
   fileType: string,
   convertTo: string,
   targetPath: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   options?: unknown,
+  execFile: ExecFileFn = execFileOriginal, // to make it mockable
 ): Promise<string> {
   let tool = "";
   if (fileType === "jxl") {

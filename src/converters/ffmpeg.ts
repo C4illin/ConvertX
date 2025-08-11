@@ -1,4 +1,5 @@
-import { execFile } from "node:child_process";
+import { execFile as execFileOriginal } from "node:child_process";
+import { ExecFileFn } from "./types";
 
 // This could be done dynamically by running `ffmpeg -formats` and parsing the output
 export const properties = {
@@ -691,8 +692,8 @@ export async function convert(
   fileType: string,
   convertTo: string,
   targetPath: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   options?: unknown,
+  execFile: ExecFileFn = execFileOriginal, // to make it mockable
 ): Promise<string> {
   let extraArgs: string[] = [];
   let message = "Done";
