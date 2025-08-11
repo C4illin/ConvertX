@@ -10,7 +10,6 @@ on:
     branches: ["main"]
   workflow_dispatch:
 env:
-  GHCR_IMAGE: ghcr.io/c4illin/convertx
   IMAGE_NAME: ${{ github.repository }}
   DOCKERHUB_USERNAME: c4illin
 
@@ -32,8 +31,7 @@ jobs:
       contents: write
       packages: write
       attestations: write
-      checks: write
-      actions: read
+      id-token: write
 
     runs-on: ${{ matrix.platform == 'linux/amd64' && 'ubuntu-24.04' || matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' }}
 
@@ -53,11 +51,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: downcase REPO
+        run: |
+          echo "REPO=${GITHUB_REPOSITORY@L}" >> "${GITHUB_ENV}"
+
       - name: Docker meta default
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.GHCR_IMAGE }}
+          images: ghcr.io/${{ env.REPO }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -82,7 +84,8 @@ jobs:
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
-          outputs: type=image,name=${{ env.GHCR_IMAGE }},push-by-digest=true,name-canonical=true,push=true,oci-mediatypes=true
+          outputs: type=image,name=ghcr.io/${{ env.REPO }},push-by-digest=true,name-canonical=true,oci-mediatypes=true
+          push: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
           cache-from: type=gha,scope=${{ matrix.platform }}
           cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
 
@@ -101,30 +104,36 @@ jobs:
           retention-days: 1
 
   merge:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     name: Merge Docker manifests
     runs-on: ubuntu-latest
 
     permissions:
-      attestations: write
-      contents: read
+      contents: write
       packages: write
+      attestations: write
+      id-token: write
 
     needs:
       - build
     steps:
       - name: Download digests
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: /tmp/digests
           pattern: digests-*
           merge-multiple: true
+
+      - name: downcase REPO
+        run: |
+          echo "REPO=${GITHUB_REPOSITORY@L}" >> "${GITHUB_ENV}"
 
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ env.GHCR_IMAGE }}
+            ghcr.io/${{ env.REPO }}
             ${{ env.IMAGE_NAME }}
 
       - name: Set up Docker Buildx
@@ -157,8 +166,8 @@ jobs:
             --annotation='index:org.opencontainers.image.created=${{ steps.timestamp.outputs.timestamp }}' \
             --annotation='index:org.opencontainers.image.url=${{ github.event.repository.url }}' \
             --annotation='index:org.opencontainers.image.source=${{ github.event.repository.url }}' \
-            $(printf '${{ env.GHCR_IMAGE }}@sha256:%s ' *)
+            $(printf 'ghcr.io/${{ env.REPO }}@sha256:%s ' *)
 
       - name: Inspect image
         run: |
-          docker buildx imagetools inspect '${{ env.GHCR_IMAGE }}:${{ steps.meta.outputs.version }}'
+          docker buildx imagetools inspect 'ghcr.io/${{ env.REPO }}:${{ steps.meta.outputs.version }}'

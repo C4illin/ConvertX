@@ -1,12 +1,11 @@
 import js from "@eslint/js";
 import eslintParserTypeScript from "@typescript-eslint/parser";
-import type { Linter } from "eslint";
 import eslintPluginBetterTailwindcss from "eslint-plugin-better-tailwindcss";
 import simpleImportSortPlugin from "eslint-plugin-simple-import-sort";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
-export default [
+export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   // ...tailwind.configs["flat/recommended"],
@@ -15,7 +14,7 @@ export default [
       "simple-import-sort": simpleImportSortPlugin,
       "better-tailwindcss": eslintPluginBetterTailwindcss,
     },
-    ignores: ["**/node_modules/**"],
+    ignores: ["**/node_modules/**", "eslint.config.ts"],
     languageOptions: {
       parser: eslintParserTypeScript,
       parserOptions: {
@@ -26,10 +25,9 @@ export default [
       },
       globals: {
         ...globals.node,
-        ...globals.browser,
       },
     },
-    files: ["**/*.{js,mjs,cjs,jsx,tsx,ts}"],
+    files: ["**/*.{tsx,ts}"],
     settings: {
       "better-tailwindcss": {
         entryPoint: "src/main.css",
@@ -63,4 +61,13 @@ export default [
       ],
     },
   },
-] as Linter.Config[];
+  {
+    files: ["**/*.{js,cjs,mjs,jsx}"],
+    extends: [tseslint.configs.disableTypeChecked],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+      },
+    },
+  },
+);

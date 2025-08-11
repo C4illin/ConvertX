@@ -94,7 +94,6 @@ All are optional, JWT_SECRET is recommended to be set.
 | LANGUAGE                     | en                                                 | Language to format date strings in, specified as a [BCP 47 language tag](https://en.wikipedia.org/wiki/IETF_language_tag) |
 | UNAUTHENTICATED_USER_SHARING | false                                              | Shares conversion history between all unauthenticated users                                                               |
 
-
 ### Docker images
 
 There is a `:latest` tag that is updated with every release and a `:main` tag that is updated with every push to the main branch. `:latest` is recommended for normal use.
@@ -133,18 +132,9 @@ Tutorial in chinese: <https://xzllll.com/24092901/>
 2. `bun install`
 3. `bun run dev`
 
-Pull requests are welcome! See below and open issues for the list of todos.
+Pull requests are welcome! See open issues for the list of todos. The ones tagged with "converter request" are quite easy. Help with docs and cleaning up in issues are also very welcome!
 
 Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#summary) for commit messages.
-
-## Todo
-
-- [ ] Add options for converters
-- [ ] Add tests
-- [ ] Make errors logs visible from the web ui
-- [ ] Add more converters:
-  - [ ] [deark](https://github.com/jsummers/deark)
-  - [ ] LibreOffice
 
 ## Contributors
 
