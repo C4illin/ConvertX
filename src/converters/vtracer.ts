@@ -72,7 +72,7 @@ export function convert(
 
       execFile("vtracer", args, (error, stdout, stderr) => {
         if (error) {
-          reject(`error: ${error}`);
+          reject(`error: ${error}${stderr ? `\nstderr: ${stderr}` : ''}`);
           return;
         }
 
