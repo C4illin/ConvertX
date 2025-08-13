@@ -75,7 +75,7 @@ RUN apt-get update && apt-get install -y \
   --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
-# Install VTracer binary (corrected version using tar.gz)
+# Install VTracer binary
 RUN ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
     VTRACER_ASSET="vtracer-aarch64-unknown-linux-musl.tar.gz"; \
@@ -95,10 +95,11 @@ COPY --from=install /temp/prod/node_modules node_modules
 COPY --from=prerelease /app/public/generated.css /app/public/
 COPY --from=prerelease /app/dist /app/dist
 
+# COPY . .
 RUN mkdir data
 
 EXPOSE 3000/tcp
+# used for calibre
 ENV QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox"
 ENV NODE_ENV=production
 ENTRYPOINT [ "bun", "run", "dist/src/index.js" ]
-
