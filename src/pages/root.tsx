@@ -185,7 +185,7 @@ export const root = new Elysia()
                         <header class="mb-2 w-full text-xl font-bold" safe>
                           {converter}
                         </header>
-                        <ul class="convert_to_target flex flex-row flex-wrap gap-1">
+                        <ul class={`convert_to_target flex flex-row flex-wrap gap-1`}>
                           {targets.map((target) => (
                             <button
                               // https://stackoverflow.com/questions/121499/when-a-blur-event-occurs-how-can-i-find-out-which-element-focus-went-to#comment82388679_33325953

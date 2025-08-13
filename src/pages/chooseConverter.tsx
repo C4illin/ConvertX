@@ -17,7 +17,7 @@ export const chooseConverter = new Elysia().use(userService).post(
         >
           {Object.entries(getPossibleTargets(body.fileType)).map(([converter, targets]) => (
             <article
-              class="convert_to_group flex w-full flex-col border-b border-neutral-700 p-4"
+              class={`convert_to_group flex w-full flex-col border-b border-neutral-700 p-4`}
               data-converter={converter}
             >
               <header class="mb-2 w-full text-xl font-bold" safe>

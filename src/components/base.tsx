@@ -22,7 +22,7 @@ export const BaseHtml = ({
       <link rel="icon" type="image/png" sizes="16x16" href={`${webroot}/favicon-16x16.png`} />
       <link rel="manifest" href={`${webroot}/site.webmanifest`} />
     </head>
-    <body class="flex min-h-screen w-full flex-col bg-neutral-900 text-neutral-200">
+    <body class={`flex min-h-screen w-full flex-col bg-neutral-900 text-neutral-200`}>
       {children}
       <footer class="w-full">
         <div class="p-4 text-center text-sm text-neutral-500">

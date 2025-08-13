@@ -162,7 +162,7 @@ export const history = new Elysia()
                                   xmlns="http://www.w3.org/2000/svg"
                                   viewBox="0 0 20 20"
                                   fill="currentColor"
-                                  class="mx-2 inline-block h-4 w-4 text-neutral-500"
+                                  class={`mx-2 inline-block h-4 w-4 text-neutral-500`}
                                 >
                                   <path
                                     fill-rule="evenodd"

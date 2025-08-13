@@ -7,8 +7,7 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   js.configs.recommended,
-  ...tseslint.configs.recommended,
-  // ...tailwind.configs["flat/recommended"],
+  tseslint.configs.recommended,
   {
     plugins: {
       "simple-import-sort": simpleImportSortPlugin,
@@ -37,7 +36,7 @@ export default tseslint.config(
       ...(eslintPluginBetterTailwindcss.configs["recommended-warn"] ?? {}).rules,
       ...(eslintPluginBetterTailwindcss.configs["stylistic-warn"] ?? {}).rules,
       // "tailwindcss/classnames-order": "off",
-      "better-tailwindcss/multiline": [
+      "better-tailwindcss/enforce-consistent-line-wrapping": [
         "warn",
         {
           group: "newLine",
