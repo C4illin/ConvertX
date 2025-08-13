@@ -25,22 +25,23 @@ A self-hosted online file converter. Supports over a thousand different formats.
 
 ## Converters supported
 
-| Converter                                        | Use case         | Converts from | Converts to |
-| ------------------------------------------------ | ---------------- | ------------- | ----------- |
-| [libjxl](https://github.com/libjxl/libjxl)       | JPEG XL          | 11            | 11          |
-| [resvg](https://github.com/RazrFalcon/resvg)     | SVG              | 1             | 1           |
-| [Vips](https://github.com/libvips/libvips)       | Images           | 45            | 23          |
-| [libheif](https://github.com/strukturag/libheif) | HEIF             | 2             | 4           |
-| [XeLaTeX](https://tug.org/xetex/)                | LaTeX            | 1             | 1           |
-| [Calibre](https://calibre-ebook.com/)            | E-books          | 26            | 19          |
-| [Pandoc](https://pandoc.org/)                    | Documents        | 43            | 65          |
-| [dvisvgm](https://dvisvgm.de/)                   | Vector images    | 4             | 2           |
-| [ImageMagick](https://imagemagick.org/)          | Images           | 245           | 183         |
-| [GraphicsMagick](http://www.graphicsmagick.org/) | Images           | 167           | 130         |
-| [Inkscape](https://inkscape.org/)                | Vector images    | 7             | 17          |
-| [Assimp](https://github.com/assimp/assimp)       | 3D Assets        | 77            | 23          |
-| [FFmpeg](https://ffmpeg.org/)                    | Video            | ~472          | ~199        |
-| [Potrace](https://potrace.sourceforge.net/)      | Raster to vector | 4             | 11          |
+| Converter                                          | Use case         | Converts from | Converts to |
+| -------------------------------------------------- | ---------------- | ------------- | ----------- |
+| [libjxl](https://github.com/libjxl/libjxl)         | JPEG XL          | 11            | 11          |
+| [resvg](https://github.com/RazrFalcon/resvg)       | SVG              | 1             | 1           |
+| [Vips](https://github.com/libvips/libvips)         | Images           | 45            | 23          |
+| [libheif](https://github.com/strukturag/libheif)   | HEIF             | 2             | 4           |
+| [XeLaTeX](https://tug.org/xetex/)                  | LaTeX            | 1             | 1           |
+| [Calibre](https://calibre-ebook.com/)              | E-books          | 26            | 19          |
+| [Pandoc](https://pandoc.org/)                      | Documents        | 43            | 65          |
+| [dvisvgm](https://dvisvgm.de/)                     | Vector images    | 4             | 2           |
+| [ImageMagick](https://imagemagick.org/)            | Images           | 245           | 183         |
+| [GraphicsMagick](http://www.graphicsmagick.org/)   | Images           | 167           | 130         |
+| [Inkscape](https://inkscape.org/)                  | Vector images    | 7             | 17          |
+| [Assimp](https://github.com/assimp/assimp)         | 3D Assets        | 77            | 23          |
+| [FFmpeg](https://ffmpeg.org/)                      | Video            | ~472          | ~199        |
+| [Potrace](https://potrace.sourceforge.net/)        | Raster to vector | 4             | 11          |
+| [VTracer](https://github.com/visioncortex/vtracer) | Raster to vector | 8             | 1           |
 
 <!-- many ffmpeg fileformats are duplicates -->
 
