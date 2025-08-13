@@ -20,9 +20,8 @@ import { convert as convertPandoc, properties as propertiesPandoc } from "./pand
 import { convert as convertPotrace, properties as propertiesPotrace } from "./potrace";
 import { convert as convertresvg, properties as propertiesresvg } from "./resvg";
 import { convert as convertImage, properties as propertiesImage } from "./vips";
+import { convert as convertVtracer, properties as propertiesVtracer } from "./vtracer";
 import { convert as convertxelatex, properties as propertiesxelatex } from "./xelatex";
-import {convert as convertVtracer, properties as propertiesVtracer} from './vtracer';
-
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
 
@@ -122,7 +121,7 @@ const properties: Record<
   vtracer: {
     properties: propertiesVtracer,
     converter: convertVtracer,
-  }
+  },
 };
 
 function chunks<T>(arr: T[], size: number): T[][] {

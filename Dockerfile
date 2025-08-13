@@ -82,14 +82,11 @@ RUN ARCH=$(uname -m) && \
   else \
     VTRACER_ASSET="vtracer-x86_64-unknown-linux-musl.tar.gz"; \
   fi && \
-  echo "Downloading VTracer: $VTRACER_ASSET" && \
   curl -L -o /tmp/vtracer.tar.gz "https://github.com/visioncortex/vtracer/releases/download/0.6.4/${VTRACER_ASSET}" && \
   tar -xzf /tmp/vtracer.tar.gz -C /tmp/ && \
   mv /tmp/vtracer /usr/local/bin/vtracer && \
   chmod +x /usr/local/bin/vtracer && \
-  rm /tmp/vtracer.tar.gz && \
-  echo "VTracer installed successfully" && \
-  vtracer --help
+  rm /tmp/vtracer.tar.gz
 
 COPY --from=install /temp/prod/node_modules node_modules
 COPY --from=prerelease /app/public/generated.css /app/public/

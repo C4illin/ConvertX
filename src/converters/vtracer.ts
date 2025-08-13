@@ -10,6 +10,20 @@ export const properties = {
   },
 };
 
+interface VTracerOptions {
+  colormode?: string;
+  hierarchical?: string;
+  mode?: string;
+  filter_speckle?: string | number;
+  color_precision?: string | number;
+  layer_difference?: string | number;
+  corner_threshold?: string | number;
+  length_threshold?: string | number;
+  max_iterations?: string | number;
+  splice_threshold?: string | number;
+  path_precision?: string | number;
+}
+
 export function convert(
   filePath: string,
   fileType: string,
@@ -24,34 +38,40 @@ export function convert(
 
     // Add optional parameter if provided
     if (options && typeof options === "object") {
-      const opts = options as Record<string, any>;
-
-      const validOptions = [
-        "colormode", "hierarchical", "mode", "filter_speckle",
-        "color_precision", "layer_difference", "corner_threshold",
-        "length_threshold", "max_iterations", "splice_threshold",
+      const opts = options as VTracerOptions;
+      const validOptions: Array<keyof VTracerOptions> = [
+        "colormode",
+        "hierarchical",
+        "mode",
+        "filter_speckle",
+        "color_precision",
+        "layer_difference",
+        "corner_threshold",
+        "length_threshold",
+        "max_iterations",
+        "splice_threshold",
         "path_precision",
       ];
 
       for (const option of validOptions) {
-          if(opts[option]){
-            args.push(`--${option}`, opts[option]);
-          }
+        if (opts[option] !== undefined) {
+          args.push(`--${option}`, String(opts[option]));
+        }
       }
     }
 
     execFile("vtracer", args, (error, stdout, stderr) => {
-      if(error){
-        reject(`error: ${error}${stderr ? `\nstderr: ${stderr}` : ''}`)
+      if (error) {
+        reject(`error: ${error}${stderr ? `\nstderr: ${stderr}` : ""}`);
         return;
       }
 
-      if(stdout){
-        console.log(`stdout: ${stdout}`)
+      if (stdout) {
+        console.log(`stdout: ${stdout}`);
       }
 
-      if(stderr){
-        console.log(`stderr: ${stderr}`)
+      if (stderr) {
+        console.log(`stderr: ${stderr}`);
       }
 
       resolve("Done");
