@@ -1,5 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["tests/**/*.test.ts"],
   "project": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts"],
   "tailwind": {
     "entry": ["src/main.css"]
