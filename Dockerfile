@@ -54,6 +54,7 @@ RUN apt-get update && apt-get install -y \
   graphicsmagick \
   imagemagick-7.q16 \
   inkscape \
+  latexmk \
   libheif-examples \
   libjxl-tools \
   libreoffice \
