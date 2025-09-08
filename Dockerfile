@@ -47,6 +47,7 @@ FROM base AS release
 RUN apt-get update && apt-get install -y \
   assimp-utils \
   calibre \
+  dasel \
   dcraw \
   dvisvgm \
   ffmpeg \
