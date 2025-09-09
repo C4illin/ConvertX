@@ -1,3 +1,4 @@
+import fs from "fs";
 import { execFile as execFileOriginal } from "node:child_process";
 import { ExecFileFn } from "./types";
 
@@ -24,7 +25,6 @@ export async function convert(
   args.push("--read", fileType);
   args.push("--write", convertTo);
 
-  const fs = require("fs");
   return new Promise((resolve, reject) => {
     execFile("dasel", args, (error, stdout, stderr) => {
       if (error) {
