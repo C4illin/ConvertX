@@ -84,6 +84,16 @@ if (process.env.NODE_ENV === "production") {
     }
   });
 
+  exec("dasel --version", (error, stdout) => {
+    if (error) {
+      console.error("dasel is not installed.");
+    }
+
+    if (stdout) {
+      console.log(stdout.split("\n")[0]);
+    }
+  });
+
   exec("xelatex -version", (error, stdout) => {
     if (error) {
       console.error("Tex Live with XeTeX is not installed.");
