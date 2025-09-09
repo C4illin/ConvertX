@@ -3,21 +3,10 @@ import { ExecFileFn } from "./types";
 
 export const properties = {
   from: {
-    document: [
-      "yaml",
-      "toml",
-      "json",
-      "xml",
-      "csv",
-    ],
+    document: ["yaml", "toml", "json", "xml", "csv"],
   },
   to: {
-    document: [
-      "yaml",
-      "toml",
-      "json",
-      "csv"
-    ],
+    document: ["yaml", "toml", "json", "csv"],
   },
 };
 
