@@ -91,7 +91,7 @@ RUN ARCH=$(uname -m) && \
   rm /tmp/vtracer.tar.gz
 
 COPY --from=install /temp/prod/node_modules node_modules
-COPY --from=prerelease /app/public/generated.css /app/public/
+COPY --from=prerelease /app/public/ /app/public/
 COPY --from=prerelease /app/dist /app/dist
 
 # COPY . .
