@@ -8,16 +8,7 @@ import { userService } from "./user";
 
 export const listConverters = new Elysia()
   .use(userService)
-  .get("/converters", async ({ jwt, redirect, cookie: { auth } }) => {
-    if (!auth?.value) {
-      return redirect(`${WEBROOT}/login`, 302);
-    }
-
-    const user = await jwt.verify(auth.value);
-    if (!user) {
-      return redirect(`${WEBROOT}/login`, 302);
-    }
-
+  .get("/converters", async () => {
     return (
       <BaseHtml webroot={WEBROOT} title="ConvertX | Converters">
         <>
@@ -77,4 +68,6 @@ export const listConverters = new Elysia()
         </>
       </BaseHtml>
     );
+  }, {
+    auth: true
   });

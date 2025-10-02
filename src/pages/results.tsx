@@ -136,19 +136,10 @@ function ResultsArticle({
 
 export const results = new Elysia()
   .use(userService)
-  .get("/results/:jobId", async ({ params, jwt, set, redirect, cookie: { auth, job_id } }) => {
-    if (!auth?.value) {
-      return redirect(`${WEBROOT}/login`, 302);
-    }
-
+  .get("/results/:jobId", async ({ params, jwt, set, redirect, cookie: { job_id }, user }) => {
     if (job_id?.value) {
-      // clear the job_id cookie since we are viewing the results
+      // Clear the job_id cookie since we are viewing the results
       job_id.remove();
-    }
-
-    const user = await jwt.verify(auth.value);
-    if (!user) {
-      return redirect(`${WEBROOT}/login`, 302);
     }
 
     const job = db
@@ -186,20 +177,11 @@ export const results = new Elysia()
         </>
       </BaseHtml>
     );
-  })
-  .post("/progress/:jobId", async ({ jwt, set, params, redirect, cookie: { auth, job_id } }) => {
-    if (!auth?.value) {
-      return redirect(`${WEBROOT}/login`, 302);
-    }
-
+  }, { auth: true })
+  .post("/progress/:jobId", async ({ jwt, set, params, cookie: { job_id }, user }) => {
     if (job_id?.value) {
-      // clear the job_id cookie since we are viewing the results
+      // Clear the job_id cookie since we are viewing the results
       job_id.remove();
-    }
-
-    const user = await jwt.verify(auth.value);
-    if (!user) {
-      return redirect(`${WEBROOT}/login`, 302);
     }
 
     const job = db
@@ -222,4 +204,4 @@ export const results = new Elysia()
       .all(params.jobId);
 
     return <ResultsArticle user={user} job={job} files={files} outputPath={outputPath} />;
-  });
+  }, { auth: true });

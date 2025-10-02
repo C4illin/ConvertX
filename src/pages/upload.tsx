@@ -6,16 +6,7 @@ import { userService } from "./user";
 
 export const upload = new Elysia().use(userService).post(
   "/upload",
-  async ({ body, redirect, jwt, cookie: { auth, jobId } }) => {
-    if (!auth?.value) {
-      return redirect(`${WEBROOT}/login`, 302);
-    }
-
-    const user = await jwt.verify(auth.value);
-    if (!user) {
-      return redirect(`${WEBROOT}/login`, 302);
-    }
-
+  async ({ body, redirect, user, cookie: { jobId } }) => {
     if (!jobId?.value) {
       return redirect(`${WEBROOT}/`, 302);
     }
@@ -44,5 +35,5 @@ export const upload = new Elysia().use(userService).post(
       message: "Files uploaded successfully.",
     };
   },
-  { body: t.Object({ file: t.Files() }) },
+  { body: t.Object({ file: t.Files() }), auth: true },
 );

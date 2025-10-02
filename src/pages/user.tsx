@@ -32,28 +32,37 @@ export const userService = new Elysia({ name: "user/service" })
       email: t.String(),
       password: t.String(),
     }),
+    session: t.Cookie({
+      auth: t.String(),
+      jobId: t.Optional(t.String()),
+    }),
+    optionalSession: t.Cookie({
+      auth: t.Optional(t.String()),
+      jobId: t.Optional(t.String()),
+    })
   })
-  .macro({
-    isSignIn(enabled: boolean) {
-      if (!enabled) return;
-
+  .macro("auth", {
+    cookie: "session", async resolve({
+      status, jwt, cookie: { auth }
+    }) {
+      if (!auth.value) {
+        return status(401, {
+          success: false,
+          message: 'Unauthorized'
+        })
+      }
+      const user = await jwt.verify(auth.value);
+      if (!user) {
+        return status(401, {
+          success: false,
+          message: 'Unauthorized'
+        })
+      }
       return {
-        async beforeHandle({ status, jwt, cookie: { auth } }) {
-          if (auth?.value) {
-            const user = await jwt.verify(auth.value);
-            return {
-              success: true,
-              user,
-            };
-          }
-
-          return status(401, {
-            success: false,
-            message: "Unauthorized",
-          });
-        },
+        success: true,
+        user
       };
-    },
+    }
   });
 
 export const user = new Elysia()
@@ -303,7 +312,8 @@ export const user = new Elysia()
         </>
       </BaseHtml>
     );
-  })
+  }, { body: "signIn", cookie: "optionalSession" }
+  )
   .post(
     "/login",
     async function handler({ body, set, redirect, jwt, cookie: { auth } }) {
@@ -363,11 +373,7 @@ export const user = new Elysia()
 
     return redirect(`${WEBROOT}/login`, 302);
   })
-  .get("/account", async ({ jwt, redirect, cookie: { auth } }) => {
-    if (!auth?.value) {
-      return redirect(`${WEBROOT}/`);
-    }
-    const user = await jwt.verify(auth.value);
+  .get("/account", async ({ user, redirect }) => {
 
     if (!user) {
       return redirect(`${WEBROOT}/`, 302);
@@ -441,6 +447,8 @@ export const user = new Elysia()
         </>
       </BaseHtml>
     );
+  }, {
+    auth: true
   })
   .post(
     "/account",
@@ -505,5 +513,6 @@ export const user = new Elysia()
         newPassword: t.MaybeEmpty(t.String()),
         password: t.String(),
       }),
+      cookie: "session"
     },
   );

@@ -1,7 +1,7 @@
 import { randomInt } from "node:crypto";
 import { Html } from "@elysiajs/html";
 import { JWTPayloadSpec } from "@elysiajs/jwt";
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import { getAllTargets } from "../converters/main";
@@ -65,7 +65,7 @@ export const root = new Elysia()
         user.id &&
         (Number.parseInt(user.id) < 2 ** 24 || !ALLOW_UNAUTHENTICATED)
       ) {
-        // make sure user exists in db
+        // Make sure user exists in db
         const existingUser = db.query("SELECT * FROM users WHERE id = ?").as(User).get(user.id);
 
         if (!existingUser) {
@@ -240,4 +240,9 @@ export const root = new Elysia()
         </>
       </BaseHtml>
     );
+  }, {
+    cookie: t.Cookie({
+      auth: t.Optional(t.String()),
+      jobId: t.Optional(t.String()),
+    })
   });

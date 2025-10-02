@@ -74,7 +74,7 @@ export const convert = new Elysia().use(userService).post(
           db.query("UPDATE jobs SET status = 'completed' WHERE id = ?1").run(jobId.value);
         }
 
-        // delete all uploaded files in userUploadsDir
+        // Delete all uploaded files in userUploadsDir
         // rmSync(userUploadsDir, { recursive: true, force: true });
       })
       .catch((error) => {
@@ -89,5 +89,6 @@ export const convert = new Elysia().use(userService).post(
       convert_to: t.String(),
       file_names: t.String(),
     }),
+    auth: true,
   },
 );

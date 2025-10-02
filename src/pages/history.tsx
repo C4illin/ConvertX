@@ -9,15 +9,10 @@ import { userService } from "./user";
 
 export const history = new Elysia()
   .use(userService)
-  .get("/history", async ({ jwt, redirect, cookie: { auth } }) => {
+  .get("/history", async ({ jwt, redirect, user }) => {
     if (HIDE_HISTORY) {
       return redirect(`${WEBROOT}/`, 302);
     }
-
-    if (!auth?.value) {
-      return redirect(`${WEBROOT}/login`, 302);
-    }
-    const user = await jwt.verify(auth.value);
 
     if (!user) {
       return redirect(`${WEBROOT}/login`, 302);
@@ -32,7 +27,7 @@ export const history = new Elysia()
       job.files_detailed = files;
     }
 
-    // filter out jobs with no files
+    // Filter out jobs with no files
     userJobs = userJobs.filter((job) => job.num_files > 0);
 
     return (
@@ -213,4 +208,6 @@ export const history = new Elysia()
         </>
       </BaseHtml>
     );
+  }, {
+    auth: true
   });

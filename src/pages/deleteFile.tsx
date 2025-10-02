@@ -7,16 +7,7 @@ import { userService } from "./user";
 
 export const deleteFile = new Elysia().use(userService).post(
   "/delete",
-  async ({ body, redirect, jwt, cookie: { auth, jobId } }) => {
-    if (!auth?.value) {
-      return redirect(`${WEBROOT}/login`, 302);
-    }
-
-    const user = await jwt.verify(auth.value);
-    if (!user) {
-      return redirect(`${WEBROOT}/login`, 302);
-    }
-
+  async ({ body, redirect, cookie: { jobId }, user }) => {
     if (!jobId?.value) {
       return redirect(`${WEBROOT}/`, 302);
     }
@@ -37,5 +28,5 @@ export const deleteFile = new Elysia().use(userService).post(
       message: "File deleted successfully.",
     };
   },
-  { body: t.Object({ filename: t.String() }) },
+  { body: t.Object({ filename: t.String() }), auth: true },
 );
