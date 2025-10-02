@@ -16,13 +16,13 @@
     "lint:prettier": "prettier --check ."
   },
   "dependencies": {
-    "@elysiajs/html": "^1.3.1",
-    "@elysiajs/jwt": "^1.3.2",
-    "@elysiajs/static": "^1.3.0",
-    "@kitajs/html": "^4.2.9",
-    "elysia": "^1.3.8",
+    "@elysiajs/html": "^1.4.0",
+    "@elysiajs/jwt": "^1.4.0",
+    "@elysiajs/static": "^1.4.0",
+    "@kitajs/html": "^4.2.10",
+    "elysia": "^1.4.8",
     "sanitize-filename": "^1.6.3",
-    "tar": "^7.4.3"
+    "tar": "^7.5.1"
   },
   "module": "src/index.tsx",
   "type": "module",
@@ -30,30 +30,32 @@
     "start": "bun run src/index.tsx"
   },
   "devDependencies": {
-    "@eslint/js": "^9.33.0",
-    "@ianvs/prettier-plugin-sort-imports": "^4.6.2",
-    "@kitajs/ts-html-plugin": "^4.1.2",
-    "@tailwindcss/cli": "^4.1.11",
-    "@tailwindcss/postcss": "^4.1.11",
+    "@eslint/js": "^9.36.0",
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
+    "@kitajs/ts-html-plugin": "^4.1.3",
+    "@tailwindcss/cli": "^4.1.13",
+    "@tailwindcss/postcss": "^4.1.13",
     "@total-typescript/ts-reset": "^0.6.1",
     "@types/bun": "latest",
-    "@types/node": "^24.2.1",
-    "@typescript-eslint/parser": "^8.39.1",
-    "eslint": "^9.33.0",
-    "eslint-plugin-better-tailwindcss": "^3.7.4",
+    "@types/node": "^24.5.2",
+    "@types/tar": "^6.1.13",
+    "@typescript-eslint/parser": "^8.44.1",
+    "eslint": "^9.36.0",
+    "eslint-plugin-better-tailwindcss": "^3.7.9",
     "eslint-plugin-simple-import-sort": "^12.1.1",
-    "globals": "^16.3.0",
-    "knip": "^5.62.0",
+    "globals": "^16.4.0",
+    "knip": "^5.64.1",
     "npm-run-all2": "^8.0.4",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
     "tailwind-scrollbar": "^4.0.2",
-    "tailwindcss": "^4.1.11",
+    "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.39.1"
+    "typescript-eslint": "^8.44.1"
   },
   "trustedDependencies": [
     "@parcel/watcher",
-    "@tailwindcss/oxide"
+    "@tailwindcss/oxide",
+    "oxc-resolver"
   ]
 }
