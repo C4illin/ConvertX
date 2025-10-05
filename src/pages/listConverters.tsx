@@ -6,9 +6,9 @@ import { getAllInputs, getAllTargets } from "../converters/main";
 import { ALLOW_UNAUTHENTICATED, WEBROOT } from "../helpers/env";
 import { userService } from "./user";
 
-export const listConverters = new Elysia()
-  .use(userService)
-  .get("/converters", async () => {
+export const listConverters = new Elysia().use(userService).get(
+  "/converters",
+  async () => {
     return (
       <BaseHtml webroot={WEBROOT} title="ConvertX | Converters">
         <>
@@ -68,6 +68,8 @@ export const listConverters = new Elysia()
         </>
       </BaseHtml>
     );
-  }, {
-    auth: true
-  });
+  },
+  {
+    auth: true,
+  },
+);

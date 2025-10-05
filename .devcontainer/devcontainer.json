@@ -1,8 +1,7 @@
 {
   "name": "ConvertX Development Environment",
   "build": {
-    "dockerfile": "Dockerfile",
-    "context": ".."
+    "dockerfile": "Dockerfile"
   },
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
@@ -44,14 +43,7 @@
       "onAutoForward": "notify"
     }
   },
-  // "postCreateCommand": "bun install && bun run dev",
+  "postCreateCommand": "bun install",
   "remoteUser": "root",
-  "mounts": [
-    "source=${localWorkspaceFolder}/data,target=/app/data,type=bind",
-    "source=${localWorkspaceFolder}/src,target=/app/src,type=bind"
-  ],
-  "containerEnv": {
-    "NODE_ENV": "development",
-    "QTWEBENGINE_CHROMIUM_FLAGS": "--no-sandbox"
-  }
+  "mounts": ["source=${localWorkspaceFolder}/data,target=/app/data,type=bind"]
 }

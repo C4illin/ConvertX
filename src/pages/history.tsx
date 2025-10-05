@@ -7,9 +7,9 @@ import { Filename, Jobs } from "../db/types";
 import { ALLOW_UNAUTHENTICATED, HIDE_HISTORY, LANGUAGE, WEBROOT } from "../helpers/env";
 import { userService } from "./user";
 
-export const history = new Elysia()
-  .use(userService)
-  .get("/history", async ({ jwt, redirect, user }) => {
+export const history = new Elysia().use(userService).get(
+  "/history",
+  async ({ redirect, user }) => {
     if (HIDE_HISTORY) {
       return redirect(`${WEBROOT}/`, 302);
     }
@@ -208,6 +208,8 @@ export const history = new Elysia()
         </>
       </BaseHtml>
     );
-  }, {
-    auth: true
-  });
+  },
+  {
+    auth: true,
+  },
+);

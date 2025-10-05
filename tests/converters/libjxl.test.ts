@@ -1,5 +1,5 @@
-import type { ExecFileException } from "node:child_process";
 import { beforeEach, expect, test } from "bun:test";
+import type { ExecFileException } from "node:child_process";
 import { convert } from "../../src/converters/libjxl";
 import { ExecFileFn } from "../../src/converters/types";
 import { runCommonTests } from "./helpers/commonTests";

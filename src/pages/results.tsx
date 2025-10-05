@@ -136,72 +136,80 @@ function ResultsArticle({
 
 export const results = new Elysia()
   .use(userService)
-  .get("/results/:jobId", async ({ params, jwt, set, redirect, cookie: { job_id }, user }) => {
-    if (job_id?.value) {
-      // Clear the job_id cookie since we are viewing the results
-      job_id.remove();
-    }
+  .get(
+    "/results/:jobId",
+    async ({ params, set, cookie: { job_id }, user }) => {
+      if (job_id?.value) {
+        // Clear the job_id cookie since we are viewing the results
+        job_id.remove();
+      }
 
-    const job = db
-      .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
-      .as(Jobs)
-      .get(user.id, params.jobId);
+      const job = db
+        .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
+        .as(Jobs)
+        .get(user.id, params.jobId);
 
-    if (!job) {
-      set.status = 404;
-      return {
-        message: "Job not found.",
-      };
-    }
+      if (!job) {
+        set.status = 404;
+        return {
+          message: "Job not found.",
+        };
+      }
 
-    const outputPath = `${user.id}/${params.jobId}/`;
+      const outputPath = `${user.id}/${params.jobId}/`;
 
-    const files = db
-      .query("SELECT * FROM file_names WHERE job_id = ?")
-      .as(Filename)
-      .all(params.jobId);
+      const files = db
+        .query("SELECT * FROM file_names WHERE job_id = ?")
+        .as(Filename)
+        .all(params.jobId);
 
-    return (
-      <BaseHtml webroot={WEBROOT} title="ConvertX | Result">
-        <>
-          <Header webroot={WEBROOT} allowUnauthenticated={ALLOW_UNAUTHENTICATED} loggedIn />
-          <main
-            class={`
+      return (
+        <BaseHtml webroot={WEBROOT} title="ConvertX | Result">
+          <>
+            <Header webroot={WEBROOT} allowUnauthenticated={ALLOW_UNAUTHENTICATED} loggedIn />
+            <main
+              class={`
               w-full flex-1 px-2
               sm:px-4
             `}
-          >
-            <ResultsArticle user={user} job={job} files={files} outputPath={outputPath} />
-          </main>
-          <script src={`${WEBROOT}/results.js`} defer />
-        </>
-      </BaseHtml>
-    );
-  }, { auth: true })
-  .post("/progress/:jobId", async ({ jwt, set, params, cookie: { job_id }, user }) => {
-    if (job_id?.value) {
-      // Clear the job_id cookie since we are viewing the results
-      job_id.remove();
-    }
+            >
+              <ResultsArticle user={user} job={job} files={files} outputPath={outputPath} />
+            </main>
+            <script src={`${WEBROOT}/results.js`} defer />
+          </>
+        </BaseHtml>
+      );
+    },
+    { auth: true },
+  )
+  .post(
+    "/progress/:jobId",
+    async ({ set, params, cookie: { job_id }, user }) => {
+      if (job_id?.value) {
+        // Clear the job_id cookie since we are viewing the results
+        job_id.remove();
+      }
 
-    const job = db
-      .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
-      .as(Jobs)
-      .get(user.id, params.jobId);
+      const job = db
+        .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
+        .as(Jobs)
+        .get(user.id, params.jobId);
 
-    if (!job) {
-      set.status = 404;
-      return {
-        message: "Job not found.",
-      };
-    }
+      if (!job) {
+        set.status = 404;
+        return {
+          message: "Job not found.",
+        };
+      }
 
-    const outputPath = `${user.id}/${params.jobId}/`;
+      const outputPath = `${user.id}/${params.jobId}/`;
 
-    const files = db
-      .query("SELECT * FROM file_names WHERE job_id = ?")
-      .as(Filename)
-      .all(params.jobId);
+      const files = db
+        .query("SELECT * FROM file_names WHERE job_id = ?")
+        .as(Filename)
+        .all(params.jobId);
 
-    return <ResultsArticle user={user} job={job} files={files} outputPath={outputPath} />;
-  }, { auth: true });
+      return <ResultsArticle user={user} job={job} files={files} outputPath={outputPath} />;
+    },
+    { auth: true },
+  );

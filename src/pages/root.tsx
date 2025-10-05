@@ -17,9 +17,9 @@ import {
 } from "../helpers/env";
 import { FIRST_RUN, userService } from "./user";
 
-export const root = new Elysia()
-  .use(userService)
-  .get("/", async ({ jwt, redirect, cookie: { auth, jobId } }) => {
+export const root = new Elysia().use(userService).get(
+  "/",
+  async ({ jwt, redirect, cookie: { auth, jobId } }) => {
     if (!ALLOW_UNAUTHENTICATED) {
       if (FIRST_RUN) {
         return redirect(`${WEBROOT}/setup`, 302);
@@ -240,9 +240,11 @@ export const root = new Elysia()
         </>
       </BaseHtml>
     );
-  }, {
+  },
+  {
     cookie: t.Cookie({
       auth: t.Optional(t.String()),
       jobId: t.Optional(t.String()),
-    })
-  });
+    }),
+  },
+);

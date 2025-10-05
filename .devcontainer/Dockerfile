@@ -1,21 +1,13 @@
-# Development Dockerfile for ConvertX
 FROM debian:trixie-slim
-
-LABEL org.opencontainers.image.source="https://github.com/C4illin/ConvertX"
-LABEL description="Development environment for ConvertX with all tools and dependencies"
 
 WORKDIR /app
 
-# Install system dependencies and development tools
 RUN apt-get update && apt-get install -y \
-  # Basic tools
   curl \
   unzip \
   git \
   ca-certificates \
-  # Build tools
   build-essential \
-  # ConvertX runtime dependencies
   assimp-utils \
   calibre \
   dasel \
@@ -48,7 +40,6 @@ RUN apt-get update && apt-get install -y \
   --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
-# Install Bun (JavaScript runtime and package manager)
 RUN ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
   curl -fsSL -o bun-linux-aarch64.zip https://github.com/oven-sh/bun/releases/download/bun-v1.2.2/bun-linux-aarch64.zip; \
@@ -59,7 +50,6 @@ RUN ARCH=$(uname -m) && \
   rm bun-linux-*.zip && \
   chmod +x /usr/local/bin/bun
 
-# Install VTracer binary for vector tracing
 RUN ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
   VTRACER_ASSET="vtracer-aarch64-unknown-linux-musl.tar.gz"; \
@@ -72,15 +62,8 @@ RUN ARCH=$(uname -m) && \
   chmod +x /usr/local/bin/vtracer && \
   rm /tmp/vtracer.tar.gz
 
-# Create data directory for development
 RUN mkdir -p data
-
-# Set environment variables for development
 ENV NODE_ENV=development
 ENV QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox"
-
-# Expose the development port
 EXPOSE 3000
-
-# Default command for development
 CMD ["bun", "run", "dev"]

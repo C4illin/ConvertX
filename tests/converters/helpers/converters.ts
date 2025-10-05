@@ -1,5 +1,5 @@
-import type { ExecFileException } from "node:child_process";
 import { expect } from "bun:test";
+import type { ExecFileException } from "node:child_process";
 import { ConvertFnWithExecFile, ExecFileFn } from "../../../src/converters/types";
 
 export async function runConvertSuccessTest(convertFn: ConvertFnWithExecFile) {
