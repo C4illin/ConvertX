@@ -15,7 +15,8 @@
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
         "ms-vscode.vscode-json",
-        "ms-vscode.vscode-docker"
+        "ms-vscode.vscode-docker",
+        "oven.bun-vscode"
       ],
       "settings": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
