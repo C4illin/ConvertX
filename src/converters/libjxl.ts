@@ -8,7 +8,7 @@ export const properties = {
     images: ["apng", "exr", "gif", "jpeg", "pam", "pfm", "pgm", "pgx", "png", "ppm"],
   },
   to: {
-    jxl: ["apng", "exr", "gif", "jpeg", "pam", "pfm", "pgm", "pgx", "png", "ppm"],
+    jxl: ["apng", "exr", "jpeg", "pam", "pfm", "pgm", "pgx", "png", "ppm"],
     images: ["jxl"],
   },
 };
