@@ -265,9 +265,9 @@ export const user = new Elysia()
             />
             <main
               class={`
-              w-full flex-1 px-2
-              sm:px-4
-            `}
+                w-full flex-1 px-2
+                sm:px-4
+              `}
             >
               <article class="article">
                 <form method="post" class="flex flex-col gap-4">
@@ -400,9 +400,9 @@ export const user = new Elysia()
             />
             <main
               class={`
-              w-full flex-1 px-2
-              sm:px-4
-            `}
+                w-full flex-1 px-2
+                sm:px-4
+              `}
             >
               <article class="article">
                 <form method="post" class="flex flex-col gap-4">

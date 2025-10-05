@@ -169,9 +169,9 @@ export const results = new Elysia()
             <Header webroot={WEBROOT} allowUnauthenticated={ALLOW_UNAUTHENTICATED} loggedIn />
             <main
               class={`
-              w-full flex-1 px-2
-              sm:px-4
-            `}
+                w-full flex-1 px-2
+                sm:px-4
+              `}
             >
               <ResultsArticle user={user} job={job} files={files} outputPath={outputPath} />
             </main>
