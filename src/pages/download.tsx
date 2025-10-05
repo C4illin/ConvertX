@@ -1,5 +1,5 @@
 import path from "node:path";
-import { Elysia, t } from 'elysia'
+import { Elysia } from "elysia";
 import sanitize from "sanitize-filename";
 import * as tar from "tar";
 import { outputDir } from "..";
@@ -29,33 +29,37 @@ export const download = new Elysia()
     },
     {
       auth: true,
-    }
+    },
   )
-  .get("/archive/:userId/:jobId", async ({ params, redirect, user }) => {
-    const job = await db
-      .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
-      .get(user.id, params.jobId);
+  .get(
+    "/archive/:userId/:jobId",
+    async ({ params, redirect, user }) => {
+      const job = await db
+        .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
+        .get(user.id, params.jobId);
 
-    if (!job) {
-      return redirect(`${WEBROOT}/results`, 302);
-    }
+      if (!job) {
+        return redirect(`${WEBROOT}/results`, 302);
+      }
 
-    const userId = decodeURIComponent(params.userId);
-    const jobId = decodeURIComponent(params.jobId);
-    const outputPath = `${outputDir}${userId}/${jobId}`;
-    const outputTar = path.join(outputPath, `converted_files_${jobId}.tar`);
+      const userId = decodeURIComponent(params.userId);
+      const jobId = decodeURIComponent(params.jobId);
+      const outputPath = `${outputDir}${userId}/${jobId}`;
+      const outputTar = path.join(outputPath, `converted_files_${jobId}.tar`);
 
-    await tar.create(
-      {
-        file: outputTar,
-        cwd: outputPath,
-        filter: (path) => {
-          return !path.match(".*\\.tar");
+      await tar.create(
+        {
+          file: outputTar,
+          cwd: outputPath,
+          filter: (path) => {
+            return !path.match(".*\\.tar");
+          },
         },
-      },
-      ["."],
-    );
-    return Bun.file(outputTar);
-  }, {
-    auth: true,
-  });
+        ["."],
+      );
+      return Bun.file(outputTar);
+    },
+    {
+      auth: true,
+    },
+  );
