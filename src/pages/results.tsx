@@ -1,4 +1,3 @@
-import { Html } from "@elysiajs/html";
 import { JWTPayloadSpec } from "@elysiajs/jwt";
 import { Elysia } from "elysia";
 import { BaseHtml } from "../components/base";
@@ -6,6 +5,8 @@ import { Header } from "../components/header";
 import db from "../db/db";
 import { Filename, Jobs } from "../db/types";
 import { ALLOW_UNAUTHENTICATED, WEBROOT } from "../helpers/env";
+import { DownloadIcon } from "../icons/download";
+import { EyeIcon } from "../icons/eye";
 import { userService } from "./user";
 
 function ResultsArticle({
@@ -25,25 +26,24 @@ function ResultsArticle({
     <article class="article">
       <div class="mb-4 flex items-center justify-between">
         <h1 class="text-xl">Results</h1>
-        <div>
+        <div class="flex flex-row gap-4">
           <a
             style={files.length !== job.num_files ? "pointer-events: none;" : ""}
             href={`${WEBROOT}/archive/${user.id}/${job.id}`}
             download={`converted_files_${job.id}.tar`}
+            class="flex btn-primary flex-row gap-2 text-contrast"
+            {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
           >
-            <button
-              type="button"
-              class="float-right w-40 btn-primary"
-              {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
-            >
-              {files.length === job.num_files ? "Download All" : "Converting..."}
-            </button>
+            <DownloadIcon /> <p>Tar</p>
           </a>
+          <button class="flex btn-primary flex-row gap-2 text-contrast" onclick="downloadAll()">
+            <DownloadIcon /> <p>All</p>
+          </button>
         </div>
       </div>
       <progress
         max={job.num_files}
-        value={files.length}
+        {...(files.length === job.num_files ? { value: files.length } : "")}
         class={`
           mb-4 inline-block h-2 w-full appearance-none overflow-hidden rounded-full border-0
           bg-neutral-700 bg-none text-accent-500 accent-accent-500
@@ -84,15 +84,7 @@ function ResultsArticle({
                 sm:px-4
               `}
             >
-              View
-            </th>
-            <th
-              class={`
-                px-2 py-2
-                sm:px-4
-              `}
-            >
-              Download
+              Actions
             </th>
           </tr>
         </thead>
@@ -103,7 +95,7 @@ function ResultsArticle({
                 {file.output_file_name}
               </td>
               <td safe>{file.status}</td>
-              <td>
+              <td class="flex flex-row gap-4">
                 <a
                   class={`
                     text-accent-500 underline
@@ -111,10 +103,8 @@ function ResultsArticle({
                   `}
                   href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
                 >
-                  View
+                  <EyeIcon />
                 </a>
-              </td>
-              <td>
                 <a
                   class={`
                     text-accent-500 underline
@@ -123,7 +113,7 @@ function ResultsArticle({
                   href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
                   download={file.output_file_name}
                 >
-                  Download
+                  <DownloadIcon />
                 </a>
               </td>
             </tr>

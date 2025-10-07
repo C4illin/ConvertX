@@ -1,4 +1,3 @@
-import { Html } from "@elysiajs/html";
 import Elysia from "elysia";
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";

@@ -1,5 +1,5 @@
 {
-  "name": "ConvertX Development Environment",
+  "name": "ConvertX",
   "build": {
     "dockerfile": "Dockerfile"
   },
@@ -46,5 +46,8 @@
   },
   "postCreateCommand": "bun install",
   "remoteUser": "root",
-  "mounts": ["source=${localWorkspaceFolder}/data,target=/app/data,type=bind"]
+  "mounts": ["source=${localWorkspaceFolder}/data,target=/app/data,type=bind"],
+  "containerEnv": {
+    "JWT_SECRET": "jwt_secret_only_used_in_testing_for_easier_hot_reloading"
+  }
 }

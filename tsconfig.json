@@ -12,9 +12,8 @@
     "strict": true,
     "downlevelIteration": true,
     "skipLibCheck": true,
-    "jsx": "react",
-    "jsxFactory": "Html.createElement",
-    "jsxFragmentFactory": "Html.Fragment",
+    "jsx": "react-jsx",
+    "jsxImportSource": "@kitajs/html",
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
@@ -30,5 +29,5 @@
     "esModuleInterop": true
     // "noImplicitReturns": true
   },
-  "include": ["src", "tests", "package.json", "reset.d.ts"]
+  "include": ["src", "tests", "package.json"]
 }

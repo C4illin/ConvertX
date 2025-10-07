@@ -1,5 +1,5 @@
-import type { ExecFileException } from "node:child_process";
 import { expect, test } from "bun:test";
+import type { ExecFileException } from "node:child_process";
 import { convert } from "../../src/converters/msgconvert";
 import { ExecFileFn } from "../../src/converters/types";
 

@@ -1,5 +1,4 @@
 import { randomUUID } from "node:crypto";
-import { Html } from "@elysiajs/html";
 import { jwt } from "@elysiajs/jwt";
 import { Elysia, t } from "elysia";
 import { BaseHtml } from "../components/base";

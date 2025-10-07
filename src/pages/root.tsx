@@ -1,5 +1,4 @@
 import { randomInt } from "node:crypto";
-import { Html } from "@elysiajs/html";
 import { JWTPayloadSpec } from "@elysiajs/jwt";
 import { Elysia, t } from "elysia";
 import { BaseHtml } from "../components/base";
