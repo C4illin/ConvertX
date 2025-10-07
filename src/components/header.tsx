@@ -1,5 +1,3 @@
-import { Html } from "@kitajs/html";
-
 export const Header = ({
   loggedIn,
   accountRegistration,

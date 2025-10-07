@@ -1,4 +1,3 @@
-import { Html } from "@elysiajs/html";
 import { version } from "../../package.json";
 
 export const BaseHtml = ({
