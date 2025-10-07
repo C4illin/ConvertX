@@ -1,0 +1,20 @@
+on:
+  pull_request_target:
+    types: [ opened, edited ]
+name: conventional-release-labels
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: bcoe/conventional-release-labels@v1
+        with:
+        type_labels: |
+          {
+            "feat": "Feature",
+            "fix": "Fix",
+            "breaking": "Breaking",
+            "chore": "Chore",
+            "docs": "Docs",
+            "test": "Test",
+            "ci": "CI",
+          }

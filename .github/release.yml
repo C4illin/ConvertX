@@ -2,7 +2,19 @@ changelog:
   exclude:
     authors:
       - renovate[bot]
-  categories:
+    categories:
+    - title: Features
+      labels:
+        - feature
+    - title: Bug Fixes
+      labels:
+        - fix
+    - title: Miscellaneous Chores
+      labels:
+        - chore
+        - ci
+        - docs
+        - test
     - title: Other Changes
       labels:
         - "*"
