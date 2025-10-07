@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.15.0](https://github.com/C4illin/ConvertX/compare/v0.14.1...v0.15.0) (2025-10-07)
+
+
+### Features
+
+* add download all file by file alongside the tar download ([#415](https://github.com/C4illin/ConvertX/issues/415)) ([3e7e95b](https://github.com/C4illin/ConvertX/commit/3e7e95b53c78469f4aada996e835fcc6b9fde134))
+* vtracer implemented and added docker file binaries install ([76c840d](https://github.com/C4illin/ConvertX/commit/76c840dbaa4a26d0623422b61581bb761ad6a6bc))
+
+
+### Bug Fixes
+
+* add language env ([f789d9d](https://github.com/C4illin/ConvertX/commit/f789d9dfe381780dcc715b70bcf304d570a73e3f))
+* add lmodern ([761f56b](https://github.com/C4illin/ConvertX/commit/761f56b869d3a4faa7550d90b3da2d853baf8a1d)), closes [#320](https://github.com/C4illin/ConvertX/issues/320)
+* missing public files ([8a888cc](https://github.com/C4illin/ConvertX/commit/8a888ccda679a31f801855e37800f52f1a1fda6e)), closes [#314](https://github.com/C4illin/ConvertX/issues/314)
+* move color variables to seperate directory ([3bf82b5](https://github.com/C4illin/ConvertX/commit/3bf82b5b86177f95531293cab1dfee1e12c898a1)), closes [#53](https://github.com/C4illin/ConvertX/issues/53)
+* run qtwebengine without sandbox ([9f2bdad](https://github.com/C4illin/ConvertX/commit/9f2bdadde779d88973296e81af103ed0016f5411))
+* update favicon ([827f22e](https://github.com/C4illin/ConvertX/commit/827f22e2fc33bf32a02befb3c5bd519511826b38)), closes [#158](https://github.com/C4illin/ConvertX/issues/158)
+
 ## [0.14.1](https://github.com/C4illin/ConvertX/compare/v0.14.0...v0.14.1) (2025-06-04)
 
 ### Bug Fixes
