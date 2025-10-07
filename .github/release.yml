@@ -1,0 +1,8 @@
+changelog:
+  exclude:
+    authors:
+      - renovate[bot]
+  categories:
+    - title: Other Changes
+      labels:
+        - "*"
