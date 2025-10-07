@@ -5,5 +5,5 @@
     "enabled": true,
     "automerge": true
   },
-  "ignoreDeps": ["bun-types", "@types/bun"]
+  "ignoreDeps": ["bun-types", "@types/bun", "bun", "Bun"]
 }
