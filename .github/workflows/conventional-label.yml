@@ -16,5 +16,5 @@ jobs:
               "chore": "Chore",
               "docs": "Docs",
               "test": "Test",
-              "ci": "CI",
+              "ci": "CI"
             }
