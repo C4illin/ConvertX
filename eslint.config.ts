@@ -1,7 +1,6 @@
 import js from "@eslint/js";
 import eslintParserTypeScript from "@typescript-eslint/parser";
 import eslintPluginBetterTailwindcss from "eslint-plugin-better-tailwindcss";
-import simpleImportSortPlugin from "eslint-plugin-simple-import-sort";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
@@ -10,7 +9,6 @@ export default tseslint.config(
   tseslint.configs.recommended,
   {
     plugins: {
-      "simple-import-sort": simpleImportSortPlugin,
       "better-tailwindcss": eslintPluginBetterTailwindcss,
     },
     ignores: ["**/node_modules/**", "eslint.config.ts"],

@@ -40,7 +40,6 @@
     "@typescript-eslint/parser": "^8.45.0",
     "eslint": "^9.37.0",
     "eslint-plugin-better-tailwindcss": "^3.7.9",
-    "eslint-plugin-simple-import-sort": "^12.1.1",
     "globals": "^16.4.0",
     "knip": "^5.64.1",
     "npm-run-all2": "^8.0.4",
