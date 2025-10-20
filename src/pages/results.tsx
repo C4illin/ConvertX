@@ -6,6 +6,7 @@ import db from "../db/db";
 import { Filename, Jobs } from "../db/types";
 import { ALLOW_UNAUTHENTICATED, WEBROOT } from "../helpers/env";
 import { DownloadIcon } from "../icons/download";
+import { DeleteIcon } from "../icons/delete";
 import { EyeIcon } from "../icons/eye";
 import { userService } from "./user";
 
@@ -39,6 +40,14 @@ function ResultsArticle({
           <button class="flex btn-primary flex-row gap-2 text-contrast" onclick="downloadAll()">
             <DownloadIcon /> <p>All</p>
           </button>
+          <a
+            style={files.length !== job.num_files ? "pointer-events: none;" : ""}
+            class="flex btn-primary flex-row gap-2 text-contrast"
+            href={`${WEBROOT}/delete/${user.id}/${job.id}`}
+            {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
+          >
+            <DeleteIcon /> <p>Delete</p>
+          </a>
         </div>
       </div>
       <progress
