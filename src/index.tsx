@@ -10,6 +10,7 @@ import { AUTO_DELETE_EVERY_N_HOURS, WEBROOT } from "./helpers/env";
 import { chooseConverter } from "./pages/chooseConverter";
 import { convert } from "./pages/convert";
 import { deleteFile } from "./pages/deleteFile";
+import { deleteJob } from "./pages/deleteJob";
 import { download } from "./pages/download";
 import { history } from "./pages/history";
 import { listConverters } from "./pages/listConverters";
@@ -42,6 +43,7 @@ const app = new Elysia({
   .use(history)
   .use(convert)
   .use(download)
+  .use(deleteJob)
   .use(results)
   .use(deleteFile)
   .use(listConverters)
