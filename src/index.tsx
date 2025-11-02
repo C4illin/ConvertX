@@ -18,6 +18,7 @@ import { results } from "./pages/results";
 import { root } from "./pages/root";
 import { upload } from "./pages/upload";
 import { user } from "./pages/user";
+import { healthcheck } from "./pages/healthcheck";
 
 mkdir("./data", { recursive: true }).catch(console.error);
 
@@ -48,6 +49,7 @@ const app = new Elysia({
   .use(deleteFile)
   .use(listConverters)
   .use(chooseConverter)
+  .use(healthcheck)
   .onError(({ error }) => {
     console.error(error);
   });
