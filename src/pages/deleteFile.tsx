@@ -12,9 +12,12 @@ export const deleteFile = new Elysia().use(userService).post(
       return redirect(`${WEBROOT}/`, 302);
     }
 
-    const existingJob = await db
-      .query("SELECT * FROM jobs WHERE id = ? AND user_id = ?")
-      .get(jobId.value, user.id);
+    const existingJob = await db.job.findFirst({
+      where: {
+        id: parseInt(jobId.value, 10),
+        userId: parseInt(user.id, 10),
+      },
+    });
 
     if (!existingJob) {
       return redirect(`${WEBROOT}/`, 302);

@@ -12,9 +12,12 @@ export const download = new Elysia()
   .get(
     "/download/:userId/:jobId/:fileName",
     async ({ params, redirect, user }) => {
-      const job = await db
-        .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
-        .get(user.id, params.jobId);
+      const job = await db.job.findFirst({
+        where: {
+          userId: parseInt(user.id, 10),
+          id: parseInt(params.jobId, 10),
+        },
+      });
 
       if (!job) {
         return redirect(`${WEBROOT}/results`, 302);
@@ -34,9 +37,12 @@ export const download = new Elysia()
   .get(
     "/archive/:userId/:jobId",
     async ({ params, redirect, user }) => {
-      const job = await db
-        .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
-        .get(user.id, params.jobId);
+      const job = await db.job.findFirst({
+        where: {
+          userId: parseInt(user.id, 10),
+          id: parseInt(params.jobId, 10),
+        },
+      });
 
       if (!job) {
         return redirect(`${WEBROOT}/results`, 302);

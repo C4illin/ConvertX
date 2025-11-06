@@ -3,7 +3,7 @@ import { Elysia } from "elysia";
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import db from "../db/db";
-import { Filename, Jobs } from "../db/types";
+import { Job, FileName } from "@prisma/client";
 import { ALLOW_UNAUTHENTICATED, WEBROOT } from "../helpers/env";
 import { DownloadIcon } from "../icons/download";
 import { DeleteIcon } from "../icons/delete";
@@ -19,8 +19,8 @@ function ResultsArticle({
   user: {
     id: string;
   } & JWTPayloadSpec;
-  job: Jobs;
-  files: Filename[];
+  job: Job;
+  files: FileName[];
   outputPath: string;
 }) {
   return (
@@ -29,11 +29,11 @@ function ResultsArticle({
         <h1 class="text-xl">Results</h1>
         <div class="flex flex-row gap-4">
           <a
-            style={files.length !== job.num_files ? "pointer-events: none;" : ""}
+            style={files.length !== job.numFiles ? "pointer-events: none;" : ""}
             href={`${WEBROOT}/archive/${user.id}/${job.id}`}
             download={`converted_files_${job.id}.tar`}
             class="flex btn-primary flex-row gap-2 text-contrast"
-            {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
+            {...(files.length !== job.numFiles ? { disabled: true, "aria-busy": "true" } : "")}
           >
             <DownloadIcon /> <p>Tar</p>
           </a>
@@ -41,18 +41,18 @@ function ResultsArticle({
             <DownloadIcon /> <p>All</p>
           </button>
           <a
-            style={files.length !== job.num_files ? "pointer-events: none;" : ""}
+            style={files.length !== job.numFiles ? "pointer-events: none;" : ""}
             class="flex btn-primary flex-row gap-2 text-contrast"
             href={`${WEBROOT}/delete/${user.id}/${job.id}`}
-            {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
+            {...(files.length !== job.numFiles ? { disabled: true, "aria-busy": "true" } : "")}
           >
             <DeleteIcon /> <p>Delete</p>
           </a>
         </div>
       </div>
       <progress
-        max={job.num_files}
-        {...(files.length === job.num_files ? { value: files.length } : "")}
+        max={job.numFiles}
+        {...(files.length === job.numFiles ? { value: files.length } : "")}
         class={`
           mb-4 inline-block h-2 w-full appearance-none overflow-hidden rounded-full border-0
           bg-neutral-700 bg-none text-accent-500 accent-accent-500
@@ -101,7 +101,7 @@ function ResultsArticle({
           {files.map((file) => (
             <tr>
               <td safe class="max-w-[20vw] truncate">
-                {file.output_file_name}
+                {file.outputFileName}
               </td>
               <td safe>{file.status}</td>
               <td class="flex flex-row gap-4">
@@ -110,7 +110,7 @@ function ResultsArticle({
                     text-accent-500 underline
                     hover:text-accent-400
                   `}
-                  href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
+                  href={`${WEBROOT}/download/${outputPath}${file.outputFileName}`}
                 >
                   <EyeIcon />
                 </a>
@@ -119,8 +119,8 @@ function ResultsArticle({
                     text-accent-500 underline
                     hover:text-accent-400
                   `}
-                  href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
-                  download={file.output_file_name}
+                  href={`${WEBROOT}/download/${outputPath}${file.outputFileName}`}
+                  download={file.outputFileName}
                 >
                   <DownloadIcon />
                 </a>
@@ -143,10 +143,15 @@ export const results = new Elysia()
         job_id.remove();
       }
 
-      const job = db
-        .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
-        .as(Jobs)
-        .get(user.id, params.jobId);
+      const userId = parseInt(user.id, 10);
+      const jobId = parseInt(params.jobId, 10);
+
+      const job = await db.job.findFirst({
+        where: {
+          userId,
+          id: jobId,
+        },
+      });
 
       if (!job) {
         set.status = 404;
@@ -155,12 +160,13 @@ export const results = new Elysia()
         };
       }
 
-      const outputPath = `${user.id}/${params.jobId}/`;
+      const outputPath = `${userId}/${jobId}/`;
 
-      const files = db
-        .query("SELECT * FROM file_names WHERE job_id = ?")
-        .as(Filename)
-        .all(params.jobId);
+      const files = await db.fileName.findMany({
+        where: {
+          jobId,
+        },
+      });
 
       return (
         <BaseHtml webroot={WEBROOT} title="ConvertX | Result">
@@ -189,10 +195,15 @@ export const results = new Elysia()
         job_id.remove();
       }
 
-      const job = db
-        .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
-        .as(Jobs)
-        .get(user.id, params.jobId);
+      const userId = parseInt(user.id, 10);
+      const jobId = parseInt(params.jobId, 10);
+
+      const job = await db.job.findFirst({
+        where: {
+          userId,
+          id: jobId,
+        },
+      });
 
       if (!job) {
         set.status = 404;
@@ -201,12 +212,13 @@ export const results = new Elysia()
         };
       }
 
-      const outputPath = `${user.id}/${params.jobId}/`;
+      const outputPath = `${userId}/${jobId}/`;
 
-      const files = db
-        .query("SELECT * FROM file_names WHERE job_id = ?")
-        .as(Filename)
-        .all(params.jobId);
+      const files = await db.fileName.findMany({
+        where: {
+          jobId,
+        },
+      });
 
       return <ResultsArticle user={user} job={job} files={files} outputPath={outputPath} />;
     },

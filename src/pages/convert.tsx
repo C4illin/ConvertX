@@ -3,8 +3,7 @@ import { Elysia, t } from "elysia";
 import sanitize from "sanitize-filename";
 import { outputDir, uploadsDir } from "..";
 import { handleConvert } from "../converters/main";
-import db from "../db/db";
-import { Jobs } from "../db/types";
+import prisma from "../db/db";
 import { WEBROOT } from "../helpers/env";
 import { normalizeFiletype } from "../helpers/normalizeFiletype";
 import { userService } from "./user";
@@ -25,10 +24,15 @@ export const convert = new Elysia().use(userService).post(
       return redirect(`${WEBROOT}/`, 302);
     }
 
-    const existingJob = db
-      .query("SELECT * FROM jobs WHERE id = ? AND user_id = ?")
-      .as(Jobs)
-      .get(jobId.value, user.id);
+    const parsedJobId = parseInt(jobId.value, 10);
+    const parsedUserId = parseInt(user.id, 10);
+
+    const existingJob = await prisma.job.findFirst({
+      where: {
+        id: parsedJobId,
+        userId: parsedUserId,
+      },
+    });
 
     if (!existingJob) {
       return redirect(`${WEBROOT}/`, 302);
@@ -61,17 +65,23 @@ export const convert = new Elysia().use(userService).post(
       return redirect(`${WEBROOT}/`, 302);
     }
 
-    db.query("UPDATE jobs SET num_files = ?1, status = 'pending' WHERE id = ?2").run(
-      fileNames.length,
-      jobId.value,
-    );
+    await prisma.job.update({
+      where: { id: parsedJobId },
+      data: {
+        numFiles: fileNames.length,
+        status: "pending",
+      },
+    });
 
     // Start the conversion process in the background
     handleConvert(fileNames, userUploadsDir, userOutputDir, convertTo, converterName, jobId)
-      .then(() => {
+      .then(async () => {
         // All conversions are done, update the job status to 'completed'
         if (jobId.value) {
-          db.query("UPDATE jobs SET status = 'completed' WHERE id = ?1").run(jobId.value);
+          await prisma.job.update({
+            where: { id: parsedJobId },
+            data: { status: "completed" },
+          });
         }
 
         // Delete all uploaded files in userUploadsDir

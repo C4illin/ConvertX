@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../data/mydb.sqlite"
+}
+
+/// A user of the application
+model User {
+  /// The unique identifier for the user
+  id       Int      @id @default(autoincrement())
+  /// The email address of the user
+  email    String   @unique
+  /// The password of the user
+  password String
+  /// The jobs associated with the user
+  jobs     Job[]
+
+  @@map("users")
+}
+
+/// A job created by a user
+model Job {
+  /// The unique identifier for the job
+  id          Int       @id @default(autoincrement())
+  /// The ID of the user who created the job
+  userId      Int       @map("user_id")
+  /// The date and time when the job was created
+  dateCreated DateTime  @map("date_created")
+  /// The current status of the job
+  status      String    @default("not started")
+  /// The number of files associated with the job
+  numFiles    Int       @default(0) @map("num_files")
+  /// The files associated with the job
+  files       FileName[]
+
+  /// The user who created the job
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("jobs")
+}
+
+/// A file associated with a job
+model FileName {
+  /// The unique identifier for the file
+  id            Int    @id @default(autoincrement())
+  /// The ID of the job this file belongs to
+  jobId         Int    @map("job_id")
+  /// The name of the input file
+  fileName      String @map("file_name")
+  /// The name of the output file
+  outputFileName String @map("output_file_name")
+  /// The current status of the file
+  status        String @default("not started")
+
+  /// The job this file belongs to
+  job Job @relation(fields: [jobId], references: [id])
+
+  @@map("file_names")
+}
