@@ -220,7 +220,7 @@ export const user = new Elysia()
       if (!auth) {
         set.status = 500;
         return {
-          message: "Failed to authenticate user.",
+          message: "No auth cookie, perhaps your browser is blocking cookies.",
         };
       }
 
