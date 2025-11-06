@@ -3,7 +3,7 @@ import { Elysia } from "elysia";
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import db from "../db/db";
-import { Job, FileName } from "@prisma/client";
+import { Job, File } from "@prisma/client";
 import { ALLOW_UNAUTHENTICATED, WEBROOT } from "../helpers/env";
 import { DownloadIcon } from "../icons/download";
 import { DeleteIcon } from "../icons/delete";
@@ -20,7 +20,7 @@ function ResultsArticle({
     id: string;
   } & JWTPayloadSpec;
   job: Job;
-  files: FileName[];
+  files: File[];
   outputPath: string;
 }) {
   return (
@@ -162,7 +162,7 @@ export const results = new Elysia()
 
       const outputPath = `${userId}/${jobId}/`;
 
-      const files = await db.fileName.findMany({
+      const files = await db.file.findMany({
         where: {
           jobId,
         },
@@ -214,7 +214,7 @@ export const results = new Elysia()
 
       const outputPath = `${userId}/${jobId}/`;
 
-      const files = await db.fileName.findMany({
+      const files = await db.file.findMany({
         where: {
           jobId,
         },

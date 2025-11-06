@@ -163,7 +163,7 @@ export async function handleConvert(
           mainConverter(filePath, fileType, convertTo, targetPath, {}, converterName)
             .then(async (r) => {
               if (jobId.value) {
-                await prisma.fileName.create({
+                await prisma.file.create({
                   data: {
                     jobId: parseInt(jobId.value, 10),
                     fileName,

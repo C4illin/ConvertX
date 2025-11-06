@@ -37,7 +37,7 @@ model Job {
   /// The number of files associated with the job
   numFiles    Int       @default(0) @map("num_files")
   /// The files associated with the job
-  files       FileName[]
+  files       File[]
 
   /// The user who created the job
   user User @relation(fields: [userId], references: [id])
@@ -46,7 +46,7 @@ model Job {
 }
 
 /// A file associated with a job
-model FileName {
+model File {
   /// The unique identifier for the file
   id            Int    @id @default(autoincrement())
   /// The ID of the job this file belongs to
