@@ -1,5 +1,7 @@
+import { mkdirSync } from "node:fs";
 import { Database } from "bun:sqlite";
 
+mkdirSync("./data", { recursive: true });
 const db = new Database("./data/mydb.sqlite", { create: true });
 
 if (!db.query("SELECT * FROM sqlite_master WHERE type='table'").get()) {
