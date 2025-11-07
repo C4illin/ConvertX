@@ -1,5 +1,4 @@
 import { rmSync } from "node:fs";
-import { mkdir } from "node:fs/promises";
 import { html } from "@elysiajs/html";
 import { staticPlugin } from "@elysiajs/static";
 import { Elysia } from "elysia";
@@ -18,8 +17,6 @@ import { root } from "./pages/root";
 import { upload } from "./pages/upload";
 import { user } from "./pages/user";
 import { healthcheck } from "./pages/healthcheck";
-
-mkdir("./data", { recursive: true }).catch(console.error);
 
 export const uploadsDir = "./data/uploads/";
 export const outputDir = "./data/output/";
