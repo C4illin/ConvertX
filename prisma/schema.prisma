@@ -31,7 +31,7 @@ model Job {
   /// The ID of the user who created the job
   userId      Int       @map("user_id")
   /// The date and time when the job was created
-  dateCreated DateTime  @map("date_created")
+  dateCreated String  @map("date_created")
   /// The current status of the job
   status      String    @default("not started")
   /// The number of files associated with the job

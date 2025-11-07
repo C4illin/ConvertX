@@ -69,7 +69,7 @@ const clearJobs = async () => {
   const jobs = await prisma.job.findMany({
     where: {
       dateCreated: {
-        lt: new Date(Date.now() - AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000),
+        lt: new Date(Date.now() - AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000).toISOString(),
       },
     },
   });

@@ -9,7 +9,7 @@ CREATE TABLE "users" (
 CREATE TABLE "jobs" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "user_id" INTEGER NOT NULL,
-    "date_created" DATETIME NOT NULL,
+    "date_created" TEXT NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'not started',
     "num_files" INTEGER NOT NULL DEFAULT 0,
     CONSTRAINT "jobs_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
