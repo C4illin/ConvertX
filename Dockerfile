@@ -24,12 +24,12 @@ RUN unzip -j bun-linux-*.zip -d /usr/local/bin && \
 # this will cache them and speed up future builds
 FROM base AS install
 RUN mkdir -p /temp/dev
-COPY package.json bun.lock /temp/dev/
+COPY package.json bun.lock prisma/ /temp/dev/
 RUN cd /temp/dev && bun install --frozen-lockfile && bun prisma generate
 
 # install with --production (exclude devDependencies)
 RUN mkdir -p /temp/prod
-COPY package.json bun.lock /temp/prod/
+COPY package.json bun.lock prisma/ /temp/prod/
 RUN cd /temp/prod && bun install --frozen-lockfile --production && bun prisma generate
 
 FROM base AS prerelease
