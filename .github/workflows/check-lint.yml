@@ -27,5 +27,8 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Generate Prisma client
+        run: bun prisma generate
+
       - name: Run lint
         run: bun run lint
