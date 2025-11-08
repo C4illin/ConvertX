@@ -5,13 +5,15 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
+  {
+    ignores: ["**/dist/**", "**/node_modules/**", "eslint.config.ts"],
+  },
   js.configs.recommended,
   tseslint.configs.recommended,
   {
     plugins: {
       "better-tailwindcss": eslintPluginBetterTailwindcss,
     },
-    ignores: ["**/node_modules/**", "eslint.config.ts"],
     languageOptions: {
       parser: eslintParserTypeScript,
       parserOptions: {
