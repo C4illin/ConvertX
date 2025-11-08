@@ -96,7 +96,7 @@ export const root = new Elysia().use(userService).get(
       },
     });
 
-    const { id } = await db.job.findFirst({
+    const { id } = (await db.job.findFirst({
       where: {
         userId,
       },
@@ -106,7 +106,7 @@ export const root = new Elysia().use(userService).get(
       select: {
         id: true,
       },
-    }) as { id: number };
+    })) as { id: number };
 
     if (!jobId) {
       return { message: "Cookies should be enabled to use this app." };
