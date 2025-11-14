@@ -8,14 +8,15 @@ export default tseslint.config(
   js.configs.recommended,
   tseslint.configs.recommended,
   {
+    files: ["**/*.{tsx,ts}"],
     plugins: {
       "better-tailwindcss": eslintPluginBetterTailwindcss,
     },
-    ignores: ["**/node_modules/**", "eslint.config.ts"],
+    ignores: ["**/node_modules/**", "eslint.config.ts", "dist/**"],
     languageOptions: {
       parser: eslintParserTypeScript,
       parserOptions: {
-        project: true,
+        project: "./tsconfig.eslint.json",
         ecmaFeatures: {
           jsx: true,
         },
@@ -24,7 +25,6 @@ export default tseslint.config(
         ...globals.node,
       },
     },
-    files: ["**/*.{tsx,ts}"],
     settings: {
       "better-tailwindcss": {
         entryPoint: "src/main.css",

@@ -29,5 +29,6 @@
     "esModuleInterop": true
     // "noImplicitReturns": true
   },
-  "include": ["src", "tests", "package.json"]
+  "include": ["src", "package.json"],
+  "exclude": ["dist", "node_modules"]
 }
