@@ -1,43 +1,38 @@
-import { mkdirSync } from "node:fs";
-import { Database } from "bun:sqlite";
+import fs from "node:fs";
+import { PrismaClient } from "@prisma/client";
+import { execSync } from "node:child_process";
 
-mkdirSync("./data", { recursive: true });
-const db = new Database("./data/mydb.sqlite", { create: true });
-
-if (!db.query("SELECT * FROM sqlite_master WHERE type='table'").get()) {
-  db.exec(`
-CREATE TABLE IF NOT EXISTS users (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	email TEXT NOT NULL,
-	password TEXT NOT NULL
-);
-CREATE TABLE IF NOT EXISTS file_names (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  job_id INTEGER NOT NULL,
-  file_name TEXT NOT NULL,
-  output_file_name TEXT NOT NULL,
-  status TEXT DEFAULT 'not started',
-  FOREIGN KEY (job_id) REFERENCES jobs(id)
-);
-CREATE TABLE IF NOT EXISTS jobs (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	user_id INTEGER NOT NULL,
-	date_created TEXT NOT NULL,
-  status TEXT DEFAULT 'not started',
-  num_files INTEGER DEFAULT 0,
-  FOREIGN KEY (user_id) REFERENCES users(id)
-);
-PRAGMA user_version = 1;`);
+// ensure db exists
+if (!fs.existsSync("./data/mydb.sqlite")) {
+  // run bun prisma migrate deploy with child_process
+  console.log("Database not found, creating a new one...");
+  execSync("bun prisma migrate deploy");
 }
 
-const dbVersion = (db.query("PRAGMA user_version").get() as { user_version?: number }).user_version;
-if (dbVersion === 0) {
-  db.exec("ALTER TABLE file_names ADD COLUMN status TEXT DEFAULT 'not started';");
-  db.exec("PRAGMA user_version = 1;");
-  console.log("Updated database to version 1.");
+// The db version before we switched to Prisma
+const prisma = new PrismaClient();
+const legacyVersion = await prisma.$queryRaw<{ user_version: bigint }[]>`PRAGMA user_version;`;
+if (legacyVersion[0]?.user_version === 1n) {
+  // close prisma connection
+  await prisma.$disconnect();
+  // Existing legacy database found, needs migration
+  console.log("Legacy database found. Skipping initial migration...");
+  execSync("bun prisma migrate resolve --applied 0_init");
+  // reconnect prisma
+  await prisma.$connect();
+  // set user_version to 2
+  await prisma.$executeRaw`PRAGMA user_version = 2;`;
 }
 
-// enable WAL mode
-db.exec("PRAGMA journal_mode = WAL;");
+console.log("Running database migrations...");
 
-export default db;
+// run any pending migrations
+await prisma.$disconnect();
+execSync("bun prisma migrate deploy");
+await prisma.$connect();
+
+await prisma.$queryRaw`PRAGMA journal_mode = WAL;`.catch((e) => {
+  console.error("Failed to set journal mode to WAL:", e);
+});
+
+export default prisma;

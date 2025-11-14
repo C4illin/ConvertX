@@ -1,10 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { jwt } from "@elysiajs/jwt";
 import { Elysia, t } from "elysia";
-import { BaseHtml } from "../components/base";
-import { Header } from "../components/header";
-import db from "../db/db";
-import { User } from "../db/types";
+import prisma from "../db/db";
 import {
   ACCOUNT_REGISTRATION,
   ALLOW_UNAUTHENTICATED,
@@ -12,8 +9,10 @@ import {
   HTTP_ALLOWED,
   WEBROOT,
 } from "../helpers/env";
+import { BaseHtml } from "../components/base";
+import { Header } from "../components/header";
 
-export let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
+export let FIRST_RUN = (await prisma.user.findFirst()) === null || false;
 
 export const userService = new Elysia({ name: "user/service" })
   .use(
@@ -191,7 +190,7 @@ export const user = new Elysia()
         FIRST_RUN = false;
       }
 
-      const existingUser = await db.query("SELECT * FROM users WHERE email = ?").get(email);
+      const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) {
         set.status = 400;
         return {
@@ -200,9 +199,12 @@ export const user = new Elysia()
       }
       const savedPassword = await Bun.password.hash(password);
 
-      db.query("INSERT INTO users (email, password) VALUES (?, ?)").run(email, savedPassword);
-
-      const user = db.query("SELECT * FROM users WHERE email = ?").as(User).get(email);
+      const user = await prisma.user.create({
+        data: {
+          email,
+          password: savedPassword,
+        },
+      });
 
       if (!user) {
         set.status = 500;
@@ -318,7 +320,7 @@ export const user = new Elysia()
   .post(
     "/login",
     async function handler({ body, set, redirect, jwt, cookie: { auth } }) {
-      const existingUser = db.query("SELECT * FROM users WHERE email = ?").as(User).get(body.email);
+      const existingUser = await prisma.user.findUnique({ where: { email: body.email } });
 
       if (!existingUser) {
         set.status = 403;
@@ -381,7 +383,9 @@ export const user = new Elysia()
         return redirect(`${WEBROOT}/`, 302);
       }
 
-      const userData = db.query("SELECT * FROM users WHERE id = ?").as(User).get(user.id);
+      const userId = Number(user.id);
+
+      const userData = await prisma.user.findUnique({ where: { id: userId } });
 
       if (!userData) {
         return redirect(`${WEBROOT}/`, 302);
@@ -465,7 +469,10 @@ export const user = new Elysia()
       if (!user) {
         return redirect(`${WEBROOT}/login`, 302);
       }
-      const existingUser = db.query("SELECT * FROM users WHERE id = ?").as(User).get(user.id);
+
+      const userId = Number(user.id);
+
+      const existingUser = await prisma.user.findUnique({ where: { id: userId } });
 
       if (!existingUser) {
         if (auth?.value) {
@@ -483,30 +490,22 @@ export const user = new Elysia()
         };
       }
 
-      const fields = [];
-      const values = [];
+      const updates: { email?: string; password?: string } = {};
 
       if (body.email) {
-        const existingUser = await db
-          .query("SELECT id FROM users WHERE email = ?")
-          .as(User)
-          .get(body.email);
-        if (existingUser && existingUser.id.toString() !== user.id) {
+        const emailInUse = await prisma.user.findUnique({ where: { email: body.email } });
+        if (emailInUse && emailInUse.id !== userId) {
           set.status = 409;
           return { message: "Email already in use." };
         }
-        fields.push("email");
-        values.push(body.email);
+        updates.email = body.email;
       }
       if (body.newPassword) {
-        fields.push("password");
-        values.push(await Bun.password.hash(body.newPassword));
+        updates.password = await Bun.password.hash(body.newPassword);
       }
 
-      if (fields.length > 0) {
-        db.query(
-          `UPDATE users SET ${fields.map((field) => `${field}=?`).join(", ")} WHERE id=?`,
-        ).run(...values, user.id);
+      if (Object.keys(updates).length > 0) {
+        await prisma.user.update({ where: { id: userId }, data: updates });
       }
 
       return redirect(`${WEBROOT}/`, 302);

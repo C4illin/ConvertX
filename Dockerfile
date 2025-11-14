@@ -25,12 +25,16 @@ RUN unzip -j bun-linux-*.zip -d /usr/local/bin && \
 FROM base AS install
 RUN mkdir -p /temp/dev
 COPY package.json bun.lock /temp/dev/
-RUN cd /temp/dev && bun install --frozen-lockfile
+COPY prisma /temp/dev/prisma/
+RUN sed -i 's|file:../data/mydb.sqlite|file:/app/data/mydb.sqlite|g' /temp/dev/prisma/schema.prisma
+RUN cd /temp/dev && bun install --frozen-lockfile && bun prisma generate
 
 # install with --production (exclude devDependencies)
 RUN mkdir -p /temp/prod
 COPY package.json bun.lock /temp/prod/
-RUN cd /temp/prod && bun install --frozen-lockfile --production
+COPY prisma /temp/prod/prisma/
+RUN sed -i 's|file:../data/mydb.sqlite|file:/app/data/mydb.sqlite|g' /temp/prod/prisma/schema.prisma
+RUN cd /temp/prod && bun install --frozen-lockfile --production && bun prisma generate
 
 FROM base AS prerelease
 WORKDIR /app
@@ -93,6 +97,7 @@ RUN ARCH=$(uname -m) && \
 COPY --from=install /temp/prod/node_modules node_modules
 COPY --from=prerelease /app/public/ /app/public/
 COPY --from=prerelease /app/dist /app/dist
+COPY --from=prerelease /app/prisma /app/prisma
 
 # COPY . .
 RUN mkdir data

@@ -1,5 +1,5 @@
 import { Cookie } from "elysia";
-import db from "../db/db";
+import prisma from "../db/db";
 import { MAX_CONVERT_PROCESS } from "../helpers/env";
 import { normalizeFiletype, normalizeOutputFiletype } from "../helpers/normalizeFiletype";
 import { convert as convertassimp, properties as propertiesassimp } from "./assimp";
@@ -146,10 +146,6 @@ export async function handleConvert(
   converterName: string,
   jobId: Cookie<string | undefined>,
 ) {
-  const query = db.query(
-    "INSERT INTO file_names (job_id, file_name, output_file_name, status) VALUES (?1, ?2, ?3, ?4)",
-  );
-
   for (const chunk of chunks(fileNames, MAX_CONVERT_PROCESS)) {
     const toProcess: Promise<string>[] = [];
     for (const fileName of chunk) {
@@ -165,9 +161,16 @@ export async function handleConvert(
       toProcess.push(
         new Promise((resolve, reject) => {
           mainConverter(filePath, fileType, convertTo, targetPath, {}, converterName)
-            .then((r) => {
+            .then(async (r) => {
               if (jobId.value) {
-                query.run(jobId.value, fileName, newFileName, r);
+                await prisma.file.create({
+                  data: {
+                    jobId: parseInt(jobId.value, 10),
+                    fileName,
+                    outputFileName: newFileName,
+                    status: r,
+                  },
+                });
               }
               resolve(r);
             })

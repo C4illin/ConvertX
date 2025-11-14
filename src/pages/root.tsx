@@ -5,7 +5,6 @@ import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import { getAllTargets } from "../converters/main";
 import db from "../db/db";
-import { User } from "../db/types";
 import {
   ACCOUNT_REGISTRATION,
   ALLOW_UNAUTHENTICATED,
@@ -31,6 +30,8 @@ export const root = new Elysia().use(userService).get(
 
     // validate jwt
     let user: ({ id: string } & JWTPayloadSpec) | false = false;
+    let userId: number | null = null;
+
     if (ALLOW_UNAUTHENTICATED) {
       const newUserId = String(
         UNAUTHENTICATED_USER_SHARING
@@ -42,6 +43,8 @@ export const root = new Elysia().use(userService).get(
       });
 
       user = { id: newUserId };
+      userId = parseInt(newUserId, 10);
+
       if (!auth) {
         return {
           message: "No auth cookie, perhaps your browser is blocking cookies.",
@@ -64,8 +67,13 @@ export const root = new Elysia().use(userService).get(
         user.id &&
         (Number.parseInt(user.id) < 2 ** 24 || !ALLOW_UNAUTHENTICATED)
       ) {
-        // Make sure user exists in db
-        const existingUser = db.query("SELECT * FROM users WHERE id = ?").as(User).get(user.id);
+        userId = parseInt(user.id, 10);
+
+        const existingUser = await db.user.findFirst({
+          where: {
+            id: userId,
+          },
+        });
 
         if (!existingUser) {
           if (auth?.value) {
@@ -76,19 +84,29 @@ export const root = new Elysia().use(userService).get(
       }
     }
 
-    if (!user) {
+    if (!user || userId === null) {
       return redirect(`${WEBROOT}/login`, 302);
     }
 
     // create a new job
-    db.query("INSERT INTO jobs (user_id, date_created) VALUES (?, ?)").run(
-      user.id,
-      new Date().toISOString(),
-    );
+    await db.job.create({
+      data: {
+        userId,
+        dateCreated: new Date().toISOString(),
+      },
+    });
 
-    const { id } = db
-      .query("SELECT id FROM jobs WHERE user_id = ? ORDER BY id DESC")
-      .get(user.id) as { id: number };
+    const { id } = (await db.job.findFirst({
+      where: {
+        userId,
+      },
+      orderBy: {
+        id: "desc",
+      },
+      select: {
+        id: true,
+      },
+    })) as { id: number };
 
     if (!jobId) {
       return { message: "Cookies should be enabled to use this app." };

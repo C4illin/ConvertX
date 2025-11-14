@@ -44,7 +44,7 @@
       "onAutoForward": "notify"
     }
   },
-  "postCreateCommand": "bun install",
+  "postCreateCommand": "bun install && bun prisma generate",
   "remoteUser": "root",
   "mounts": ["source=${localWorkspaceFolder}/data,target=/app/data,type=bind"],
   "containerEnv": {

@@ -3,8 +3,7 @@ import { html } from "@elysiajs/html";
 import { staticPlugin } from "@elysiajs/static";
 import { Elysia } from "elysia";
 import "./helpers/printVersions";
-import db from "./db/db";
-import { Jobs } from "./db/types";
+import prisma from "./db/db";
 import { AUTO_DELETE_EVERY_N_HOURS, WEBROOT } from "./helpers/env";
 import { chooseConverter } from "./pages/chooseConverter";
 import { convert } from "./pages/convert";
@@ -69,25 +68,28 @@ app.listen(3000);
 
 console.log(`🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}${WEBROOT}`);
 
-const clearJobs = () => {
-  const jobs = db
-    .query("SELECT * FROM jobs WHERE date_created < ?")
-    .as(Jobs)
-    .all(new Date(Date.now() - AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000).toISOString());
+const clearJobs = async () => {
+  const jobs = await prisma.job.findMany({
+    where: {
+      dateCreated: {
+        lt: new Date(Date.now() - AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000).toISOString(),
+      },
+    },
+  });
 
   for (const job of jobs) {
     // delete the directories
-    rmSync(`${outputDir}${job.user_id}/${job.id}`, {
+    rmSync(`${outputDir}${job.userId}/${job.id}`, {
       recursive: true,
       force: true,
     });
-    rmSync(`${uploadsDir}${job.user_id}/${job.id}`, {
+    rmSync(`${uploadsDir}${job.userId}/${job.id}`, {
       recursive: true,
       force: true,
     });
 
     // delete the job
-    db.query("DELETE FROM jobs WHERE id = ?").run(job.id);
+    await prisma.job.delete({ where: { id: job.id } });
   }
 
   setTimeout(clearJobs, AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000);

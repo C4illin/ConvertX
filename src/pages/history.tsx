@@ -1,8 +1,7 @@
 import { Elysia } from "elysia";
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
-import db from "../db/db";
-import { Filename, Jobs } from "../db/types";
+import prisma from "../db/db";
 import { ALLOW_UNAUTHENTICATED, HIDE_HISTORY, LANGUAGE, WEBROOT } from "../helpers/env";
 import { userService } from "./user";
 
@@ -17,17 +16,20 @@ export const history = new Elysia().use(userService).get(
       return redirect(`${WEBROOT}/login`, 302);
     }
 
-    let userJobs = db.query("SELECT * FROM jobs WHERE user_id = ?").as(Jobs).all(user.id).reverse();
+    const userId = parseInt(user.id, 10);
 
-    for (const job of userJobs) {
-      const files = db.query("SELECT * FROM file_names WHERE job_id = ?").as(Filename).all(job.id);
-
-      job.finished_files = files.length;
-      job.files_detailed = files;
-    }
-
-    // Filter out jobs with no files
-    userJobs = userJobs.filter((job) => job.num_files > 0);
+    const userJobs = await prisma.job.findMany({
+      where: {
+        userId,
+        files: {
+          some: {}, // Ensures only jobs with files are included
+        },
+      },
+      orderBy: { id: "desc" },
+      include: {
+        files: true,
+      },
+    });
 
     return (
       <BaseHtml webroot={WEBROOT} title="ConvertX | Results">
@@ -127,9 +129,9 @@ export const history = new Elysia().use(userService).get(
                             />
                           </svg>
                         </td>
-                        <td safe>{new Date(job.date_created).toLocaleTimeString(LANGUAGE)}</td>
-                        <td>{job.num_files}</td>
-                        <td class="max-sm:hidden">{job.finished_files}</td>
+                        <td safe>{new Date(job.dateCreated).toLocaleTimeString(LANGUAGE)}</td>
+                        <td>{job.numFiles}</td>
+                        <td class="max-sm:hidden">{job.files.length}</td>
                         <td safe>{job.status}</td>
                         <td>
                           <a
@@ -147,10 +149,10 @@ export const history = new Elysia().use(userService).get(
                         <td colspan="6">
                           <div class="p-2 text-sm text-neutral-500">
                             <div class="mb-1 font-semibold">Detailed File Information:</div>
-                            {job.files_detailed.map((file: Filename) => (
+                            {job.files.map((file) => (
                               <div class="flex items-center">
-                                <span class="w-5/12 truncate" title={file.file_name} safe>
-                                  {file.file_name}
+                                <span class="w-5/12 truncate" title={file.fileName} safe>
+                                  {file.fileName}
                                 </span>
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -164,8 +166,8 @@ export const history = new Elysia().use(userService).get(
                                     clip-rule="evenodd"
                                   />
                                 </svg>
-                                <span class="w-5/12 truncate" title={file.output_file_name} safe>
-                                  {file.output_file_name}
+                                <span class="w-5/12 truncate" title={file.outputFileName} safe>
+                                  {file.outputFileName}
                                 </span>
                               </div>
                             ))}

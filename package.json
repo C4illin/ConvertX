@@ -20,7 +20,9 @@
     "@elysiajs/jwt": "^1.4.0",
     "@elysiajs/static": "^1.4.4",
     "@kitajs/html": "^4.2.10",
+    "@prisma/client": "^6.19.0",
     "elysia": "^1.4.13",
+    "prisma": "^6.19.0",
     "sanitize-filename": "^1.6.3",
     "tar": "^7.5.1"
   },
