@@ -9,7 +9,6 @@ import { Jobs } from "../db/types";
 export const deleteJob = new Elysia().use(userService).get(
   "/delete/:jobId",
   async ({ params, redirect, user }) => {
-
     const job = db
       .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
       .as(Jobs)

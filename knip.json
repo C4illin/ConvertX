@@ -4,6 +4,5 @@
   "project": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts"],
   "tailwind": {
     "entry": ["src/main.css"]
-  },
-  "ignoreDependencies": ["tailwind-scrollbar"]
+  }
 }
