@@ -1,4 +1,3 @@
-import { JWTPayloadSpec } from "@elysiajs/jwt";
 import { Elysia } from "elysia";
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
@@ -11,14 +10,10 @@ import { EyeIcon } from "../icons/eye";
 import { userService } from "./user";
 
 function ResultsArticle({
-  user,
   job,
   files,
   outputPath,
 }: {
-  user: {
-    id: string;
-  } & JWTPayloadSpec;
   job: Jobs;
   files: Filename[];
   outputPath: string;
@@ -30,7 +25,7 @@ function ResultsArticle({
         <div class="flex flex-row gap-4">
           <a
             style={files.length !== job.num_files ? "pointer-events: none;" : ""}
-            href={`${WEBROOT}/archive/${user.id}/${job.id}`}
+            href={`${WEBROOT}/archive/${job.id}`}
             download={`converted_files_${job.id}.tar`}
             class="flex btn-primary flex-row gap-2 text-contrast"
             {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
@@ -43,7 +38,7 @@ function ResultsArticle({
           <a
             style={files.length !== job.num_files ? "pointer-events: none;" : ""}
             class="flex btn-primary flex-row gap-2 text-contrast"
-            href={`${WEBROOT}/delete/${user.id}/${job.id}`}
+            href={`${WEBROOT}/delete/${job.id}`}
             {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
           >
             <DeleteIcon /> <p>Delete</p>
@@ -172,7 +167,7 @@ export const results = new Elysia()
                 sm:px-4
               `}
             >
-              <ResultsArticle user={user} job={job} files={files} outputPath={outputPath} />
+              <ResultsArticle job={job} files={files} outputPath={outputPath} />
             </main>
             <script src={`${WEBROOT}/results.js`} defer />
           </>
@@ -208,7 +203,7 @@ export const results = new Elysia()
         .as(Filename)
         .all(params.jobId);
 
-      return <ResultsArticle user={user} job={job} files={files} outputPath={outputPath} />;
+      return <ResultsArticle job={job} files={files} outputPath={outputPath} />;
     },
     { auth: true },
   );
