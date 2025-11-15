@@ -245,22 +245,18 @@ const possibleTargets: Record<string, Record<string, string[]>> = {};
 
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
-
-  if (!converterProperties) {
-    continue;
-  }
+  if (!converterProperties) continue;
 
   for (const key in converterProperties.from) {
-    if (converterProperties.from[key] === undefined) {
-      continue;
-    }
+    const fromList = converterProperties.from[key];
+    const toList = converterProperties.to[key];
 
-    for (const extension of converterProperties.from[key] ?? []) {
-      if (!possibleTargets[extension]) {
-        possibleTargets[extension] = {};
-      }
+    if (!fromList || !toList) continue;
 
-      possibleTargets[extension][converterName] = converterProperties.to[key] || [];
+    for (const ext of fromList) {
+      if (!possibleTargets[ext]) possibleTargets[ext] = {};
+
+      possibleTargets[ext][converterName] = toList;
     }
   }
 }
@@ -288,11 +284,6 @@ for (const converterName in properties) {
   }
 }
 possibleInputs.sort();
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getPossibleInputs = () => {
-  return possibleInputs;
-};
 
 const allTargets: Record<string, string[]> = {};
 
@@ -336,29 +327,3 @@ for (const converterName in properties) {
 export const getAllInputs = (converter: string) => {
   return allInputs[converter] || [];
 };
-
-// // count the number of unique formats
-// const uniqueFormats = new Set();
-
-// for (const converterName in properties) {
-//   const converterProperties = properties[converterName]?.properties;
-
-//   if (!converterProperties) {
-//     continue;
-//   }
-
-//   for (const key in converterProperties.from) {
-//     for (const extension of converterProperties.from[key] ?? []) {
-//       uniqueFormats.add(extension);
-//     }
-//   }
-
-//   for (const key in converterProperties.to) {
-//     for (const extension of converterProperties.to[key] ?? []) {
-//       uniqueFormats.add(extension);
-//     }
-//   }
-// }
-
-// // print the number of unique Inputs and Outputs
-// console.log(`Unique Formats: ${uniqueFormats.size}`);
