@@ -3,19 +3,28 @@ import eslintParserTypeScript from "@typescript-eslint/parser";
 import eslintPluginBetterTailwindcss from "eslint-plugin-better-tailwindcss";
 import globals from "globals";
 import tseslint from "typescript-eslint";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export default tseslint.config(
+  {
+    ignores: ["**/node_modules/**", "eslint.config.ts", "dist/**"],
+  },
   js.configs.recommended,
   tseslint.configs.recommended,
   {
+    files: ["**/*.{tsx,ts}"],
     plugins: {
       "better-tailwindcss": eslintPluginBetterTailwindcss,
     },
-    ignores: ["**/node_modules/**", "eslint.config.ts"],
     languageOptions: {
       parser: eslintParserTypeScript,
       parserOptions: {
-        project: true,
+        project: "./tsconfig.eslint.json",
+        tsconfigRootDir: __dirname,
         ecmaFeatures: {
           jsx: true,
         },
@@ -24,7 +33,6 @@ export default tseslint.config(
         ...globals.node,
       },
     },
-    files: ["**/*.{tsx,ts}"],
     settings: {
       "better-tailwindcss": {
         entryPoint: "src/main.css",
