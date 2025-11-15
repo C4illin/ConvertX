@@ -25,6 +25,14 @@ function ResultsArticle({
         <div class="flex flex-row gap-4">
           <a
             style={files.length !== job.num_files ? "pointer-events: none;" : ""}
+            class="flex btn-secondary flex-row gap-2 text-contrast"
+            href={`${WEBROOT}/delete/${job.id}`}
+            {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
+          >
+            <DeleteIcon /> <p>Delete</p>
+          </a>
+          <a
+            style={files.length !== job.num_files ? "pointer-events: none;" : ""}
             href={`${WEBROOT}/archive/${job.id}`}
             download={`converted_files_${job.id}.tar`}
             class="flex btn-primary flex-row gap-2 text-contrast"
@@ -35,14 +43,6 @@ function ResultsArticle({
           <button class="flex btn-primary flex-row gap-2 text-contrast" onclick="downloadAll()">
             <DownloadIcon /> <p>All</p>
           </button>
-          <a
-            style={files.length !== job.num_files ? "pointer-events: none;" : ""}
-            class="flex btn-primary flex-row gap-2 text-contrast"
-            href={`${WEBROOT}/delete/${job.id}`}
-            {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
-          >
-            <DeleteIcon /> <p>Delete</p>
-          </a>
         </div>
       </div>
       <progress

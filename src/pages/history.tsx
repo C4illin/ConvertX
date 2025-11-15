@@ -133,7 +133,7 @@ export const history = new Elysia().use(userService).get(
                         <td>{job.num_files}</td>
                         <td class="max-sm:hidden">{job.finished_files}</td>
                         <td safe>{job.status}</td>
-                        <td>
+                        <td class="flex flex-row gap-4">
                           <a
                             class={`
                               text-accent-500 underline

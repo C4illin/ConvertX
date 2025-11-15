@@ -1,2 +1,5 @@
 [tools]
 bun = "1.2.2"
+
+[env]
+JWT_SECRET = "JustForDevelopmentPurposesOnlyChangeMeInProduction!"
