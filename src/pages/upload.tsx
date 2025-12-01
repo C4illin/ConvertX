@@ -25,11 +25,11 @@ export const upload = new Elysia().use(userService).post(
     if (body?.file) {
       if (Array.isArray(body.file)) {
         for (const file of body.file) {
-          const santizedFileName = sanitize(file.name)
+          const santizedFileName = sanitize(file.name);
           await Bun.write(`${userUploadsDir}${santizedFileName}`, file);
         }
       } else {
-        const santizedFileName = sanitize(body.file["name"])
+        const santizedFileName = sanitize(body.file["name"]);
         await Bun.write(`${userUploadsDir}${santizedFileName}`, body.file);
       }
     }
