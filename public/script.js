@@ -33,7 +33,6 @@ dropZone.addEventListener("drop", (e) => {
   }
 });
 
-// Extracted handleFile function for reusability in drag-and-drop and file input
 function handleFile(file) {
   const fileList = document.querySelector("#file-list");
 
@@ -128,14 +127,11 @@ const updateSearchBar = () => {
   });
 
   convertToInput.addEventListener("search", () => {
-    // when the user clears the search bar using the 'x' button
     convertButton.disabled = true;
     formatSelected = false;
   });
 
   convertToInput.addEventListener("blur", (e) => {
-    // Keep the popup open even when clicking on a target button
-    // for a split second to allow the click to go through
     if (e?.relatedTarget?.classList?.contains("target")) {
       convertToPopup.classList.add("hidden");
       convertToPopup.classList.remove("flex");
@@ -152,7 +148,6 @@ const updateSearchBar = () => {
   });
 };
 
-// Add a 'change' event listener to the file input element
 fileInput.addEventListener("change", (e) => {
   const files = e.target.files;
   for (const file of files) {
@@ -165,21 +160,19 @@ const setTitle = () => {
   title.textContent = `Convert ${fileType ? `.${fileType}` : ""}`;
 };
 
-// Add a onclick for the delete button
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const deleteRow = (target) => {
   const filename = target.parentElement.parentElement.children[0].textContent;
   const row = target.parentElement.parentElement;
   row.remove();
 
-  // remove from fileNames
   const index = fileNames.indexOf(filename);
-  fileNames.splice(index, 1);
+  if (index !== -1) {
+    fileNames.splice(index, 1);
+  }
 
-  // reset fileInput
   fileInput.value = "";
 
-  // if fileNames is empty, reset fileType
   if (fileNames.length === 0) {
     fileType = null;
     fileInput.removeAttribute("accept");
@@ -209,20 +202,104 @@ const uploadFile = (file) => {
   xhr.open("POST", `${webroot}/upload`, true);
 
   xhr.onload = () => {
-    let data = JSON.parse(xhr.responseText);
-
     pendingFiles -= 1;
+
+    // 🔍 1) Log exactly what the browser got
+    console.log("Upload raw response:", xhr.status, xhr.responseText);
+
+    let data = {};
+    try {
+      data = JSON.parse(xhr.responseText || "{}");
+    } catch (e) {
+      console.error("Failed to parse upload response:", e, xhr.responseText);
+    }
+
+    // 🔍 2) Compute an "infected" flag as robustly as possible
+    const isInfected =
+      (typeof data === "object" &&
+        data !== null &&
+        (data.infected === true ||
+          data.infected === "true" ||
+          (typeof data.message === "string" &&
+            data.message.toLowerCase().includes("infected file found")))) ||
+      (typeof xhr.responseText === "string" &&
+        xhr.responseText.toLowerCase().includes("infected file found"));
+
+    // 🔴 3) If backend reports infection, show popup and stop
+    if (xhr.status >= 200 && xhr.status < 300 && isInfected) {
+      const infectedFiles = data.infectedFiles || [];
+      const details = infectedFiles
+        .map((f) =>
+          `${f.name}: ${
+            Array.isArray(f.viruses) && f.viruses.length
+              ? f.viruses.join(", ")
+              : "malware detected"
+          }`,
+        )
+        .join("\n");
+
+      alert(
+        "⚠️ Infected file found. Conversion will be aborted.\n\n" +
+          (details ? "Details:\n" + details : ""),
+      );
+
+      // Remove row for this file
+      if (file.htmlRow && file.htmlRow.remove) {
+        file.htmlRow.remove();
+      }
+
+      // Remove from internal list
+      const idx = fileNames.indexOf(file.name);
+      if (idx !== -1) {
+        fileNames.splice(idx, 1);
+      }
+
+      if (fileNames.length === 0) {
+        fileType = null;
+        fileInput.removeAttribute("accept");
+        setTitle();
+        convertButton.disabled = true;
+      } else if (pendingFiles === 0 && formatSelected) {
+        convertButton.disabled = false;
+      }
+
+      convertButton.textContent = "Convert";
+
+      const progressbar = file.htmlRow?.getElementsByTagName("progress");
+      if (progressbar && progressbar[0]?.parentElement) {
+        progressbar[0].parentElement.remove();
+      }
+
+      return;
+    }
+
+    // Generic HTTP error
+    if (xhr.status !== 200) {
+      console.error("Upload failed:", xhr.status, xhr.responseText);
+      alert("Upload failed. Please try again.");
+      convertButton.disabled = false;
+      convertButton.textContent = "Upload failed";
+
+      const progressbar = file.htmlRow.getElementsByTagName("progress");
+      if (progressbar[0]?.parentElement) {
+        progressbar[0].parentElement.remove();
+      }
+      return;
+    }
+
+    // Clean upload
     if (pendingFiles === 0) {
-      if (formatSelected) {
+      if (formatSelected && fileNames.length > 0) {
         convertButton.disabled = false;
       }
       convertButton.textContent = "Convert";
     }
 
-    //Remove the progress bar when upload is done
-    let progressbar = file.htmlRow.getElementsByTagName("progress");
-    progressbar[0].parentElement.remove();
-    console.log(data);
+    const progressbar = file.htmlRow.getElementsByTagName("progress");
+    if (progressbar[0]?.parentElement) {
+      progressbar[0].parentElement.remove();
+    }
+    console.log("Upload parsed response:", data);
   };
 
   xhr.upload.onprogress = (e) => {
@@ -231,11 +308,16 @@ const uploadFile = (file) => {
     console.log(`upload progress (${file.name}):`, (100 * sent) / total);
 
     let progressbar = file.htmlRow.getElementsByTagName("progress");
-    progressbar[0].value = (100 * sent) / total;
+    if (progressbar[0]) {
+      progressbar[0].value = (100 * sent) / total;
+    }
   };
 
   xhr.onerror = (e) => {
-    console.log(e);
+    console.log("XHR error:", e);
+    alert("Upload failed due to a network error.");
+    convertButton.disabled = false;
+    convertButton.textContent = "Upload failed";
   };
 
   xhr.send(formData);
@@ -249,3 +331,4 @@ formConvert.addEventListener("submit", () => {
 });
 
 updateSearchBar();
+
