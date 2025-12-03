@@ -19,7 +19,7 @@ jobs:
           node-version: "22"
 
       - name: Bump version and push tag
-        uses: ramonpaolo/bump-version@v2.3.1
+        uses: ramonpaolo/bump-version@v2.4.0
         with:
           tag: ${{ github.ref_name }}
           commit: true
