@@ -7,6 +7,186 @@ let fileType;
 let pendingFiles = 0;
 let formatSelected = false;
 
+// ─────────────────────────────────────
+// Antivirus toggle UI (custom slider)
+// ─────────────────────────────────────
+
+let avToggleButton = null;
+let avToggleLabel = null;
+
+// Inject minimal CSS so the toggle looks like a real slider
+function injectAvToggleStyles() {
+  if (document.getElementById("av-toggle-styles")) return;
+
+  const style = document.createElement("style");
+  style.id = "av-toggle-styles";
+  style.textContent = `
+    .av-toggle-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+    }
+    .av-toggle-label {
+      color: #04070eff;
+    }
+    .av-toggle-switch {
+      position: relative;
+      width: 42px;
+      height: 22px;
+      border-radius: 999px;
+      border: none;
+      background-color: #4b5563;
+      padding: 0;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+    }
+    .av-toggle-switch::before {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background-color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+      left: 2px;
+      transition: transform 0.2s ease;
+    }
+    .av-toggle-switch.av-on {
+      background-color: #22c55e;
+    }
+    .av-toggle-switch.av-on::before {
+      transform: translateX(20px);
+    }
+    .av-toggle-switch.av-disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+function setAntivirusToggleVisual(enabled, available) {
+  if (!avToggleButton) return;
+
+  avToggleButton.classList.remove("av-on", "av-disabled");
+
+  if (!available) {
+    avToggleButton.classList.add("av-disabled");
+    avToggleButton.setAttribute("aria-disabled", "true");
+    avToggleButton.setAttribute("aria-pressed", "false");
+    if (avToggleLabel) {
+      avToggleLabel.textContent =
+        "Antivirus scan unavailable (CLAMAV_URL not set)";
+    }
+    return;
+  }
+
+  avToggleButton.setAttribute("aria-disabled", "false");
+
+  if (enabled) {
+    avToggleButton.classList.add("av-on");
+    avToggleButton.setAttribute("aria-pressed", "true");
+  } else {
+    avToggleButton.setAttribute("aria-pressed", "false");
+  }
+
+  if (avToggleLabel) {
+    avToggleLabel.textContent = "Enable antivirus scan";
+  }
+}
+
+function initAntivirusToggleState() {
+  if (!avToggleButton) return;
+
+  fetch(`${webroot}/api/antivirus`)
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("Antivirus state from server:", data);
+      const available = !!data.available;
+      const enabled = !!data.enabled;
+      setAntivirusToggleVisual(enabled, available);
+    })
+    .catch((err) => {
+      console.error("Failed to get antivirus state:", err);
+      setAntivirusToggleVisual(false, false);
+      if (avToggleLabel) {
+        avToggleLabel.textContent = "Antivirus scan status unavailable";
+      }
+    });
+
+  avToggleButton.addEventListener("click", () => {
+    const isDisabled = avToggleButton.classList.contains("av-disabled");
+    if (isDisabled) return;
+
+    const currentlyOn = avToggleButton.classList.contains("av-on");
+    const newValue = !currentlyOn;
+
+    fetch(`${webroot}/api/antivirus`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled: newValue }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Antivirus updated state:", data);
+        const available = !!data.available;
+        const enabled = !!data.enabled;
+        setAntivirusToggleVisual(enabled, available);
+      })
+      .catch((err) => {
+        console.error("Failed to update antivirus state:", err);
+        // On error, do not visually toggle
+      });
+  });
+}
+
+function createAntivirusToggle() {
+  injectAvToggleStyles();
+
+  const form = document.querySelector("form");
+  if (!form) return;
+  if (document.getElementById("av-toggle-wrapper")) return;
+
+  const wrapper = document.createElement("div");
+  wrapper.id = "av-toggle-wrapper";
+  wrapper.className = "av-toggle-wrapper";
+
+  const labelSpan = document.createElement("span");
+  labelSpan.id = "av-toggle-label";
+  labelSpan.className = "av-toggle-label";
+  labelSpan.textContent = "Enable antivirus scan";
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.id = "av-toggle";
+  button.className = "av-toggle-switch";
+  button.setAttribute("role", "switch");
+  button.setAttribute("aria-pressed", "false");
+  button.setAttribute("aria-disabled", "true");
+
+  wrapper.appendChild(labelSpan);
+  wrapper.appendChild(button);
+
+  // Insert at top of form so it's visible above dropzone
+  form.insertBefore(wrapper, form.firstChild);
+
+  avToggleButton = button;
+  avToggleLabel = labelSpan;
+
+  initAntivirusToggleState();
+}
+
+// Create the toggle as soon as script runs
+createAntivirusToggle();
+
+// ─────────────────────────────────────
+// Existing upload UI logic
+// ─────────────────────────────────────
+
 dropZone.addEventListener("dragover", (e) => {
   e.preventDefault();
   dropZone.classList.add("dragover");
@@ -325,10 +505,18 @@ const uploadFile = (file) => {
 
 const formConvert = document.querySelector(`form[action='${webroot}/convert']`);
 
-formConvert.addEventListener("submit", () => {
-  const hiddenInput = document.querySelector("input[name='file_names']");
-  hiddenInput.value = JSON.stringify(fileNames);
-});
+if (formConvert) {
+  formConvert.addEventListener("submit", () => {
+    console.log("Submitting convert form with files:", fileNames);
+    const hiddenInput = document.querySelector("input[name='file_names']");
+    if (hiddenInput) {
+      hiddenInput.value = JSON.stringify(fileNames);
+    } else {
+      console.warn(
+        "Hidden input 'file_names' not found – form will submit without it.",
+      );
+    }
+  });
+}
 
 updateSearchBar();
-
