@@ -28,9 +28,18 @@ function injectAvToggleStyles() {
       margin-bottom: 0.75rem;
       font-size: 0.9rem;
     }
+
+    /* Light theme (default) */
     .av-toggle-label {
-      color: #04070eff;
+      color: #04070e;
+      transition: color 0.15s ease;
     }
+
+    /* Dark theme: make label white */
+    html[data-theme="dark"] .av-toggle-label {
+      color: #ffffff;
+    }
+
     .av-toggle-switch {
       position: relative;
       width: 42px;
@@ -180,7 +189,7 @@ function createAntivirusToggle() {
   initAntivirusToggleState();
 }
 
-// Create the toggle as soon as script runs
+// Create the antivirus toggle as soon as script runs
 createAntivirusToggle();
 
 // ─────────────────────────────────────
@@ -520,3 +529,102 @@ if (formConvert) {
 }
 
 updateSearchBar();
+
+/* ------------------------------------------------------------------
+ * Theme toggle (Light / Dark) in header, before "History"
+ * ------------------------------------------------------------------ */
+
+const THEME_STORAGE_KEY = "convertx-theme";
+
+function applyTheme(theme) {
+  const root = document.documentElement;
+  if (theme === "dark") {
+    root.setAttribute("data-theme", "dark");
+  } else {
+    root.removeAttribute("data-theme"); // original light theme
+  }
+}
+
+function initThemeFromPreference() {
+  let stored = null;
+  try {
+    stored = localStorage.getItem(THEME_STORAGE_KEY);
+  } catch (e) {
+    // ignore
+  }
+
+  const initial =
+    stored === "dark" || stored === "light" ? stored : "light";
+
+  applyTheme(initial);
+  return initial;
+}
+
+function createThemeToggle(initialTheme) {
+  if (document.querySelector(".cx-theme-toggle")) return;
+
+  const container = document.createElement("span");
+  container.className = "cx-theme-toggle";
+
+  container.innerHTML = `
+    <span class="cx-theme-toggle__label">${
+      initialTheme === "dark" ? "Dark" : "Light"
+    }</span>
+    <button
+      type="button"
+      class="cx-switch ${initialTheme === "dark" ? "cx-switch--on" : ""}"
+      aria-label="Toggle dark mode"
+    >
+      <span class="cx-switch__thumb"></span>
+    </button>
+  `;
+
+  const switchEl = container.querySelector(".cx-switch");
+  const labelEl = container.querySelector(".cx-theme-toggle__label");
+
+  switchEl.addEventListener("click", () => {
+    const isDark =
+      document.documentElement.getAttribute("data-theme") === "dark";
+    const newTheme = isDark ? "light" : "dark";
+
+    applyTheme(newTheme);
+
+    if (newTheme === "dark") {
+      switchEl.classList.add("cx-switch--on");
+      labelEl.textContent = "Dark";
+    } else {
+      switchEl.classList.remove("cx-switch--on");
+      labelEl.textContent = "Light";
+    }
+
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+    } catch (e) {
+      // ignore
+    }
+  });
+
+  // Insert in header before the "History" link
+  const links = Array.from(document.querySelectorAll("header a, nav a"));
+  const historyLink = links.find(
+    (a) => a.textContent.trim() === "History",
+  );
+
+  if (historyLink && historyLink.parentNode) {
+    historyLink.parentNode.insertBefore(container, historyLink);
+  } else {
+    const header = document.querySelector("header");
+    if (header) {
+      header.appendChild(container);
+    } else {
+      document.body.appendChild(container);
+    }
+  }
+}
+
+// Initialise theme toggle once DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+  const initialTheme = initThemeFromPreference();
+  createThemeToggle(initialTheme);
+});
+
