@@ -16,6 +16,8 @@ import {
 } from "../helpers/env";
 import { FIRST_RUN, userService } from "./user";
 
+type JwtUser = { id: string; role: string } & JWTPayloadSpec;
+
 export const root = new Elysia().use(userService).get(
   "/",
   async ({ jwt, redirect, cookie: { auth, jobId } }) => {
@@ -30,18 +32,23 @@ export const root = new Elysia().use(userService).get(
     }
 
     // validate jwt
-    let user: ({ id: string } & JWTPayloadSpec) | false = false;
+    let user: JwtUser | null = null;
+
     if (ALLOW_UNAUTHENTICATED) {
+      // unauthenticated / guest mode
       const newUserId = String(
         UNAUTHENTICATED_USER_SHARING
           ? 0
           : randomInt(2 ** 24, Math.min(2 ** 48 + 2 ** 24 - 1, Number.MAX_SAFE_INTEGER)),
       );
+
       const accessToken = await jwt.sign({
         id: newUserId,
+        role: "user",
       });
 
-      user = { id: newUserId };
+      user = { id: newUserId, role: "user" } as JwtUser;
+
       if (!auth) {
         return {
           message: "No auth cookie, perhaps your browser is blocking cookies.",
@@ -57,10 +64,14 @@ export const root = new Elysia().use(userService).get(
         sameSite: "strict",
       });
     } else if (auth?.value) {
-      user = await jwt.verify(auth.value);
+      const decoded = await jwt.verify(auth.value);
+
+      if (decoded && typeof decoded === "object" && "id" in decoded && "role" in decoded) {
+        user = decoded as JwtUser;
+      }
 
       if (
-        user !== false &&
+        user &&
         user.id &&
         (Number.parseInt(user.id) < 2 ** 24 || !ALLOW_UNAUTHENTICATED)
       ) {
@@ -82,27 +93,31 @@ export const root = new Elysia().use(userService).get(
 
     // create a new job
     db.query("INSERT INTO jobs (user_id, date_created) VALUES (?, ?)").run(
-      user.id,
+      Number.parseInt(user.id),
       new Date().toISOString(),
     );
 
-    const { id } = db
-      .query("SELECT id FROM jobs WHERE user_id = ? ORDER BY id DESC")
-      .get(user.id) as { id: number };
+    const newJob = db.query("SELECT last_insert_rowid() AS id").get() as { id: number };
 
     if (!jobId) {
       return { message: "Cookies should be enabled to use this app." };
     }
 
     jobId.set({
-      value: id,
+      value: newJob.id.toString(),
       httpOnly: true,
       secure: !HTTP_ALLOWED,
       maxAge: 24 * 60 * 60,
       sameSite: "strict",
     });
 
-    console.log("jobId set to:", id);
+    console.log("jobId set to:", newJob.id);
+
+    const converters = await getAllTargets();
+
+    const storedJobs = db.query(
+      "SELECT jobs.*, users.email FROM jobs INNER JOIN users ON jobs.user_id = users.id ORDER BY jobs.date_created DESC",
+    ).all() as (User & { date_created: string; num_files: number; status: string })[];
 
     return (
       <BaseHtml webroot={WEBROOT}>
@@ -174,7 +189,7 @@ export const root = new Elysia().use(userService).get(
                       sm:h-[30vh]
                     `}
                   >
-                    {Object.entries(getAllTargets()).map(([converter, targets]) => (
+                    {Object.entries(converters).map(([converter, targets]) => (
                       <article
                         class={`
                           convert_to_group flex w-full flex-col border-b border-neutral-700 p-4
@@ -187,7 +202,7 @@ export const root = new Elysia().use(userService).get(
                         <ul class={`convert_to_target flex flex-row flex-wrap gap-1`}>
                           {targets.map((target) => (
                             <button
-                              // https://stackoverflow.com/questions/121499/when-a-blur-event-occurs-how-can-i-find-out-which-element-focus-went-to#comment82388679_33325953
+                              // https://stackoverflow.com/quest...-i-find-out-which-element-focus-went-to#comment82388679_33325953
                               tabindex={0}
                               class={`
                                 target rounded bg-neutral-700 p-1 text-base
@@ -212,7 +227,7 @@ export const root = new Elysia().use(userService).get(
                     <option selected disabled value="">
                       Convert to
                     </option>
-                    {Object.entries(getAllTargets()).map(([converter, targets]) => (
+                    {Object.entries(converters).map(([converter, targets]) => (
                       <optgroup label={converter}>
                         {targets.map((target) => (
                           <option value={`${target},${converter}`} safe>
@@ -247,3 +262,4 @@ export const root = new Elysia().use(userService).get(
     }),
   },
 );
+
