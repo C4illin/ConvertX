@@ -8,38 +8,90 @@ import {
   setAntivirusEnabled,
 } from "../helpers/avToggle";
 
+/**
+ * Antivirus toggle API
+ *
+ * GET  /api/antivirus  (auth required)
+ *   -> { available: boolean, enabled: boolean }
+ *
+ * POST /api/antivirus  (auth required)
+ *   body: { enabled: boolean }
+ *   -> { available: boolean, enabled: boolean }
+ *
+ * - `available` reflects CLAMAV_URL (via isAntivirusAvailable()).
+ * - `enabled` is the global effective flag used by upload.tsx.
+ */
 export const antivirus = new Elysia()
   .use(userService)
-  // Get current AV status
-  .get("/api/antivirus", () => {
-    const available = isAntivirusAvailable();
-    const enabled = isAntivirusEnabled();
-    return { available, enabled };
-  })
-  // Update AV status
+
+  // Read current antivirus state
+  .get(
+    "/api/antivirus",
+    () => {
+      const available = isAntivirusAvailable();
+      const enabled = isAntivirusEnabled();
+
+      console.log(
+        "[Antivirus API][GET] available:",
+        available,
+        "enabled:",
+        enabled,
+      );
+
+      return { available, enabled };
+    },
+    {
+      // 🔒 Only logged-in users should see global AV state
+      auth: true,
+    },
+  )
+
+  // Update antivirus state (enable/disable)
   .post(
     "/api/antivirus",
     ({ body }) => {
-      const { enabled } = body;
+      const requested = Boolean(body.enabled);
+      const available = isAntivirusAvailable();
 
-      if (!isAntivirusAvailable()) {
-        // CLAMAV_URL missing: force disabled and report unavailable
+      console.log(
+        "[Antivirus API][POST] requested enabled=",
+        requested,
+        "available=",
+        available,
+      );
+
+      // If AV is not available (CLAMAV_URL missing), force disabled
+      if (!available) {
+        console.warn(
+          "[Antivirus API][POST] CLAMAV_URL not configured. Refusing to enable antivirus.",
+        );
         return {
           available: false,
           enabled: false,
         };
       }
 
-      setAntivirusEnabled(Boolean(enabled));
+      // Persist the new state
+      setAntivirusEnabled(requested);
+
+      const effectiveEnabled = isAntivirusEnabled();
+
+      console.log(
+        "[Antivirus API][POST] effective enabled=",
+        effectiveEnabled,
+      );
 
       return {
         available: true,
-        enabled: isAntivirusEnabled(),
+        enabled: effectiveEnabled,
       };
     },
     {
       body: t.Object({
         enabled: t.Boolean(),
       }),
+      // 🔒 Only logged-in users can change global AV setting
+      auth: true,
     },
   );
+
