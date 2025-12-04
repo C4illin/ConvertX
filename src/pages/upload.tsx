@@ -1,9 +1,12 @@
+// src/pages/upload.tsx
+
 import { Elysia, t } from "elysia";
 import db from "../db/db";
 import { WEBROOT, CLAMAV_URL } from "../helpers/env";
 import { uploadsDir } from "../index";
 import { userService } from "./user";
 import sanitize from "sanitize-filename";
+import { isAntivirusEnabled } from "../helpers/avToggle";
 
 type ClamAvResultItem = {
   name: string;
@@ -23,8 +26,22 @@ type ClamAvResponse = {
  * Returns { infected: boolean, viruses: string[] } and logs everything.
  */
 async function scanFileWithClamAV(file: any, fileName: string) {
+  // 🔀 Respect toggle + CLAMAV_URL availability
+  if (!isAntivirusEnabled()) {
+    console.log(
+      "[ClamAV] Antivirus disabled (toggle off or CLAMAV_URL unset). Skipping scan for",
+      fileName,
+    );
+    return {
+      infected: false,
+      viruses: [] as string[],
+    };
+  }
+
   if (!CLAMAV_URL) {
-    console.error("[ClamAV] CLAMAV_URL is not configured, skipping scan.");
+    console.error(
+      "[ClamAV] CLAMAV_URL is not configured, but antivirus was considered enabled. Skipping scan.",
+    );
     return {
       infected: false,
       viruses: [] as string[],
@@ -161,7 +178,12 @@ export const upload = new Elysia()
         for (const file of files) {
           const originalName = (file as any).name ?? "upload";
           const sanitizedFileName = sanitize(originalName) || "file";
-          console.log("[Upload] Handling file:", originalName, "=> sanitized:", sanitizedFileName);
+          console.log(
+            "[Upload] Handling file:",
+            originalName,
+            "=> sanitized:",
+            sanitizedFileName,
+          );
 
           // 1) Scan with ClamAV REST API (use original name just for logging / AV metadata)
           const scan = await scanFileWithClamAV(file, originalName);
@@ -216,4 +238,3 @@ export const upload = new Elysia()
       auth: true,
     },
   );
-
