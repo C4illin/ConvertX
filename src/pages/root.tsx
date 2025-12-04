@@ -5,7 +5,6 @@ import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import { getAllTargets } from "../converters/main";
 import db from "../db/db";
-import { User } from "../db/types";
 import {
   ACCOUNT_REGISTRATION,
   ALLOW_UNAUTHENTICATED,
@@ -76,7 +75,7 @@ export const root = new Elysia().use(userService).get(
         (Number.parseInt(user.id) < 2 ** 24 || !ALLOW_UNAUTHENTICATED)
       ) {
         // Make sure user exists in db
-        const existingUser = db.query("SELECT * FROM users WHERE id = ?").as(User).get(user.id);
+        const existingUser = db.query("SELECT * FROM users WHERE id = ?").get(user.id);
 
         if (!existingUser) {
           if (auth?.value) {
@@ -114,10 +113,6 @@ export const root = new Elysia().use(userService).get(
     console.log("jobId set to:", newJob.id);
 
     const converters = await getAllTargets();
-
-    const storedJobs = db.query(
-      "SELECT jobs.*, users.email FROM jobs INNER JOIN users ON jobs.user_id = users.id ORDER BY jobs.date_created DESC",
-    ).all() as (User & { date_created: string; num_files: number; status: string })[];
 
     return (
       <BaseHtml webroot={WEBROOT}>

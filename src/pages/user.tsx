@@ -1018,12 +1018,16 @@ export const user = new Elysia()
         }
       }
 
-      // delete this user's jobs and files (to avoid FK issues)
-      db.query(
-        "DELETE FROM file_names WHERE job_id IN (SELECT id FROM jobs WHERE user_id = ?)",
-      ).run(targetId);
-      db.query("DELETE FROM jobs WHERE user_id = ?").run(targetId);
-      db.query("DELETE FROM users WHERE id = ?").run(targetId);
+      // delete this user's jobs and files (to avoid FK issues) in a single transaction
+      const deleteUserTx = db.transaction((id: number) => {
+        db.query(
+          "DELETE FROM file_names WHERE job_id IN (SELECT id FROM jobs WHERE user_id = ?)",
+        ).run(id);
+        db.query("DELETE FROM jobs WHERE user_id = ?").run(id);
+        db.query("DELETE FROM users WHERE id = ?").run(id);
+      });
+
+      deleteUserTx(targetId);
 
       return redirect(`${WEBROOT}/account`, 302);
     },
