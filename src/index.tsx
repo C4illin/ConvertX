@@ -18,6 +18,7 @@ import { root } from "./pages/root";
 import { upload } from "./pages/upload";
 import { user } from "./pages/user";
 import { healthcheck } from "./pages/healthcheck";
+import { antivirus } from "./pages/antivirus"; // 👈 NEW
 
 export const uploadsDir = "./data/uploads/";
 export const outputDir = "./data/output/";
@@ -50,6 +51,7 @@ const app = new Elysia({
   .use(listConverters)
   .use(chooseConverter)
   .use(healthcheck)
+  .use(antivirus) // 👈 register the antivirus toggle API
   .onError(({ error }) => {
     console.error(error);
   });
@@ -67,13 +69,19 @@ if (process.env.NODE_ENV !== "production") {
 
 app.listen(3000);
 
-console.log(`🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}${WEBROOT}`);
+console.log(
+  `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}${WEBROOT}`,
+);
 
 const clearJobs = () => {
   const jobs = db
     .query("SELECT * FROM jobs WHERE date_created < ?")
     .as(Jobs)
-    .all(new Date(Date.now() - AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000).toISOString());
+    .all(
+      new Date(
+        Date.now() - AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000,
+      ).toISOString(),
+    );
 
   for (const job of jobs) {
     // delete the directories

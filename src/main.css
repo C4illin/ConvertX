@@ -5,6 +5,7 @@
 
 @theme {
   --color-contrast: var(--contrast);
+
   --color-neutral-900: var(--neutral-900);
   --color-neutral-800: var(--neutral-800);
   --color-neutral-700: var(--neutral-700);
@@ -14,19 +15,24 @@
   --color-neutral-300: var(--neutral-300);
   --color-neutral-200: var(--neutral-200);
   --color-neutral-100: var(--neutral-100);
+
   --color-accent-600: var(--accent-600);
   --color-accent-500: var(--accent-500);
   --color-accent-400: var(--accent-400);
 }
 
+/* Article container (Convert box, history rows, etc.) */
 @utility article {
   @apply px-2 sm:px-4 py-4 mb-4 bg-neutral-800/40 w-full mx-auto max-w-4xl rounded-sm;
 }
 
+/* Primary button (Convert) */
 @utility btn-primary {
   @apply bg-accent-500 text-contrast rounded-sm p-2 sm:p-4 hover:bg-accent-400 cursor-pointer transition-colors;
 }
 
+/* Secondary button */
 @utility btn-secondary {
   @apply bg-neutral-400 text-contrast rounded-sm p-2 sm:p-4 hover:bg-neutral-300 cursor-pointer transition-colors;
 }
+
