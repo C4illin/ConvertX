@@ -35,7 +35,7 @@ export const BaseHtml = ({
         `}
       </script>
 
-      {/* FIXED: Correct JSX syntax for CSS path */}
+      {/* CSS */}
       <link rel="stylesheet" href={`${webroot}/generated.css`} />
 
       {/* Icons */}
@@ -77,4 +77,3 @@ export const BaseHtml = ({
     </body>
   </html>
 );
-
