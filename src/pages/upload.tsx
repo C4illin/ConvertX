@@ -1,5 +1,3 @@
-// src/pages/upload.tsx
-
 import { Elysia, t } from "elysia";
 import db from "../db/db";
 import { WEBROOT, CLAMAV_URL } from "../helpers/env";
@@ -25,7 +23,7 @@ type ClamAvResponse = {
  * Send a file to ClamAV REST API (benzino77/clamav-rest-api).
  * Returns { infected: boolean, viruses: string[] } and logs everything.
  */
-async function scanFileWithClamAV(file: any, fileName: string) {
+async function scanFileWithClamAV(file: File, fileName: string) {
   // 🔀 Respect toggle + CLAMAV_URL availability
   if (!isAntivirusEnabled()) {
     console.log(
@@ -48,21 +46,9 @@ async function scanFileWithClamAV(file: any, fileName: string) {
     };
   }
 
-  const FormDataCtor = (globalThis as any).FormData as
-    | (new () => { append: (name: string, value: any, fileName?: string) => void })
-    | undefined;
-
-  if (!FormDataCtor) {
-    console.error("[ClamAV] FormData is not available in this runtime, skipping scan.");
-    return {
-      infected: false,
-      viruses: [] as string[],
-    };
-  }
-
   console.log("[ClamAV] Scanning file:", fileName, "via", CLAMAV_URL);
 
-  const formData = new FormDataCtor();
+  const formData = new FormData();
   formData.append("FILES", file, fileName);
 
   let rawText = "";
@@ -71,7 +57,7 @@ async function scanFileWithClamAV(file: any, fileName: string) {
   try {
     const res = await fetch(CLAMAV_URL, {
       method: "POST",
-      body: formData as any,
+      body: formData,
     });
 
     status = res.status;
@@ -175,9 +161,16 @@ export const upload = new Elysia()
 
         const infectedFiles: { name: string; viruses: string[] }[] = [];
 
-        for (const file of files) {
-          const originalName = (file as any).name ?? "upload";
-          const sanitizedFileName = sanitize(originalName) || "file";
+        for (const file of files as File[]) {
+          const originalName = file.name ?? "upload";
+
+          // Sanitize first; if result is empty, generate a unique fallback
+          const baseSanitized = sanitize(originalName);
+          const sanitizedFileName =
+            baseSanitized && baseSanitized.trim().length > 0
+              ? baseSanitized
+              : `file_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
           console.log(
             "[Upload] Handling file:",
             originalName,
@@ -203,7 +196,7 @@ export const upload = new Elysia()
             continue;
           }
 
-          // 2) Only save if clean, with sanitized filename
+          // 2) Only save if clean, with sanitized (or unique-fallback) filename
           const targetPath = `${userUploadsDir}${sanitizedFileName}`;
           console.log("[Upload] Saving clean file to:", targetPath);
           await Bun.write(targetPath, file);
@@ -238,4 +231,3 @@ export const upload = new Elysia()
       auth: true,
     },
   );
-

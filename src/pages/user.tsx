@@ -536,8 +536,8 @@ export const user = new Elysia()
                         <table
                           class={`
                             w-full table-auto rounded bg-neutral-900
-                            [&_th]:border-b [&_th]:border-neutral-800 [&_th]:p-2
                             [&_td]:border-b [&_td]:border-neutral-800 [&_td]:p-2
+                            [&_th]:border-b [&_th]:border-neutral-800 [&_th]:p-2
                           `}
                         >
                           <thead>
@@ -566,7 +566,10 @@ export const user = new Elysia()
                                       />
                                       <button
                                         type="submit"
-                                        class="inline-flex items-center justify-center text-accent-400 hover:text-accent-300"
+                                        class={`
+                                          inline-flex items-center justify-center text-accent-400
+                                          hover:text-accent-500
+                                        `}
                                         title="Edit user"
                                       >
                                         <svg
@@ -598,7 +601,10 @@ export const user = new Elysia()
                                       />
                                       <button
                                         type="submit"
-                                        class="inline-flex items-center justify-center text-accent-400 hover:text-accent-300"
+                                        class={`
+                                          inline-flex items-center justify-center text-accent-400
+                                          hover:text-accent-500
+                                        `}
                                         title="Delete user"
                                       >
                                         <svg
@@ -671,6 +677,7 @@ export const user = new Elysia()
       }
 
       const fields: string[] = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const values: any[] = [];
 
       if (body.email) {
@@ -822,7 +829,13 @@ export const user = new Elysia()
                     it unchanged.
                   </p>
                 </header>
-                <form method="post" action={`${WEBROOT}/account/edit-user`} class="flex flex-col gap-4">
+                <form
+                  method="post"
+                  action={`${WEBROOT}/account/edit-user`}
+                  class={`
+                    flex flex-col gap-4
+                  `}
+                >
                   <input type="hidden" name="userId" value={String(targetUser.id)} />
                   <fieldset class="mb-4 flex flex-col gap-4">
                     <label class="flex flex-col gap-1">
@@ -931,6 +944,7 @@ export const user = new Elysia()
       }
 
       const fields: string[] = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const values: any[] = [];
 
       if (role === "admin" || role === "user") {
@@ -1038,4 +1052,3 @@ export const user = new Elysia()
       cookie: "session",
     },
   );
-
