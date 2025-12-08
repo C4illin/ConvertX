@@ -59,7 +59,7 @@ describe("convert", () => {
 
   test("should reject if execFile returns an error", async () => {
     mockExecFile = (cmd, args, callback) => callback(new Error("fail"), "", "");
-    expect(
+    await expect(
       convert("input.md", "markdown", "html", "output.html", undefined, mockExecFile),
     ).rejects.toMatch(/error: Error: fail/);
   });
