@@ -51,7 +51,7 @@ describe("convert", () => {
 
   test("should reject if execFile returns an error", async () => {
     mockExecFile = (cmd, args, callback) => callback(new Error("fail"), "", "stderr output");
-    expect(
+    await expect(
       convert("input.png", "png", "svg", "output.svg", undefined, mockExecFile),
     ).rejects.toMatch(/error: Error: fail\nstderr: stderr output/);
   });

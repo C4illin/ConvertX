@@ -55,7 +55,7 @@ describe("convert", () => {
 
   test("should reject if execFile returns an error", async () => {
     mockExecFile = (cmd, args, callback) => callback(new Error("fail"), "", "");
-    expect(
+    await expect(
       convert("input.yaml", "yaml", "json", "output.json", undefined, mockExecFile),
     ).rejects.toMatch(/error: Error: fail/);
   });
@@ -63,7 +63,7 @@ describe("convert", () => {
   test("should reject if writeFile fails", async () => {
     // @ts-expect-error: property __promisify__ is missing
     fs.writeFile = (path, data, cb) => cb(new Error("write fail"));
-    expect(
+    await expect(
       convert("input.yaml", "yaml", "json", "output.json", undefined, (cmd, args, cb) =>
         cb(null, "output-data", ""),
       ),
