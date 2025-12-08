@@ -108,16 +108,16 @@ test("strips leading './' from outdir", async () => {
 // --- promise settlement ------------------------------------------------------
 test("resolves with 'Done' when execFile succeeds", async () => {
   behavior = { kind: "success", stdout: "fine", stderr: "" };
-  await expect(convert("in.txt", "txt", "docx", "out/out.docx", undefined, mockExecFile)).resolves.toBe(
-    "Done",
-  );
+  await expect(
+    convert("in.txt", "txt", "docx", "out/out.docx", undefined, mockExecFile),
+  ).resolves.toBe("Done");
 });
 
 test("rejects when execFile returns an error", async () => {
   behavior = { kind: "error", message: "convert failed", stderr: "oops" };
-  await expect(convert("in.txt", "txt", "docx", "out/out.docx", undefined, mockExecFile)).rejects.toMatch(
-    /error: Error: convert failed/,
-  );
+  await expect(
+    convert("in.txt", "txt", "docx", "out/out.docx", undefined, mockExecFile),
+  ).rejects.toMatch(/error: Error: convert failed/);
 });
 
 // --- logging behavior --------------------------------------------------------
