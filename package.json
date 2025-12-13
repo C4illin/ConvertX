@@ -35,7 +35,7 @@
     "@tailwindcss/cli": "^4.1.17",
     "@tailwindcss/postcss": "^4.1.17",
     "@types/bun": "latest",
-    "@types/node": "^24.10.1",
+    "@types/node": "^25.0.0",
     "@typescript-eslint/parser": "^8.46.4",
     "eslint": "^9.39.1",
     "eslint-plugin-better-tailwindcss": "^3.7.10",
