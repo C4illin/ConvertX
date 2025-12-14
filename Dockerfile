@@ -74,9 +74,19 @@ RUN apt-get update && apt-get install -y \
   texlive-latex-extra \
   texlive-latex-recommended \
   texlive-xetex \
+  texlive-lang-chinese \         
+  fonts-noto-cjk \               
+  fonts-wqy-zenhei \             
+  fonts-wqy-microhei \          
+  fonts-arphic-ukai \          
+  fonts-arphic-uming \        
   --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
+RUN mkdir -p /usr/share/fonts/truetype/chinese && \
+    ln -sf /usr/share/fonts/truetype/noto /usr/share/fonts/truetype/chinese/noto && \
+    fc-cache -f -v
+  
 # Install VTracer binary
 RUN ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
