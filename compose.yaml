@@ -5,6 +5,7 @@ services:
       # dockerfile: Debian.Dockerfile
     volumes:
       - ./data:/app/data
+      # - /usr/share/fonts/truetype/chinese:/usr/share/fonts/truetype/chinese:ro # mount Chinese fonts from host (optional)
     environment: # Defaults are listed below. All are optional.
       - ACCOUNT_REGISTRATION=true # true or false, doesn't matter for the first account (e.g. keep this to false if you only want one account)
       - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234 # will use randomUUID() by default
@@ -16,5 +17,8 @@ services:
       # - HIDE_HISTORY=true # hides the history tab in the web interface, defaults to false
       - TZ=Europe/Stockholm # set your timezone, defaults to UTC
       # - UNAUTHENTICATED_USER_SHARING=true # for use with ALLOW_UNAUTHENTICATED=true to share history with all unauthenticated users / devices
+      # - PANDOC_ENABLE_CHINESE_FONT=true # enable Chinese font support for Pandoc PDF/LaTeX conversion
+      # - PANDOC_CHINESE_FONT_PATH=/usr/share/fonts/truetype/chinese # path to Chinese font directory on host
+      # - PANDOC_CHINESE_FONT_FAMILY=NotoSansCJK # Chinese font family name
     ports:
       - 3000:3000

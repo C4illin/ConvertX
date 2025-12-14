@@ -23,3 +23,10 @@ export const MAX_CONVERT_PROCESS =
 
 export const UNAUTHENTICATED_USER_SHARING =
   process.env.UNAUTHENTICATED_USER_SHARING?.toLowerCase() === "true" || false;
+
+export const PANDOC_ENABLE_CHINESE_FONT =
+  process.env.PANDOC_ENABLE_CHINESE_FONT?.toLowerCase() === "true" || false;
+
+export const PANDOC_CHINESE_FONT_PATH = process.env.PANDOC_CHINESE_FONT_PATH || "";
+
+export const PANDOC_CHINESE_FONT_FAMILY = process.env.PANDOC_CHINESE_FONT_FAMILY || "SimSun";
