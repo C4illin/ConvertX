@@ -1,4 +1,6 @@
 name: Bump Version
+permissions:
+  contents: write
 
 on:
   push:
