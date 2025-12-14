@@ -93,7 +93,8 @@ All are optional, JWT_SECRET is recommended to be set.
 | ALLOW_UNAUTHENTICATED        | false                                              | Allow unauthenticated users to use the service, only set this to true locally                                             |
 | AUTO_DELETE_EVERY_N_HOURS    | 24                                                 | Checks every n hours for files older then n hours and deletes them, set to 0 to disable                                   |
 | WEBROOT                      |                                                    | The address to the root path setting this to "/convert" will serve the website on "example.com/convert/"                  |
-| FFMPEG_ARGS                  |                                                    | Arguments to pass to ffmpeg, e.g. `-preset veryfast`                                                                      |
+| FFMPEG_ARGS                  |                                                    | Arguments to pass to the input file of ffmpeg, e.g. `-hwaccel vaapi`                                                      |
+| FFMPEG_OUTPUT_ARGS           |                                                    | Arguments to pass to the output of ffmpeg, e.g. `-preset veryfast`                                                        |
 | HIDE_HISTORY                 | false                                              | Hide the history page                                                                                                     |
 | LANGUAGE                     | en                                                 | Language to format date strings in, specified as a [BCP 47 language tag](https://en.wikipedia.org/wiki/IETF_language_tag) |
 | UNAUTHENTICATED_USER_SHARING | false                                              | Shares conversion history between all unauthenticated users                                                               |
