@@ -699,7 +699,7 @@ export async function convert(
   let message = "Done";
 
   if (convertTo === "ico") {
-    // make sure image is 256x256 or smaller
+    // Make sure image is 256x256 or smaller
     extraArgs = [
       "-filter:v",
       "scale='min(256,iw)':min'(256,ih)':force_original_aspect_ratio=decrease",
@@ -708,7 +708,7 @@ export async function convert(
   }
 
   if (convertTo.split(".").length > 1) {
-    // support av1.mkv and av1.mp4 and h265.mp4 etc.
+    // Support av1.mkv and av1.mp4 and h265.mp4 etc.
     const split = convertTo.split(".");
     const codec_short = split[0];
 
@@ -734,7 +734,7 @@ export async function convert(
   return new Promise((resolve, reject) => {
     execFile(
       "ffmpeg",
-      [...ffmpegArgs, "-i", filePath, ...extraArgs, targetPath],
+      ["-i", filePath, ...ffmpegArgs, ...extraArgs, targetPath],
       (error, stdout, stderr) => {
         if (error) {
           reject(`error: ${error}`);
