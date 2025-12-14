@@ -135,7 +135,7 @@ test("respects FFMPEG_ARGS", async () => {
 
   console.log = originalConsoleLog;
 
-  expect(calls[0]?.slice(2, 4)).toEqual(["-hide_banner", "-y"]);
+  expect(calls[0]?.slice(0, 2)).toEqual(["-hide_banner", "-y"]);
   expect(loggedMessage).toBe("stdout: Fake stdout");
 });
 
