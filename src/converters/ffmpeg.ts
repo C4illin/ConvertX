@@ -730,11 +730,14 @@ export async function convert(
 
   // Parse FFMPEG_ARGS environment variable into array
   const ffmpegArgs = process.env.FFMPEG_ARGS ? process.env.FFMPEG_ARGS.split(/\s+/) : [];
+  const ffmpegOutputArgs = process.env.FFMPEG_OUTPUT_ARGS
+    ? process.env.FFMPEG_OUTPUT_ARGS.split(/\s+/)
+    : [];
 
   return new Promise((resolve, reject) => {
     execFile(
       "ffmpeg",
-      ["-i", filePath, ...ffmpegArgs, ...extraArgs, targetPath],
+      [...ffmpegArgs, "-i", filePath, ...ffmpegOutputArgs, ...extraArgs, targetPath],
       (error, stdout, stderr) => {
         if (error) {
           reject(`error: ${error}`);
