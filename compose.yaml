@@ -18,7 +18,7 @@ services:
       - TZ=Europe/Stockholm # set your timezone, defaults to UTC
       # - UNAUTHENTICATED_USER_SHARING=true # for use with ALLOW_UNAUTHENTICATED=true to share history with all unauthenticated users / devices
       # - PANDOC_ENABLE_CHINESE_FONT=true # enable Chinese font support for Pandoc PDF/LaTeX conversion
-      # - PANDOC_CHINESE_FONT_PATH=/usr/share/fonts/truetype/chinese # path to Chinese font directory on host
+      # - PANDOC_CHINESE_FONT_PATH=/usr/share/fonts/truetype/chinese # path to Chinese font directory in container (mount fonts via volumes above)
       # - PANDOC_CHINESE_FONT_FAMILY=NotoSansCJK # Chinese font family name
     ports:
       - 3000:3000
