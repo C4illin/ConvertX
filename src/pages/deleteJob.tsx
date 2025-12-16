@@ -29,7 +29,7 @@ export const deleteJob = new Elysia().use(userService).get(
     });
 
     // delete the job
-    db.query("DELETE FROM jobs WHERE id = ?").run(job.id);
+    db.query("DELETE FROM jobs WHERE id = ? AND user_id = ?").run(job.id, user.id);
     return redirect(`${WEBROOT}/history`, 302);
   },
   {

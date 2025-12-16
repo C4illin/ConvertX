@@ -2,6 +2,7 @@ import { unlink } from "node:fs/promises";
 import { Elysia, t } from "elysia";
 import { uploadsDir } from "..";
 import db from "../db/db";
+import { Jobs } from "../db/types";
 import { WEBROOT } from "../helpers/env";
 import { userService } from "./user";
 
@@ -12,8 +13,9 @@ export const deleteFile = new Elysia().use(userService).post(
       return redirect(`${WEBROOT}/`, 302);
     }
 
-    const existingJob = await db
+    const existingJob = db
       .query("SELECT * FROM jobs WHERE id = ? AND user_id = ?")
+      .as(Jobs)
       .get(jobId.value, user.id);
 
     if (!existingJob) {
