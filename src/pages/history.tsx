@@ -48,6 +48,17 @@ export const history = new Elysia().use(userService).get(
           >
             <article class="article">
               <h1 class="mb-4 text-xl">Results</h1>
+              <div id="delete-selected-container" class="mb-4 hidden">
+                <button
+                  id="delete-selected-btn"
+                  class={`
+                    rounded bg-red-600 px-4 py-2 text-white transition-colors
+                    hover:bg-red-700
+                  `}
+                >
+                  Delete Selected (<span id="selected-count">0</span>)
+                </button>
+              </div>
               <table
                 class={`
                   w-full table-auto overflow-y-auto rounded bg-neutral-900 text-left
@@ -57,6 +68,19 @@ export const history = new Elysia().use(userService).get(
               >
                 <thead>
                   <tr>
+                    <th
+                      class={`
+                        px-2 py-2
+                        sm:px-4
+                      `}
+                    >
+                      <input
+                        type="checkbox"
+                        id="select-all"
+                        class="h-4 w-4 cursor-pointer"
+                        title="Select all"
+                      />
+                    </th>
                     <th
                       class={`
                         px-2 py-2
@@ -112,6 +136,13 @@ export const history = new Elysia().use(userService).get(
                   {userJobs.map((job) => (
                     <>
                       <tr id={`job-row-${job.id}`}>
+                        <td>
+                          <input
+                            type="checkbox"
+                            class="job-checkbox h-4 w-4 cursor-pointer"
+                            data-job-id={job.id}
+                          />
+                        </td>
                         <td class="job-details-toggle cursor-pointer" data-job-id={job.id}>
                           <svg
                             id={`arrow-${job.id}`}
@@ -159,7 +190,7 @@ export const history = new Elysia().use(userService).get(
                         </td>
                       </tr>
                       <tr id={`details-${job.id}`} class="hidden">
-                        <td colspan="6">
+                        <td colspan="7">
                           <div class="p-2 text-sm text-neutral-500">
                             <div class="mb-1 font-semibold">Detailed File Information:</div>
                             {job.files_detailed.map((file: Filename) => (
@@ -196,25 +227,91 @@ export const history = new Elysia().use(userService).get(
           <script>
             {`
               document.addEventListener('DOMContentLoaded', () => {
+                // Expand/collapse job details
                 const toggles = document.querySelectorAll('.job-details-toggle');
                 toggles.forEach(toggle => {
                   toggle.addEventListener('click', function() {
                     const jobId = this.dataset.jobId;
                     const detailsRow = document.getElementById(\`details-\${jobId}\`);
-                    // The arrow SVG itself has the ID arrow-\${jobId}
                     const arrow = document.getElementById(\`arrow-\${jobId}\`);
 
                     if (detailsRow && arrow) {
                       detailsRow.classList.toggle("hidden");
                       if (detailsRow.classList.contains("hidden")) {
-                        // Right-facing arrow (collapsed)
                         arrow.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />';
                       } else {
-                        // Down-facing arrow (expanded)
                         arrow.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />';
                       }
                     }
                   });
+                });
+
+                // Checkbox management
+                const selectAllCheckbox = document.getElementById('select-all');
+                const jobCheckboxes = document.querySelectorAll('.job-checkbox');
+                const deleteSelectedBtn = document.getElementById('delete-selected-btn');
+                const deleteSelectedContainer = document.getElementById('delete-selected-container');
+                const selectedCountSpan = document.getElementById('selected-count');
+
+                function updateDeleteButton() {
+                  const checkedBoxes = Array.from(jobCheckboxes).filter(cb => cb.checked);
+                  if (checkedBoxes.length > 0) {
+                    deleteSelectedContainer.classList.remove('hidden');
+                    selectedCountSpan.textContent = checkedBoxes.length;
+                  } else {
+                    deleteSelectedContainer.classList.add('hidden');
+                  }
+                }
+
+                selectAllCheckbox?.addEventListener('change', function() {
+                  jobCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                  });
+                  updateDeleteButton();
+                });
+
+                jobCheckboxes.forEach(checkbox => {
+                  checkbox.addEventListener('change', function() {
+                    const allChecked = Array.from(jobCheckboxes).every(cb => cb.checked);
+                    const someChecked = Array.from(jobCheckboxes).some(cb => cb.checked);
+                    if (selectAllCheckbox) {
+                      selectAllCheckbox.checked = allChecked;
+                      selectAllCheckbox.indeterminate = someChecked && !allChecked;
+                    }
+                    updateDeleteButton();
+                  });
+                });
+
+                deleteSelectedBtn?.addEventListener('click', async function() {
+                  const checkedBoxes = Array.from(jobCheckboxes).filter(cb => cb.checked);
+                  const jobIds = checkedBoxes.map(cb => cb.dataset.jobId);
+
+                  if (jobIds.length === 0) return;
+
+                  const confirmed = confirm(\`Are you sure you want to delete \${jobIds.length} job(s)? This action cannot be undone.\`);
+                  if (!confirmed) return;
+
+                  try {
+                    const response = await fetch('${WEBROOT}/delete-multiple', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({ jobIds }),
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success || result.deleted > 0) {
+                      alert(\`Successfully deleted \${result.deleted} job(s).\${result.failed > 0 ? \` Failed to delete \${result.failed} job(s).\` : ''}\`);
+                      window.location.reload();
+                    } else {
+                      alert('Failed to delete jobs. Please try again.');
+                    }
+                  } catch (error) {
+                    console.error('Error deleting jobs:', error);
+                    alert('An error occurred while deleting jobs. Please try again.');
+                  }
                 });
               });
             `}
