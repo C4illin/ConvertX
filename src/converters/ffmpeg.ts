@@ -687,6 +687,87 @@ export const properties = {
   },
 };
 
+// CUDA-supported codec names (as detected by ffprobe)
+const cudaSupportedCodecs = new Set(["h264", "hevc", "vp9", "vp8", "mpeg2video", "mpeg4", "av1"]);
+
+// Known image formats that should skip ffprobe (no video codec to detect)
+const imageFormats = new Set([
+  "jpg",
+  "jpeg",
+  "png",
+  "gif",
+  "bmp",
+  "webp",
+  "ico",
+  "tiff",
+  "tif",
+  "svg",
+  "avif",
+  "jxl",
+  "heic",
+  "heif",
+  "raw",
+  "cr2",
+  "nef",
+  "orf",
+  "sr2",
+  "arw",
+  "dng",
+  "psd",
+  "xcf",
+  "exr",
+  "hdr",
+]);
+
+/**
+ * Uses ffprobe to detect if the video codec in a file is supported by CUDA hardware acceleration.
+ * Returns false for image formats without probing (performance optimization).
+ * Falls back to false if probing fails (safe default).
+ */
+async function isCudaSupportedCodec(
+  filePath: string,
+  fileType: string,
+  execFile: ExecFileFn = execFileOriginal,
+): Promise<boolean> {
+  // Skip ffprobe for known image formats (no video codec to detect)
+  if (imageFormats.has(fileType.toLowerCase())) {
+    return false;
+  }
+
+  try {
+    // Wrap execFile callback in a Promise for async/await
+    const stdout = await new Promise<string>((resolve, reject) => {
+      execFile(
+        "ffprobe",
+        ["-v", "quiet", "-print_format", "json", "-show_streams", filePath],
+        (error, stdout) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+          resolve(stdout);
+        },
+      );
+    });
+
+    const probeData = JSON.parse(stdout);
+    const videoStream = probeData.streams?.find(
+      (s: { codec_type?: string }) => s.codec_type === "video",
+    );
+
+    if (!videoStream || !videoStream.codec_name) {
+      return false;
+    }
+
+    const codecName = videoStream.codec_name.toLowerCase();
+    return cudaSupportedCodecs.has(codecName);
+  } catch (error) {
+    // If probing fails, fall back to conservative approach (no CUDA)
+    console.warn(`Failed to probe codec for ${filePath}:`, error);
+    return false;
+  }
+}
+
 export async function convert(
   filePath: string,
   fileType: string,
@@ -697,6 +778,10 @@ export async function convert(
 ): Promise<string> {
   let extraArgs: string[] = [];
   let message = "Done";
+
+  // Check if hardware encoding is preferred (NVENC, VAAPI, etc.)
+  const preferHardware =
+    process.env.FFMPEG_PREFER_HARDWARE === "true" || process.env.FFMPEG_PREFER_HARDWARE === "1";
 
   if (convertTo === "ico") {
     // Make sure image is 256x256 or smaller
@@ -711,10 +796,6 @@ export async function convert(
     // Support av1.mkv and av1.mp4 and h265.mp4 etc.
     const split = convertTo.split(".");
     const codec_short = split[0];
-
-    // Check if hardware encoding is preferred (NVENC, VAAPI, etc.)
-    const preferHardware = process.env.FFMPEG_PREFER_HARDWARE === "true" ||
-                          process.env.FFMPEG_PREFER_HARDWARE === "1";
 
     switch (codec_short) {
       case "av1":
@@ -742,6 +823,18 @@ export async function convert(
 
   // Parse FFMPEG_ARGS environment variable into array
   const ffmpegArgs = process.env.FFMPEG_ARGS ? process.env.FFMPEG_ARGS.split(/\s+/) : [];
+
+  // If hardware is preferred, check if the codec supports CUDA hardware acceleration
+  // This only applies if FFMPEG_ARGS doesn't already specify a hardware accelerator
+  const hasHardwareAccel = ffmpegArgs.includes("-hwaccel");
+
+  if (preferHardware && !hasHardwareAccel) {
+    const supportsCuda = await isCudaSupportedCodec(filePath, fileType, execFile);
+    if (supportsCuda) {
+      ffmpegArgs.push("-hwaccel", "cuda");
+    }
+  }
+
   const ffmpegOutputArgs = process.env.FFMPEG_OUTPUT_ARGS
     ? process.env.FFMPEG_OUTPUT_ARGS.split(/\s+/)
     : [];
