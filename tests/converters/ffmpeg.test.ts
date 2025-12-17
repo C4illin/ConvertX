@@ -1,5 +1,5 @@
 import { beforeEach, expect, test } from "bun:test";
-import { convert } from "../../src/converters/ffmpeg";
+import { convert, resetNvidiaGpuCache } from "../../src/converters/ffmpeg";
 
 let calls: string[][] = [];
 
@@ -11,6 +11,9 @@ function mockExecFile(
   calls.push(args);
   if (args.includes("fail.mov")) {
     callback(new Error("mock failure"), "", "Fake stderr: fail");
+  } else if (_cmd === "nvidia-smi") {
+    // Mock nvidia-smi - assume GPU is available for tests
+    callback(null, "GPU 0: NVIDIA GeForce RTX 3080 (UUID: GPU-12345678-1234-1234-1234-123456789012)\n", "");
   } else if (_cmd === "ffprobe") {
     // Mock ffprobe responses for codec detection
     // Return H.264 codec for .mp4 files, no video stream for images
@@ -46,6 +49,9 @@ function mockExecFile(
 beforeEach(() => {
   calls = [];
   delete process.env.FFMPEG_ARGS;
+  delete process.env.FFMPEG_PREFER_HARDWARE;
+  // Reset the GPU availability cache between tests
+  resetNvidiaGpuCache();
 });
 
 test("converts a normal file", async () => {
@@ -162,8 +168,8 @@ test("uses h264_nvenc for h264.mp4 when hardware preferred", async () => {
 
   console.log = originalConsoleLog;
 
-  // calls[0] is ffprobe, calls[1] is ffmpeg
-  expect(calls[1]).toEqual(expect.arrayContaining(["-c:v", "h264_nvenc"]));
+  // calls[0] is nvidia-smi, calls[1] is ffprobe, calls[2] is ffmpeg
+  expect(calls[2]).toEqual(expect.arrayContaining(["-c:v", "h264_nvenc"]));
   expect(loggedMessage).toBe("stdout: Fake stdout");
 
   delete process.env.FFMPEG_PREFER_HARDWARE;
@@ -183,8 +189,8 @@ test("uses hevc_nvenc for h265.mp4 when hardware preferred", async () => {
 
   console.log = originalConsoleLog;
 
-  // calls[0] is ffprobe, calls[1] is ffmpeg
-  expect(calls[1]).toEqual(expect.arrayContaining(["-c:v", "hevc_nvenc"]));
+  // calls[0] is nvidia-smi, calls[1] is ffprobe, calls[2] is ffmpeg
+  expect(calls[2]).toEqual(expect.arrayContaining(["-c:v", "hevc_nvenc"]));
   expect(loggedMessage).toBe("stdout: Fake stdout");
 
   delete process.env.FFMPEG_PREFER_HARDWARE;
@@ -225,8 +231,8 @@ test("adds CUDA hwaccel for video input when hardware preferred", async () => {
 
   console.log = originalConsoleLog;
 
-  // calls[0] is ffprobe, calls[1] is ffmpeg
-  expect(calls[1]).toEqual(expect.arrayContaining(["-hwaccel", "cuda"]));
+  // calls[0] is nvidia-smi, calls[1] is ffprobe, calls[2] is ffmpeg
+  expect(calls[2]).toEqual(expect.arrayContaining(["-hwaccel", "cuda"]));
   expect(loggedMessage).toBe("stdout: Fake stdout");
 
   delete process.env.FFMPEG_PREFER_HARDWARE;
@@ -268,8 +274,10 @@ test("does not add CUDA hwaccel if FFMPEG_ARGS already specifies hwaccel", async
 
   console.log = originalConsoleLog;
 
+  // When FFMPEG_ARGS already has hwaccel, no ffprobe call is made
+  // calls[0] is nvidia-smi, calls[1] is ffmpeg
   // Should use vaapi from FFMPEG_ARGS, not add cuda
-  expect(calls[0]).toEqual(expect.arrayContaining(["-hwaccel", "vaapi"]));
+  expect(calls[1]).toEqual(expect.arrayContaining(["-hwaccel", "vaapi"]));
   expect(calls[0]).not.toEqual(expect.arrayContaining(["-hwaccel", "cuda"]));
   expect(loggedMessage).toBe("stdout: Fake stdout");
 

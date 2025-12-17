@@ -719,6 +719,51 @@ const imageFormats = new Set([
   "hdr",
 ]);
 
+// Cache NVIDIA GPU availability to avoid repeated checks
+let nvidiaGpuAvailable: boolean | null = null;
+
+// Export for testing (allows resetting cache between tests)
+export const resetNvidiaGpuCache = () => {
+  nvidiaGpuAvailable = null;
+};
+
+/**
+ * Checks if an NVIDIA GPU is available using nvidia-smi.
+ * Returns false if no GPU is available or nvidia-smi fails.
+ */
+async function checkNvidiaGpuAvailable(execFile: ExecFileFn = execFileOriginal): Promise<boolean> {
+  // Cache the result to avoid repeated checks
+  if (nvidiaGpuAvailable !== null) {
+    return nvidiaGpuAvailable;
+  }
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      execFile(
+        "nvidia-smi",
+        ["-L"], // List GPUs (simple check that succeeds if GPU is available)
+        (error) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+          resolve();
+        },
+      );
+    });
+
+    // If nvidia-smi succeeds, GPU is available
+    nvidiaGpuAvailable = true;
+    console.log("NVIDIA GPU detected - hardware acceleration available");
+    return true;
+  } catch (error) {
+    // nvidia-smi failed - no GPU available or not installed
+    console.warn("NVIDIA GPU not available - using software encoding/decoding:", error);
+    nvidiaGpuAvailable = false;
+    return false;
+  }
+}
+
 /**
  * Uses ffprobe to detect if the video codec in a file is supported by CUDA hardware acceleration.
  * Returns false for image formats without probing (performance optimization).
@@ -731,6 +776,7 @@ async function isCudaSupportedCodec(
 ): Promise<boolean> {
   // Skip ffprobe for known image formats (no video codec to detect)
   if (imageFormats.has(fileType.toLowerCase())) {
+    console.log(`Skipping CUDA detection for image format: ${fileType}`);
     return false;
   }
 
@@ -760,7 +806,15 @@ async function isCudaSupportedCodec(
     }
 
     const codecName = videoStream.codec_name.toLowerCase();
-    return cudaSupportedCodecs.has(codecName);
+    const isSupported = cudaSupportedCodecs.has(codecName);
+    if (isSupported) {
+      console.log(`CUDA-supported codec detected: ${codecName} in ${filePath}`);
+    } else {
+      console.log(
+        `Codec not CUDA-supported: ${codecName} in ${filePath} - using software decoding`,
+      );
+    }
+    return isSupported;
   } catch (error) {
     // If probing fails, fall back to conservative approach (no CUDA)
     console.warn(`Failed to probe codec for ${filePath}:`, error);
@@ -782,6 +836,17 @@ export async function convert(
   // Check if hardware encoding is preferred (NVENC, VAAPI, etc.)
   const preferHardware =
     process.env.FFMPEG_PREFER_HARDWARE === "true" || process.env.FFMPEG_PREFER_HARDWARE === "1";
+
+  // Check GPU availability if hardware is preferred
+  const gpuAvailable = preferHardware ? await checkNvidiaGpuAvailable(execFile) : false;
+
+  if (preferHardware && gpuAvailable) {
+    console.log("Hardware acceleration enabled for conversion");
+  } else if (preferHardware && !gpuAvailable) {
+    console.log("Hardware acceleration requested but GPU not available - using software");
+  } else {
+    console.log("Using software encoding/decoding (hardware not preferred)");
+  }
 
   if (convertTo === "ico") {
     // Make sure image is 256x256 or smaller
@@ -832,6 +897,9 @@ export async function convert(
     const supportsCuda = await isCudaSupportedCodec(filePath, fileType, execFile);
     if (supportsCuda) {
       ffmpegArgs.push("-hwaccel", "cuda");
+      console.log("Added CUDA hardware acceleration for input decoding");
+    } else {
+      console.log("CUDA not supported for input file - using software decoding");
     }
   }
 
