@@ -712,15 +712,27 @@ export async function convert(
     const split = convertTo.split(".");
     const codec_short = split[0];
 
+    // Check if hardware encoding is preferred (NVENC, VAAPI, etc.)
+    const preferHardware = process.env.FFMPEG_PREFER_HARDWARE === "true" ||
+                          process.env.FFMPEG_PREFER_HARDWARE === "1";
+
     switch (codec_short) {
       case "av1":
         extraArgs.push("-c:v", "libaom-av1");
         break;
       case "h264":
-        extraArgs.push("-c:v", "libx264");
+        if (preferHardware) {
+          extraArgs.push("-c:v", "h264_nvenc");
+        } else {
+          extraArgs.push("-c:v", "libx264");
+        }
         break;
       case "h265":
-        extraArgs.push("-c:v", "libx265");
+        if (preferHardware) {
+          extraArgs.push("-c:v", "hevc_nvenc");
+        } else {
+          extraArgs.push("-c:v", "libx265");
+        }
         break;
       case "h266":
         extraArgs.push("-c:v", "libx266");

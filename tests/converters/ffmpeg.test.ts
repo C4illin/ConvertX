@@ -121,6 +121,66 @@ test("uses libx266 for h266.mp4", async () => {
   expect(loggedMessage).toBe("stdout: Fake stdout");
 });
 
+test("uses h264_nvenc for h264.mp4 when hardware preferred", async () => {
+  process.env.FFMPEG_PREFER_HARDWARE = "true";
+
+  const originalConsoleLog = console.log;
+
+  let loggedMessage = "";
+  console.log = (msg) => {
+    loggedMessage = msg;
+  };
+
+  await convert("in.mkv", "mkv", "h264.mp4", "out.mp4", undefined, mockExecFile);
+
+  console.log = originalConsoleLog;
+
+  expect(calls[0]).toEqual(expect.arrayContaining(["-c:v", "h264_nvenc"]));
+  expect(loggedMessage).toBe("stdout: Fake stdout");
+
+  delete process.env.FFMPEG_PREFER_HARDWARE;
+});
+
+test("uses hevc_nvenc for h265.mp4 when hardware preferred", async () => {
+  process.env.FFMPEG_PREFER_HARDWARE = "true";
+
+  const originalConsoleLog = console.log;
+
+  let loggedMessage = "";
+  console.log = (msg) => {
+    loggedMessage = msg;
+  };
+
+  await convert("in.mkv", "mkv", "h265.mp4", "out.mp4", undefined, mockExecFile);
+
+  console.log = originalConsoleLog;
+
+  expect(calls[0]).toEqual(expect.arrayContaining(["-c:v", "hevc_nvenc"]));
+  expect(loggedMessage).toBe("stdout: Fake stdout");
+
+  delete process.env.FFMPEG_PREFER_HARDWARE;
+});
+
+test("uses libx264 for h264.mp4 when hardware not preferred", async () => {
+  process.env.FFMPEG_PREFER_HARDWARE = "false";
+
+  const originalConsoleLog = console.log;
+
+  let loggedMessage = "";
+  console.log = (msg) => {
+    loggedMessage = msg;
+  };
+
+  await convert("in.mkv", "mkv", "h264.mp4", "out.mp4", undefined, mockExecFile);
+
+  console.log = originalConsoleLog;
+
+  expect(calls[0]).toEqual(expect.arrayContaining(["-c:v", "libx264"]));
+  expect(loggedMessage).toBe("stdout: Fake stdout");
+
+  delete process.env.FFMPEG_PREFER_HARDWARE;
+});
+
 test("respects FFMPEG_ARGS", async () => {
   process.env.FFMPEG_ARGS = "-hide_banner -y";
 
