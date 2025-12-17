@@ -867,14 +867,14 @@ export async function convert(
         extraArgs.push("-c:v", "libaom-av1");
         break;
       case "h264":
-        if (preferHardware) {
+        if (preferHardware && gpuAvailable) {
           extraArgs.push("-c:v", "h264_nvenc");
         } else {
           extraArgs.push("-c:v", "libx264");
         }
         break;
       case "h265":
-        if (preferHardware) {
+        if (preferHardware && gpuAvailable) {
           extraArgs.push("-c:v", "hevc_nvenc");
         } else {
           extraArgs.push("-c:v", "libx265");
@@ -893,7 +893,7 @@ export async function convert(
   // This only applies if FFMPEG_ARGS doesn't already specify a hardware accelerator
   const hasHardwareAccel = ffmpegArgs.includes("-hwaccel");
 
-  if (preferHardware && !hasHardwareAccel) {
+  if (preferHardware && gpuAvailable && !hasHardwareAccel) {
     const supportsCuda = await isCudaSupportedCodec(filePath, fileType, execFile);
     if (supportsCuda) {
       ffmpegArgs.push("-hwaccel", "cuda");

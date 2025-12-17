@@ -253,7 +253,8 @@ test("does not add CUDA hwaccel for image input when hardware preferred", async 
 
   console.log = originalConsoleLog;
 
-  expect(calls[0]).not.toEqual(expect.arrayContaining(["-hwaccel", "cuda"]));
+  // calls[0] is nvidia-smi, calls[1] is ffprobe, calls[2] is ffmpeg
+  expect(calls[2]).not.toEqual(expect.arrayContaining(["-hwaccel", "cuda"]));
   expect(loggedMessage).toBe("stdout: Fake stdout");
 
   delete process.env.FFMPEG_PREFER_HARDWARE;
