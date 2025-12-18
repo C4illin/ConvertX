@@ -300,6 +300,10 @@ export const history = new Elysia().use(userService).get(
                       body: JSON.stringify({ jobIds }),
                     });
 
+                    if (!response.ok) {
+                      throw new Error(\`HTTP error! status: \${response.status}\`);
+                    }
+
                     const result = await response.json();
 
                     if (result.success || result.deleted > 0) {

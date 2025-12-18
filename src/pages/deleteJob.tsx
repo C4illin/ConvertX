@@ -109,7 +109,7 @@ export const deleteJob = new Elysia()
     {
       auth: true,
       body: t.Object({
-        jobIds: t.Array(t.String()),
+        jobIds: t.Array(t.String(), { maxItems: 100 }),
       }),
     },
   );
