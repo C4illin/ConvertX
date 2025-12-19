@@ -13,33 +13,55 @@ function mockExecFile(
     callback(new Error("mock failure"), "", "Fake stderr: fail");
   } else if (_cmd === "nvidia-smi") {
     // Mock nvidia-smi - assume GPU is available for tests
-    callback(null, "GPU 0: NVIDIA GeForce RTX 3080 (UUID: GPU-12345678-1234-1234-1234-123456789012)\n", "");
+    callback(
+      null,
+      "GPU 0: NVIDIA GeForce RTX 3080 (UUID: GPU-12345678-1234-1234-1234-123456789012)\n",
+      "",
+    );
   } else if (_cmd === "ffprobe") {
     // Mock ffprobe responses for codec detection
     // Return H.264 codec for .mp4 files, no video stream for images
     if (args.includes("in.mp4") || args.includes("in.mkv") || args.includes("in.avi")) {
-      callback(null, JSON.stringify({
-        streams: [{
-          codec_type: "video",
-          codec_name: "h264",
-        }],
-      }), "");
+      callback(
+        null,
+        JSON.stringify({
+          streams: [
+            {
+              codec_type: "video",
+              codec_name: "h264",
+            },
+          ],
+        }),
+        "",
+      );
     } else if (args.includes("in.jpg") || args.includes("in.png")) {
       // Image files have no video stream
-      callback(null, JSON.stringify({
-        streams: [{
-          codec_type: "audio",
-          codec_name: "pcm",
-        }],
-      }), "");
+      callback(
+        null,
+        JSON.stringify({
+          streams: [
+            {
+              codec_type: "audio",
+              codec_name: "pcm",
+            },
+          ],
+        }),
+        "",
+      );
     } else {
       // Default: assume H.264 for video files
-      callback(null, JSON.stringify({
-        streams: [{
-          codec_type: "video",
-          codec_name: "h264",
-        }],
-      }), "");
+      callback(
+        null,
+        JSON.stringify({
+          streams: [
+            {
+              codec_type: "video",
+              codec_name: "h264",
+            },
+          ],
+        }),
+        "",
+      );
     }
   } else {
     callback(null, "Fake stdout", "");
