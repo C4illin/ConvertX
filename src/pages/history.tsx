@@ -47,17 +47,16 @@ export const history = new Elysia().use(userService).get(
             `}
           >
             <article class="article">
-              <h1 class="mb-4 text-xl">Results</h1>
-              <div id="delete-selected-container" class="mb-4 hidden">
-                <button
-                  id="delete-selected-btn"
-                  class={`
-                    rounded bg-red-600 px-4 py-2 text-white transition-colors
-                    hover:bg-red-700
-                  `}
-                >
-                  Delete Selected (<span id="selected-count">0</span>)
-                </button>
+              <div class="mb-4 flex items-center justify-between">
+                <h1 class="text-xl">Results</h1>
+                <div id="delete-selected-container" class="hidden">
+                  <button
+                    id="delete-selected-btn"
+                    class="flex btn-secondary flex-row gap-2 text-contrast"
+                  >
+                    <DeleteIcon /> <p>Delete Selected (<span id="selected-count">0</span>)</p>
+                  </button>
+                </div>
               </div>
               <table
                 class={`
