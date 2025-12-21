@@ -130,9 +130,7 @@ export const history = new Elysia().use(userService).get(
                           </svg>
                         </td>
                         <td safe>
-                          {new Date(job.date_created).toLocaleString(LANGUAGE, {
-                            timeZone: TIMEZONE,
-                          })}
+                          {new Date(job.date_created).toLocaleTimeString(LANGUAGE, { timeZone: TIMEZONE })}
                         </td>
                         <td>{job.num_files}</td>
                         <td class="max-sm:hidden">{job.finished_files}</td>
