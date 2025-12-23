@@ -74,9 +74,19 @@ RUN apt-get update && apt-get install -y \
   texlive-latex-extra \
   texlive-latex-recommended \
   texlive-xetex \
+  texlive-lang-chinese \
+  fonts-noto-cjk \               
+  fonts-wqy-zenhei \             
+  fonts-wqy-microhei \          
+  fonts-arphic-ukai \          
+  fonts-arphic-uming \        
   --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
+RUN mkdir -p /usr/share/fonts/truetype/chinese && \
+    ln -sf /usr/share/fonts/opentype/noto /usr/share/fonts/truetype/chinese/noto && \
+    fc-cache -f -v
+  
 # Install VTracer binary
 RUN ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
@@ -101,4 +111,6 @@ EXPOSE 3000/tcp
 # used for calibre
 ENV QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox"
 ENV NODE_ENV=production
+ENV LANG=zh_CN.UTF-8
+ENV LC_ALL=zh_CN.UTF-8
 ENTRYPOINT [ "bun", "run", "dist/src/index.js" ]

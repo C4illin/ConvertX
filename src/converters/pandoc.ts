@@ -1,5 +1,10 @@
 import { execFile as execFileOriginal } from "node:child_process";
 import { ExecFileFn } from "./types";
+import { 
+  PANDOC_ENABLE_CHINESE_FONT, 
+  PANDOC_CHINESE_FONT_PATH, 
+  PANDOC_CHINESE_FONT_FAMILY 
+} from "../helpers/env";
 
 export const properties = {
   from: {
@@ -136,6 +141,24 @@ export function convert(
 
   if (xelatex.includes(convertTo)) {
     args.push("--pdf-engine=xelatex");
+    
+    // Add Chinese font support if enabled
+    if (PANDOC_ENABLE_CHINESE_FONT) {
+      // Create a custom LaTeX template for Chinese font support
+      const chineseFontArgs = [
+        "-V", `mainfont=${PANDOC_CHINESE_FONT_FAMILY}`,
+        "-V", "CJKmainfont=" + PANDOC_CHINESE_FONT_FAMILY,
+        "--variable", "geometry:margin=1in",
+        "--variable", "fontsize=11pt"
+      ];
+      
+      // Add font path if specified
+      if (PANDOC_CHINESE_FONT_PATH) {
+        chineseFontArgs.push("--variable", `fontdir:${PANDOC_CHINESE_FONT_PATH}`);
+      }
+      
+      args.push(...chineseFontArgs);
+    }
   }
 
   args.push(filePath);
