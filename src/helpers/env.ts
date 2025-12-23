@@ -23,3 +23,5 @@ export const MAX_CONVERT_PROCESS =
 
 export const UNAUTHENTICATED_USER_SHARING =
   process.env.UNAUTHENTICATED_USER_SHARING?.toLowerCase() === "true" || false;
+
+export const TIMEZONE = process.env.TZ || undefined;
