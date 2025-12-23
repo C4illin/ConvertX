@@ -49,10 +49,11 @@ export const history = new Elysia().use(userService).get(
             <article class="article">
               <div class="mb-4 flex items-center justify-between">
                 <h1 class="text-xl">Results</h1>
-                <div id="delete-selected-container" class="hidden">
+                <div id="delete-selected-container">
                   <button
                     id="delete-selected-btn"
                     class="flex btn-secondary flex-row gap-2 text-contrast"
+                    disabled
                   >
                     <DeleteIcon />{" "}
                     <span>
@@ -259,10 +260,11 @@ export const history = new Elysia().use(userService).get(
                 function updateDeleteButton() {
                   const checkedBoxes = Array.from(jobCheckboxes).filter(cb => cb.checked);
                   if (checkedBoxes.length > 0) {
-                    deleteSelectedContainer.classList.remove('hidden');
+                    deleteSelectedBtn.disabled = false;
                     selectedCountSpan.textContent = checkedBoxes.length;
                   } else {
-                    deleteSelectedContainer.classList.add('hidden');
+                    deleteSelectedBtn.disabled = true;
+                    selectedCountSpan.textContent = '0';
                   }
                 }
 
