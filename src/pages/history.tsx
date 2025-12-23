@@ -54,7 +54,10 @@ export const history = new Elysia().use(userService).get(
                     id="delete-selected-btn"
                     class="flex btn-secondary flex-row gap-2 text-contrast"
                   >
-                    <DeleteIcon /> <span>Delete Selected (<span id="selected-count">0</span>)</span>
+                    <DeleteIcon />{" "}
+                    <span>
+                      Delete Selected (<span id="selected-count">0</span>)
+                    </span>
                   </button>
                 </div>
               </div>
@@ -138,7 +141,8 @@ export const history = new Elysia().use(userService).get(
                         <td>
                           <input
                             type="checkbox"
-                            class="job-checkbox h-4 w-4 cursor-pointer"
+                            class="h-4 w-4 cursor-pointer"
+                            data-checkbox-type="job"
                             data-job-id={job.id}
                           />
                         </td>
@@ -247,7 +251,7 @@ export const history = new Elysia().use(userService).get(
 
                 // Checkbox management
                 const selectAllCheckbox = document.getElementById('select-all');
-                const jobCheckboxes = document.querySelectorAll('.job-checkbox');
+                const jobCheckboxes = document.querySelectorAll('[data-checkbox-type="job"]');
                 const deleteSelectedBtn = document.getElementById('delete-selected-btn');
                 const deleteSelectedContainer = document.getElementById('delete-selected-container');
                 const selectedCountSpan = document.getElementById('selected-count');
