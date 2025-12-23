@@ -456,6 +456,7 @@ export const properties = {
       "webm",
       "webp",
       "webvtt",
+      "wma",
       "wow",
       "wsaud",
       "wsd",
