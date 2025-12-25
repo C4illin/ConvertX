@@ -77,6 +77,16 @@ RUN apt-get update && apt-get install -y \
   --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
+# Install Python, pipx, and MarkItDown (PEP 668 compliant)
+RUN apt-get update && apt-get install -y \
+  python3 \
+  python3-pip \
+  pipx \
+  && pipx install "markitdown[all]" \
+  && pipx ensurepath \
+  && rm -rf /var/lib/apt/lists/*
+
+
 # Install VTracer binary
 RUN ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \

@@ -128,7 +128,7 @@ const properties: Record<
     properties: propertiesVtracer,
     converter: convertVtracer,
   },
-  MarkitDown: {
+  markitDown: {
     properties: propertiesMarkitdown,
     converter: convertMarkitdown,
   },
