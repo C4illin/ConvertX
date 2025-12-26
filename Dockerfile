@@ -86,6 +86,8 @@ RUN apt-get update && apt-get install -y \
   && pipx ensurepath \
   && rm -rf /var/lib/apt/lists/*
 
+# Add pipx bin directory to PATH
+ENV PATH="/root/.local/bin:${PATH}"
 
 # Install VTracer binary
 RUN ARCH=$(uname -m) && \
