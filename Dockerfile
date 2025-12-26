@@ -74,16 +74,11 @@ RUN apt-get update && apt-get install -y \
   texlive-latex-extra \
   texlive-latex-recommended \
   texlive-xetex \
-  --no-install-recommends \
-  && rm -rf /var/lib/apt/lists/*
-
-# Install Python, pipx, and MarkItDown (PEP 668 compliant)
-RUN apt-get update && apt-get install -y \
   python3 \
   python3-pip \
   pipx \
+  --no-install-recommends \
   && pipx install "markitdown[all]" \
-  && pipx ensurepath \
   && rm -rf /var/lib/apt/lists/*
 
 # Add pipx bin directory to PATH
