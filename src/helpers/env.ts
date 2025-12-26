@@ -28,21 +28,4 @@ export const MAX_CONVERT_PROCESS =
 export const UNAUTHENTICATED_USER_SHARING =
   process.env.UNAUTHENTICATED_USER_SHARING?.toLowerCase() === "true" || false;
 
-// ─────────────────────────────────────────────────────────────
-// ClamAV / Antivirus integration
-// ─────────────────────────────────────────────────────────────
-
-// REST endpoint of benzino77/clamav-rest-api, e.g.
-// CLAMAV_URL=http://192.168.68.134:3000/api/v1/scan
-export const CLAMAV_URL = process.env.CLAMAV_URL ?? "";
-
-// True only if CLAMAV_URL is non-empty
-export const CLAMAV_CONFIGURED = CLAMAV_URL.length > 0;
-
-// Default AV toggle value:
-// - If ANTIVIRUS_ENABLED_DEFAULT=false → force disabled
-// - Otherwise: enabled only when CLAMAV is configured
-export const ANTIVIRUS_ENABLED_DEFAULT =
-  process.env.ANTIVIRUS_ENABLED_DEFAULT?.toLowerCase() === "false"
-    ? false
-    : CLAMAV_CONFIGURED;
+export const TIMEZONE = process.env.TZ || undefined;

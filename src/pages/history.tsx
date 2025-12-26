@@ -3,7 +3,7 @@ import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import db from "../db/db";
 import { Filename, Jobs } from "../db/types";
-import { ALLOW_UNAUTHENTICATED, HIDE_HISTORY, LANGUAGE, WEBROOT } from "../helpers/env";
+import { ALLOW_UNAUTHENTICATED, HIDE_HISTORY, LANGUAGE, TIMEZONE, WEBROOT } from "../helpers/env";
 import { userService } from "./user";
 import { EyeIcon } from "../icons/eye";
 import { DeleteIcon } from "../icons/delete";
@@ -129,7 +129,11 @@ export const history = new Elysia().use(userService).get(
                             />
                           </svg>
                         </td>
-                        <td safe>{new Date(job.date_created).toLocaleTimeString(LANGUAGE)}</td>
+                        <td safe>
+                          {new Date(job.date_created).toLocaleTimeString(LANGUAGE, {
+                            timeZone: TIMEZONE,
+                          })}
+                        </td>
                         <td>{job.num_files}</td>
                         <td class="max-sm:hidden">{job.finished_files}</td>
                         <td safe>{job.status}</td>

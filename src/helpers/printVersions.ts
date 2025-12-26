@@ -1,10 +1,11 @@
 import { exec } from "node:child_process";
+import { readFile } from "node:fs";
 import { version } from "../../package.json";
 
 console.log(`ConvertX v${version}`);
 
 if (process.env.NODE_ENV === "production") {
-  exec("cat /etc/os-release", (error, stdout) => {
+  readFile("/etc/os-release", "utf8", (error, stdout) => {
     if (error) {
       console.error("Not running on docker, this is not supported.");
     }
