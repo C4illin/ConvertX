@@ -7,6 +7,195 @@ let fileType;
 let pendingFiles = 0;
 let formatSelected = false;
 
+// ─────────────────────────────────────
+// Antivirus toggle UI (custom slider)
+// ─────────────────────────────────────
+
+let avToggleButton = null;
+let avToggleLabel = null;
+
+// Inject minimal CSS so the toggle looks like a real slider
+function injectAvToggleStyles() {
+  if (document.getElementById("av-toggle-styles")) return;
+
+  const style = document.createElement("style");
+  style.id = "av-toggle-styles";
+  style.textContent = `
+    .av-toggle-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    /* Light theme (default) */
+    .av-toggle-label {
+      color: #04070e;
+      transition: color 0.15s ease;
+    }
+
+    /* Dark theme: make label white */
+    html[data-theme="dark"] .av-toggle-label {
+      color: #ffffff;
+    }
+
+    .av-toggle-switch {
+      position: relative;
+      width: 42px;
+      height: 22px;
+      border-radius: 999px;
+      border: none;
+      background-color: #4b5563;
+      padding: 0;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+    }
+    .av-toggle-switch::before {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background-color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+      left: 2px;
+      transition: transform 0.2s ease;
+    }
+    .av-toggle-switch.av-on {
+      background-color: #22c55e;
+    }
+    .av-toggle-switch.av-on::before {
+      transform: translateX(20px);
+    }
+    .av-toggle-switch.av-disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+function setAntivirusToggleVisual(enabled, available) {
+  if (!avToggleButton) return;
+
+  avToggleButton.classList.remove("av-on", "av-disabled");
+
+  if (!available) {
+    avToggleButton.classList.add("av-disabled");
+    avToggleButton.setAttribute("aria-disabled", "true");
+    avToggleButton.setAttribute("aria-pressed", "false");
+    if (avToggleLabel) {
+      avToggleLabel.textContent =
+        "Antivirus scan unavailable (CLAMAV_URL not set)";
+    }
+    return;
+  }
+
+  avToggleButton.setAttribute("aria-disabled", "false");
+
+  if (enabled) {
+    avToggleButton.classList.add("av-on");
+    avToggleButton.setAttribute("aria-pressed", "true");
+  } else {
+    avToggleButton.setAttribute("aria-pressed", "false");
+  }
+
+  if (avToggleLabel) {
+    avToggleLabel.textContent = "Enable antivirus scan";
+  }
+}
+
+function initAntivirusToggleState() {
+  if (!avToggleButton) return;
+
+  fetch(`${webroot}/api/antivirus`)
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("Antivirus state from server:", data);
+      const available = !!data.available;
+      const enabled = !!data.enabled;
+      setAntivirusToggleVisual(enabled, available);
+    })
+    .catch((err) => {
+      console.error("Failed to get antivirus state:", err);
+      setAntivirusToggleVisual(false, false);
+      if (avToggleLabel) {
+        avToggleLabel.textContent = "Antivirus scan status unavailable";
+      }
+    });
+
+  avToggleButton.addEventListener("click", () => {
+    const isDisabled = avToggleButton.classList.contains("av-disabled");
+    if (isDisabled) return;
+
+    const currentlyOn = avToggleButton.classList.contains("av-on");
+    const newValue = !currentlyOn;
+
+    fetch(`${webroot}/api/antivirus`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled: newValue }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Antivirus updated state:", data);
+        const available = !!data.available;
+        const enabled = !!data.enabled;
+        setAntivirusToggleVisual(enabled, available);
+      })
+      .catch((err) => {
+        console.error("Failed to update antivirus state:", err);
+        // On error, do not visually toggle
+      });
+  });
+}
+
+function createAntivirusToggle() {
+  injectAvToggleStyles();
+
+  const form = document.querySelector("form");
+  if (!form) return;
+  if (document.getElementById("av-toggle-wrapper")) return;
+
+  const wrapper = document.createElement("div");
+  wrapper.id = "av-toggle-wrapper";
+  wrapper.className = "av-toggle-wrapper";
+
+  const labelSpan = document.createElement("span");
+  labelSpan.id = "av-toggle-label";
+  labelSpan.className = "av-toggle-label";
+  labelSpan.textContent = "Enable antivirus scan";
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.id = "av-toggle";
+  button.className = "av-toggle-switch";
+  button.setAttribute("role", "switch");
+  button.setAttribute("aria-pressed", "false");
+  button.setAttribute("aria-disabled", "true");
+
+  wrapper.appendChild(labelSpan);
+  wrapper.appendChild(button);
+
+  // Insert at top of form so it's visible above dropzone
+  form.insertBefore(wrapper, form.firstChild);
+
+  avToggleButton = button;
+  avToggleLabel = labelSpan;
+
+  initAntivirusToggleState();
+}
+
+// Create the antivirus toggle as soon as script runs
+createAntivirusToggle();
+
+// ─────────────────────────────────────
+// Existing upload UI logic
+// ─────────────────────────────────────
+
 dropZone.addEventListener("dragover", (e) => {
   e.preventDefault();
   dropZone.classList.add("dragover");
@@ -33,7 +222,6 @@ dropZone.addEventListener("drop", (e) => {
   }
 });
 
-// Extracted handleFile function for reusability in drag-and-drop and file input
 function handleFile(file) {
   const fileList = document.querySelector("#file-list");
 
@@ -128,14 +316,11 @@ const updateSearchBar = () => {
   });
 
   convertToInput.addEventListener("search", () => {
-    // when the user clears the search bar using the 'x' button
     convertButton.disabled = true;
     formatSelected = false;
   });
 
   convertToInput.addEventListener("blur", (e) => {
-    // Keep the popup open even when clicking on a target button
-    // for a split second to allow the click to go through
     if (e?.relatedTarget?.classList?.contains("target")) {
       convertToPopup.classList.add("hidden");
       convertToPopup.classList.remove("flex");
@@ -152,7 +337,6 @@ const updateSearchBar = () => {
   });
 };
 
-// Add a 'change' event listener to the file input element
 fileInput.addEventListener("change", (e) => {
   const files = e.target.files;
   for (const file of files) {
@@ -165,21 +349,19 @@ const setTitle = () => {
   title.textContent = `Convert ${fileType ? `.${fileType}` : ""}`;
 };
 
-// Add a onclick for the delete button
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const deleteRow = (target) => {
   const filename = target.parentElement.parentElement.children[0].textContent;
   const row = target.parentElement.parentElement;
   row.remove();
 
-  // remove from fileNames
   const index = fileNames.indexOf(filename);
-  fileNames.splice(index, 1);
+  if (index !== -1) {
+    fileNames.splice(index, 1);
+  }
 
-  // reset fileInput
   fileInput.value = "";
 
-  // if fileNames is empty, reset fileType
   if (fileNames.length === 0) {
     fileType = null;
     fileInput.removeAttribute("accept");
@@ -209,20 +391,104 @@ const uploadFile = (file) => {
   xhr.open("POST", `${webroot}/upload`, true);
 
   xhr.onload = () => {
-    let data = JSON.parse(xhr.responseText);
-
     pendingFiles -= 1;
+
+    // 🔍 1) Log exactly what the browser got
+    console.log("Upload raw response:", xhr.status, xhr.responseText);
+
+    let data = {};
+    try {
+      data = JSON.parse(xhr.responseText || "{}");
+    } catch (e) {
+      console.error("Failed to parse upload response:", e, xhr.responseText);
+    }
+
+    // 🔍 2) Compute an "infected" flag as robustly as possible
+    const isInfected =
+      (typeof data === "object" &&
+        data !== null &&
+        (data.infected === true ||
+          data.infected === "true" ||
+          (typeof data.message === "string" &&
+            data.message.toLowerCase().includes("infected file found")))) ||
+      (typeof xhr.responseText === "string" &&
+        xhr.responseText.toLowerCase().includes("infected file found"));
+
+    // 🔴 3) If backend reports infection, show popup and stop
+    if (xhr.status >= 200 && xhr.status < 300 && isInfected) {
+      const infectedFiles = data.infectedFiles || [];
+      const details = infectedFiles
+        .map((f) =>
+          `${f.name}: ${
+            Array.isArray(f.viruses) && f.viruses.length
+              ? f.viruses.join(", ")
+              : "malware detected"
+          }`,
+        )
+        .join("\n");
+
+      alert(
+        "⚠️ Infected file found. Conversion will be aborted.\n\n" +
+          (details ? "Details:\n" + details : ""),
+      );
+
+      // Remove row for this file
+      if (file.htmlRow && file.htmlRow.remove) {
+        file.htmlRow.remove();
+      }
+
+      // Remove from internal list
+      const idx = fileNames.indexOf(file.name);
+      if (idx !== -1) {
+        fileNames.splice(idx, 1);
+      }
+
+      if (fileNames.length === 0) {
+        fileType = null;
+        fileInput.removeAttribute("accept");
+        setTitle();
+        convertButton.disabled = true;
+      } else if (pendingFiles === 0 && formatSelected) {
+        convertButton.disabled = false;
+      }
+
+      convertButton.textContent = "Convert";
+
+      const progressbar = file.htmlRow?.getElementsByTagName("progress");
+      if (progressbar && progressbar[0]?.parentElement) {
+        progressbar[0].parentElement.remove();
+      }
+
+      return;
+    }
+
+    // Generic HTTP error
+    if (xhr.status !== 200) {
+      console.error("Upload failed:", xhr.status, xhr.responseText);
+      alert("Upload failed. Please try again.");
+      convertButton.disabled = false;
+      convertButton.textContent = "Upload failed";
+
+      const progressbar = file.htmlRow.getElementsByTagName("progress");
+      if (progressbar[0]?.parentElement) {
+        progressbar[0].parentElement.remove();
+      }
+      return;
+    }
+
+    // Clean upload
     if (pendingFiles === 0) {
-      if (formatSelected) {
+      if (formatSelected && fileNames.length > 0) {
         convertButton.disabled = false;
       }
       convertButton.textContent = "Convert";
     }
 
-    //Remove the progress bar when upload is done
-    let progressbar = file.htmlRow.getElementsByTagName("progress");
-    progressbar[0].parentElement.remove();
-    console.log(data);
+    const progressbar = file.htmlRow.getElementsByTagName("progress");
+    if (progressbar[0]?.parentElement) {
+      progressbar[0].parentElement.remove();
+    }
+    console.log("Upload parsed response:", data);
   };
 
   xhr.upload.onprogress = (e) => {
@@ -231,11 +497,16 @@ const uploadFile = (file) => {
     console.log(`upload progress (${file.name}):`, (100 * sent) / total);
 
     let progressbar = file.htmlRow.getElementsByTagName("progress");
-    progressbar[0].value = (100 * sent) / total;
+    if (progressbar[0]) {
+      progressbar[0].value = (100 * sent) / total;
+    }
   };
 
   xhr.onerror = (e) => {
-    console.log(e);
+    console.log("XHR error:", e);
+    alert("Upload failed due to a network error.");
+    convertButton.disabled = false;
+    convertButton.textContent = "Upload failed";
   };
 
   xhr.send(formData);
@@ -243,9 +514,117 @@ const uploadFile = (file) => {
 
 const formConvert = document.querySelector(`form[action='${webroot}/convert']`);
 
-formConvert.addEventListener("submit", () => {
-  const hiddenInput = document.querySelector("input[name='file_names']");
-  hiddenInput.value = JSON.stringify(fileNames);
-});
+if (formConvert) {
+  formConvert.addEventListener("submit", () => {
+    console.log("Submitting convert form with files:", fileNames);
+    const hiddenInput = document.querySelector("input[name='file_names']");
+    if (hiddenInput) {
+      hiddenInput.value = JSON.stringify(fileNames);
+    } else {
+      console.warn(
+        "Hidden input 'file_names' not found – form will submit without it.",
+      );
+    }
+  });
+}
 
 updateSearchBar();
+
+/* ------------------------------------------------------------------
+ * Theme toggle (Light / Dark) in header, before "History"
+ * ------------------------------------------------------------------ */
+
+const THEME_STORAGE_KEY = "convertx-theme";
+
+function applyTheme(theme) {
+  const root = document.documentElement;
+  if (theme === "dark") {
+    root.setAttribute("data-theme", "dark");
+  } else {
+    root.removeAttribute("data-theme"); // original light theme
+  }
+}
+
+function initThemeFromPreference() {
+  let stored = null;
+  try {
+    stored = localStorage.getItem(THEME_STORAGE_KEY);
+  } catch (_e) {
+    // ignore
+  }
+
+  const initial =
+    stored === "dark" || stored === "light" ? stored : "light";
+
+  applyTheme(initial);
+  return initial;
+}
+
+function createThemeToggle(initialTheme) {
+  if (document.querySelector(".cx-theme-toggle")) return;
+
+  const container = document.createElement("span");
+  container.className = "cx-theme-toggle";
+
+  container.innerHTML = `
+    <span class="cx-theme-toggle__label">${
+      initialTheme === "dark" ? "Dark" : "Light"
+    }</span>
+    <button
+      type="button"
+      class="cx-switch ${initialTheme === "dark" ? "cx-switch--on" : ""}"
+      aria-label="Toggle dark mode"
+    >
+      <span class="cx-switch__thumb"></span>
+    </button>
+  `;
+
+  const switchEl = container.querySelector(".cx-switch");
+  const labelEl = container.querySelector(".cx-theme-toggle__label");
+
+  switchEl.addEventListener("click", () => {
+    const isDark =
+      document.documentElement.getAttribute("data-theme") === "dark";
+    const newTheme = isDark ? "light" : "dark";
+
+    applyTheme(newTheme);
+
+    if (newTheme === "dark") {
+      switchEl.classList.add("cx-switch--on");
+      labelEl.textContent = "Dark";
+    } else {
+      switchEl.classList.remove("cx-switch--on");
+      labelEl.textContent = "Light";
+    }
+
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+    } catch (_e) {
+      // ignore
+    }
+  });
+
+  // Insert in header before the "History" link
+  const links = Array.from(document.querySelectorAll("header a, nav a"));
+  const historyLink = links.find(
+    (a) => a.textContent.trim() === "History",
+  );
+
+  if (historyLink && historyLink.parentNode) {
+    historyLink.parentNode.insertBefore(container, historyLink);
+  } else {
+    const header = document.querySelector("header");
+    if (header) {
+      header.appendChild(container);
+    } else {
+      document.body.appendChild(container);
+    }
+  }
+}
+
+// Initialise theme toggle once DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+  const initialTheme = initThemeFromPreference();
+  createThemeToggle(initialTheme);
+});
+
