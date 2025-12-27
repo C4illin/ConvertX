@@ -45,6 +45,7 @@ A self-hosted online file converter. Supports over a thousand different formats.
 | [FFmpeg](https://ffmpeg.org/)                                   | Video            | ~472          | ~199        |
 | [Potrace](https://potrace.sourceforge.net/)                     | Raster to vector | 4             | 11          |
 | [VTracer](https://github.com/visioncortex/vtracer)              | Raster to vector | 8             | 1           |
+| [Markitdown](https://github.com/microsoft/markitdown)           | Documents        | 6             | 1           |
 
 <!-- many ffmpeg fileformats are duplicates -->
 
