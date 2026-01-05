@@ -1,11 +1,11 @@
 // src/helpers/avToggle.ts
+//
+// Simple in-memory antivirus toggle.
+// Default behaviour: enabled by default when ClamAV is configured, unless explicitly overridden.
 
-import {
-  ANTIVIRUS_ENABLED_DEFAULT,
-  CLAMAV_CONFIGURED,
-} from "./env";
+import { ANTIVIRUS_ENABLED_DEFAULT, CLAMAV_CONFIGURED } from "./env";
 
-let antivirusEnabled = ANTIVIRUS_ENABLED_DEFAULT;
+let antivirusEnabled: boolean = CLAMAV_CONFIGURED ? ANTIVIRUS_ENABLED_DEFAULT : false;
 
 /**
  * Is ClamAV configured at all (CLAMAV_URL set)?
@@ -15,10 +15,12 @@ export function isAntivirusAvailable(): boolean {
 }
 
 /**
- * Is antivirus scanning currently enabled (and available)?
+ * Current effective antivirus enabled state.
+ * If ClamAV is not configured, this always returns false.
  */
 export function isAntivirusEnabled(): boolean {
-  return CLAMAV_CONFIGURED && antivirusEnabled;
+  if (!CLAMAV_CONFIGURED) return false;
+  return antivirusEnabled;
 }
 
 /**
@@ -30,5 +32,13 @@ export function setAntivirusEnabled(enabled: boolean): void {
     antivirusEnabled = false;
     return;
   }
-  antivirusEnabled = enabled;
+  antivirusEnabled = Boolean(enabled);
 }
+
+/**
+ * Useful if env / configuration changes at runtime (tests, hot reload).
+ */
+export function resetAntivirusEnabledToDefault(): void {
+  antivirusEnabled = CLAMAV_CONFIGURED ? ANTIVIRUS_ENABLED_DEFAULT : false;
+}
+
