@@ -128,7 +128,7 @@ Tutorial in french: <https://belginux.com/installer-convertx-avec-docker/>
 
 Tutorial in chinese: <https://xzllll.com/24092901/>
 
-Tutorial in polish: <https://kreatywnyprogramista.pl/convertx-lokalny-konwerter-plikow>
+Tutorial in polish: <https://www.kreatywnyprogramista.pl/convertx-lokalny-konwerter-plikow>
 
 ## Screenshots
 
