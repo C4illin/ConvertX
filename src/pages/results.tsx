@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { Elysia, t } from "elysia";
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
