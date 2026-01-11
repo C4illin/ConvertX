@@ -12,18 +12,30 @@ import { userService } from "./user";
 import { outputDir } from "..";
 import { sendFileToErugo } from "../helpers/erugo";
 
+type JobsWithOptionalNumFiles = Jobs & {
+  num_files?: number;
+};
+
 function ResultsArticle({
   job,
   files,
   outputPath,
 }: {
-  job: Jobs;
+  job: JobsWithOptionalNumFiles;
   files: Filename[];
   outputPath: string;
 }) {
-  const maxFiles = Number((job as any).num_files ?? 0);
-  const doneFiles = Number(files.filter((f: any) => String((f as any).status || '').toLowerCase() === 'done').length);
-const isDone = doneFiles === maxFiles;
+  // If the DB schema includes jobs.num_files use it; otherwise fall back to files.length
+  const maxFiles =
+    typeof job.num_files === "number" && Number.isFinite(job.num_files)
+      ? Number(job.num_files)
+      : Number(files.length);
+
+  const doneFiles = Number(
+    files.filter((f) => String(f.status ?? "").toLowerCase() === "done").length,
+  );
+
+  const isDone = maxFiles > 0 ? doneFiles >= maxFiles : true;
 
   const disabledLinkClass = "pointer-events-none opacity-50";
   const busyAttrs = { disabled: true, "aria-busy": "true" } as const;
@@ -467,7 +479,7 @@ export const results = new Elysia()
       const job = db
         .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
         .as(Jobs)
-        .get(user.id, params.jobId);
+        .get(user.id, params.jobId) as JobsWithOptionalNumFiles | null;
 
       if (!job) {
         set.status = 404;
@@ -514,7 +526,7 @@ export const results = new Elysia()
       const job = db
         .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
         .as(Jobs)
-        .get(user.id, params.jobId);
+        .get(user.id, params.jobId) as JobsWithOptionalNumFiles | null;
 
       if (!job) {
         set.status = 404;
@@ -547,9 +559,7 @@ export const results = new Elysia()
       }
 
       const file = db
-        .query(
-          "SELECT * FROM file_names WHERE job_id = ? AND output_file_name = ?",
-        )
+        .query("SELECT * FROM file_names WHERE job_id = ? AND output_file_name = ?")
         .as(Filename)
         .get(params.jobId, body.fileName);
 
@@ -575,7 +585,7 @@ export const results = new Elysia()
 
         const result = await sendFileToErugo(payload);
         return result;
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
         set.status = 500;
         return { message: "Failed to share with Erugo" };
@@ -591,5 +601,3 @@ export const results = new Elysia()
       }),
     },
   );
-
-
