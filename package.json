@@ -39,7 +39,7 @@
     "@typescript-eslint/parser": "^8.46.4",
     "eslint": "^9.39.1",
     "eslint-plugin-better-tailwindcss": "^3.7.10",
-    "globals": "^16.5.0",
+    "globals": "^17.0.0",
     "knip": "^5.69.1",
     "npm-run-all2": "^8.0.4",
     "postcss": "^8.5.6",

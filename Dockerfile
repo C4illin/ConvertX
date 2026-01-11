@@ -68,14 +68,22 @@ RUN apt-get update && apt-get install -y \
   poppler-utils \
   potrace \
   python3-numpy \
+  python3-tinycss2 \
   resvg \
   texlive \
   texlive-fonts-recommended \
   texlive-latex-extra \
   texlive-latex-recommended \
   texlive-xetex \
+  python3 \
+  python3-pip \
+  pipx \
   --no-install-recommends \
+  && pipx install "markitdown[all]" \
   && rm -rf /var/lib/apt/lists/*
+
+# Add pipx bin directory to PATH
+ENV PATH="/root/.local/bin:${PATH}"
 
 # Install VTracer binary
 RUN ARCH=$(uname -m) && \
