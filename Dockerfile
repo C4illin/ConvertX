@@ -68,6 +68,7 @@ RUN apt-get update && apt-get install -y \
   poppler-utils \
   potrace \
   python3-numpy \
+  python3-tinycss2 \
   resvg \
   texlive \
   texlive-fonts-recommended \
