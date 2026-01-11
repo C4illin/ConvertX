@@ -64,11 +64,20 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
+    # Uncomment the following lines for NVIDIA GPU hardware acceleration (NVENC/NVDEC)
+    # Requires: NVIDIA drivers with NVENC/NVDEC support + nvidia-docker runtime
+    # runtime: nvidia  # Required: Enable NVIDIA container runtime
+    # group_add:       # Optional: May be needed for GPU device access (not required in Unraid)
+    #   - 226          # The render group GID on the host (check with: getent group render | cut -d: -f3)
     environment:
       - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234 # will use randomUUID() if unset
       # - HTTP_ALLOWED=true # uncomment this if accessing it over a non-https connection
+      # - FFMPEG_PREFER_HARDWARE=true # Optional: Enable hardware acceleration for video encoding/decoding
+      # - NVIDIA_VISIBLE_DEVICES=all  # Optional: Defaults to 'all', use '0,1' for specific GPUs (get IDs with: nvidia-smi -L)
+      # - NVIDIA_DRIVER_CAPABILITIES=all  # Optional: Comma-separated list (e.g., 'compute,video,utility'), 'all' for everything
     volumes:
       - ./data:/app/data
+      # - /usr/bin/nvidia-smi:/usr/bin/nvidia-smi:ro # May be needed: Mount nvidia-smi for GPU detection (not required in Unraid)
 ```
 
 or
