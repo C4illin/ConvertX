@@ -61,7 +61,7 @@ function ResultsArticle({
               !isDone ? disabledLinkClass : ""
             }`}
             href={`${WEBROOT}/archive/${job.id}`}
-            download={`converted_files_${job.id}.tar`}
+            download
             {...(!isDone ? busyAttrs : {})}
           >
             <DownloadIcon /> <p>Tar</p>
@@ -125,7 +125,7 @@ function ResultsArticle({
                 <a
                   class="text-accent-500 hover:text-accent-400"
                   href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
-                  download={file.output_file_name}
+                  download
                 >
                   <DownloadIcon />
                 </a>
@@ -206,7 +206,7 @@ function ResultsArticle({
               <textarea
                 id="cxShareDescription"
                 class="w-full rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-accent-500"
-                rows={3}
+                rows="3"
                 placeholder="Message to share recipients (optional)"
               ></textarea>
             </div>
