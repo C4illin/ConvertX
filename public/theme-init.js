@@ -13,7 +13,7 @@
     } else {
       document.documentElement.removeAttribute("data-theme");
     }
-  } catch (_e) {
+  } catch {
     // If localStorage is blocked, just fall back to light theme
     document.documentElement.removeAttribute("data-theme");
   }
