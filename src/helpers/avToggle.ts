@@ -34,11 +34,3 @@ export function setAntivirusEnabled(enabled: boolean): void {
   }
   antivirusEnabled = Boolean(enabled);
 }
-
-/**
- * Useful if env / configuration changes at runtime (tests, hot reload).
- * Not exported because it is not used externally (keeps knip clean).
- */
-function resetAntivirusEnabledToDefault(): void {
-  antivirusEnabled = CLAMAV_CONFIGURED ? ANTIVIRUS_ENABLED_DEFAULT : false;
-}
