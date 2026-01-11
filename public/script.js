@@ -549,7 +549,7 @@ function initThemeFromPreference() {
   let stored = null;
   try {
     stored = localStorage.getItem(THEME_STORAGE_KEY);
-  } catch (_e) {
+  } catch {
     // ignore
   }
 
@@ -599,7 +599,7 @@ function createThemeToggle(initialTheme) {
 
     try {
       localStorage.setItem(THEME_STORAGE_KEY, newTheme);
-    } catch (_e) {
+    } catch {
       // ignore
     }
   });
