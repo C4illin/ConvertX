@@ -16,13 +16,13 @@ END:VCARD`;
 
     expect(result).toEqual([
       {
-        'Full Name': 'John Doe',
-        'Last Name': 'Doe',
-        'First Name': 'John',
-        'Phone': '+123456789',
-        'Email': 'john@example.com',
-        'Organization': 'Example Corp'
-      }
+        "Full Name": "John Doe",
+        "Last Name": "Doe",
+        "First Name": "John",
+        Phone: "+123456789",
+        Email: "john@example.com",
+        Organization: "Example Corp",
+      },
     ]);
   });
 
@@ -36,10 +36,7 @@ END:VCARD`;
 
     const result = parseVCF(vcfData);
 
-    expect(result).toEqual([
-      { 'Full Name': 'John Doe' },
-      { 'Full Name': 'Jane Smith' }
-    ]);
+    expect(result).toEqual([{ "Full Name": "John Doe" }, { "Full Name": "Jane Smith" }]);
   });
 
   test("should parse VCF with TYPE parameters", () => {
@@ -55,12 +52,12 @@ END:VCARD`;
 
     expect(result).toEqual([
       {
-        'Full Name': 'John Doe',
-        'Last Name': 'Doe',
-        'First Name': 'John',
-        'Phone': '(111) 555-1212',
-        'Email': 'john.doe@example.com'
-      }
+        "Full Name": "John Doe",
+        "Last Name": "Doe",
+        "First Name": "John",
+        Phone: "(111) 555-1212",
+        Email: "john.doe@example.com",
+      },
     ]);
   });
 });
@@ -69,10 +66,10 @@ describe("toCSV", () => {
   test("should convert contacts to CSV", () => {
     const contacts = [
       {
-        'Full Name': 'John Doe',
-        'Phone': '+123',
-        'Email': 'john@example.com'
-      }
+        "Full Name": "John Doe",
+        Phone: "+123",
+        Email: "john@example.com",
+      },
     ];
 
     const result = toCSV(contacts);
@@ -81,9 +78,7 @@ describe("toCSV", () => {
   });
 
   test("should escape quotes", () => {
-    const contacts = [
-      { 'Full Name': 'John "Johnny" Doe' }
-    ];
+    const contacts = [{ "Full Name": 'John "Johnny" Doe' }];
 
     const result = toCSV(contacts);
 
@@ -92,7 +87,7 @@ describe("toCSV", () => {
 
   test("should handle empty data", () => {
     const result = toCSV([]);
-    expect(result).toBe('');
+    expect(result).toBe("");
   });
 });
 
