@@ -38,6 +38,7 @@ A self-hosted online file converter. Supports over a thousand different formats.
 | [Dasel](https://github.com/TomWright/dasel)                     | Data Files       | 5             | 4           |
 | [Pandoc](https://pandoc.org/)                                   | Documents        | 43            | 65          |
 | [msgconvert](https://github.com/mvz/email-outlook-message-perl) | Outlook          | 1             | 1           |
+| VCF to CSV                                                      | Contacts         | 1             | 1           |
 | [dvisvgm](https://dvisvgm.de/)                                  | Vector images    | 4             | 2           |
 | [ImageMagick](https://imagemagick.org/)                         | Images           | 245           | 183         |
 | [GraphicsMagick](http://www.graphicsmagick.org/)                | Images           | 167           | 130         |

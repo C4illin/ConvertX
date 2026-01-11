@@ -22,6 +22,7 @@ import { convert as convertPotrace, properties as propertiesPotrace } from "./po
 import { convert as convertresvg, properties as propertiesresvg } from "./resvg";
 import { convert as convertImage, properties as propertiesImage } from "./vips";
 import { convert as convertVtracer, properties as propertiesVtracer } from "./vtracer";
+import { convert as convertVcf, properties as propertiesVcf } from "./vcf";
 import { convert as convertxelatex, properties as propertiesxelatex } from "./xelatex";
 import { convert as convertMarkitdown, properties as propertiesMarkitdown } from "./markitdown";
 
@@ -127,6 +128,10 @@ const properties: Record<
   vtracer: {
     properties: propertiesVtracer,
     converter: convertVtracer,
+  },
+  vcf: {
+    properties: propertiesVcf,
+    converter: convertVcf,
   },
   markitDown: {
     properties: propertiesMarkitdown,
