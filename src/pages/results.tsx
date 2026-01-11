@@ -25,7 +25,6 @@ function ResultsArticle({
   files: Filename[];
   outputPath: string;
 }) {
-  // If the DB schema includes jobs.num_files use it; otherwise fall back to files.length
   const maxFiles =
     typeof job.num_files === "number" && Number.isFinite(job.num_files)
       ? Number(job.num_files)
@@ -38,7 +37,6 @@ function ResultsArticle({
   const isDone = maxFiles > 0 ? doneFiles >= maxFiles : true;
 
   const disabledLinkClass = "pointer-events-none opacity-50";
-  const busyAttrs = { disabled: true, "aria-busy": "true" } as const;
 
   return (
     <article class="article">
@@ -51,7 +49,7 @@ function ResultsArticle({
               !isDone ? disabledLinkClass : ""
             }`}
             href={`${WEBROOT}/delete/${job.id}`}
-            {...(!isDone ? busyAttrs : {})}
+            aria-disabled={!isDone ? "true" : undefined}
           >
             <DeleteIcon /> <p>Delete</p>
           </a>
@@ -62,7 +60,7 @@ function ResultsArticle({
             }`}
             href={`${WEBROOT}/archive/${job.id}`}
             download
-            {...(!isDone ? busyAttrs : {})}
+            aria-disabled={!isDone ? "true" : undefined}
           >
             <DownloadIcon /> <p>Tar</p>
           </a>
@@ -71,7 +69,8 @@ function ResultsArticle({
             id="cxDownloadAll"
             type="button"
             class="flex btn-primary flex-row gap-2 text-contrast"
-            {...(!isDone ? busyAttrs : {})}
+            disabled={!isDone ? "true" : undefined}
+            aria-busy={!isDone ? "true" : undefined}
           >
             <DownloadIcon /> <p>All</p>
           </button>
@@ -215,7 +214,7 @@ function ResultsArticle({
               <button
                 id="cxShareSubmit"
                 type="button"
-                class="btn-primary flex items-center gap-2"
+                class="flex btn-primary items-center gap-2"
               >
                 Send
               </button>
@@ -253,11 +252,6 @@ function ResultsArticle({
   );
 }
 
-/**
- * IMPORTANT FIX:
- * Results HTML is re-rendered via /progress/:jobId and replaces the article + modal.
- * So we MUST NOT keep stale DOM references. We re-query elements on each action.
- */
 const shareJs = `
 (function () {
   const WEBROOT = ${JSON.stringify(WEBROOT)};
@@ -316,13 +310,11 @@ const shareJs = `
     currentFileName = null;
   }
 
-  // Delegated: always works even after /progress replaces the article
   document.addEventListener("click", (e) => {
     const t = e.target;
     const btn = t && (t.closest ? t.closest('[data-share="true"]') : null);
     if (!btn) return;
 
-    // kill old handlers (e.g. alert() from older results.js)
     e.preventDefault();
     e.stopPropagation();
     if (e.stopImmediatePropagation) e.stopImmediatePropagation();
@@ -332,7 +324,6 @@ const shareJs = `
     openModal(jobId, fileName);
   }, true);
 
-  // Delegated close (because modal DOM is replaced during progress polling)
   document.addEventListener("click", (e) => {
     const id = e.target && e.target.id;
     if (id === "cxShareClose" || id === "cxShareCancel") {
@@ -340,7 +331,6 @@ const shareJs = `
       closeModal();
     }
     if (id === "cxShareModal") {
-      // click outside dialog closes
       closeModal();
     }
   }, true);
@@ -350,7 +340,6 @@ const shareJs = `
     if (e.key === "Escape" && r.modal && !r.modal.classList.contains("hidden")) closeModal();
   });
 
-  // Delegated copy
   document.addEventListener("click", async (e) => {
     const t = e.target;
     if (!t || t.id !== "cxShareCopy") return;
@@ -369,7 +358,6 @@ const shareJs = `
     }
   }, true);
 
-  // Delegated submit
   document.addEventListener("click", async (e) => {
     const t = e.target;
     if (!t || t.id !== "cxShareSubmit") return;
@@ -413,13 +401,13 @@ const shareJs = `
       }
 
       const url =
-        json?.share_url ||
-        json?.share_link ||
-        json?.data?.url ||
-        json?.data?.share?.url ||
+        (json && typeof json === "object" && json.share_url) ||
+        (json && typeof json === "object" && json.share_link) ||
+        (json && typeof json === "object" && json.data && json.data.url) ||
+        (json && typeof json === "object" && json.data && json.data.share && json.data.share.url) ||
         null;
 
-      if (url) {
+      if (url && typeof url === "string") {
         r.linkEl.value = url;
         r.linkBlock.classList.remove("hidden");
       }
@@ -436,7 +424,6 @@ const shareJs = `
     }
   }, true);
 
-  // Download All: delegated, because button is replaced during progress polling
   document.addEventListener("click", (e) => {
     const t = e.target;
     const btn = t && (t.closest ? t.closest("#cxDownloadAll") : null);
@@ -458,7 +445,6 @@ const shareJs = `
 
 export const results = new Elysia()
   .use(userService)
-
   .get(
     "/results-share.js",
     () =>
@@ -470,7 +456,6 @@ export const results = new Elysia()
       }),
     { auth: true },
   )
-
   .get(
     "/results/:jobId",
     async ({ params, set, cookie: { job_id }, user }) => {
@@ -506,10 +491,10 @@ export const results = new Elysia()
               <ResultsArticle job={job} files={files} outputPath={outputPath} />
             </main>
 
-            {/* keep existing file */}
+            {/* existing file */}
             <script src={`${WEBROOT}/results.js`} defer />
 
-            {/* our override must also load */}
+            {/* override handlers */}
             <script src={`${WEBROOT}/results-share.js`} defer />
           </>
         </BaseHtml>
@@ -517,7 +502,6 @@ export const results = new Elysia()
     },
     { auth: true },
   )
-
   .post(
     "/progress/:jobId",
     async ({ set, params, cookie: { job_id }, user }) => {
@@ -544,7 +528,6 @@ export const results = new Elysia()
     },
     { auth: true },
   )
-
   .post(
     "/share-to-erugo/:jobId",
     async ({ params, body, user, set }) => {
@@ -559,7 +542,9 @@ export const results = new Elysia()
       }
 
       const file = db
-        .query("SELECT * FROM file_names WHERE job_id = ? AND output_file_name = ?")
+        .query(
+          "SELECT * FROM file_names WHERE job_id = ? AND output_file_name = ?",
+        )
         .as(Filename)
         .get(params.jobId, body.fileName);
 
