@@ -107,23 +107,49 @@ export async function sendFileToErugo(options: {
     );
   }
 
-  let json: any = null;
+    const get = (obj: unknown, key: string): unknown => {
+    if (!obj || typeof obj !== "object") return undefined;
+    return (obj as Record<string, unknown>)[key];
+  };
+
+  const getNested = (obj: unknown, keys: string[]): unknown => {
+    let cur: unknown = obj;
+    for (const k of keys) {
+      cur = get(cur, k);
+      if (cur === undefined || cur === null) return undefined;
+    }
+    return cur;
+  };
+
+  let jsonObj: Record<string, unknown> = {};
+
   try {
-    json = text ? JSON.parse(text) : null;
+    const parsed: unknown = text ? JSON.parse(text) : null;
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      jsonObj = parsed as Record<string, unknown>;
+    } else {
+      jsonObj = { value: parsed };
+    }
   } catch {
-    json = { raw: text };
+    jsonObj = { raw: text };
   }
 
+  const shareUrlCandidates: unknown[] = [
+    getNested(jsonObj, ["share_url"]),
+    getNested(jsonObj, ["share_link"]),
+    getNested(jsonObj, ["data", "url"]),
+    getNested(jsonObj, ["data", "share", "url"]),
+    getNested(jsonObj, ["data", "share_url"]),
+    getNested(jsonObj, ["data", "share_link"]),
+  ];
+
+  const share_url =
+    (shareUrlCandidates.find((v) => typeof v === "string") as string | undefined) ??
+    null;
+
   return {
-    ...json,
-    share_url:
-      json?.share_url ||
-      json?.share_link ||
-      json?.data?.url ||
-      json?.data?.share?.url ||
-      json?.data?.share_url ||
-      json?.data?.share_link ||
-      null,
+    ...jsonObj,
+    share_url,
   };
-}
+
 
