@@ -2,5 +2,5 @@
 bun = "1.2.2"
 
 [env]
-JWT_SECRET = "JustForDevelopmentPurposesOnlyChangeMeInProduction!"
+JWT_SECRET = "aLongAndSecretStringUsedToSignTheJSONWebToken1234"
 FFMPEG_OUTPUT_ARGS = "-preset veryfast -threads 2"
