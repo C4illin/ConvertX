@@ -193,88 +193,88 @@ export const user = new Elysia()
       </BaseHtml>
     );
   })
-    .post(
+  .post(
     "/register",
     async ({ body: { email, password }, set, redirect, jwt, cookie: { auth } }) => {
-          // DB-driven "first user" detection (no stale in-memory flag) + race-safe creation.
-          // We hash outside the write-lock to keep the lock window short.
-          const savedPassword = await Bun.password.hash(password);
+      // DB-driven "first user" detection (no stale in-memory flag) + race-safe creation.
+      // We hash outside the write-lock to keep the lock window short.
+      const savedPassword = await Bun.password.hash(password);
 
-          // Acquire a write lock so only one instance can perform "count==0 then insert" at a time.
-          db.exec("BEGIN IMMEDIATE");
-          try {
-            const isFirstUser = computeFirstRun();
+      // Acquire a write lock so only one instance can perform "count==0 then insert" at a time.
+      db.exec("BEGIN IMMEDIATE");
+      try {
+        const isFirstUser = computeFirstRun();
 
-            // first user allowed even if ACCOUNT_REGISTRATION=false
-            if (!ACCOUNT_REGISTRATION && !isFirstUser) {
-              db.exec("ROLLBACK");
-              return redirect(`${WEBROOT}/login`, 302);
-            }
+        // first user allowed even if ACCOUNT_REGISTRATION=false
+        if (!ACCOUNT_REGISTRATION && !isFirstUser) {
+          db.exec("ROLLBACK");
+          return redirect(`${WEBROOT}/login`, 302);
+        }
 
-            const existingUser = db.query("SELECT 1 FROM users WHERE email = ?").get(email);
-            if (existingUser) {
-              db.exec("ROLLBACK");
-              set.status = 400;
-              return {
-                message: "Email already in use.",
-              };
-            }
+        const existingUser = db.query("SELECT 1 FROM users WHERE email = ?").get(email);
+        if (existingUser) {
+          db.exec("ROLLBACK");
+          set.status = 400;
+          return {
+            message: "Email already in use.",
+          };
+        }
 
-            const role = isFirstUser ? "admin" : "user";
+        const role = isFirstUser ? "admin" : "user";
 
-            db.query("INSERT INTO users (email, password, role) VALUES (?, ?, ?)").run(
-              email,
-              savedPassword,
-              role,
-            );
+        db.query("INSERT INTO users (email, password, role) VALUES (?, ?, ?)").run(
+          email,
+          savedPassword,
+          role,
+        );
 
-            const userRow = db.query("SELECT * FROM users WHERE email = ?").as(User).get(email);
+        const userRow = db.query("SELECT * FROM users WHERE email = ?").as(User).get(email);
 
-            if (!userRow) {
-              db.exec("ROLLBACK");
-              set.status = 500;
-              return {
-                message: "Failed to create user.",
-              };
-            }
+        if (!userRow) {
+          db.exec("ROLLBACK");
+          set.status = 500;
+          return {
+            message: "Failed to create user.",
+          };
+        }
 
-            db.exec("COMMIT");
-            FIRST_RUN = false;
+        db.exec("COMMIT");
+        FIRST_RUN = false;
 
-            const accessToken = await jwt.sign({
-              id: String(userRow.id),
-              role: userRow.role ?? "user",
-            });
+        const accessToken = await jwt.sign({
+          id: String(userRow.id),
+          role: userRow.role ?? "user",
+        });
 
-            if (!auth) {
-              set.status = 500;
-              return {
-                message: "No auth cookie, perhaps your browser is blocking cookies.",
-              };
-            }
+        if (!auth) {
+          set.status = 500;
+          return {
+            message: "No auth cookie, perhaps your browser is blocking cookies.",
+          };
+        }
 
-            // set cookie
-            auth.set({
-              value: accessToken,
-              httpOnly: true,
-              secure: !HTTP_ALLOWED,
-              maxAge: 60 * 60 * 24 * 7,
-              sameSite: "strict",
-            });
+        // set cookie
+        auth.set({
+          value: accessToken,
+          httpOnly: true,
+          secure: !HTTP_ALLOWED,
+          maxAge: 60 * 60 * 24 * 7,
+          sameSite: "strict",
+        });
 
-            return redirect(`${WEBROOT}/`, 302);
-          } catch (e) {
-            try {
-              db.exec("ROLLBACK");
-            } catch (rollbackErr) {
-              console.warn("[user/register] ROLLBACK failed:", rollbackErr);
-            }
-            throw e;
-          }
+        return redirect(`${WEBROOT}/`, 302);
+      } catch (e) {
+        try {
+          db.exec("ROLLBACK");
+        } catch {
+          // ignore rollback errors
+        }
+        throw e;
+      }
     },
     { body: "signIn" },
   )
-.get(
+  .get(
     "/login",
     async ({ jwt, redirect, cookie: { auth } }) => {
       if (computeFirstRun()) {
@@ -357,9 +357,7 @@ export const user = new Elysia()
   .post(
     "/login",
     async function handler({ body, set, redirect, jwt, cookie: { auth } }) {
-      const existingUser = db.query("SELECT * FROM users WHERE email = ?").as(User).get(
-        body.email,
-      );
+      const existingUser = db.query("SELECT * FROM users WHERE email = ?").as(User).get(body.email);
 
       if (!existingUser) {
         set.status = 403;
@@ -535,11 +533,7 @@ export const user = new Elysia()
                         </label>
                         <label class="flex flex-col gap-1">
                           Role
-                          <select
-                            name="newUserRole"
-                            class="rounded-sm bg-neutral-800 p-3"
-                            required
-                          >
+                          <select name="newUserRole" class="rounded-sm bg-neutral-800 p-3" required>
                             <option value="user">Normal user</option>
                             <option value="admin">Admin</option>
                           </select>
@@ -583,15 +577,8 @@ export const user = new Elysia()
                                 <td>
                                   <div class="flex items-center gap-6">
                                     {/* Edit / details icon */}
-                                    <form
-                                      method="get"
-                                      action={`${WEBROOT}/account/edit-user`}
-                                    >
-                                      <input
-                                        type="hidden"
-                                        name="userId"
-                                        value={String(u.id)}
-                                      />
+                                    <form method="get" action={`${WEBROOT}/account/edit-user`}>
+                                      <input type="hidden" name="userId" value={String(u.id)} />
                                       <button
                                         type="submit"
                                         class={`
@@ -684,9 +671,7 @@ export const user = new Elysia()
       if (!tokenUser) {
         return redirect(`${WEBROOT}/login`, 302);
       }
-      const existingUser = db.query("SELECT * FROM users WHERE id = ?").as(User).get(
-        tokenUser.id,
-      );
+      const existingUser = db.query("SELECT * FROM users WHERE id = ?").as(User).get(tokenUser.id);
 
       if (!existingUser) {
         if (auth?.value) {
@@ -875,11 +860,7 @@ export const user = new Elysia()
                     </label>
                     <label class="flex flex-col gap-1">
                       Role
-                      <select
-                        name="role"
-                        class="rounded-sm bg-neutral-800 p-3 capitalize"
-                        required
-                      >
+                      <select name="role" class="rounded-sm bg-neutral-800 p-3 capitalize" required>
                         <option value="user" selected={targetUser.role === "user"}>
                           Normal user
                         </option>
@@ -900,10 +881,7 @@ export const user = new Elysia()
                     </label>
                   </fieldset>
                   <div class="flex flex-row gap-4">
-                    <a
-                      href={`${WEBROOT}/account`}
-                      class="w-full btn-secondary text-center"
-                    >
+                    <a href={`${WEBROOT}/account`} class="w-full btn-secondary text-center">
                       Cancel
                     </a>
                     <button type="submit" class="w-full btn-primary">
@@ -984,9 +962,10 @@ export const user = new Elysia()
       }
 
       if (fields.length > 0) {
-        db.query(
-          `UPDATE users SET ${fields.map((f) => `${f}=?`).join(", ")} WHERE id=?`,
-        ).run(...values, targetId);
+        db.query(`UPDATE users SET ${fields.map((f) => `${f}=?`).join(", ")} WHERE id=?`).run(
+          ...values,
+          targetId,
+        );
       }
 
       return redirect(`${WEBROOT}/account`, 302);
@@ -1078,4 +1057,3 @@ export const user = new Elysia()
       cookie: "session",
     },
   );
-

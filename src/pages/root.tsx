@@ -76,7 +76,7 @@ export const root = new Elysia().use(userService).get(
           // fallback: treat as normal user if role missing
           user = { ...verifiedUser, id: verifiedUser.id, role: "user" };
         } else {
-          user = verifiedUser as ({ id: string; role: string } & JWTPayloadSpec);
+          user = verifiedUser as { id: string; role: string } & JWTPayloadSpec;
         }
       }
 
