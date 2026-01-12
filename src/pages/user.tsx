@@ -13,9 +13,20 @@ import {
   WEBROOT,
 } from "../helpers/env";
 
-export let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
+function computeFirstRun(): boolean {
+  // DB-driven, so it stays correct across reloads and per-request updates.
+  return db.query("SELECT 1 FROM users LIMIT 1").get() === null;
+}
+
+// Kept as an exported boolean for backwards-compatibility (e.g. root.tsx imports FIRST_RUN),
+// but it is refreshed per-request via userService. Do not rely on it being constant.
+export let FIRST_RUN = computeFirstRun();
 
 export const userService = new Elysia({ name: "user/service" })
+  .derive(() => {
+    FIRST_RUN = computeFirstRun();
+    return {};
+  })
   .use(
     jwt({
       name: "jwt",
@@ -67,7 +78,8 @@ export const userService = new Elysia({ name: "user/service" })
 export const user = new Elysia()
   .use(userService)
   .get("/setup", ({ redirect }) => {
-    if (!FIRST_RUN) {
+    const isFirstRun = computeFirstRun();
+    if (!isFirstRun) {
       return redirect(`${WEBROOT}/login`, 302);
     }
 
@@ -182,27 +194,31 @@ export const user = new Elysia()
     );
   })
   .post(
-    "/register",
-    async ({ body: { email, password }, set, redirect, jwt, cookie: { auth } }) => {
-      // first user allowed even if ACCOUNT_REGISTRATION=false
-      const isFirstUser = FIRST_RUN;
+  "/register",
+  async ({ body: { email, password }, set, redirect, jwt, cookie: { auth } }) => {
+    // DB-driven "first user" detection (no stale in-memory flag) + race-safe creation.
+    // We hash outside the write-lock to keep the lock window short.
+    const savedPassword = await Bun.password.hash(password);
 
+    // Acquire a write lock so only one instance can perform "count==0 then insert" at a time.
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      const isFirstUser = computeFirstRun();
+
+      // first user allowed even if ACCOUNT_REGISTRATION=false
       if (!ACCOUNT_REGISTRATION && !isFirstUser) {
+        db.exec("ROLLBACK");
         return redirect(`${WEBROOT}/login`, 302);
       }
 
-      if (FIRST_RUN) {
-        FIRST_RUN = false;
-      }
-
-      const existingUser = await db.query("SELECT * FROM users WHERE email = ?").get(email);
+      const existingUser = db.query("SELECT 1 FROM users WHERE email = ?").get(email);
       if (existingUser) {
+        db.exec("ROLLBACK");
         set.status = 400;
         return {
           message: "Email already in use.",
         };
       }
-      const savedPassword = await Bun.password.hash(password);
 
       const role = isFirstUser ? "admin" : "user";
 
@@ -215,15 +231,19 @@ export const user = new Elysia()
       const userRow = db.query("SELECT * FROM users WHERE email = ?").as(User).get(email);
 
       if (!userRow) {
+        db.exec("ROLLBACK");
         set.status = 500;
         return {
           message: "Failed to create user.",
         };
       }
 
+      db.exec("COMMIT");
+      FIRST_RUN = false;
+
       const accessToken = await jwt.sign({
         id: String(userRow.id),
-        role: userRow.role,
+        role: userRow.role ?? "user",
       });
 
       if (!auth) {
@@ -243,13 +263,23 @@ export const user = new Elysia()
       });
 
       return redirect(`${WEBROOT}/`, 302);
-    },
-    { body: "signIn" },
-  )
+    } catch (e) {
+      try {
+        db.exec("ROLLBACK");
+      } catch {
+        // ignore rollback errors
+      }
+      throw e;
+    }
+  },
+  { body: "signIn" },
+)
+
+
   .get(
     "/login",
     async ({ jwt, redirect, cookie: { auth } }) => {
-      if (FIRST_RUN) {
+      if (computeFirstRun()) {
         return redirect(`${WEBROOT}/setup`, 302);
       }
 
