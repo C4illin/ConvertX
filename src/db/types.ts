@@ -22,4 +22,3 @@ export class User {
   password!: string;
   role!: string; // 'admin' | 'user'
 }
-
