@@ -39,10 +39,6 @@ if (dbVersion === 0) {
   console.log("Updated database to version 1.");
 }
 
-/**
- * Ensure `role` column exists on users table.
- * This works for both fresh installs and existing DBs, without touching user_version.
- */
 const userColumns = db.query("PRAGMA table_info(users)").all() as { name: string }[];
 const hasRoleColumn = userColumns.some((col) => col.name === "role");
 if (!hasRoleColumn) {
