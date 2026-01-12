@@ -936,36 +936,46 @@ export const user = new Elysia()
         return redirect(`${WEBROOT}/account`, 302);
       }
 
-      // Prevent demoting the last admin
-      if (targetUser.role === "admin" && role !== "admin") {
-        const adminCountRow = db
-          .query("SELECT COUNT(*) AS cnt FROM users WHERE role = 'admin'")
-          .get() as { cnt: number };
-        if (adminCountRow.cnt <= 1) {
-          set.status = 400;
-          return { message: "You cannot demote the last remaining admin." };
+      // Atomic last-admin protection: concurrent demotions must not be able to leave zero admins.
+      // Use a write transaction to serialize changes and a conditional UPDATE for demotion.
+      db.exec("BEGIN IMMEDIATE");
+      try {
+        // Role change
+        if (role === "admin") {
+          db.query("UPDATE users SET role = 'admin' WHERE id = ?").run(targetId);
+        } else if (role === "user") {
+          // If demoting an admin, only allow if there is more than 1 admin at the time of the update.
+          const demoteRes = db
+            .query(
+              `UPDATE users
+         SET role = 'user'
+         WHERE id = ?
+           AND role = 'admin'
+           AND (SELECT COUNT(*) FROM users WHERE role = 'admin') > 1`,
+            )
+            .run(targetId);
+
+          if (targetUser.role === "admin" && demoteRes.changes === 0) {
+            db.exec("ROLLBACK");
+            set.status = 400;
+            return { message: "You cannot demote the last remaining admin." };
+          }
         }
-      }
 
-      const fields: string[] = [];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const values: any[] = [];
+        // Password change (optional)
+        if (newPassword && newPassword.trim().length > 0) {
+          const hashed = await Bun.password.hash(newPassword);
+          db.query("UPDATE users SET password = ? WHERE id = ?").run(hashed, targetId);
+        }
 
-      if (role === "admin" || role === "user") {
-        fields.push("role");
-        values.push(role);
-      }
-
-      if (newPassword && newPassword.trim().length > 0) {
-        fields.push("password");
-        values.push(await Bun.password.hash(newPassword));
-      }
-
-      if (fields.length > 0) {
-        db.query(`UPDATE users SET ${fields.map((f) => `${f}=?`).join(", ")} WHERE id=?`).run(
-          ...values,
-          targetId,
-        );
+        db.exec("COMMIT");
+      } catch (e) {
+        try {
+          db.exec("ROLLBACK");
+        } catch (rollbackErr) {
+          console.warn("[user/edit-user] ROLLBACK failed:", rollbackErr);
+        }
+        throw e;
       }
 
       return redirect(`${WEBROOT}/account`, 302);
