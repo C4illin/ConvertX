@@ -13,20 +13,9 @@ import {
   WEBROOT,
 } from "../helpers/env";
 
-function computeFirstRun(): boolean {
-  // DB-driven, so it stays correct across reloads and per-request updates.
-  return db.query("SELECT 1 FROM users LIMIT 1").get() === null;
-}
-
-// Kept as an exported boolean for backwards-compatibility (e.g. root.tsx imports FIRST_RUN),
-// but it is refreshed per-request via userService. Do not rely on it being constant.
-export let FIRST_RUN = computeFirstRun();
+export let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
 
 export const userService = new Elysia({ name: "user/service" })
-  .derive(() => {
-    FIRST_RUN = computeFirstRun();
-    return {};
-  })
   .use(
     jwt({
       name: "jwt",
@@ -78,8 +67,7 @@ export const userService = new Elysia({ name: "user/service" })
 export const user = new Elysia()
   .use(userService)
   .get("/setup", ({ redirect }) => {
-    const isFirstRun = computeFirstRun();
-    if (!isFirstRun) {
+    if (!FIRST_RUN) {
       return redirect(`${WEBROOT}/login`, 302);
     }
 
@@ -196,88 +184,72 @@ export const user = new Elysia()
   .post(
     "/register",
     async ({ body: { email, password }, set, redirect, jwt, cookie: { auth } }) => {
-      // DB-driven "first user" detection (no stale in-memory flag) + race-safe creation.
-      // We hash outside the write-lock to keep the lock window short.
+      // first user allowed even if ACCOUNT_REGISTRATION=false
+      const isFirstUser = FIRST_RUN;
+
+      if (!ACCOUNT_REGISTRATION && !isFirstUser) {
+        return redirect(`${WEBROOT}/login`, 302);
+      }
+
+      if (FIRST_RUN) {
+        FIRST_RUN = false;
+      }
+
+      const existingUser = await db.query("SELECT * FROM users WHERE email = ?").get(email);
+      if (existingUser) {
+        set.status = 400;
+        return {
+          message: "Email already in use.",
+        };
+      }
       const savedPassword = await Bun.password.hash(password);
 
-      // Acquire a write lock so only one instance can perform "count==0 then insert" at a time.
-      db.exec("BEGIN IMMEDIATE");
-      try {
-        const isFirstUser = computeFirstRun();
+      const role = isFirstUser ? "admin" : "user";
 
-        // first user allowed even if ACCOUNT_REGISTRATION=false
-        if (!ACCOUNT_REGISTRATION && !isFirstUser) {
-          db.exec("ROLLBACK");
-          return redirect(`${WEBROOT}/login`, 302);
-        }
+      db.query("INSERT INTO users (email, password, role) VALUES (?, ?, ?)").run(
+        email,
+        savedPassword,
+        role,
+      );
 
-        const existingUser = db.query("SELECT 1 FROM users WHERE email = ?").get(email);
-        if (existingUser) {
-          db.exec("ROLLBACK");
-          set.status = 400;
-          return {
-            message: "Email already in use.",
-          };
-        }
+      const userRow = db.query("SELECT * FROM users WHERE email = ?").as(User).get(email);
 
-        const role = isFirstUser ? "admin" : "user";
-
-        db.query("INSERT INTO users (email, password, role) VALUES (?, ?, ?)").run(
-          email,
-          savedPassword,
-          role,
-        );
-
-        const userRow = db.query("SELECT * FROM users WHERE email = ?").as(User).get(email);
-
-        if (!userRow) {
-          db.exec("ROLLBACK");
-          set.status = 500;
-          return {
-            message: "Failed to create user.",
-          };
-        }
-
-        db.exec("COMMIT");
-        FIRST_RUN = false;
-
-        const accessToken = await jwt.sign({
-          id: String(userRow.id),
-          role: userRow.role ?? "user",
-        });
-
-        if (!auth) {
-          set.status = 500;
-          return {
-            message: "No auth cookie, perhaps your browser is blocking cookies.",
-          };
-        }
-
-        // set cookie
-        auth.set({
-          value: accessToken,
-          httpOnly: true,
-          secure: !HTTP_ALLOWED,
-          maxAge: 60 * 60 * 24 * 7,
-          sameSite: "strict",
-        });
-
-        return redirect(`${WEBROOT}/`, 302);
-      } catch (e) {
-        try {
-          db.exec("ROLLBACK");
-        } catch {
-          // ignore rollback errors
-        }
-        throw e;
+      if (!userRow) {
+        set.status = 500;
+        return {
+          message: "Failed to create user.",
+        };
       }
+
+      const accessToken = await jwt.sign({
+        id: String(userRow.id),
+        role: userRow.role,
+      });
+
+      if (!auth) {
+        set.status = 500;
+        return {
+          message: "No auth cookie, perhaps your browser is blocking cookies.",
+        };
+      }
+
+      // set cookie
+      auth.set({
+        value: accessToken,
+        httpOnly: true,
+        secure: !HTTP_ALLOWED,
+        maxAge: 60 * 60 * 24 * 7,
+        sameSite: "strict",
+      });
+
+      return redirect(`${WEBROOT}/`, 302);
     },
     { body: "signIn" },
   )
   .get(
     "/login",
     async ({ jwt, redirect, cookie: { auth } }) => {
-      if (computeFirstRun()) {
+      if (FIRST_RUN) {
         return redirect(`${WEBROOT}/setup`, 302);
       }
 
@@ -845,7 +817,9 @@ export const user = new Elysia()
                 <form
                   method="post"
                   action={`${WEBROOT}/account/edit-user`}
-                  class="flex flex-col gap-4"
+                  class={`
+                    flex flex-col gap-4
+                  `}
                 >
                   <input type="hidden" name="userId" value={String(targetUser.id)} />
                   <fieldset class="mb-4 flex flex-col gap-4">
@@ -938,6 +912,14 @@ export const user = new Elysia()
 
       // Atomic last-admin protection: concurrent demotions must not be able to leave zero admins.
       // Use a write transaction to serialize changes and a conditional UPDATE for demotion.
+      //
+      // IMPORTANT: do not hold a SQLite write transaction open across an `await`.
+      // Hash any password outside the transaction to avoid lock contention.
+      let hashedPassword: string | null = null;
+      if (newPassword && newPassword.trim().length > 0) {
+        hashedPassword = await Bun.password.hash(newPassword);
+      }
+
       db.exec("BEGIN IMMEDIATE");
       try {
         // Role change
@@ -963,9 +945,8 @@ export const user = new Elysia()
         }
 
         // Password change (optional)
-        if (newPassword && newPassword.trim().length > 0) {
-          const hashed = await Bun.password.hash(newPassword);
-          db.query("UPDATE users SET password = ? WHERE id = ?").run(hashed, targetId);
+        if (hashedPassword) {
+          db.query("UPDATE users SET password = ? WHERE id = ?").run(hashedPassword, targetId);
         }
 
         db.exec("COMMIT");
