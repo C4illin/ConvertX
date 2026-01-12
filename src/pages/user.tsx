@@ -862,9 +862,7 @@ export const user = new Elysia()
                 <form
                   method="post"
                   action={`${WEBROOT}/account/edit-user`}
-                  class={`
-                    flex flex-col gap-4
-                  `}
+                  class="flex flex-col gap-4"
                 >
                   <input type="hidden" name="userId" value={String(targetUser.id)} />
                   <fieldset class="mb-4 flex flex-col gap-4">
