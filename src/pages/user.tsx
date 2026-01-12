@@ -193,90 +193,88 @@ export const user = new Elysia()
       </BaseHtml>
     );
   })
-  .post(
-  "/register",
-  async ({ body: { email, password }, set, redirect, jwt, cookie: { auth } }) => {
-    // DB-driven "first user" detection (no stale in-memory flag) + race-safe creation.
-    // We hash outside the write-lock to keep the lock window short.
-    const savedPassword = await Bun.password.hash(password);
+    .post(
+    "/register",
+    async ({ body: { email, password }, set, redirect, jwt, cookie: { auth } }) => {
+          // DB-driven "first user" detection (no stale in-memory flag) + race-safe creation.
+          // We hash outside the write-lock to keep the lock window short.
+          const savedPassword = await Bun.password.hash(password);
 
-    // Acquire a write lock so only one instance can perform "count==0 then insert" at a time.
-    db.exec("BEGIN IMMEDIATE");
-    try {
-      const isFirstUser = computeFirstRun();
+          // Acquire a write lock so only one instance can perform "count==0 then insert" at a time.
+          db.exec("BEGIN IMMEDIATE");
+          try {
+            const isFirstUser = computeFirstRun();
 
-      // first user allowed even if ACCOUNT_REGISTRATION=false
-      if (!ACCOUNT_REGISTRATION && !isFirstUser) {
-        db.exec("ROLLBACK");
-        return redirect(`${WEBROOT}/login`, 302);
-      }
+            // first user allowed even if ACCOUNT_REGISTRATION=false
+            if (!ACCOUNT_REGISTRATION && !isFirstUser) {
+              db.exec("ROLLBACK");
+              return redirect(`${WEBROOT}/login`, 302);
+            }
 
-      const existingUser = db.query("SELECT 1 FROM users WHERE email = ?").get(email);
-      if (existingUser) {
-        db.exec("ROLLBACK");
-        set.status = 400;
-        return {
-          message: "Email already in use.",
-        };
-      }
+            const existingUser = db.query("SELECT 1 FROM users WHERE email = ?").get(email);
+            if (existingUser) {
+              db.exec("ROLLBACK");
+              set.status = 400;
+              return {
+                message: "Email already in use.",
+              };
+            }
 
-      const role = isFirstUser ? "admin" : "user";
+            const role = isFirstUser ? "admin" : "user";
 
-      db.query("INSERT INTO users (email, password, role) VALUES (?, ?, ?)").run(
-        email,
-        savedPassword,
-        role,
-      );
+            db.query("INSERT INTO users (email, password, role) VALUES (?, ?, ?)").run(
+              email,
+              savedPassword,
+              role,
+            );
 
-      const userRow = db.query("SELECT * FROM users WHERE email = ?").as(User).get(email);
+            const userRow = db.query("SELECT * FROM users WHERE email = ?").as(User).get(email);
 
-      if (!userRow) {
-        db.exec("ROLLBACK");
-        set.status = 500;
-        return {
-          message: "Failed to create user.",
-        };
-      }
+            if (!userRow) {
+              db.exec("ROLLBACK");
+              set.status = 500;
+              return {
+                message: "Failed to create user.",
+              };
+            }
 
-      db.exec("COMMIT");
-      FIRST_RUN = false;
+            db.exec("COMMIT");
+            FIRST_RUN = false;
 
-      const accessToken = await jwt.sign({
-        id: String(userRow.id),
-        role: userRow.role ?? "user",
-      });
+            const accessToken = await jwt.sign({
+              id: String(userRow.id),
+              role: userRow.role ?? "user",
+            });
 
-      if (!auth) {
-        set.status = 500;
-        return {
-          message: "No auth cookie, perhaps your browser is blocking cookies.",
-        };
-      }
+            if (!auth) {
+              set.status = 500;
+              return {
+                message: "No auth cookie, perhaps your browser is blocking cookies.",
+              };
+            }
 
-      // set cookie
-      auth.set({
-        value: accessToken,
-        httpOnly: true,
-        secure: !HTTP_ALLOWED,
-        maxAge: 60 * 60 * 24 * 7,
-        sameSite: "strict",
-      });
+            // set cookie
+            auth.set({
+              value: accessToken,
+              httpOnly: true,
+              secure: !HTTP_ALLOWED,
+              maxAge: 60 * 60 * 24 * 7,
+              sameSite: "strict",
+            });
 
-      return redirect(`${WEBROOT}/`, 302);
-    } catch (e) {
-      try {
-        db.exec("ROLLBACK");
-      } catch {
-        // ignore rollback errors
-      }
-      throw e;
-    }
-  },
-  { body: "signIn" },
-)
-
-
-  .get(
+            return redirect(`${WEBROOT}/`, 302);
+          } catch (e) {
+            try {
+              db.exec("ROLLBACK");
+            } catch (rollbackErr) {
+              console.warn("[user/register] ROLLBACK failed:", rollbackErr);
+            }
+            throw e;
+          }
+    },
+    { body: "signIn" },
+  )
+.get(
     "/login",
     async ({ jwt, redirect, cookie: { auth } }) => {
       if (computeFirstRun()) {
