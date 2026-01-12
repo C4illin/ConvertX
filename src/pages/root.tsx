@@ -30,18 +30,22 @@ export const root = new Elysia().use(userService).get(
     }
 
     // validate jwt
-    let user: ({ id: string } & JWTPayloadSpec) | false = false;
+    let user: ({ id: string; role: string } & JWTPayloadSpec) | false = false;
+
     if (ALLOW_UNAUTHENTICATED) {
       const newUserId = String(
         UNAUTHENTICATED_USER_SHARING
           ? 0
           : randomInt(2 ** 24, Math.min(2 ** 48 + 2 ** 24 - 1, Number.MAX_SAFE_INTEGER)),
       );
+
       const accessToken = await jwt.sign({
         id: newUserId,
+        role: "user",
       });
 
-      user = { id: newUserId };
+      user = { id: newUserId, role: "user" };
+
       if (!auth) {
         return {
           message: "No auth cookie, perhaps your browser is blocking cookies.",
@@ -57,7 +61,24 @@ export const root = new Elysia().use(userService).get(
         sameSite: "strict",
       });
     } else if (auth?.value) {
-      user = await jwt.verify(auth.value);
+      const verified = await jwt.verify(auth.value);
+
+      // If verification fails, keep user as false
+      if (verified === false) {
+        user = false;
+      } else {
+        // Ensure role is present (defensive, for older tokens)
+        const verifiedUser = verified as { id?: string; role?: string } & JWTPayloadSpec;
+
+        if (!verifiedUser.id) {
+          user = false;
+        } else if (!verifiedUser.role) {
+          // fallback: treat as normal user if role missing
+          user = { ...verifiedUser, id: verifiedUser.id, role: "user" };
+        } else {
+          user = verifiedUser as ({ id: string; role: string } & JWTPayloadSpec);
+        }
+      }
 
       if (
         user !== false &&
@@ -73,6 +94,9 @@ export const root = new Elysia().use(userService).get(
           }
           return redirect(`${WEBROOT}/login`, 302);
         }
+
+        // Optional: if you want DB to be the source of truth for role, uncomment below:
+        // user = { ...user, role: existingUser.role ?? "user" };
       }
     }
 
