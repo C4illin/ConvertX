@@ -66,20 +66,11 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
-    # Uncomment the following lines for NVIDIA GPU hardware acceleration (NVENC/NVDEC)
-    # Requires: NVIDIA drivers with NVENC/NVDEC support + nvidia-docker runtime
-    # runtime: nvidia  # Required: Enable NVIDIA container runtime
-    # group_add:       # Optional: May be needed for GPU device access (not required in Unraid)
-    #   - 226          # The render group GID on the host (check with: getent group render | cut -d: -f3)
     environment:
       - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234 # will use randomUUID() if unset
       # - HTTP_ALLOWED=true # uncomment this if accessing it over a non-https connection
-      # - FFMPEG_PREFER_HARDWARE=true # Optional: Enable hardware acceleration for video encoding/decoding
-      # - NVIDIA_VISIBLE_DEVICES=all  # Optional: Defaults to 'all', use '0,1' for specific GPUs (get IDs with: nvidia-smi -L)
-      # - NVIDIA_DRIVER_CAPABILITIES=all  # Optional: Comma-separated list (e.g., 'compute,video,utility'), 'all' for everything
     volumes:
       - ./data:/app/data
-      # - /usr/bin/nvidia-smi:/usr/bin/nvidia-smi:ro # May be needed: Mount nvidia-smi for GPU detection (not required in Unraid)
 ```
 
 or
@@ -87,6 +78,45 @@ or
 ```bash
 docker run -p 3000:3000 -v ./data:/app/data ghcr.io/c4illin/convertx
 ```
+
+### NVIDIA GPU Hardware Acceleration
+
+For improved performance on NVIDIA GPUs with NVENC/NVDEC support, use this enhanced docker-compose configuration:
+
+```yml
+# docker-compose.yml (with NVIDIA GPU support)
+services:
+  convertx:
+    image: ghcr.io/c4illin/convertx
+    container_name: convertx
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    runtime: nvidia
+    group_add:
+      - 226 # The render group GID on the host (check with: getent group render | cut -d: -f3)
+    environment:
+      - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234
+      # - HTTP_ALLOWED=true # uncomment this if accessing it over a non-https connection
+      - FFMPEG_PREFER_HARDWARE=true # Enable hardware acceleration for video encoding/decoding
+      - NVIDIA_VISIBLE_DEVICES=all # Use 'all' for all GPUs, or '0,1' for specific GPUs (get IDs with: nvidia-smi -L)
+      - NVIDIA_DRIVER_CAPABILITIES=all # Comma-separated list (e.g., 'compute,video,utility'), 'all' for everything
+    volumes:
+      - ./data:/app/data
+      - /usr/bin/nvidia-smi:/usr/bin/nvidia-smi:ro # Mount nvidia-smi for GPU detection
+```
+
+**Requirements:**
+
+- NVIDIA drivers with NVENC/NVDEC support
+- nvidia-docker runtime
+- The render group GID (226) may differ on your system
+
+**Notes:**
+
+- `group_add` may not be needed in Unraid
+- `nvidia-smi` volume mount may not be needed in Unraid
+- Hardware acceleration requires: `FFMPEG_PREFER_HARDWARE=true`, NVIDIA GPU detection, and supported video codecs (H.264, H.265, VP9, VP8, MPEG-2, MPEG-4, AV1)
 
 Then visit `http://localhost:3000` in your browser and create your account. Don't leave it unconfigured and open, as anyone can register the first account.
 
