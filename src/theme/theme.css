@@ -1,6 +1,7 @@
 :root {
-  /* Light mode */
+  /* Light mode (original ConvertX) */
   --contrast: oklch(100% 0 0);
+
   /* Neutral colors - Gray */
   --neutral-950: oklch(98.5% 0.002 247.839);
   --neutral-900: oklch(96.7% 0.003 264.542);
@@ -13,6 +14,7 @@
   --neutral-200: oklch(26.9% 0 0);
   --neutral-100: oklch(21% 0.034 264.665);
   --neutral-50: oklch(13% 0.028 261.692);
+
   /* lime-700 */
   --accent-600: oklch(53.2% 0.157 131.589);
   /* lime-600 */
@@ -22,10 +24,13 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  /* Dark mode */
+  /* Dark mode (system preference only) */
   :root {
+    /* In original file this was 0%; we keep value but our explicit
+       data-theme="dark" override below will control real dark mode. */
     --contrast: oklch(0% 0 0);
-    /* Neutral colors - Gray */
+
+    /* Neutral colors - Gray (darker backgrounds) */
     --neutral-950: oklch(13% 0.028 261.692);
     --neutral-900: oklch(21% 0.034 264.665);
     --neutral-800: oklch(27.8% 0.033 256.848);
@@ -37,6 +42,7 @@
     --neutral-200: oklch(92.8% 0.006 264.531);
     --neutral-100: oklch(96.7% 0.003 264.542);
     --neutral-50: oklch(98.5% 0.002 247.839);
+
     /* lime-600 */
     --accent-600: oklch(64.8% 0.2 131.684);
     /* lime-500 */
@@ -45,3 +51,92 @@
     --accent-400: oklch(84.1% 0.238 128.85);
   }
 }
+
+/* ---------- Explicit app-controlled dark mode ---------- */
+/* Light = default (:root above).
+   Dark = when JS sets <html data-theme="dark"> */
+
+:root[data-theme="dark"] {
+  /* White text on dark backgrounds */
+  --contrast: oklch(100% 0 0);
+
+  /* Same dark neutrals as in the @media block above */
+  --neutral-950: oklch(13% 0.028 261.692);
+  --neutral-900: oklch(21% 0.034 264.665);
+  --neutral-800: oklch(27.8% 0.033 256.848);
+  --neutral-700: oklch(37.3% 0.034 259.733);
+  --neutral-600: oklch(44.6% 0.03 256.802);
+  --neutral-500: oklch(55.1% 0.027 264.364);
+  --neutral-400: oklch(70.7% 0.022 261.325);
+  --neutral-300: oklch(87.2% 0.01 258.338);
+  --neutral-200: oklch(92.8% 0.006 264.531);
+  --neutral-100: oklch(96.7% 0.003 264.542);
+  --neutral-50:  oklch(98.5% 0.002 247.839);
+
+  /* Slightly brighter accents in dark mode */
+  --accent-600: oklch(64.8% 0.2 131.684);
+  --accent-500: oklch(76.8% 0.233 130.85);
+  --accent-400: oklch(84.1% 0.238 128.85);
+}
+
+/* ---------- Toggle styling (small, header-only) ---------- */
+
+.cx-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: 1.25rem;  /* space from logo area */
+  margin-right: 1.75rem; /* NEW: space before "History" */
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--neutral-900);
+}
+
+:root[data-theme="dark"] .cx-theme-toggle {
+  color: var(--neutral-50);
+}
+
+.cx-theme-toggle__label {
+  white-space: nowrap;
+}
+
+/* Switch body */
+.cx-switch {
+  position: relative;
+  width: 64px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.25);
+  background: #e5e7eb;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  box-sizing: border-box;
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color 150ms ease-out,
+    border-color 150ms ease-out;
+}
+
+/* Thumb */
+.cx-switch__thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.35);
+  transform: translateX(0);
+  transition: transform 150ms ease-out;
+}
+
+/* ON state */
+.cx-switch.cx-switch--on {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.cx-switch.cx-switch--on .cx-switch__thumb {
+  transform: translateX(32px);
+}
+

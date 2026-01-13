@@ -18,5 +18,32 @@ services:
       # - HIDE_HISTORY=true # hides the history tab in the web interface, defaults to false
       - TZ=Europe/Stockholm # set your timezone, defaults to UTC
       # - UNAUTHENTICATED_USER_SHARING=true # for use with ALLOW_UNAUTHENTICATED=true to share history with all unauthenticated users / devices
+      - CLAMAV_URL=http://clam_av_api:3000/api/v1/scan
     ports:
-      - 3000:3000
+      - 8080:3000
+
+  clamav-rest-api:
+    image: benzino77/clamav-rest-api:latest
+    container_name: clamav-rest-api
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      # field name expected in the multipart form
+      - APP_FORM_KEY=FILES
+      # talk to your existing ClamAV daemon
+      - CLAMD_IP=CLAMAV_server_IP
+      - CLAMD_PORT=3310
+      # max allowed file size (here: 250 MB)
+      - APP_MAX_FILE_SIZE=262144000
+    ports:
+      # outside:inside
+      - "3000:3000"
+
+   clamav:
+    image: clamav/clamav:latest
+    container_name: clamav
+    restart: unless-stopped
+    ports:
+      - "3310:3310"
+    environment:
+      - CLAMAV_NO_FRESHCLAMD=false   

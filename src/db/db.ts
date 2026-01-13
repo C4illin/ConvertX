@@ -31,10 +31,23 @@ PRAGMA user_version = 1;`);
 }
 
 const dbVersion = (db.query("PRAGMA user_version").get() as { user_version?: number }).user_version;
+
+// existing migration: add status column to file_names
 if (dbVersion === 0) {
   db.exec("ALTER TABLE file_names ADD COLUMN status TEXT DEFAULT 'not started';");
   db.exec("PRAGMA user_version = 1;");
   console.log("Updated database to version 1.");
+}
+
+/**
+ * Ensure `role` column exists on users table.
+ * This works for both fresh installs and existing DBs, without touching user_version.
+ */
+const userColumns = db.query("PRAGMA table_info(users)").all() as { name: string }[];
+const hasRoleColumn = userColumns.some((col) => col.name === "role");
+if (!hasRoleColumn) {
+  db.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user';");
+  console.log("Added 'role' column to users table.");
 }
 
 // enable WAL mode
