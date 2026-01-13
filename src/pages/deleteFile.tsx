@@ -4,6 +4,8 @@ import { uploadsDir } from "..";
 import db from "../db/db";
 import { WEBROOT } from "../helpers/env";
 import { userService } from "./user";
+import sanitize from "sanitize-filename";
+import path from "node:path";
 
 export const deleteFile = new Elysia().use(userService).post(
   "/delete",
@@ -20,9 +22,12 @@ export const deleteFile = new Elysia().use(userService).post(
       return redirect(`${WEBROOT}/`, 302);
     }
 
-    const userUploadsDir = `${uploadsDir}${user.id}/${jobId.value}/`;
+    const userUploadsDir = path.join(uploadsDir, user.id, jobId.value);
 
-    await unlink(`${userUploadsDir}${body.filename}`);
+    const sanitized = sanitize(body.filename);
+    const targetPath = path.join(userUploadsDir, sanitized);
+
+    await unlink(targetPath);
 
     return {
       message: "File deleted successfully.",
