@@ -691,33 +691,36 @@ export const properties = {
 // CUDA-supported codec names (as detected by ffprobe)
 const cudaSupportedCodecs = new Set(["h264", "hevc", "vp9", "vp8", "mpeg2video", "mpeg4", "av1"]);
 
-// Known image formats that should skip ffprobe (no video codec to detect)
-const imageFormats = new Set([
-  "jpg",
-  "jpeg",
-  "png",
-  "gif",
-  "bmp",
-  "webp",
-  "ico",
-  "tiff",
-  "tif",
-  "svg",
-  "avif",
-  "jxl",
-  "heic",
-  "heif",
-  "raw",
-  "cr2",
-  "nef",
-  "orf",
-  "sr2",
-  "arw",
-  "dng",
-  "psd",
-  "xcf",
-  "exr",
-  "hdr",
+// Container formats that can contain video streams with unknown codecs (run ffprobe)
+const containerFormats = new Set([
+  // Most common/popular video containers
+  "avi",
+  "mkv",
+  "mov",
+  "mp4",
+  "m4v", // MPEG-4 video
+  "m4a", // MPEG-4 audio
+  "webm",
+  "flv",
+  "wmv",
+  "vob", // DVD video
+  // MPEG transport streams
+  "m2ts",
+  "ts",
+  "mts",
+  // MPEG containers
+  "mpeg",
+  "mpg",
+  "m2v", // MPEG-2 video
+  // Mobile/legacy formats
+  "3gp",
+  "3g2",
+  // Other containers
+  "nut",
+  "ogv", // OGG video
+  "asf",
+  "mxf", // Professional video
+  "f4v", // Flash video
 ]);
 
 // Cache NVIDIA GPU availability to avoid repeated checks
@@ -767,7 +770,7 @@ async function checkNvidiaGpuAvailable(execFile: ExecFileFn = execFileOriginal):
 
 /**
  * Uses ffprobe to detect if the video codec in a file is supported by CUDA hardware acceleration.
- * Returns false for image formats without probing (performance optimization).
+ * Only probes container formats that can contain video streams with unknown codecs.
  * Falls back to false if probing fails (safe default).
  */
 async function isCudaSupportedCodec(
@@ -775,9 +778,9 @@ async function isCudaSupportedCodec(
   fileType: string,
   execFile: ExecFileFn = execFileOriginal,
 ): Promise<boolean> {
-  // Skip ffprobe for known image formats (no video codec to detect)
-  if (imageFormats.has(fileType.toLowerCase())) {
-    console.log(`Skipping CUDA detection for image format: ${fileType}`);
+  // Only run ffprobe on container formats that can contain video streams
+  if (!containerFormats.has(fileType.toLowerCase())) {
+    console.log(`Skipping CUDA detection for non-container format: ${fileType}`);
     return false;
   }
 
