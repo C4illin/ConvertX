@@ -35,6 +35,7 @@ export const properties = {
   to: {
     document: [
       "azw3",
+      "cbz",
       "docx",
       "epub",
       "fb2",
