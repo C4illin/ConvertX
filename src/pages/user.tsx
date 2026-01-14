@@ -13,9 +13,19 @@ import {
   WEBROOT,
 } from "../helpers/env";
 
-export let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
+function computeFirstRun(): boolean {
+  // DB-driven, so it stays correct across reloads and multi-process setups.
+  return db.query("SELECT 1 FROM users LIMIT 1").get() === null;
+}
+
+// Exported for backwards compatibility; refreshed per-request via userService.derive().
+export let FIRST_RUN = computeFirstRun();
 
 export const userService = new Elysia({ name: "user/service" })
+  .derive(() => {
+    FIRST_RUN = computeFirstRun();
+    return {};
+  })
   .use(
     jwt({
       name: "jwt",
@@ -67,7 +77,7 @@ export const userService = new Elysia({ name: "user/service" })
 export const user = new Elysia()
   .use(userService)
   .get("/setup", ({ redirect }) => {
-    if (!FIRST_RUN) {
+    if (!computeFirstRun()) {
       return redirect(`${WEBROOT}/login`, 302);
     }
 
@@ -182,27 +192,28 @@ export const user = new Elysia()
     );
   })
   .post(
-    "/register",
-    async ({ body: { email, password }, set, redirect, jwt, cookie: { auth } }) => {
-      // first user allowed even if ACCOUNT_REGISTRATION=false
-      const isFirstUser = FIRST_RUN;
+  "/register",
+  async ({ body: { email, password }, set, redirect, jwt, cookie: { auth } }) => {
+    // DB-driven "first user" detection + race-safe creation.
+    // Hash outside the write-lock to keep the lock window short.
+    const savedPassword = await Bun.password.hash(password);
 
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      const isFirstUser = computeFirstRun();
+
+      // first user allowed even if ACCOUNT_REGISTRATION=false
       if (!ACCOUNT_REGISTRATION && !isFirstUser) {
+        db.exec("ROLLBACK");
         return redirect(`${WEBROOT}/login`, 302);
       }
 
-      if (FIRST_RUN) {
-        FIRST_RUN = false;
-      }
-
-      const existingUser = await db.query("SELECT * FROM users WHERE email = ?").get(email);
+      const existingUser = db.query("SELECT 1 FROM users WHERE email = ?").get(email);
       if (existingUser) {
+        db.exec("ROLLBACK");
         set.status = 400;
-        return {
-          message: "Email already in use.",
-        };
+        return { message: "Email already in use." };
       }
-      const savedPassword = await Bun.password.hash(password);
 
       const role = isFirstUser ? "admin" : "user";
 
@@ -213,24 +224,25 @@ export const user = new Elysia()
       );
 
       const userRow = db.query("SELECT * FROM users WHERE email = ?").as(User).get(email);
-
       if (!userRow) {
+        db.exec("ROLLBACK");
         set.status = 500;
-        return {
-          message: "Failed to create user.",
-        };
+        return { message: "Failed to create user." };
       }
+
+      db.exec("COMMIT");
+
+      // Refresh after successful creation
+      FIRST_RUN = computeFirstRun();
 
       const accessToken = await jwt.sign({
         id: String(userRow.id),
-        role: userRow.role,
+        role: userRow.role ?? "user",
       });
 
       if (!auth) {
         set.status = 500;
-        return {
-          message: "No auth cookie, perhaps your browser is blocking cookies.",
-        };
+        return { message: "No auth cookie, perhaps your browser is blocking cookies." };
       }
 
       // set cookie
@@ -243,9 +255,18 @@ export const user = new Elysia()
       });
 
       return redirect(`${WEBROOT}/`, 302);
-    },
-    { body: "signIn" },
-  )
+    } catch (e) {
+      try {
+        db.exec("ROLLBACK");
+      } catch (rollbackErr) {
+        console.warn("[user/register] ROLLBACK failed:", rollbackErr);
+      }
+      throw e;
+    }
+  },
+  { body: "signIn" },
+)
+
   .get(
     "/login",
     async ({ jwt, redirect, cookie: { auth } }) => {
@@ -547,35 +568,18 @@ export const user = new Elysia()
                                 <td>{u.email}</td>
                                 <td class="capitalize">{u.role}</td>
                                 <td>
-                                  <div class="flex items-center gap-6">
-                                    {/* Edit / details icon */}
+                                  <div class="flex flex-wrap items-center gap-3">
                                     <form method="get" action={`${WEBROOT}/account/edit-user`}>
                                       <input type="hidden" name="userId" value={String(u.id)} />
                                       <button
                                         type="submit"
-                                        class={`
-                                          inline-flex items-center justify-center text-accent-400
-                                          hover:text-accent-500
-                                        `}
+                                        class="btn-secondary px-3 py-2"
                                         title="Edit user"
                                       >
-                                        <svg
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          viewBox="0 0 24 24"
-                                          class="h-6 w-6"
-                                          fill="none"
-                                          stroke="currentColor"
-                                          stroke-width="1.8"
-                                          stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                        >
-                                          <path d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7s-8.268-2.943-9.542-7z" />
-                                          <circle cx="12" cy="12" r="3" />
-                                        </svg>
+                                        Edit
                                       </button>
                                     </form>
 
-                                    {/* Delete icon */}
                                     <form
                                       method="post"
                                       action={`${WEBROOT}/account/delete-user`}
@@ -588,28 +592,10 @@ export const user = new Elysia()
                                       />
                                       <button
                                         type="submit"
-                                        class={`
-                                          inline-flex items-center justify-center text-accent-400
-                                          hover:text-accent-500
-                                        `}
+                                        class="btn-secondary px-3 py-2"
                                         title="Delete user"
                                       >
-                                        <svg
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          viewBox="0 0 24 24"
-                                          class="h-6 w-6"
-                                          fill="none"
-                                          stroke="currentColor"
-                                          stroke-width="1.8"
-                                          stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                        >
-                                          <path d="M4 7h16" />
-                                          <path d="M10 11v6" />
-                                          <path d="M14 11v6" />
-                                          <path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12" />
-                                          <path d="M9 4h6a1 1 0 0 1 1 1v2H8V5a1 1 0 0 1 1-1z" />
-                                        </svg>
+                                        Delete
                                       </button>
                                     </form>
                                   </div>
@@ -817,9 +803,7 @@ export const user = new Elysia()
                 <form
                   method="post"
                   action={`${WEBROOT}/account/edit-user`}
-                  class={`
-                    flex flex-col gap-4
-                  `}
+                  class="flex flex-col gap-4"
                 >
                   <input type="hidden" name="userId" value={String(targetUser.id)} />
                   <fieldset class="mb-4 flex flex-col gap-4">
