@@ -13,19 +13,9 @@ import {
   WEBROOT,
 } from "../helpers/env";
 
-function computeFirstRun(): boolean {
-  // DB-driven, so it stays correct across reloads and multi-process setups.
-  return db.query("SELECT 1 FROM users LIMIT 1").get() === null;
-}
-
-// Exported for backwards compatibility; refreshed per-request via userService.derive().
-export let FIRST_RUN = computeFirstRun();
+export let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
 
 export const userService = new Elysia({ name: "user/service" })
-  .derive(() => {
-    FIRST_RUN = computeFirstRun();
-    return {};
-  })
   .use(
     jwt({
       name: "jwt",
@@ -77,7 +67,7 @@ export const userService = new Elysia({ name: "user/service" })
 export const user = new Elysia()
   .use(userService)
   .get("/setup", ({ redirect }) => {
-    if (!computeFirstRun()) {
+    if (!FIRST_RUN) {
       return redirect(`${WEBROOT}/login`, 302);
     }
 
@@ -192,28 +182,27 @@ export const user = new Elysia()
     );
   })
   .post(
-  "/register",
-  async ({ body: { email, password }, set, redirect, jwt, cookie: { auth } }) => {
-    // DB-driven "first user" detection + race-safe creation.
-    // Hash outside the write-lock to keep the lock window short.
-    const savedPassword = await Bun.password.hash(password);
-
-    db.exec("BEGIN IMMEDIATE");
-    try {
-      const isFirstUser = computeFirstRun();
-
+    "/register",
+    async ({ body: { email, password }, set, redirect, jwt, cookie: { auth } }) => {
       // first user allowed even if ACCOUNT_REGISTRATION=false
+      const isFirstUser = FIRST_RUN;
+
       if (!ACCOUNT_REGISTRATION && !isFirstUser) {
-        db.exec("ROLLBACK");
         return redirect(`${WEBROOT}/login`, 302);
       }
 
-      const existingUser = db.query("SELECT 1 FROM users WHERE email = ?").get(email);
-      if (existingUser) {
-        db.exec("ROLLBACK");
-        set.status = 400;
-        return { message: "Email already in use." };
+      if (FIRST_RUN) {
+        FIRST_RUN = false;
       }
+
+      const existingUser = await db.query("SELECT * FROM users WHERE email = ?").get(email);
+      if (existingUser) {
+        set.status = 400;
+        return {
+          message: "Email already in use.",
+        };
+      }
+      const savedPassword = await Bun.password.hash(password);
 
       const role = isFirstUser ? "admin" : "user";
 
@@ -224,25 +213,24 @@ export const user = new Elysia()
       );
 
       const userRow = db.query("SELECT * FROM users WHERE email = ?").as(User).get(email);
+
       if (!userRow) {
-        db.exec("ROLLBACK");
         set.status = 500;
-        return { message: "Failed to create user." };
+        return {
+          message: "Failed to create user.",
+        };
       }
-
-      db.exec("COMMIT");
-
-      // Refresh after successful creation
-      FIRST_RUN = computeFirstRun();
 
       const accessToken = await jwt.sign({
         id: String(userRow.id),
-        role: userRow.role ?? "user",
+        role: userRow.role,
       });
 
       if (!auth) {
         set.status = 500;
-        return { message: "No auth cookie, perhaps your browser is blocking cookies." };
+        return {
+          message: "No auth cookie, perhaps your browser is blocking cookies.",
+        };
       }
 
       // set cookie
@@ -255,18 +243,9 @@ export const user = new Elysia()
       });
 
       return redirect(`${WEBROOT}/`, 302);
-    } catch (e) {
-      try {
-        db.exec("ROLLBACK");
-      } catch (rollbackErr) {
-        console.warn("[user/register] ROLLBACK failed:", rollbackErr);
-      }
-      throw e;
-    }
-  },
-  { body: "signIn" },
-)
-
+    },
+    { body: "signIn" },
+  )
   .get(
     "/login",
     async ({ jwt, redirect, cookie: { auth } }) => {
@@ -350,7 +329,9 @@ export const user = new Elysia()
   .post(
     "/login",
     async function handler({ body, set, redirect, jwt, cookie: { auth } }) {
-      const existingUser = db.query("SELECT * FROM users WHERE email = ?").as(User).get(body.email);
+      const existingUser = db.query("SELECT * FROM users WHERE email = ?").as(User).get(
+        body.email,
+      );
 
       if (!existingUser) {
         set.status = 403;
@@ -526,7 +507,11 @@ export const user = new Elysia()
                         </label>
                         <label class="flex flex-col gap-1">
                           Role
-                          <select name="newUserRole" class="rounded-sm bg-neutral-800 p-3" required>
+                          <select
+                            name="newUserRole"
+                            class="rounded-sm bg-neutral-800 p-3"
+                            required
+                          >
                             <option value="user">Normal user</option>
                             <option value="admin">Admin</option>
                           </select>
@@ -567,39 +552,75 @@ export const user = new Elysia()
                               <tr>
                                 <td>{u.email}</td>
                                 <td class="capitalize">{u.role}</td>
-                                <td>
-                                  <div class="flex flex-wrap items-center gap-3">
-                                    <form method="get" action={`${WEBROOT}/account/edit-user`}>
-                                      <input type="hidden" name="userId" value={String(u.id)} />
-                                      <button
-                                        type="submit"
-                                        class="btn-secondary px-3 py-2"
-                                        title="Edit user"
-                                      >
-                                        Edit
-                                      </button>
-                                    </form>
+                                
+<td>
+  <div class="flex items-center gap-6">
+    {/* Edit / details icon */}
+    <form method="get" action={`${WEBROOT}/account/edit-user`}>
+      <input type="hidden" name="userId" value={String(u.id)} />
+      <button
+        type="submit"
+        class={`
+          inline-flex items-center justify-center text-accent-400
+          hover:text-accent-500
+        `}
+        title="Edit user"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          class="h-6 w-6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7s-8.268-2.943-9.542-7z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      </button>
+    </form>
 
-                                    <form
-                                      method="post"
-                                      action={`${WEBROOT}/account/delete-user`}
-                                      onsubmit="return confirm('Are you sure you want to delete this user?');"
-                                    >
-                                      <input
-                                        type="hidden"
-                                        name="deleteUserId"
-                                        value={String(u.id)}
-                                      />
-                                      <button
-                                        type="submit"
-                                        class="btn-secondary px-3 py-2"
-                                        title="Delete user"
-                                      >
-                                        Delete
-                                      </button>
-                                    </form>
-                                  </div>
-                                </td>
+    {/* Delete icon */}
+    <form
+      method="post"
+      action={`${WEBROOT}/account/delete-user`}
+      onsubmit="return confirm('Are you sure you want to delete this user?');"
+    >
+      <input
+        type="hidden"
+        name="deleteUserId"
+        value={String(u.id)}
+      />
+      <button
+        type="submit"
+        class={`
+          inline-flex items-center justify-center text-accent-400
+          hover:text-accent-500
+        `}
+        title="Delete user"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          class="h-6 w-6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M4 7h16" />
+          <path d="M10 11v6" />
+          <path d="M14 11v6" />
+          <path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12" />
+          <path d="M9 4h6a1 1 0 0 1 1 1v2H8V5a1 1 0 0 1 1-1z" />
+        </svg>
+      </button>
+    </form>
+  </div>
+</td>
                               </tr>
                             ))}
                           </tbody>
@@ -629,7 +650,9 @@ export const user = new Elysia()
       if (!tokenUser) {
         return redirect(`${WEBROOT}/login`, 302);
       }
-      const existingUser = db.query("SELECT * FROM users WHERE id = ?").as(User).get(tokenUser.id);
+      const existingUser = db.query("SELECT * FROM users WHERE id = ?").as(User).get(
+        tokenUser.id,
+      );
 
       if (!existingUser) {
         if (auth?.value) {
@@ -803,7 +826,9 @@ export const user = new Elysia()
                 <form
                   method="post"
                   action={`${WEBROOT}/account/edit-user`}
-                  class="flex flex-col gap-4"
+                  class={`
+                    flex flex-col gap-4
+                  `}
                 >
                   <input type="hidden" name="userId" value={String(targetUser.id)} />
                   <fieldset class="mb-4 flex flex-col gap-4">
@@ -818,7 +843,11 @@ export const user = new Elysia()
                     </label>
                     <label class="flex flex-col gap-1">
                       Role
-                      <select name="role" class="rounded-sm bg-neutral-800 p-3 capitalize" required>
+                      <select
+                        name="role"
+                        class="rounded-sm bg-neutral-800 p-3 capitalize"
+                        required
+                      >
                         <option value="user" selected={targetUser.role === "user"}>
                           Normal user
                         </option>
@@ -839,7 +868,10 @@ export const user = new Elysia()
                     </label>
                   </fieldset>
                   <div class="flex flex-row gap-4">
-                    <a href={`${WEBROOT}/account`} class="w-full btn-secondary text-center">
+                    <a
+                      href={`${WEBROOT}/account`}
+                      class="w-full btn-secondary text-center"
+                    >
                       Cancel
                     </a>
                     <button type="submit" class="w-full btn-primary">
@@ -894,53 +926,35 @@ export const user = new Elysia()
         return redirect(`${WEBROOT}/account`, 302);
       }
 
-      // Atomic last-admin protection: concurrent demotions must not be able to leave zero admins.
-      // Use a write transaction to serialize changes and a conditional UPDATE for demotion.
-      //
-      // IMPORTANT: do not hold a SQLite write transaction open across an `await`.
-      // Hash any password outside the transaction to avoid lock contention.
-      let hashedPassword: string | null = null;
-      if (newPassword && newPassword.trim().length > 0) {
-        hashedPassword = await Bun.password.hash(newPassword);
+      // Prevent demoting the last admin
+      if (targetUser.role === "admin" && role !== "admin") {
+        const adminCountRow = db
+          .query("SELECT COUNT(*) AS cnt FROM users WHERE role = 'admin'")
+          .get() as { cnt: number };
+        if (adminCountRow.cnt <= 1) {
+          set.status = 400;
+          return { message: "You cannot demote the last remaining admin." };
+        }
       }
 
-      db.exec("BEGIN IMMEDIATE");
-      try {
-        // Role change
-        if (role === "admin") {
-          db.query("UPDATE users SET role = 'admin' WHERE id = ?").run(targetId);
-        } else if (role === "user") {
-          // If demoting an admin, only allow if there is more than 1 admin at the time of the update.
-          const demoteRes = db
-            .query(
-              `UPDATE users
-         SET role = 'user'
-         WHERE id = ?
-           AND role = 'admin'
-           AND (SELECT COUNT(*) FROM users WHERE role = 'admin') > 1`,
-            )
-            .run(targetId);
+      const fields: string[] = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const values: any[] = [];
 
-          if (targetUser.role === "admin" && demoteRes.changes === 0) {
-            db.exec("ROLLBACK");
-            set.status = 400;
-            return { message: "You cannot demote the last remaining admin." };
-          }
-        }
+      if (role === "admin" || role === "user") {
+        fields.push("role");
+        values.push(role);
+      }
 
-        // Password change (optional)
-        if (hashedPassword) {
-          db.query("UPDATE users SET password = ? WHERE id = ?").run(hashedPassword, targetId);
-        }
+      if (newPassword && newPassword.trim().length > 0) {
+        fields.push("password");
+        values.push(await Bun.password.hash(newPassword));
+      }
 
-        db.exec("COMMIT");
-      } catch (e) {
-        try {
-          db.exec("ROLLBACK");
-        } catch (rollbackErr) {
-          console.warn("[user/edit-user] ROLLBACK failed:", rollbackErr);
-        }
-        throw e;
+      if (fields.length > 0) {
+        db.query(
+          `UPDATE users SET ${fields.map((f) => `${f}=?`).join(", ")} WHERE id=?`,
+        ).run(...values, targetId);
       }
 
       return redirect(`${WEBROOT}/account`, 302);
@@ -1032,3 +1046,4 @@ export const user = new Elysia()
       cookie: "session",
     },
   );
+
