@@ -7,9 +7,6 @@ const db = new Database("./data/mydb.sqlite", { create: true });
 // Always keep foreign keys on (SQLite defaults to off).
 db.exec("PRAGMA foreign_keys = ON;");
 
-// -----------------------------------------------------------------------------
-// Initial schema bootstrap (fresh install)
-// -----------------------------------------------------------------------------
 const hasAnyTable = db.query("SELECT 1 FROM sqlite_master WHERE type='table' LIMIT 1").get();
 if (!hasAnyTable) {
   db.exec(`
@@ -43,9 +40,7 @@ PRAGMA user_version = 1;
 `);
 }
 
-// -----------------------------------------------------------------------------
-// Version marker (kept for backwards-compatibility; schema is enforced below).
-// -----------------------------------------------------------------------------
+
 const dbVersion = (db.query("PRAGMA user_version").get() as { user_version?: number })
   .user_version;
 
@@ -54,11 +49,6 @@ if ((dbVersion ?? 0) === 0) {
   console.log("Updated database to version 1.");
 }
 
-// -----------------------------------------------------------------------------
-// One-time migration: Policy A
-// If the `role` column is newly added AND there are existing users,
-// make the oldest user (lowest id) an admin.
-// -----------------------------------------------------------------------------
 const userColumns = db.query("PRAGMA table_info(users)").all() as { name: string }[];
 const hasRoleColumn = userColumns.some((col) => col.name === "role");
 
