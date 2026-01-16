@@ -102,7 +102,7 @@ const filters: Record<FileCategories, Record<string, string>> = {
     odt: "writer8",
     ott: "writer8_template",
     pages: "Apple Pages",
-    // pdf: "writer_pdf_import",
+    pdf: "writer_pdf_import",
     psw: "PocketWord File",
     rtf: "Rich Text Format",
     sdw: "StarOffice_Writer",
@@ -148,7 +148,7 @@ export function convert(
   const [inFilter, outFilter] = getFilters(fileType, convertTo);
 
   if (inFilter) {
-    args.push(`--infilter="${inFilter}"`);
+    args.push(`--infilter=${inFilter}`);
   }
 
   if (outFilter) {
