@@ -124,7 +124,9 @@ const filters: Record<FileCategories, Record<string, string>> = {
 };
 
 const getFilters = (fileType: string, converto: string) => {
-  if (fileType in filters.text && converto in filters.text) {
+  if (converto === "pdf") {
+    return [null, null];
+  } else if (fileType in filters.text && converto in filters.text) {
     return [filters.text[fileType], filters.text[converto]];
   } else if (fileType in filters.calc && converto in filters.calc) {
     return [filters.calc[fileType], filters.calc[converto]];
