@@ -77,7 +77,15 @@ test("uses only outFilter when input has no filter (e.g., pdf -> txt)", async ()
 
   const { args } = requireDefined(calls[0], "Expected at least one execFile call");
 
-  expect(args).toEqual(["--headless", "--infilter=writer_pdf_import","--convert-to", "txt:Text", "--outdir", "out", "in.pdf"]);
+  expect(args).toEqual([
+    "--headless",
+    "--infilter=writer_pdf_import",
+    "--convert-to",
+    "txt:Text",
+    "--outdir",
+    "out",
+    "in.pdf",
+  ]);
 });
 
 test("uses only infilter when convertTo has no out filter (e.g., docx -> pdf)", async () => {
