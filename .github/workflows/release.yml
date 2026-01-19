@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
 
 env:
   DOCKER_IMAGE: convertx/convertx-cn
@@ -11,14 +11,44 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # ========================================
+      # 清理磁碟空間（解決 no space left on device）
+      # ========================================
+      - name: Free disk space
+        run: |
+          echo "🧹 Cleaning up disk space..."
+          df -h
+
+          # 移除不需要的預裝軟體
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf /usr/share/swift
+          sudo rm -rf /opt/hostedtoolcache
+
+          # 清理 apt cache
+          sudo apt-get clean
+          sudo apt-get autoremove -y
+
+          # 清理 Docker 舊資料
+          docker system prune -af --volumes || true
+
+          echo "After cleanup:"
+          df -h
+
       - name: Get tag name
         id: tag
         run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -54,7 +84,7 @@ jobs:
     needs: build-and-push
     permissions:
       contents: write
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -70,7 +100,7 @@ jobs:
         run: |
           # Get previous tag
           PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-          
+
           if [ -z "$PREVIOUS_TAG" ]; then
             # No previous tag, get all commits
             CHANGELOG=$(git log --pretty=format:"- %s (%h)" HEAD)
@@ -78,10 +108,10 @@ jobs:
             # Get commits between previous tag and current
             CHANGELOG=$(git log --pretty=format:"- %s (%h)" ${PREVIOUS_TAG}..HEAD)
           fi
-          
+
           # Write to file to preserve newlines
           echo "$CHANGELOG" > changelog.txt
-          
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:

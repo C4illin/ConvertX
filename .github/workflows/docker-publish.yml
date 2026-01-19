@@ -51,6 +51,33 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      # ========================================
+      # 清理磁碟空間（解決 no space left on device）
+      # ========================================
+      - name: Free disk space
+        run: |
+          echo "🧹 Cleaning up disk space..."
+          df -h
+
+          # 移除不需要的預裝軟體
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /usr/local/lib/android || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+          sudo rm -rf /usr/local/share/boost || true
+          sudo rm -rf /usr/share/swift || true
+          sudo rm -rf /opt/hostedtoolcache || true
+
+          # 清理 apt cache
+          sudo apt-get clean || true
+          sudo apt-get autoremove -y || true
+
+          # 清理 Docker 舊資料
+          docker system prune -af --volumes || true
+
+          echo "After cleanup:"
+          df -h
+
       - name: downcase REPO
         run: |
           echo "REPO=${GITHUB_REPOSITORY@L}" >> "${GITHUB_ENV}"

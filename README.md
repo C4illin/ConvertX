@@ -7,7 +7,7 @@
 [![GitHub Release](https://img.shields.io/github/v/release/pi-docket/ConvertX-CN)](https://github.com/pi-docket/ConvertX-CN/releases)
 
 > 🎉 **這是完整版 ConvertX-CN image，已內建所有轉換依賴！**
-> 
+>
 > 使用者 **不需要自己寫 Dockerfile**，直接 `docker run` 或 `docker compose up` 即可使用。
 
 基於 [C4illin/ConvertX](https://github.com/C4illin/ConvertX) 的中文優化版本。
@@ -18,16 +18,16 @@
 
 此 image 已經內建以下所有依賴，開箱即用：
 
-| 類別 | 內建內容 |
-|------|----------|
-| **文件轉換** | LibreOffice (headless)、Pandoc |
-| **LaTeX** | TexLive Full（完整版，支援所有 LaTeX 需求） |
+| 類別         | 內建內容                                                         |
+| ------------ | ---------------------------------------------------------------- |
+| **文件轉換** | LibreOffice (headless)、Pandoc                                   |
+| **LaTeX**    | TexLive Full（完整版，支援所有 LaTeX 需求）                      |
 | **OCR 識別** | Tesseract OCR + 繁體中文、簡體中文、日文、韓文、英文、德文語言包 |
-| **CJK 字型** | Noto CJK（中日韓）、Noto Emoji、微軟核心字型、標楷體 |
-| **影音轉換** | FFmpeg、ImageMagick、GraphicsMagick |
-| **向量圖形** | Inkscape、Potrace、VTracer、resvg |
-| **電子書** | Calibre |
-| **其他** | Ghostscript、MuPDF、Poppler、libheif、libjxl 等 |
+| **CJK 字型** | Noto CJK（中日韓）、Noto Emoji、微軟核心字型、標楷體             |
+| **影音轉換** | FFmpeg、ImageMagick、GraphicsMagick                              |
+| **向量圖形** | Inkscape、Potrace、VTracer、resvg                                |
+| **電子書**   | Calibre                                                          |
+| **其他**     | Ghostscript、MuPDF、Poppler、libheif、libjxl 等                  |
 
 ---
 
@@ -78,10 +78,10 @@ docker compose up -d
 
 ## 📦 Docker Image
 
-| Image | 說明 |
-|-------|------|
+| Image                         | 說明       |
+| ----------------------------- | ---------- |
 | `convertx/convertx-cn:latest` | 最新穩定版 |
-| `convertx/convertx-cn:v0.1.1` | 指定版本 |
+| `convertx/convertx-cn:v0.1.1` | 指定版本   |
 
 > ⚠️ 由於內建完整依賴，image 大小約 4-6 GB，首次下載需要較長時間。
 
@@ -122,20 +122,20 @@ docker compose up -d
 
 所有環境變數皆為選填，建議設定 `JWT_SECRET`。
 
-| 變數名稱 | 預設值 | 說明 |
-|----------|--------|------|
-| JWT_SECRET | randomUUID() | 用於簽署 JWT 的密鑰字串 |
-| ACCOUNT_REGISTRATION | false | 是否允許註冊新帳號 |
-| HTTP_ALLOWED | false | 是否允許 HTTP 連線（僅本地使用） |
-| ALLOW_UNAUTHENTICATED | false | 是否允許未登入使用 |
-| AUTO_DELETE_EVERY_N_HOURS | 24 | 自動刪除超過 N 小時的檔案（0 = 停用） |
-| WEBROOT | | 子路徑部署，例如 `/convertx` |
-| FFMPEG_ARGS | | FFmpeg 輸入參數，例如 `-hwaccel vaapi` |
-| FFMPEG_OUTPUT_ARGS | | FFmpeg 輸出參數，例如 `-preset veryfast` |
-| HIDE_HISTORY | false | 隱藏歷史紀錄頁面 |
-| LANGUAGE | en | 日期格式語言（BCP 47 格式） |
-| TZ | UTC | 時區設定 |
-| MAX_CONVERT_PROCESS | 0 | 最大同時轉換數（0 = 無限制） |
+| 變數名稱                  | 預設值       | 說明                                     |
+| ------------------------- | ------------ | ---------------------------------------- |
+| JWT_SECRET                | randomUUID() | 用於簽署 JWT 的密鑰字串                  |
+| ACCOUNT_REGISTRATION      | false        | 是否允許註冊新帳號                       |
+| HTTP_ALLOWED              | false        | 是否允許 HTTP 連線（僅本地使用）         |
+| ALLOW_UNAUTHENTICATED     | false        | 是否允許未登入使用                       |
+| AUTO_DELETE_EVERY_N_HOURS | 24           | 自動刪除超過 N 小時的檔案（0 = 停用）    |
+| WEBROOT                   |              | 子路徑部署，例如 `/convertx`             |
+| FFMPEG_ARGS               |              | FFmpeg 輸入參數，例如 `-hwaccel vaapi`   |
+| FFMPEG_OUTPUT_ARGS        |              | FFmpeg 輸出參數，例如 `-preset veryfast` |
+| HIDE_HISTORY              | false        | 隱藏歷史紀錄頁面                         |
+| LANGUAGE                  | en           | 日期格式語言（BCP 47 格式）              |
+| TZ                        | UTC          | 時區設定                                 |
+| MAX_CONVERT_PROCESS       | 0            | 最大同時轉換數（0 = 無限制）             |
 
 ---
 
