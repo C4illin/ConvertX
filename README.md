@@ -10,7 +10,7 @@
 >
 > 使用者 **不需要自己寫 Dockerfile**，直接 `docker run` 或 `docker compose up` 即可使用。
 
-基於 [C4illin/ConvertX](https://github.com/C4illin/ConvertX) 的中文優化版本。
+基於 [C4illin/ConvertX](https://github.com/C4illin/ConvertX) 的中文優化版本。目前還在實作請等到1月底發布
 
 ---
 
