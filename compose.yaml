@@ -1,22 +1,44 @@
-# This compose file is for development and testing purposes only. See README for production deployment instructions.
+# ==============================================================================
+# ConvertX-CN 部署範例（docker-compose.yml / compose.yaml）
+# 
+# 🎉 這是完整版 image，已內建所有轉換依賴：
+#    - LibreOffice (headless)
+#    - TexLive Full
+#    - Tesseract OCR + 中日韓英德語言包
+#    - CJK 字型（Noto CJK、微軟核心字型、標楷體）
+#    - Pandoc、FFmpeg、ImageMagick 等所有轉換器
+#
+# ✅ 使用者不需要自己寫 Dockerfile
+# ✅ 直接 docker compose up -d 即可使用
+# ==============================================================================
 
 services:
   convertx:
-    build:
-      context: .
-      # dockerfile: Debian.Dockerfile
+    image: convertx/convertx-cn:latest
+    container_name: convertx-cn
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
     volumes:
       - ./data:/app/data
-    environment: # Defaults are listed below. All are optional.
-      - ACCOUNT_REGISTRATION=true # true or false, doesn't matter for the first account (e.g. keep this to false if you only want one account)
-      - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234 # will use randomUUID() by default
-      - HTTP_ALLOWED=false # setting this to true is unsafe, only set this to true locally
-      - ALLOW_UNAUTHENTICATED=false # allows anyone to use the service without logging in, only set this to true locally
-      - AUTO_DELETE_EVERY_N_HOURS=1 # checks every n hours for files older then n hours and deletes them, set to 0 to disable
-      # - FFMPEG_ARGS=-hwaccel vulkan # additional arguments to pass to ffmpeg
-      # - WEBROOT=/convertx # the root path of the web interface, leave empty to disable
-      # - HIDE_HISTORY=true # hides the history tab in the web interface, defaults to false
-      - TZ=Europe/Stockholm # set your timezone, defaults to UTC
-      # - UNAUTHENTICATED_USER_SHARING=true # for use with ALLOW_UNAUTHENTICATED=true to share history with all unauthenticated users / devices
-    ports:
-      - 3000:3000
+    environment:
+      # === 帳號設定 ===
+      - ACCOUNT_REGISTRATION=false    # 是否允許註冊新帳號（首次帳號不受此限制）
+      - JWT_SECRET=請更換為一個長且隨機的字串  # 若不設定則使用 randomUUID()
+      
+      # === 安全設定 ===
+      - HTTP_ALLOWED=false             # 是否允許非 HTTPS 連線（僅本地測試時設為 true）
+      - ALLOW_UNAUTHENTICATED=false    # 是否允許未登入使用（僅本地測試時設為 true）
+      
+      # === 檔案管理 ===
+      - AUTO_DELETE_EVERY_N_HOURS=24   # 自動刪除超過 N 小時的檔案（0 = 停用）
+      
+      # === 時區設定 ===
+      - TZ=Asia/Taipei
+      
+      # === 可選設定 ===
+      # - WEBROOT=/convertx            # 子路徑部署（例如 example.com/convertx/）
+      # - HIDE_HISTORY=true            # 隱藏歷史紀錄頁面
+      # - LANGUAGE=zh-TW               # 日期格式語言
+      # - FFMPEG_ARGS=-hwaccel vaapi   # FFmpeg 硬體加速參數
+      # - MAX_CONVERT_PROCESS=4        # 最大同時轉換數（0 = 無限制）

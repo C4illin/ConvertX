@@ -1,29 +1,93 @@
 ![ConvertX](images/logo.png)
 
-# ConvertX
+# ConvertX-CN（完整版）
 
-[![Docker](https://github.com/C4illin/ConvertX/actions/workflows/docker-publish.yml/badge.svg?branch=main)](https://github.com/C4illin/ConvertX/actions/workflows/docker-publish.yml)
-[![ghcr.io Pulls](https://img.shields.io/badge/dynamic/json?logo=github&url=https%3A%2F%2Fipitio.github.io%2Fbackage%2FC4illin%2FConvertX%2Fconvertx.json&query=%24.downloads&label=ghcr.io%20pulls&cacheSeconds=14400)](https://github.com/C4illin/ConvertX/pkgs/container/ConvertX)
-[![Docker Pulls](https://img.shields.io/docker/pulls/c4illin/convertx?style=flat&logo=docker&label=dockerhub%20pulls&link=https%3A%2F%2Fhub.docker.com%2Frepository%2Fdocker%2Fc4illin%2Fconvertx%2Fgeneral)](https://hub.docker.com/r/c4illin/convertx)
-[![GitHub Release](https://img.shields.io/github/v/release/C4illin/ConvertX)](https://github.com/C4illin/ConvertX/pkgs/container/convertx)
-![GitHub commits since latest release](https://img.shields.io/github/commits-since/C4illin/ConvertX/latest)
-![GitHub repo size](https://img.shields.io/github/repo-size/C4illin/ConvertX)
-![Docker container size](https://ghcr-badge.egpl.dev/c4illin/convertx/size?color=%230375b6&tag=latest&label=image+size&trim=)
+[![Docker](https://github.com/pi-docket/ConvertX-CN/actions/workflows/release.yml/badge.svg)](https://github.com/pi-docket/ConvertX-CN/actions/workflows/release.yml)
+[![Docker Pulls](https://img.shields.io/docker/pulls/convertx/convertx-cn?style=flat&logo=docker&label=Docker%20Hub)](https://hub.docker.com/r/convertx/convertx-cn)
+[![GitHub Release](https://img.shields.io/github/v/release/pi-docket/ConvertX-CN)](https://github.com/pi-docket/ConvertX-CN/releases)
 
-<a href="https://trendshift.io/repositories/13818" target="_blank"><img src="https://trendshift.io/api/badge/repositories/13818" alt="C4illin%2FConvertX | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+> 🎉 **這是完整版 ConvertX-CN image，已內建所有轉換依賴！**
+> 
+> 使用者 **不需要自己寫 Dockerfile**，直接 `docker run` 或 `docker compose up` 即可使用。
 
-<!-- ![Dev image size](https://ghcr-badge.egpl.dev/c4illin/convertx/size?color=%230375b6&tag=main&label=dev+image&trim=) -->
+基於 [C4illin/ConvertX](https://github.com/C4illin/ConvertX) 的中文優化版本。
 
-A self-hosted online file converter. Supports over a thousand different formats. Written with TypeScript, Bun and Elysia.
+---
 
-## Features
+## ✨ 完整版特色
 
-- Convert files to different formats
-- Process multiple files at once
-- Password protection
-- Multiple accounts
+此 image 已經內建以下所有依賴，開箱即用：
 
-## Converters supported
+| 類別 | 內建內容 |
+|------|----------|
+| **文件轉換** | LibreOffice (headless)、Pandoc |
+| **LaTeX** | TexLive Full（完整版，支援所有 LaTeX 需求） |
+| **OCR 識別** | Tesseract OCR + 繁體中文、簡體中文、日文、韓文、英文、德文語言包 |
+| **CJK 字型** | Noto CJK（中日韓）、Noto Emoji、微軟核心字型、標楷體 |
+| **影音轉換** | FFmpeg、ImageMagick、GraphicsMagick |
+| **向量圖形** | Inkscape、Potrace、VTracer、resvg |
+| **電子書** | Calibre |
+| **其他** | Ghostscript、MuPDF、Poppler、libheif、libjxl 等 |
+
+---
+
+## 🚀 快速開始
+
+### 方法一：Docker Run
+
+```bash
+docker run -d \
+  --name convertx-cn \
+  -p 3000:3000 \
+  -v ./data:/app/data \
+  -e TZ=Asia/Taipei \
+  convertx/convertx-cn:latest
+```
+
+### 方法二：Docker Compose（推薦）
+
+建立 `docker-compose.yml`：
+
+```yaml
+services:
+  convertx:
+    image: convertx/convertx-cn:latest
+    container_name: convertx-cn
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - TZ=Asia/Taipei
+      - JWT_SECRET=請更換為一個長且隨機的字串
+      - ACCOUNT_REGISTRATION=false
+      - HTTP_ALLOWED=false
+      - AUTO_DELETE_EVERY_N_HOURS=24
+```
+
+啟動服務：
+
+```bash
+docker compose up -d
+```
+
+然後瀏覽 `http://localhost:3000` 並建立第一個帳號。
+
+---
+
+## 📦 Docker Image
+
+| Image | 說明 |
+|-------|------|
+| `convertx/convertx-cn:latest` | 最新穩定版 |
+| `convertx/convertx-cn:v0.1.1` | 指定版本 |
+
+> ⚠️ 由於內建完整依賴，image 大小約 4-6 GB，首次下載需要較長時間。
+
+---
+
+## 🔧 支援的轉換器
 
 | Converter                                                       | Use case         | Converts from | Converts to |
 | --------------------------------------------------------------- | ---------------- | ------------- | ----------- |
@@ -50,116 +114,67 @@ A self-hosted online file converter. Supports over a thousand different formats.
 
 <!-- many ffmpeg fileformats are duplicates -->
 
-Any missing converter? Open an issue or pull request!
+缺少什麼轉換器？歡迎開 issue 或 pull request！
 
-## Deployment
+---
 
-> [!WARNING]
-> If you can't login, make sure you are accessing the service over localhost or https otherwise set HTTP_ALLOWED=true
+## ⚙️ 環境變數
 
-```yml
-# docker-compose.yml
-services:
-  convertx:
-    image: ghcr.io/c4illin/convertx
-    container_name: convertx
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234 # will use randomUUID() if unset
-      # - HTTP_ALLOWED=true # uncomment this if accessing it over a non-https connection
-    volumes:
-      - ./data:/app/data
-```
+所有環境變數皆為選填，建議設定 `JWT_SECRET`。
 
-or
+| 變數名稱 | 預設值 | 說明 |
+|----------|--------|------|
+| JWT_SECRET | randomUUID() | 用於簽署 JWT 的密鑰字串 |
+| ACCOUNT_REGISTRATION | false | 是否允許註冊新帳號 |
+| HTTP_ALLOWED | false | 是否允許 HTTP 連線（僅本地使用） |
+| ALLOW_UNAUTHENTICATED | false | 是否允許未登入使用 |
+| AUTO_DELETE_EVERY_N_HOURS | 24 | 自動刪除超過 N 小時的檔案（0 = 停用） |
+| WEBROOT | | 子路徑部署，例如 `/convertx` |
+| FFMPEG_ARGS | | FFmpeg 輸入參數，例如 `-hwaccel vaapi` |
+| FFMPEG_OUTPUT_ARGS | | FFmpeg 輸出參數，例如 `-preset veryfast` |
+| HIDE_HISTORY | false | 隱藏歷史紀錄頁面 |
+| LANGUAGE | en | 日期格式語言（BCP 47 格式） |
+| TZ | UTC | 時區設定 |
+| MAX_CONVERT_PROCESS | 0 | 最大同時轉換數（0 = 無限制） |
 
-```bash
-docker run -p 3000:3000 -v ./data:/app/data ghcr.io/c4illin/convertx
-```
+---
 
-Then visit `http://localhost:3000` in your browser and create your account. Don't leave it unconfigured and open, as anyone can register the first account.
-
-If you get unable to open database file run `chown -R $USER:$USER path` on the path you choose.
-
-### Environment variables
-
-All are optional, JWT_SECRET is recommended to be set.
-
-| Name                         | Default                                            | Description                                                                                                                                                   |
-| ---------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| JWT_SECRET                   | when unset it will use the value from randomUUID() | A long and secret string used to sign the JSON Web Token                                                                                                      |
-| ACCOUNT_REGISTRATION         | false                                              | Allow users to register accounts                                                                                                                              |
-| HTTP_ALLOWED                 | false                                              | Allow HTTP connections, only set this to true locally                                                                                                         |
-| ALLOW_UNAUTHENTICATED        | false                                              | Allow unauthenticated users to use the service, only set this to true locally                                                                                 |
-| AUTO_DELETE_EVERY_N_HOURS    | 24                                                 | Checks every n hours for files older then n hours and deletes them, set to 0 to disable                                                                       |
-| WEBROOT                      |                                                    | The address to the root path setting this to "/convert" will serve the website on "example.com/convert/"                                                      |
-| FFMPEG_ARGS                  |                                                    | Arguments to pass to the input file of ffmpeg, e.g. `-hwaccel vaapi`. See https://github.com/C4illin/ConvertX/issues/190 for more info about hw-acceleration. |
-| FFMPEG_OUTPUT_ARGS           |                                                    | Arguments to pass to the output of ffmpeg, e.g. `-preset veryfast`                                                                                            |
-| HIDE_HISTORY                 | false                                              | Hide the history page                                                                                                                                         |
-| LANGUAGE                     | en                                                 | Language to format date strings in, specified as a [BCP 47 language tag](https://en.wikipedia.org/wiki/IETF_language_tag)                                     |
-| UNAUTHENTICATED_USER_SHARING | false                                              | Shares conversion history between all unauthenticated users                                                                                                   |
-| MAX_CONVERT_PROCESS          | 0                                                  | Maximum number of concurrent conversion processes allowed. Set to 0 for unlimited.                                                                            |
-
-### Docker images
-
-There is a `:latest` tag that is updated with every release and a `:main` tag that is updated with every push to the main branch. `:latest` is recommended for normal use.
-
-The image is available on [GitHub Container Registry](https://github.com/C4illin/ConvertX/pkgs/container/ConvertX) and [Docker Hub](https://hub.docker.com/r/c4illin/convertx).
-
-| Image                                  | What it is                       |
-| -------------------------------------- | -------------------------------- |
-| `image: ghcr.io/c4illin/convertx`      | The latest release on ghcr       |
-| `image: ghcr.io/c4illin/convertx:main` | The latest commit on ghcr        |
-| `image: c4illin/convertx`              | The latest release on docker hub |
-| `image: c4illin/convertx:main`         | The latest commit on docker hub  |
-
-![Release image size](https://ghcr-badge.egpl.dev/c4illin/convertx/size?color=%230375b6&tag=latest&label=release+image&trim=)
-![Dev image size](https://ghcr-badge.egpl.dev/c4illin/convertx/size?color=%230375b6&tag=main&label=dev+image&trim=)
-
-<!-- Dockerhub was introduced in 0.9.0 and older releases -->
-
-### Tutorial
+## 📖 教學文章
 
 > [!NOTE]
-> These are written by other people, and may be outdated, incorrect or wrong.
+> 以下教學由社群撰寫，可能有過時或錯誤之處。
 
-Tutorial in french: <https://belginux.com/installer-convertx-avec-docker/>
+- 法文教學：<https://belginux.com/installer-convertx-avec-docker/>
+- 中文教學：<https://xzllll.com/24092901/>
+- 波蘭文教學：<https://www.kreatywnyprogramista.pl/convertx-lokalny-konwerter-plikow>
 
-Tutorial in chinese: <https://xzllll.com/24092901/>
+---
 
-Tutorial in polish: <https://www.kreatywnyprogramista.pl/convertx-lokalny-konwerter-plikow>
-
-## Screenshots
+## 📸 Screenshots
 
 ![ConvertX Preview](images/preview.png)
 
-## Development
+## 🛠️ 開發
 
-0. Install [Bun](https://bun.sh/) and Git
-1. Clone the repository
+0. 安裝 [Bun](https://bun.sh/) 和 Git
+1. Clone 這個 repository
 2. `bun install`
 3. `bun run dev`
 
-Pull requests are welcome! See open issues for the list of todos. The ones tagged with "converter request" are quite easy. Help with docs and cleaning up in issues are also very welcome!
+歡迎 Pull Request！請使用 [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#summary) 格式。
 
-Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#summary) for commit messages.
+---
 
-## Contributors
+## 🙏 致謝
+
+本專案基於 [C4illin/ConvertX](https://github.com/C4illin/ConvertX) 開發。
 
 <a href="https://github.com/C4illin/ConvertX/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=C4illin/ConvertX" alt="Image with all contributors"/>
 </a>
 
-![Alt](https://repobeats.axiom.co/api/embed/dcdabd0564fcdcccbf5680c1bdc2efad54a3d4d9.svg "Repobeats analytics image")
+---
 
-## Star History
+## 📜 License
 
-<a href="https://github.com/C4illin/ConvertX/stargazers">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=C4illin/ConvertX&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=C4illin/ConvertX&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=C4illin/ConvertX&type=Date" />
- </picture>
-</a>
+MIT License
