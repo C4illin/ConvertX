@@ -96,8 +96,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   fonts-noto-core \
   fonts-noto-extra \
   fonts-noto-color-emoji \
-  # === 微軟核心字型 ===
-  ttf-mscorefonts-installer \
+  # === Liberation 字型（微軟字型開源替代）===
+  fonts-liberation \
+  fonts-liberation2 \
   # === Python 依賴 ===
   python3 \
   python3-pip \
