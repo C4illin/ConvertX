@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Inayoendeshwa na",
+    "version": "v{version}",
+    "loading": "Inapakia...",
+    "error": "Hitilafu",
+    "success": "Imefanikiwa",
+    "confirm": "Thibitisha",
+    "cancel": "Ghairi",
+    "close": "Funga",
+    "save": "Hifadhi",
+    "delete": "Futa",
+    "remove": "Ondoa",
+    "download": "Pakua",
+    "upload": "Pakia",
+    "submit": "Wasilisha",
+    "back": "Rudi",
+    "next": "Inayofuata",
+    "yes": "Ndiyo",
+    "no": "Hapana"
+  },
+  "nav": {
+    "history": "Historia",
+    "account": "Akaunti",
+    "logout": "Toka",
+    "login": "Ingia",
+    "register": "Jisajili",
+    "language": "Lugha"
+  },
+  "convert": {
+    "title": "Badilisha",
+    "titleWithType": "Badilisha .{fileType}",
+    "chooseFile": "Chagua faili",
+    "orDragHere": "au iburute hapa",
+    "searchConversions": "Tafuta ubadilishaji",
+    "convertTo": "Badilisha kuwa",
+    "convertButton": "Badilisha",
+    "uploading": "Inapakia...",
+    "processing": "Inachakata..."
+  },
+  "results": {
+    "title": "Matokeo",
+    "convertedFileName": "Jina la faili iliyobadilishwa",
+    "status": "Hali",
+    "actions": "Vitendo",
+    "downloadAll": "Zote",
+    "downloadTar": "Tar",
+    "deleteJob": "Futa",
+    "noFiles": "Hakuna faili zilizobadilishwa bado.",
+    "statusPending": "Inasubiri",
+    "statusCompleted": "Imekamilika",
+    "statusFailed": "Imeshindwa"
+  },
+  "history": {
+    "title": "Matokeo",
+    "time": "Wakati",
+    "files": "Faili",
+    "filesDone": "Faili zilizokamilika",
+    "status": "Hali",
+    "actions": "Vitendo",
+    "expandDetails": "Panua maelezo",
+    "detailedFileInfo": "Maelezo ya kina ya faili:",
+    "deleteSelected": "Futa zilizochaguliwa",
+    "selectAll": "Chagua zote",
+    "confirmDelete": "Una uhakika unataka kufuta kazi {count}? Kitendo hiki hakiwezi kutenduliwa.",
+    "deleteSuccess": "Kazi {deleted} zimefutwa kwa mafanikio.",
+    "deleteFailed": "Imeshindwa kufuta kazi {failed}.",
+    "deleteError": "Hitilafu imetokea wakati wa kufuta kazi. Tafadhali jaribu tena."
+  },
+  "auth": {
+    "email": "Barua pepe",
+    "password": "Nenosiri",
+    "currentPassword": "Nenosiri la sasa",
+    "newPassword": "Nenosiri (acha tupu ikiwa halijabadilishwa)",
+    "loginButton": "Ingia",
+    "registerButton": "Jisajili",
+    "updateButton": "Sasisha",
+    "createAccount": "Unda akaunti",
+    "invalidCredentials": "Vitambulisho batili.",
+    "emailInUse": "Barua pepe tayari inatumika.",
+    "unauthorized": "Haujaidhinishwa",
+    "cookiesRequired": "Kuki zinapaswa kuwezeshwa kutumia programu hii.",
+    "noCookies": "Hakuna kuki ya uthibitisho, labda kivinjari chako kinazuia kuki."
+  },
+  "setup": {
+    "welcome": "Karibu kwenye ConvertX-CN!",
+    "createYourAccount": "Unda akaunti yako",
+    "reportIssues": "Ripoti matatizo yoyote kwenye",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Kazi haijapatikana.",
+    "fileNotFound": "Faili haijapatikana.",
+    "uploadFailed": "Upakiaji umeshindwa.",
+    "conversionFailed": "Ubadilishaji umeshindwa.",
+    "serverError": "Hitilafu ya seva."
+  },
+  "upload": {
+    "success": "Faili zimepakiwa kwa mafanikio.",
+    "dragDrop": "Dondosha faili hapa"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

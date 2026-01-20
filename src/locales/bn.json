@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "দ্বারা চালিত",
+    "version": "v{version}",
+    "loading": "লোড হচ্ছে...",
+    "error": "ত্রুটি",
+    "success": "সফল",
+    "confirm": "নিশ্চিত করুন",
+    "cancel": "বাতিল",
+    "close": "বন্ধ করুন",
+    "save": "সংরক্ষণ করুন",
+    "delete": "মুছুন",
+    "remove": "সরান",
+    "download": "ডাউনলোড",
+    "upload": "আপলোড",
+    "submit": "জমা দিন",
+    "back": "পেছনে",
+    "next": "পরবর্তী",
+    "yes": "হ্যাঁ",
+    "no": "না"
+  },
+  "nav": {
+    "history": "ইতিহাস",
+    "account": "অ্যাকাউন্ট",
+    "logout": "লগআউট",
+    "login": "লগইন",
+    "register": "নিবন্ধন",
+    "language": "ভাষা"
+  },
+  "convert": {
+    "title": "রূপান্তর করুন",
+    "titleWithType": ".{fileType} রূপান্তর করুন",
+    "chooseFile": "একটি ফাইল নির্বাচন করুন",
+    "orDragHere": "অথবা এখানে টেনে আনুন",
+    "searchConversions": "রূপান্তর খুঁজুন",
+    "convertTo": "এতে রূপান্তর করুন",
+    "convertButton": "রূপান্তর করুন",
+    "uploading": "আপলোড হচ্ছে...",
+    "processing": "প্রক্রিয়াকরণ হচ্ছে..."
+  },
+  "results": {
+    "title": "ফলাফল",
+    "convertedFileName": "রূপান্তরিত ফাইলের নাম",
+    "status": "স্থিতি",
+    "actions": "ক্রিয়াকলাপ",
+    "downloadAll": "সব",
+    "downloadTar": "Tar",
+    "deleteJob": "মুছুন",
+    "noFiles": "এখনও কোনো ফাইল রূপান্তরিত হয়নি।",
+    "statusPending": "অপেক্ষমাণ",
+    "statusCompleted": "সম্পন্ন",
+    "statusFailed": "ব্যর্থ"
+  },
+  "history": {
+    "title": "ফলাফল",
+    "time": "সময়",
+    "files": "ফাইল",
+    "filesDone": "সম্পন্ন ফাইল",
+    "status": "স্থিতি",
+    "actions": "ক্রিয়াকলাপ",
+    "expandDetails": "বিস্তারিত দেখুন",
+    "detailedFileInfo": "বিস্তারিত ফাইল তথ্য:",
+    "deleteSelected": "নির্বাচিত মুছুন",
+    "selectAll": "সব নির্বাচন করুন",
+    "confirmDelete": "আপনি কি নিশ্চিত যে আপনি {count}টি কাজ মুছতে চান? এই ক্রিয়া পূর্বাবস্থায় ফেরানো যাবে না।",
+    "deleteSuccess": "সফলভাবে {deleted}টি কাজ মুছে ফেলা হয়েছে।",
+    "deleteFailed": "{failed}টি কাজ মুছতে ব্যর্থ।",
+    "deleteError": "কাজ মুছতে গিয়ে একটি ত্রুটি ঘটেছে। অনুগ্রহ করে আবার চেষ্টা করুন।"
+  },
+  "auth": {
+    "email": "ইমেইল",
+    "password": "পাসওয়ার্ড",
+    "currentPassword": "বর্তমান পাসওয়ার্ড",
+    "newPassword": "পাসওয়ার্ড (অপরিবর্তিত রাখতে ফাঁকা রাখুন)",
+    "loginButton": "লগইন",
+    "registerButton": "নিবন্ধন",
+    "updateButton": "আপডেট",
+    "createAccount": "অ্যাকাউন্ট তৈরি করুন",
+    "invalidCredentials": "অবৈধ শংসাপত্র।",
+    "emailInUse": "ইমেইল ইতিমধ্যে ব্যবহৃত।",
+    "unauthorized": "অননুমোদিত",
+    "cookiesRequired": "এই অ্যাপ ব্যবহার করতে কুকি সক্ষম করা উচিত।",
+    "noCookies": "কোনো প্রমাণীকরণ কুকি নেই, সম্ভবত আপনার ব্রাউজার কুকি ব্লক করছে।"
+  },
+  "setup": {
+    "welcome": "ConvertX-CN-এ স্বাগতম!",
+    "createYourAccount": "আপনার অ্যাকাউন্ট তৈরি করুন",
+    "reportIssues": "সমস্যা রিপোর্ট করুন",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "কাজ পাওয়া যায়নি।",
+    "fileNotFound": "ফাইল পাওয়া যায়নি।",
+    "uploadFailed": "আপলোড ব্যর্থ।",
+    "conversionFailed": "রূপান্তর ব্যর্থ।",
+    "serverError": "সার্ভার ত্রুটি।"
+  },
+  "upload": {
+    "success": "ফাইল সফলভাবে আপলোড হয়েছে।",
+    "dragDrop": "এখানে ফাইল ছেড়ে দিন"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

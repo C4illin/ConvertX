@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "ដំណើរការដោយ",
+    "version": "v{version}",
+    "loading": "កំពុងផ្ទុក...",
+    "error": "កំហុស",
+    "success": "ជោគជ័យ",
+    "confirm": "បញ្ជាក់",
+    "cancel": "បោះបង់",
+    "close": "បិទ",
+    "save": "រក្សាទុក",
+    "delete": "លុប",
+    "remove": "ដកចេញ",
+    "download": "ទាញយក",
+    "upload": "ផ្ទុកឡើង",
+    "submit": "ដាក់ស្នើ",
+    "back": "ថយក្រោយ",
+    "next": "បន្ទាប់",
+    "yes": "បាទ/ចាស",
+    "no": "ទេ"
+  },
+  "nav": {
+    "history": "ប្រវត្តិ",
+    "account": "គណនី",
+    "logout": "ចាកចេញ",
+    "login": "ចូល",
+    "register": "ចុះឈ្មោះ",
+    "language": "ភាសា"
+  },
+  "convert": {
+    "title": "បម្លែង",
+    "titleWithType": "បម្លែង .{fileType}",
+    "chooseFile": "ជ្រើសរើសឯកសារ",
+    "orDragHere": "ឬអូសមកទីនេះ",
+    "searchConversions": "ស្វែងរកការបម្លែង",
+    "convertTo": "បម្លែងទៅ",
+    "convertButton": "បម្លែង",
+    "uploading": "កំពុងផ្ទុកឡើង...",
+    "processing": "កំពុងដំណើរការ..."
+  },
+  "results": {
+    "title": "លទ្ធផល",
+    "convertedFileName": "ឈ្មោះឯកសារដែលបានបម្លែង",
+    "status": "ស្ថានភាព",
+    "actions": "សកម្មភាព",
+    "downloadAll": "ទាំងអស់",
+    "downloadTar": "Tar",
+    "deleteJob": "លុប",
+    "noFiles": "មិនទាន់មានឯកសារដែលបានបម្លែងទេ។",
+    "statusPending": "កំពុងរង់ចាំ",
+    "statusCompleted": "បានបញ្ចប់",
+    "statusFailed": "បរាជ័យ"
+  },
+  "history": {
+    "title": "លទ្ធផល",
+    "time": "ពេលវេលា",
+    "files": "ឯកសារ",
+    "filesDone": "ឯកសារបានបញ្ចប់",
+    "status": "ស្ថានភាព",
+    "actions": "សកម្មភាព",
+    "expandDetails": "ពង្រីកព័ត៌មានលម្អិត",
+    "detailedFileInfo": "ព័ត៌មានលម្អិតឯកសារ:",
+    "deleteSelected": "លុបដែលបានជ្រើសរើស",
+    "selectAll": "ជ្រើសរើសទាំងអស់",
+    "confirmDelete": "តើអ្នកប្រាកដថាចង់លុបការងារ {count}? សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។",
+    "deleteSuccess": "បានលុបការងារ {deleted} ដោយជោគជ័យ។",
+    "deleteFailed": "បរាជ័យក្នុងការលុបការងារ {failed}។",
+    "deleteError": "មានកំហុសកើតឡើងពេលលុបការងារ។ សូមព្យាយាមម្តងទៀត។"
+  },
+  "auth": {
+    "email": "អ៊ីមែល",
+    "password": "ពាក្យសម្ងាត់",
+    "currentPassword": "ពាក្យសម្ងាត់បច្ចុប្បន្ន",
+    "newPassword": "ពាក្យសម្ងាត់ (ទុកទទេបើមិនប្តូរ)",
+    "loginButton": "ចូល",
+    "registerButton": "ចុះឈ្មោះ",
+    "updateButton": "ធ្វើបច្ចុប្បន្នភាព",
+    "createAccount": "បង្កើតគណនី",
+    "invalidCredentials": "ព័ត៌មានសម្គាល់មិនត្រឹមត្រូវ។",
+    "emailInUse": "អ៊ីមែលមាននរណាប្រើរួចហើយ។",
+    "unauthorized": "គ្មានការអនុញ្ញាត",
+    "cookiesRequired": "គួរតែបើកខូគីដើម្បីប្រើកម្មវិធីនេះ។",
+    "noCookies": "គ្មានខូគីផ្ទៀងផ្ទាត់ទេ ប្រហែលជាកម្មវិធីរុករករបស់អ្នកកំពុងបិទខូគី។"
+  },
+  "setup": {
+    "welcome": "សូមស្វាគមន៍មកកាន់ ConvertX-CN!",
+    "createYourAccount": "បង្កើតគណនីរបស់អ្នក",
+    "reportIssues": "រាយការណ៍បញ្ហានៅ",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "រកមិនឃើញការងារ។",
+    "fileNotFound": "រកមិនឃើញឯកសារ។",
+    "uploadFailed": "ការផ្ទុកឡើងបរាជ័យ។",
+    "conversionFailed": "ការបម្លែងបរាជ័យ។",
+    "serverError": "កំហុសម៉ាស៊ីនមេ។"
+  },
+  "upload": {
+    "success": "ឯកសារបានផ្ទុកឡើងដោយជោគជ័យ។",
+    "dragDrop": "ទម្លាក់ឯកសារទីនេះ"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

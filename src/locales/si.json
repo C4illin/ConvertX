@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "මගින් බලගැන්වේ",
+    "version": "v{version}",
+    "loading": "පූරණය වෙමින්...",
+    "error": "දෝෂය",
+    "success": "සාර්ථකයි",
+    "confirm": "තහවුරු කරන්න",
+    "cancel": "අවලංගු කරන්න",
+    "close": "වසන්න",
+    "save": "සුරකින්න",
+    "delete": "මකන්න",
+    "remove": "ඉවත් කරන්න",
+    "download": "බාගන්න",
+    "upload": "උඩුගත කරන්න",
+    "submit": "ඉදිරිපත් කරන්න",
+    "back": "ආපසු",
+    "next": "ඊළඟ",
+    "yes": "ඔව්",
+    "no": "නැත"
+  },
+  "nav": {
+    "history": "ඉතිහාසය",
+    "account": "ගිණුම",
+    "logout": "පිටවන්න",
+    "login": "පිවිසෙන්න",
+    "register": "ලියාපදිංචි වන්න",
+    "language": "භාෂාව"
+  },
+  "convert": {
+    "title": "පරිවර්තනය",
+    "titleWithType": ".{fileType} පරිවර්තනය",
+    "chooseFile": "ගොනුවක් තෝරන්න",
+    "orDragHere": "හෝ මෙහි ඇද දමන්න",
+    "searchConversions": "පරිවර්තන සොයන්න",
+    "convertTo": "වෙත පරිවර්තනය",
+    "convertButton": "පරිවර්තනය",
+    "uploading": "උඩුගත වෙමින්...",
+    "processing": "සැකසෙමින්..."
+  },
+  "results": {
+    "title": "ප්‍රතිඵල",
+    "convertedFileName": "පරිවර්තිත ගොනු නාමය",
+    "status": "තත්ත්වය",
+    "actions": "ක්‍රියා",
+    "downloadAll": "සියල්ල",
+    "downloadTar": "Tar",
+    "deleteJob": "මකන්න",
+    "noFiles": "තවම ගොනු පරිවර්තනය කර නැත.",
+    "statusPending": "අපේක්ෂාවෙන්",
+    "statusCompleted": "සම්පූර්ණයි",
+    "statusFailed": "අසාර්ථකයි"
+  },
+  "history": {
+    "title": "ප්‍රතිඵල",
+    "time": "වේලාව",
+    "files": "ගොනු",
+    "filesDone": "සම්පූර්ණ ගොනු",
+    "status": "තත්ත්වය",
+    "actions": "ක්‍රියා",
+    "expandDetails": "විස්තර විහිදන්න",
+    "detailedFileInfo": "සවිස්තර ගොනු තොරතුරු:",
+    "deleteSelected": "තෝරාගත්තවා මකන්න",
+    "selectAll": "සියල්ල තෝරන්න",
+    "confirmDelete": "ඔබට කාර්ය {count}ක් මැකීමට අවශ්‍ය බව විශ්වාසද? මෙම ක්‍රියාව අවලංගු කළ නොහැක.",
+    "deleteSuccess": "කාර්ය {deleted}ක් සාර්ථකව මකා දැමිණි.",
+    "deleteFailed": "කාර්ය {failed}ක් මැකීමට අසමත් විය.",
+    "deleteError": "කාර්යයන් මකන විට දෝෂයක් ඇති විය. කරුණාකර නැවත උත්සාහ කරන්න."
+  },
+  "auth": {
+    "email": "ඊමේල්",
+    "password": "මුරපදය",
+    "currentPassword": "වත්මන් මුරපදය",
+    "newPassword": "මුරපදය (වෙනස් නොකරන්නේ නම් හිස්ව තබන්න)",
+    "loginButton": "පිවිසෙන්න",
+    "registerButton": "ලියාපදිංචි වන්න",
+    "updateButton": "යාවත්කාලීන කරන්න",
+    "createAccount": "ගිණුමක් සාදන්න",
+    "invalidCredentials": "අවලංගු අක්තපත්‍ර.",
+    "emailInUse": "ඊමේල් දැනටමත් භාවිතයේ පවතී.",
+    "unauthorized": "අනවසර",
+    "cookiesRequired": "මෙම යෙදුම භාවිතා කිරීමට කුකී සක්‍රීය කළ යුතුය.",
+    "noCookies": "සත්‍යාපන කුකී නැත, සමහර විට ඔබේ බ්‍රව්සරය කුකී අවහිර කරයි."
+  },
+  "setup": {
+    "welcome": "ConvertX-CN වෙත සාදරයෙන් පිළිගනිමු!",
+    "createYourAccount": "ඔබේ ගිණුම සාදන්න",
+    "reportIssues": "ගැටලු වාර්තා කරන්න",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "කාර්යය හමු නොවීය.",
+    "fileNotFound": "ගොනුව හමු නොවීය.",
+    "uploadFailed": "උඩුගත කිරීම අසාර්ථක විය.",
+    "conversionFailed": "පරිවර්තනය අසාර්ථක විය.",
+    "serverError": "සේවාදායක දෝෂය."
+  },
+  "upload": {
+    "success": "ගොනු සාර්ථකව උඩුගත කරන ලදී.",
+    "dragDrop": "ගොනු මෙහි දමන්න"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

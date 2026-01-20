@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Работает на",
+    "version": "v{version}",
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "success": "Успешно",
+    "confirm": "Подтвердить",
+    "cancel": "Отмена",
+    "close": "Закрыть",
+    "save": "Сохранить",
+    "delete": "Удалить",
+    "remove": "Убрать",
+    "download": "Скачать",
+    "upload": "Загрузить",
+    "submit": "Отправить",
+    "back": "Назад",
+    "next": "Далее",
+    "yes": "Да",
+    "no": "Нет"
+  },
+  "nav": {
+    "history": "История",
+    "account": "Аккаунт",
+    "logout": "Выйти",
+    "login": "Войти",
+    "register": "Регистрация",
+    "language": "Язык"
+  },
+  "convert": {
+    "title": "Конвертировать",
+    "titleWithType": "Конвертировать .{fileType}",
+    "chooseFile": "Выберите файл",
+    "orDragHere": "или перетащите сюда",
+    "searchConversions": "Поиск конвертаций",
+    "convertTo": "Конвертировать в",
+    "convertButton": "Конвертировать",
+    "uploading": "Загрузка...",
+    "processing": "Обработка..."
+  },
+  "results": {
+    "title": "Результаты",
+    "convertedFileName": "Имя конвертированного файла",
+    "status": "Статус",
+    "actions": "Действия",
+    "downloadAll": "Все",
+    "downloadTar": "Tar",
+    "deleteJob": "Удалить",
+    "noFiles": "Файлы ещё не конвертированы.",
+    "statusPending": "Ожидание",
+    "statusCompleted": "Завершено",
+    "statusFailed": "Ошибка"
+  },
+  "history": {
+    "title": "Результаты",
+    "time": "Время",
+    "files": "Файлы",
+    "filesDone": "Готовые файлы",
+    "status": "Статус",
+    "actions": "Действия",
+    "expandDetails": "Развернуть детали",
+    "detailedFileInfo": "Подробная информация о файле:",
+    "deleteSelected": "Удалить выбранные",
+    "selectAll": "Выбрать все",
+    "confirmDelete": "Вы уверены, что хотите удалить {count} задание(й)? Это действие нельзя отменить.",
+    "deleteSuccess": "Успешно удалено {deleted} задание(й).",
+    "deleteFailed": "Не удалось удалить {failed} задание(й).",
+    "deleteError": "Произошла ошибка при удалении заданий. Пожалуйста, попробуйте снова."
+  },
+  "auth": {
+    "email": "Электронная почта",
+    "password": "Пароль",
+    "currentPassword": "Текущий пароль",
+    "newPassword": "Пароль (оставьте пустым, чтобы не менять)",
+    "loginButton": "Войти",
+    "registerButton": "Зарегистрироваться",
+    "updateButton": "Обновить",
+    "createAccount": "Создать аккаунт",
+    "invalidCredentials": "Неверные учётные данные.",
+    "emailInUse": "Электронная почта уже используется.",
+    "unauthorized": "Не авторизован",
+    "cookiesRequired": "Для использования этого приложения необходимо включить cookies.",
+    "noCookies": "Нет cookie аутентификации, возможно, ваш браузер блокирует cookies."
+  },
+  "setup": {
+    "welcome": "Добро пожаловать в ConvertX-CN!",
+    "createYourAccount": "Создайте свой аккаунт",
+    "reportIssues": "Сообщить о проблемах на",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Задание не найдено.",
+    "fileNotFound": "Файл не найден.",
+    "uploadFailed": "Ошибка загрузки.",
+    "conversionFailed": "Ошибка конвертации.",
+    "serverError": "Ошибка сервера."
+  },
+  "upload": {
+    "success": "Файлы успешно загружены.",
+    "dragDrop": "Перетащите файлы сюда"
+  },
+  "file": {
+    "size": "{size} кБ"
+  }
+}

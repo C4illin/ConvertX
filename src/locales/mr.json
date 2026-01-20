@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "द्वारे समर्थित",
+    "version": "v{version}",
+    "loading": "लोड होत आहे...",
+    "error": "त्रुटी",
+    "success": "यशस्वी",
+    "confirm": "पुष्टी करा",
+    "cancel": "रद्द करा",
+    "close": "बंद करा",
+    "save": "सेव्ह करा",
+    "delete": "हटवा",
+    "remove": "काढून टाका",
+    "download": "डाउनलोड करा",
+    "upload": "अपलोड करा",
+    "submit": "सबमिट करा",
+    "back": "मागे",
+    "next": "पुढे",
+    "yes": "होय",
+    "no": "नाही"
+  },
+  "nav": {
+    "history": "इतिहास",
+    "account": "खाते",
+    "logout": "लॉगआउट",
+    "login": "लॉगिन",
+    "register": "नोंदणी करा",
+    "language": "भाषा"
+  },
+  "convert": {
+    "title": "रूपांतर करा",
+    "titleWithType": ".{fileType} रूपांतर करा",
+    "chooseFile": "फाइल निवडा",
+    "orDragHere": "किंवा येथे ड्रॅग करा",
+    "searchConversions": "रूपांतरणे शोधा",
+    "convertTo": "यात रूपांतर करा",
+    "convertButton": "रूपांतर करा",
+    "uploading": "अपलोड होत आहे...",
+    "processing": "प्रक्रिया होत आहे..."
+  },
+  "results": {
+    "title": "परिणाम",
+    "convertedFileName": "रूपांतरित फाइल नाव",
+    "status": "स्थिती",
+    "actions": "क्रिया",
+    "downloadAll": "सर्व",
+    "downloadTar": "Tar",
+    "deleteJob": "हटवा",
+    "noFiles": "अद्याप कोणत्याही फाइल्स रूपांतरित झालेल्या नाहीत.",
+    "statusPending": "प्रलंबित",
+    "statusCompleted": "पूर्ण",
+    "statusFailed": "अयशस्वी"
+  },
+  "history": {
+    "title": "परिणाम",
+    "time": "वेळ",
+    "files": "फाइल्स",
+    "filesDone": "पूर्ण झालेल्या फाइल्स",
+    "status": "स्थिती",
+    "actions": "क्रिया",
+    "expandDetails": "तपशील विस्तारित करा",
+    "detailedFileInfo": "तपशीलवार फाइल माहिती:",
+    "deleteSelected": "निवडलेले हटवा",
+    "selectAll": "सर्व निवडा",
+    "confirmDelete": "तुम्हाला खात्री आहे की तुम्ही {count} जॉब हटवू इच्छिता? ही क्रिया पूर्ववत करता येणार नाही.",
+    "deleteSuccess": "{deleted} जॉब यशस्वीरित्या हटवले.",
+    "deleteFailed": "{failed} जॉब हटवण्यात अयशस्वी.",
+    "deleteError": "जॉब हटवताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा."
+  },
+  "auth": {
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "currentPassword": "सध्याचा पासवर्ड",
+    "newPassword": "पासवर्ड (बदलायचा नसेल तर रिक्त ठेवा)",
+    "loginButton": "लॉगिन",
+    "registerButton": "नोंदणी करा",
+    "updateButton": "अपडेट करा",
+    "createAccount": "खाते तयार करा",
+    "invalidCredentials": "अवैध क्रेडेन्शियल्स.",
+    "emailInUse": "ईमेल आधीच वापरात आहे.",
+    "unauthorized": "अनधिकृत",
+    "cookiesRequired": "हे अॅप वापरण्यासाठी कुकीज सक्षम असाव्यात.",
+    "noCookies": "प्रमाणीकरण कुकी नाही, कदाचित तुमचा ब्राउझर कुकीज ब्लॉक करत आहे."
+  },
+  "setup": {
+    "welcome": "ConvertX-CN मध्ये स्वागत आहे!",
+    "createYourAccount": "तुमचे खाते तयार करा",
+    "reportIssues": "समस्या कळवा",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "जॉब सापडला नाही.",
+    "fileNotFound": "फाइल सापडली नाही.",
+    "uploadFailed": "अपलोड अयशस्वी.",
+    "conversionFailed": "रूपांतर अयशस्वी.",
+    "serverError": "सर्व्हर त्रुटी."
+  },
+  "upload": {
+    "success": "फाइल्स यशस्वीरित्या अपलोड झाल्या.",
+    "dragDrop": "फाइल्स येथे सोडा"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

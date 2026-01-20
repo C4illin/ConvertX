@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Овозможено од",
+    "version": "v{version}",
+    "loading": "Се вчитува...",
+    "error": "Грешка",
+    "success": "Успех",
+    "confirm": "Потврди",
+    "cancel": "Откажи",
+    "close": "Затвори",
+    "save": "Зачувај",
+    "delete": "Избриши",
+    "remove": "Отстрани",
+    "download": "Преземи",
+    "upload": "Прикачи",
+    "submit": "Испрати",
+    "back": "Назад",
+    "next": "Следно",
+    "yes": "Да",
+    "no": "Не"
+  },
+  "nav": {
+    "history": "Историја",
+    "account": "Сметка",
+    "logout": "Одјава",
+    "login": "Најава",
+    "register": "Регистрација",
+    "language": "Јазик"
+  },
+  "convert": {
+    "title": "Конвертирај",
+    "titleWithType": "Конвертирај .{fileType}",
+    "chooseFile": "Изберете датотека",
+    "orDragHere": "или повлечете ја тука",
+    "searchConversions": "Пребарајте конверзии",
+    "convertTo": "Конвертирај во",
+    "convertButton": "Конвертирај",
+    "uploading": "Се прикачува...",
+    "processing": "Се обработува..."
+  },
+  "results": {
+    "title": "Резултати",
+    "convertedFileName": "Име на конвертирана датотека",
+    "status": "Статус",
+    "actions": "Дејства",
+    "downloadAll": "Сите",
+    "downloadTar": "Tar",
+    "deleteJob": "Избриши",
+    "noFiles": "Сè уште нема конвертирани датотеки.",
+    "statusPending": "Во тек",
+    "statusCompleted": "Завршено",
+    "statusFailed": "Неуспешно"
+  },
+  "history": {
+    "title": "Резултати",
+    "time": "Време",
+    "files": "Датотеки",
+    "filesDone": "Завршени датотеки",
+    "status": "Статус",
+    "actions": "Дејства",
+    "expandDetails": "Прошири детали",
+    "detailedFileInfo": "Детални информации за датотеката:",
+    "deleteSelected": "Избриши избрани",
+    "selectAll": "Избери сите",
+    "confirmDelete": "Дали сте сигурни дека сакате да избришете {count} задача(и)? Оваа акција не може да се поништи.",
+    "deleteSuccess": "Успешно избришани {deleted} задача(и).",
+    "deleteFailed": "Не успеа бришењето на {failed} задача(и).",
+    "deleteError": "Настана грешка при бришење на задачите. Ве молиме обидете се повторно."
+  },
+  "auth": {
+    "email": "Е-пошта",
+    "password": "Лозинка",
+    "currentPassword": "Тековна лозинка",
+    "newPassword": "Лозинка (оставете празно за непроменета)",
+    "loginButton": "Најава",
+    "registerButton": "Регистрирај се",
+    "updateButton": "Ажурирај",
+    "createAccount": "Креирај сметка",
+    "invalidCredentials": "Невалидни акредитиви.",
+    "emailInUse": "Е-поштата е веќе во употреба.",
+    "unauthorized": "Неовластено",
+    "cookiesRequired": "Колачињата треба да бидат овозможени за да ја користите оваа апликација.",
+    "noCookies": "Нема колаче за автентикација, можеби вашиот прелистувач ги блокира колачињата."
+  },
+  "setup": {
+    "welcome": "Добредојдовте во ConvertX-CN!",
+    "createYourAccount": "Креирајте ја вашата сметка",
+    "reportIssues": "Пријавете проблеми на",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Задачата не е пронајдена.",
+    "fileNotFound": "Датотеката не е пронајдена.",
+    "uploadFailed": "Прикачувањето не успеа.",
+    "conversionFailed": "Конверзијата не успеа.",
+    "serverError": "Грешка на серверот."
+  },
+  "upload": {
+    "success": "Датотеките се успешно прикачени.",
+    "dragDrop": "Пуштете датотеки тука"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

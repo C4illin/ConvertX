@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Được hỗ trợ bởi",
+    "version": "v{version}",
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "success": "Thành công",
+    "confirm": "Xác nhận",
+    "cancel": "Hủy",
+    "close": "Đóng",
+    "save": "Lưu",
+    "delete": "Xóa",
+    "remove": "Gỡ bỏ",
+    "download": "Tải xuống",
+    "upload": "Tải lên",
+    "submit": "Gửi",
+    "back": "Quay lại",
+    "next": "Tiếp theo",
+    "yes": "Có",
+    "no": "Không"
+  },
+  "nav": {
+    "history": "Lịch sử",
+    "account": "Tài khoản",
+    "logout": "Đăng xuất",
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "language": "Ngôn ngữ"
+  },
+  "convert": {
+    "title": "Chuyển đổi",
+    "titleWithType": "Chuyển đổi .{fileType}",
+    "chooseFile": "Chọn tệp",
+    "orDragHere": "hoặc kéo vào đây",
+    "searchConversions": "Tìm kiếm chuyển đổi",
+    "convertTo": "Chuyển đổi sang",
+    "convertButton": "Chuyển đổi",
+    "uploading": "Đang tải lên...",
+    "processing": "Đang xử lý..."
+  },
+  "results": {
+    "title": "Kết quả",
+    "convertedFileName": "Tên tệp đã chuyển đổi",
+    "status": "Trạng thái",
+    "actions": "Hành động",
+    "downloadAll": "Tất cả",
+    "downloadTar": "Tar",
+    "deleteJob": "Xóa",
+    "noFiles": "Chưa có tệp nào được chuyển đổi.",
+    "statusPending": "Đang chờ",
+    "statusCompleted": "Hoàn thành",
+    "statusFailed": "Thất bại"
+  },
+  "history": {
+    "title": "Kết quả",
+    "time": "Thời gian",
+    "files": "Tệp",
+    "filesDone": "Tệp hoàn thành",
+    "status": "Trạng thái",
+    "actions": "Hành động",
+    "expandDetails": "Mở rộng chi tiết",
+    "detailedFileInfo": "Thông tin chi tiết tệp:",
+    "deleteSelected": "Xóa đã chọn",
+    "selectAll": "Chọn tất cả",
+    "confirmDelete": "Bạn có chắc muốn xóa {count} công việc? Hành động này không thể hoàn tác.",
+    "deleteSuccess": "Đã xóa thành công {deleted} công việc.",
+    "deleteFailed": "Không thể xóa {failed} công việc.",
+    "deleteError": "Đã xảy ra lỗi khi xóa công việc. Vui lòng thử lại."
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Mật khẩu",
+    "currentPassword": "Mật khẩu hiện tại",
+    "newPassword": "Mật khẩu (để trống nếu không thay đổi)",
+    "loginButton": "Đăng nhập",
+    "registerButton": "Đăng ký",
+    "updateButton": "Cập nhật",
+    "createAccount": "Tạo tài khoản",
+    "invalidCredentials": "Thông tin đăng nhập không hợp lệ.",
+    "emailInUse": "Email đã được sử dụng.",
+    "unauthorized": "Không được phép",
+    "cookiesRequired": "Cần bật cookie để sử dụng ứng dụng này.",
+    "noCookies": "Không có cookie xác thực, có thể trình duyệt của bạn đang chặn cookie."
+  },
+  "setup": {
+    "welcome": "Chào mừng đến với ConvertX-CN!",
+    "createYourAccount": "Tạo tài khoản của bạn",
+    "reportIssues": "Báo cáo sự cố tại",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Không tìm thấy công việc.",
+    "fileNotFound": "Không tìm thấy tệp.",
+    "uploadFailed": "Tải lên thất bại.",
+    "conversionFailed": "Chuyển đổi thất bại.",
+    "serverError": "Lỗi máy chủ."
+  },
+  "upload": {
+    "success": "Tải tệp lên thành công.",
+    "dragDrop": "Thả tệp vào đây"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

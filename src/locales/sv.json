@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Drivs av",
+    "version": "v{version}",
+    "loading": "Laddar...",
+    "error": "Fel",
+    "success": "Lyckades",
+    "confirm": "Bekräfta",
+    "cancel": "Avbryt",
+    "close": "Stäng",
+    "save": "Spara",
+    "delete": "Ta bort",
+    "remove": "Ta bort",
+    "download": "Ladda ner",
+    "upload": "Ladda upp",
+    "submit": "Skicka",
+    "back": "Tillbaka",
+    "next": "Nästa",
+    "yes": "Ja",
+    "no": "Nej"
+  },
+  "nav": {
+    "history": "Historik",
+    "account": "Konto",
+    "logout": "Logga ut",
+    "login": "Logga in",
+    "register": "Registrera",
+    "language": "Språk"
+  },
+  "convert": {
+    "title": "Konvertera",
+    "titleWithType": "Konvertera .{fileType}",
+    "chooseFile": "Välj en fil",
+    "orDragHere": "eller dra den hit",
+    "searchConversions": "Sök konverteringar",
+    "convertTo": "Konvertera till",
+    "convertButton": "Konvertera",
+    "uploading": "Laddar upp...",
+    "processing": "Bearbetar..."
+  },
+  "results": {
+    "title": "Resultat",
+    "convertedFileName": "Konverterat filnamn",
+    "status": "Status",
+    "actions": "Åtgärder",
+    "downloadAll": "Alla",
+    "downloadTar": "Tar",
+    "deleteJob": "Ta bort",
+    "noFiles": "Inga filer konverterade än.",
+    "statusPending": "Väntar",
+    "statusCompleted": "Slutförd",
+    "statusFailed": "Misslyckades"
+  },
+  "history": {
+    "title": "Resultat",
+    "time": "Tid",
+    "files": "Filer",
+    "filesDone": "Färdiga filer",
+    "status": "Status",
+    "actions": "Åtgärder",
+    "expandDetails": "Expandera detaljer",
+    "detailedFileInfo": "Detaljerad filinformation:",
+    "deleteSelected": "Ta bort valda",
+    "selectAll": "Välj alla",
+    "confirmDelete": "Är du säker på att du vill ta bort {count} jobb? Denna åtgärd kan inte ångras.",
+    "deleteSuccess": "Lyckades ta bort {deleted} jobb.",
+    "deleteFailed": "Kunde inte ta bort {failed} jobb.",
+    "deleteError": "Ett fel uppstod när jobb skulle tas bort. Försök igen."
+  },
+  "auth": {
+    "email": "E-post",
+    "password": "Lösenord",
+    "currentPassword": "Nuvarande lösenord",
+    "newPassword": "Lösenord (lämna tomt för att inte ändra)",
+    "loginButton": "Logga in",
+    "registerButton": "Registrera",
+    "updateButton": "Uppdatera",
+    "createAccount": "Skapa konto",
+    "invalidCredentials": "Ogiltiga inloggningsuppgifter.",
+    "emailInUse": "E-postadressen används redan.",
+    "unauthorized": "Ej auktoriserad",
+    "cookiesRequired": "Cookies måste vara aktiverade för att använda denna app.",
+    "noCookies": "Ingen autentiseringscookie, kanske din webbläsare blockerar cookies."
+  },
+  "setup": {
+    "welcome": "Välkommen till ConvertX-CN!",
+    "createYourAccount": "Skapa ditt konto",
+    "reportIssues": "Rapportera problem på",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Jobb hittades inte.",
+    "fileNotFound": "Fil hittades inte.",
+    "uploadFailed": "Uppladdning misslyckades.",
+    "conversionFailed": "Konvertering misslyckades.",
+    "serverError": "Serverfel."
+  },
+  "upload": {
+    "success": "Filerna laddades upp framgångsrikt.",
+    "dragDrop": "Släpp filer här"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

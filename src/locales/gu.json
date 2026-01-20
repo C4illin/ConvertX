@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "દ્વારા સંચાલિત",
+    "version": "v{version}",
+    "loading": "લોડ થઈ રહ્યું છે...",
+    "error": "ભૂલ",
+    "success": "સફળતા",
+    "confirm": "પુષ્ટિ કરો",
+    "cancel": "રદ કરો",
+    "close": "બંધ કરો",
+    "save": "સાચવો",
+    "delete": "કાઢી નાખો",
+    "remove": "દૂર કરો",
+    "download": "ડાઉનલોડ કરો",
+    "upload": "અપલોડ કરો",
+    "submit": "સબમિટ કરો",
+    "back": "પાછા",
+    "next": "આગળ",
+    "yes": "હા",
+    "no": "ના"
+  },
+  "nav": {
+    "history": "ઇતિહાસ",
+    "account": "એકાઉન્ટ",
+    "logout": "લૉગઆઉટ",
+    "login": "લૉગિન",
+    "register": "નોંધણી કરો",
+    "language": "ભાષા"
+  },
+  "convert": {
+    "title": "રૂપાંતર કરો",
+    "titleWithType": ".{fileType} રૂપાંતર કરો",
+    "chooseFile": "ફાઇલ પસંદ કરો",
+    "orDragHere": "અથવા અહીં ખેંચો",
+    "searchConversions": "રૂપાંતરણો શોધો",
+    "convertTo": "આમાં રૂપાંતર કરો",
+    "convertButton": "રૂપાંતર કરો",
+    "uploading": "અપલોડ થઈ રહ્યું છે...",
+    "processing": "પ્રક્રિયા થઈ રહી છે..."
+  },
+  "results": {
+    "title": "પરિણામો",
+    "convertedFileName": "રૂપાંતરિત ફાઇલ નામ",
+    "status": "સ્થિતિ",
+    "actions": "ક્રિયાઓ",
+    "downloadAll": "બધું",
+    "downloadTar": "Tar",
+    "deleteJob": "કાઢી નાખો",
+    "noFiles": "હજી કોઈ ફાઇલ રૂપાંતરિત થઈ નથી.",
+    "statusPending": "બાકી",
+    "statusCompleted": "પૂર્ણ",
+    "statusFailed": "નિષ્ફળ"
+  },
+  "history": {
+    "title": "પરિણામો",
+    "time": "સમય",
+    "files": "ફાઇલો",
+    "filesDone": "પૂર્ણ થયેલ ફાઇલો",
+    "status": "સ્થિતિ",
+    "actions": "ક્રિયાઓ",
+    "expandDetails": "વિગતો વિસ્તૃત કરો",
+    "detailedFileInfo": "વિગતવાર ફાઇલ માહિતી:",
+    "deleteSelected": "પસંદ કરેલ કાઢી નાખો",
+    "selectAll": "બધું પસંદ કરો",
+    "confirmDelete": "શું તમે ખાતરી છો કે તમે {count} જોબ કાઢી નાખવા માંગો છો? આ ક્રિયા પૂર્વવત થઈ શકતી નથી.",
+    "deleteSuccess": "{deleted} જોબ સફળતાપૂર્વક કાઢી નાખવામાં આવ્યા.",
+    "deleteFailed": "{failed} જોબ કાઢી નાખવામાં નિષ્ફળ.",
+    "deleteError": "જોબ કાઢી નાખતી વખતે ભૂલ થઈ. કૃપા કરીને ફરી પ્રયાસ કરો."
+  },
+  "auth": {
+    "email": "ઇમેઇલ",
+    "password": "પાસવર્ડ",
+    "currentPassword": "વર્તમાન પાસવર્ડ",
+    "newPassword": "પાસવર્ડ (બદલવું નથી તો ખાલી રાખો)",
+    "loginButton": "લૉગિન",
+    "registerButton": "નોંધણી કરો",
+    "updateButton": "અપડેટ કરો",
+    "createAccount": "એકાઉન્ટ બનાવો",
+    "invalidCredentials": "અમાન્ય ઓળખાણ.",
+    "emailInUse": "ઇમેઇલ પહેલેથી વપરાશમાં છે.",
+    "unauthorized": "અનધિકૃત",
+    "cookiesRequired": "આ એપ વાપરવા માટે કૂકીઝ સક્ષમ હોવી જોઈએ.",
+    "noCookies": "કોઈ પ્રમાણીકરણ કૂકી નથી, કદાચ તમારું બ્રાઉઝર કૂકીઝ અવરોધિત કરી રહ્યું છે."
+  },
+  "setup": {
+    "welcome": "ConvertX-CN માં સ્વાગત છે!",
+    "createYourAccount": "તમારું એકાઉન્ટ બનાવો",
+    "reportIssues": "સમસ્યાઓ જણાવો",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "જોબ મળ્યો નથી.",
+    "fileNotFound": "ફાઇલ મળી નથી.",
+    "uploadFailed": "અપલોડ નિષ્ફળ.",
+    "conversionFailed": "રૂપાંતર નિષ્ફળ.",
+    "serverError": "સર્વર ભૂલ."
+  },
+  "upload": {
+    "success": "ફાઇલો સફળતાપૂર્વક અપલોડ થઈ.",
+    "dragDrop": "ફાઇલો અહીં છોડો"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

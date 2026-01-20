@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "مدعوم من",
+    "version": "v{version}",
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "success": "نجاح",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء",
+    "close": "إغلاق",
+    "save": "حفظ",
+    "delete": "حذف",
+    "remove": "إزالة",
+    "download": "تحميل",
+    "upload": "رفع",
+    "submit": "إرسال",
+    "back": "رجوع",
+    "next": "التالي",
+    "yes": "نعم",
+    "no": "لا"
+  },
+  "nav": {
+    "history": "السجل",
+    "account": "الحساب",
+    "logout": "تسجيل الخروج",
+    "login": "تسجيل الدخول",
+    "register": "التسجيل",
+    "language": "اللغة"
+  },
+  "convert": {
+    "title": "تحويل",
+    "titleWithType": "تحويل .{fileType}",
+    "chooseFile": "اختر ملفاً",
+    "orDragHere": "أو اسحبه هنا",
+    "searchConversions": "البحث عن التحويلات",
+    "convertTo": "تحويل إلى",
+    "convertButton": "تحويل",
+    "uploading": "جاري الرفع...",
+    "processing": "جاري المعالجة..."
+  },
+  "results": {
+    "title": "النتائج",
+    "convertedFileName": "اسم الملف المحوّل",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "downloadAll": "الكل",
+    "downloadTar": "Tar",
+    "deleteJob": "حذف",
+    "noFiles": "لم يتم تحويل أي ملفات بعد.",
+    "statusPending": "قيد الانتظار",
+    "statusCompleted": "مكتمل",
+    "statusFailed": "فشل"
+  },
+  "history": {
+    "title": "النتائج",
+    "time": "الوقت",
+    "files": "الملفات",
+    "filesDone": "الملفات المنجزة",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "expandDetails": "توسيع التفاصيل",
+    "detailedFileInfo": "معلومات تفصيلية عن الملف:",
+    "deleteSelected": "حذف المحدد",
+    "selectAll": "تحديد الكل",
+    "confirmDelete": "هل أنت متأكد من حذف {count} مهمة؟ لا يمكن التراجع عن هذا الإجراء.",
+    "deleteSuccess": "تم حذف {deleted} مهمة بنجاح.",
+    "deleteFailed": "فشل حذف {failed} مهمة.",
+    "deleteError": "حدث خطأ أثناء حذف المهام. يرجى المحاولة مرة أخرى."
+  },
+  "auth": {
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "currentPassword": "كلمة المرور الحالية",
+    "newPassword": "كلمة المرور (اتركها فارغة لعدم التغيير)",
+    "loginButton": "تسجيل الدخول",
+    "registerButton": "التسجيل",
+    "updateButton": "تحديث",
+    "createAccount": "إنشاء حساب",
+    "invalidCredentials": "بيانات الاعتماد غير صالحة.",
+    "emailInUse": "البريد الإلكتروني مستخدم بالفعل.",
+    "unauthorized": "غير مصرح",
+    "cookiesRequired": "يجب تفعيل ملفات تعريف الارتباط لاستخدام هذا التطبيق.",
+    "noCookies": "لا يوجد ملف تعريف ارتباط للمصادقة، ربما يقوم متصفحك بحظر ملفات تعريف الارتباط."
+  },
+  "setup": {
+    "welcome": "مرحباً بك في ConvertX-CN!",
+    "createYourAccount": "أنشئ حسابك",
+    "reportIssues": "الإبلاغ عن المشاكل على",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "المهمة غير موجودة.",
+    "fileNotFound": "الملف غير موجود.",
+    "uploadFailed": "فشل الرفع.",
+    "conversionFailed": "فشل التحويل.",
+    "serverError": "خطأ في الخادم."
+  },
+  "upload": {
+    "success": "تم رفع الملفات بنجاح.",
+    "dragDrop": "أفلت الملفات هنا"
+  },
+  "file": {
+    "size": "{size} كيلوبايت"
+  }
+}

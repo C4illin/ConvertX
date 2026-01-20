@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Keyrt af",
+    "version": "v{version}",
+    "loading": "Hleður...",
+    "error": "Villa",
+    "success": "Tókst",
+    "confirm": "Staðfesta",
+    "cancel": "Hætta við",
+    "close": "Loka",
+    "save": "Vista",
+    "delete": "Eyða",
+    "remove": "Fjarlægja",
+    "download": "Hlaða niður",
+    "upload": "Hlaða upp",
+    "submit": "Senda",
+    "back": "Til baka",
+    "next": "Næsta",
+    "yes": "Já",
+    "no": "Nei"
+  },
+  "nav": {
+    "history": "Saga",
+    "account": "Reikningur",
+    "logout": "Útskrá",
+    "login": "Innskrá",
+    "register": "Nýskrá",
+    "language": "Tungumál"
+  },
+  "convert": {
+    "title": "Umbreyta",
+    "titleWithType": "Umbreyta .{fileType}",
+    "chooseFile": "Veldu skrá",
+    "orDragHere": "eða dragðu hana hingað",
+    "searchConversions": "Leita að umbreytingum",
+    "convertTo": "Umbreyta í",
+    "convertButton": "Umbreyta",
+    "uploading": "Hleður upp...",
+    "processing": "Vinnur úr..."
+  },
+  "results": {
+    "title": "Niðurstöður",
+    "convertedFileName": "Nafn umbreyttrar skráar",
+    "status": "Staða",
+    "actions": "Aðgerðir",
+    "downloadAll": "Allt",
+    "downloadTar": "Tar",
+    "deleteJob": "Eyða",
+    "noFiles": "Engar skrár hafa verið umbreyttar ennþá.",
+    "statusPending": "Í bið",
+    "statusCompleted": "Lokið",
+    "statusFailed": "Mistókst"
+  },
+  "history": {
+    "title": "Niðurstöður",
+    "time": "Tími",
+    "files": "Skrár",
+    "filesDone": "Loknar skrár",
+    "status": "Staða",
+    "actions": "Aðgerðir",
+    "expandDetails": "Sýna nánar",
+    "detailedFileInfo": "Ítarlegar skráarupplýsingar:",
+    "deleteSelected": "Eyða völdum",
+    "selectAll": "Velja allt",
+    "confirmDelete": "Ertu viss um að þú viljir eyða {count} verki(um)? Þessa aðgerð er ekki hægt að afturkalla.",
+    "deleteSuccess": "{deleted} verk(um) eytt.",
+    "deleteFailed": "Ekki tókst að eyða {failed} verki(um).",
+    "deleteError": "Villa kom upp við að eyða verkum. Vinsamlegast reyndu aftur."
+  },
+  "auth": {
+    "email": "Netfang",
+    "password": "Lykilorð",
+    "currentPassword": "Núverandi lykilorð",
+    "newPassword": "Lykilorð (skildu eftir autt ef óbreytt)",
+    "loginButton": "Innskrá",
+    "registerButton": "Nýskrá",
+    "updateButton": "Uppfæra",
+    "createAccount": "Stofna reikning",
+    "invalidCredentials": "Ógild skilríki.",
+    "emailInUse": "Netfang er þegar í notkun.",
+    "unauthorized": "Óheimilt",
+    "cookiesRequired": "Vefkökur þurfa að vera virkar til að nota þetta forrit.",
+    "noCookies": "Engin auðkenningarkaka, kannski vafrinn þinn lokar á vefkökur."
+  },
+  "setup": {
+    "welcome": "Velkomin í ConvertX-CN!",
+    "createYourAccount": "Stofnaðu reikninginn þinn",
+    "reportIssues": "Tilkynntu vandamál á",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Verk fannst ekki.",
+    "fileNotFound": "Skrá fannst ekki.",
+    "uploadFailed": "Upphleðsla mistókst.",
+    "conversionFailed": "Umbreyting mistókst.",
+    "serverError": "Villa á þjóni."
+  },
+  "upload": {
+    "success": "Skrár hlaðnar upp.",
+    "dragDrop": "Slepptu skrám hér"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

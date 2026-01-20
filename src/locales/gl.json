@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Impulsado por",
+    "version": "v{version}",
+    "loading": "Cargando...",
+    "error": "Erro",
+    "success": "Éxito",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "close": "Pechar",
+    "save": "Gardar",
+    "delete": "Eliminar",
+    "remove": "Quitar",
+    "download": "Descargar",
+    "upload": "Subir",
+    "submit": "Enviar",
+    "back": "Atrás",
+    "next": "Seguinte",
+    "yes": "Si",
+    "no": "Non"
+  },
+  "nav": {
+    "history": "Historial",
+    "account": "Conta",
+    "logout": "Pechar sesión",
+    "login": "Iniciar sesión",
+    "register": "Rexistrarse",
+    "language": "Idioma"
+  },
+  "convert": {
+    "title": "Converter",
+    "titleWithType": "Converter .{fileType}",
+    "chooseFile": "Escolle un ficheiro",
+    "orDragHere": "ou arrástreo aquí",
+    "searchConversions": "Buscar conversións",
+    "convertTo": "Converter a",
+    "convertButton": "Converter",
+    "uploading": "Subindo...",
+    "processing": "Procesando..."
+  },
+  "results": {
+    "title": "Resultados",
+    "convertedFileName": "Nome do ficheiro convertido",
+    "status": "Estado",
+    "actions": "Accións",
+    "downloadAll": "Todo",
+    "downloadTar": "Tar",
+    "deleteJob": "Eliminar",
+    "noFiles": "Aínda non se converteron ficheiros.",
+    "statusPending": "Pendente",
+    "statusCompleted": "Completado",
+    "statusFailed": "Fallou"
+  },
+  "history": {
+    "title": "Resultados",
+    "time": "Hora",
+    "files": "Ficheiros",
+    "filesDone": "Ficheiros completados",
+    "status": "Estado",
+    "actions": "Accións",
+    "expandDetails": "Ampliar detalles",
+    "detailedFileInfo": "Información detallada do ficheiro:",
+    "deleteSelected": "Eliminar seleccionados",
+    "selectAll": "Seleccionar todo",
+    "confirmDelete": "Estás seguro de que queres eliminar {count} traballo(s)? Esta acción non se pode desfacer.",
+    "deleteSuccess": "Elimináronse {deleted} traballo(s) correctamente.",
+    "deleteFailed": "Non se puideron eliminar {failed} traballo(s).",
+    "deleteError": "Produciuse un erro ao eliminar os traballos. Por favor, téntao de novo."
+  },
+  "auth": {
+    "email": "Correo electrónico",
+    "password": "Contrasinal",
+    "currentPassword": "Contrasinal actual",
+    "newPassword": "Contrasinal (deixa en branco se non cambia)",
+    "loginButton": "Iniciar sesión",
+    "registerButton": "Rexistrarse",
+    "updateButton": "Actualizar",
+    "createAccount": "Crear conta",
+    "invalidCredentials": "Credenciais non válidas.",
+    "emailInUse": "O correo electrónico xa está en uso.",
+    "unauthorized": "Non autorizado",
+    "cookiesRequired": "As cookies deben estar habilitadas para usar esta aplicación.",
+    "noCookies": "Non hai cookie de autenticación, quizais o teu navegador bloquea as cookies."
+  },
+  "setup": {
+    "welcome": "Benvido a ConvertX-CN!",
+    "createYourAccount": "Crea a túa conta",
+    "reportIssues": "Informa de calquera problema en",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Traballo non atopado.",
+    "fileNotFound": "Ficheiro non atopado.",
+    "uploadFailed": "Erro ao subir.",
+    "conversionFailed": "Erro na conversión.",
+    "serverError": "Erro do servidor."
+  },
+  "upload": {
+    "success": "Ficheiros subidos correctamente.",
+    "dragDrop": "Solta os ficheiros aquí"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

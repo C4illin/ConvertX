@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Unterstützt von",
+    "version": "v{version}",
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "confirm": "Bestätigen",
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "remove": "Entfernen",
+    "download": "Herunterladen",
+    "upload": "Hochladen",
+    "submit": "Absenden",
+    "back": "Zurück",
+    "next": "Weiter",
+    "yes": "Ja",
+    "no": "Nein"
+  },
+  "nav": {
+    "history": "Verlauf",
+    "account": "Konto",
+    "logout": "Abmelden",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "language": "Sprache"
+  },
+  "convert": {
+    "title": "Konvertieren",
+    "titleWithType": ".{fileType} konvertieren",
+    "chooseFile": "Datei auswählen",
+    "orDragHere": "oder hierher ziehen",
+    "searchConversions": "Konvertierungen suchen",
+    "convertTo": "Konvertieren zu",
+    "convertButton": "Konvertieren",
+    "uploading": "Hochladen...",
+    "processing": "Verarbeiten..."
+  },
+  "results": {
+    "title": "Ergebnisse",
+    "convertedFileName": "Konvertierter Dateiname",
+    "status": "Status",
+    "actions": "Aktionen",
+    "downloadAll": "Alle",
+    "downloadTar": "Tar",
+    "deleteJob": "Löschen",
+    "noFiles": "Noch keine Dateien konvertiert.",
+    "statusPending": "Ausstehend",
+    "statusCompleted": "Abgeschlossen",
+    "statusFailed": "Fehlgeschlagen"
+  },
+  "history": {
+    "title": "Ergebnisse",
+    "time": "Zeit",
+    "files": "Dateien",
+    "filesDone": "Fertige Dateien",
+    "status": "Status",
+    "actions": "Aktionen",
+    "expandDetails": "Details erweitern",
+    "detailedFileInfo": "Detaillierte Dateiinformationen:",
+    "deleteSelected": "Ausgewählte löschen",
+    "selectAll": "Alle auswählen",
+    "confirmDelete": "Sind Sie sicher, dass Sie {count} Auftrag/Aufträge löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "deleteSuccess": "{deleted} Auftrag/Aufträge erfolgreich gelöscht.",
+    "deleteFailed": "{failed} Auftrag/Aufträge konnten nicht gelöscht werden.",
+    "deleteError": "Beim Löschen der Aufträge ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
+  },
+  "auth": {
+    "email": "E-Mail",
+    "password": "Passwort",
+    "currentPassword": "Aktuelles Passwort",
+    "newPassword": "Passwort (leer lassen für unverändert)",
+    "loginButton": "Anmelden",
+    "registerButton": "Registrieren",
+    "updateButton": "Aktualisieren",
+    "createAccount": "Konto erstellen",
+    "invalidCredentials": "Ungültige Anmeldedaten.",
+    "emailInUse": "E-Mail wird bereits verwendet.",
+    "unauthorized": "Nicht autorisiert",
+    "cookiesRequired": "Cookies müssen aktiviert sein, um diese App zu nutzen.",
+    "noCookies": "Kein Auth-Cookie, möglicherweise blockiert Ihr Browser Cookies."
+  },
+  "setup": {
+    "welcome": "Willkommen bei ConvertX-CN!",
+    "createYourAccount": "Erstellen Sie Ihr Konto",
+    "reportIssues": "Probleme melden auf",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Auftrag nicht gefunden.",
+    "fileNotFound": "Datei nicht gefunden.",
+    "uploadFailed": "Hochladen fehlgeschlagen.",
+    "conversionFailed": "Konvertierung fehlgeschlagen.",
+    "serverError": "Serverfehler."
+  },
+  "upload": {
+    "success": "Dateien erfolgreich hochgeladen.",
+    "dragDrop": "Dateien hier ablegen"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

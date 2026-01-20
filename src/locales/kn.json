@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "ಮೂಲಕ ಚಾಲಿತ",
+    "version": "v{version}",
+    "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
+    "error": "ದೋಷ",
+    "success": "ಯಶಸ್ಸು",
+    "confirm": "ದೃಢೀಕರಿಸಿ",
+    "cancel": "ರದ್ದುಮಾಡಿ",
+    "close": "ಮುಚ್ಚಿ",
+    "save": "ಉಳಿಸಿ",
+    "delete": "ಅಳಿಸಿ",
+    "remove": "ತೆಗೆದುಹಾಕಿ",
+    "download": "ಡೌನ್‌ಲೋಡ್",
+    "upload": "ಅಪ್‌ಲೋಡ್",
+    "submit": "ಸಲ್ಲಿಸಿ",
+    "back": "ಹಿಂದೆ",
+    "next": "ಮುಂದೆ",
+    "yes": "ಹೌದು",
+    "no": "ಇಲ್ಲ"
+  },
+  "nav": {
+    "history": "ಇತಿಹಾಸ",
+    "account": "ಖಾತೆ",
+    "logout": "ಲಾಗ್ ಔಟ್",
+    "login": "ಲಾಗಿನ್",
+    "register": "ನೋಂದಣಿ",
+    "language": "ಭಾಷೆ"
+  },
+  "convert": {
+    "title": "ಪರಿವರ್ತಿಸಿ",
+    "titleWithType": ".{fileType} ಪರಿವರ್ತಿಸಿ",
+    "chooseFile": "ಫೈಲ್ ಆಯ್ಕೆಮಾಡಿ",
+    "orDragHere": "ಅಥವಾ ಇಲ್ಲಿ ಎಳೆಯಿರಿ",
+    "searchConversions": "ಪರಿವರ್ತನೆಗಳನ್ನು ಹುಡುಕಿ",
+    "convertTo": "ಇದಕ್ಕೆ ಪರಿವರ್ತಿಸಿ",
+    "convertButton": "ಪರಿವರ್ತಿಸಿ",
+    "uploading": "ಅಪ್‌ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
+    "processing": "ಪ್ರಕ್ರಿಯೆ ಆಗುತ್ತಿದೆ..."
+  },
+  "results": {
+    "title": "ಫಲಿತಾಂಶಗಳು",
+    "convertedFileName": "ಪರಿವರ್ತಿತ ಫೈಲ್ ಹೆಸರು",
+    "status": "ಸ್ಥಿತಿ",
+    "actions": "ಕ್ರಿಯೆಗಳು",
+    "downloadAll": "ಎಲ್ಲಾ",
+    "downloadTar": "Tar",
+    "deleteJob": "ಅಳಿಸಿ",
+    "noFiles": "ಇನ್ನೂ ಯಾವುದೇ ಫೈಲ್‌ಗಳು ಪರಿವರ್ತನೆಯಾಗಿಲ್ಲ.",
+    "statusPending": "ಬಾಕಿ",
+    "statusCompleted": "ಪೂರ್ಣಗೊಂಡಿದೆ",
+    "statusFailed": "ವಿಫಲವಾಯಿತು"
+  },
+  "history": {
+    "title": "ಫಲಿತಾಂಶಗಳು",
+    "time": "ಸಮಯ",
+    "files": "ಫೈಲ್‌ಗಳು",
+    "filesDone": "ಮುಗಿದ ಫೈಲ್‌ಗಳು",
+    "status": "ಸ್ಥಿತಿ",
+    "actions": "ಕ್ರಿಯೆಗಳು",
+    "expandDetails": "ವಿವರಗಳನ್ನು ವಿಸ್ತರಿಸಿ",
+    "detailedFileInfo": "ವಿವರವಾದ ಫೈಲ್ ಮಾಹಿತಿ:",
+    "deleteSelected": "ಆಯ್ಕೆಮಾಡಿದವುಗಳನ್ನು ಅಳಿಸಿ",
+    "selectAll": "ಎಲ್ಲಾ ಆಯ್ಕೆಮಾಡಿ",
+    "confirmDelete": "ನೀವು {count} ಕೆಲಸ(ಗಳನ್ನು) ಅಳಿಸಲು ಖಚಿತವಾಗಿದ್ದೀರಾ? ಈ ಕ್ರಿಯೆಯನ್ನು ರದ್ದುಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ.",
+    "deleteSuccess": "{deleted} ಕೆಲಸ(ಗಳು) ಯಶಸ್ವಿಯಾಗಿ ಅಳಿಸಲಾಗಿದೆ.",
+    "deleteFailed": "{failed} ಕೆಲಸ(ಗಳನ್ನು) ಅಳಿಸಲು ವಿಫಲವಾಯಿತು.",
+    "deleteError": "ಕೆಲಸಗಳನ್ನು ಅಳಿಸುವಾಗ ದೋಷ ಸಂಭವಿಸಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."
+  },
+  "auth": {
+    "email": "ಇಮೇಲ್",
+    "password": "ಪಾಸ್‌ವರ್ಡ್",
+    "currentPassword": "ಪ್ರಸ್ತುತ ಪಾಸ್‌ವರ್ಡ್",
+    "newPassword": "ಪಾಸ್‌ವರ್ಡ್ (ಬದಲಾಯಿಸದಿದ್ದರೆ ಖಾಲಿ ಬಿಡಿ)",
+    "loginButton": "ಲಾಗಿನ್",
+    "registerButton": "ನೋಂದಣಿ",
+    "updateButton": "ಅಪ್‌ಡೇಟ್",
+    "createAccount": "ಖಾತೆ ರಚಿಸಿ",
+    "invalidCredentials": "ಅಮಾನ್ಯ ರುಜುವಾತುಗಳು.",
+    "emailInUse": "ಇಮೇಲ್ ಈಗಾಗಲೇ ಬಳಕೆಯಲ್ಲಿದೆ.",
+    "unauthorized": "ಅನಧಿಕೃತ",
+    "cookiesRequired": "ಈ ಅಪ್ಲಿಕೇಶನ್ ಬಳಸಲು ಕುಕೀಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಬೇಕು.",
+    "noCookies": "ದೃಢೀಕರಣ ಕುಕೀ ಇಲ್ಲ, ನಿಮ್ಮ ಬ್ರೌಸರ್ ಕುಕೀಗಳನ್ನು ತಡೆಯುತ್ತಿರಬಹುದು."
+  },
+  "setup": {
+    "welcome": "ConvertX-CN ಗೆ ಸುಸ್ವಾಗತ!",
+    "createYourAccount": "ನಿಮ್ಮ ಖಾತೆಯನ್ನು ರಚಿಸಿ",
+    "reportIssues": "ಸಮಸ್ಯೆಗಳನ್ನು ವರದಿ ಮಾಡಿ",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "ಕೆಲಸ ಕಂಡುಬಂದಿಲ್ಲ.",
+    "fileNotFound": "ಫೈಲ್ ಕಂಡುಬಂದಿಲ್ಲ.",
+    "uploadFailed": "ಅಪ್‌ಲೋಡ್ ವಿಫಲವಾಯಿತು.",
+    "conversionFailed": "ಪರಿವರ್ತನೆ ವಿಫಲವಾಯಿತು.",
+    "serverError": "ಸರ್ವರ್ ದೋಷ."
+  },
+  "upload": {
+    "success": "ಫೈಲ್‌ಗಳು ಯಶಸ್ವಿಯಾಗಿ ಅಪ್‌ಲೋಡ್ ಆಗಿವೆ.",
+    "dragDrop": "ಫೈಲ್‌ಗಳನ್ನು ಇಲ್ಲಿ ಬಿಡಿ"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

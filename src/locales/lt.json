@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Veikia su",
+    "version": "v{version}",
+    "loading": "Įkeliama...",
+    "error": "Klaida",
+    "success": "Sėkmė",
+    "confirm": "Patvirtinti",
+    "cancel": "Atšaukti",
+    "close": "Uždaryti",
+    "save": "Išsaugoti",
+    "delete": "Ištrinti",
+    "remove": "Pašalinti",
+    "download": "Atsisiųsti",
+    "upload": "Įkelti",
+    "submit": "Pateikti",
+    "back": "Atgal",
+    "next": "Kitas",
+    "yes": "Taip",
+    "no": "Ne"
+  },
+  "nav": {
+    "history": "Istorija",
+    "account": "Paskyra",
+    "logout": "Atsijungti",
+    "login": "Prisijungti",
+    "register": "Registruotis",
+    "language": "Kalba"
+  },
+  "convert": {
+    "title": "Konvertuoti",
+    "titleWithType": "Konvertuoti .{fileType}",
+    "chooseFile": "Pasirinkite failą",
+    "orDragHere": "arba vilkite čia",
+    "searchConversions": "Ieškoti konversijų",
+    "convertTo": "Konvertuoti į",
+    "convertButton": "Konvertuoti",
+    "uploading": "Įkeliama...",
+    "processing": "Apdorojama..."
+  },
+  "results": {
+    "title": "Rezultatai",
+    "convertedFileName": "Konvertuoto failo pavadinimas",
+    "status": "Būsena",
+    "actions": "Veiksmai",
+    "downloadAll": "Visi",
+    "downloadTar": "Tar",
+    "deleteJob": "Ištrinti",
+    "noFiles": "Dar nekonvertuota jokių failų.",
+    "statusPending": "Laukiama",
+    "statusCompleted": "Baigta",
+    "statusFailed": "Nepavyko"
+  },
+  "history": {
+    "title": "Rezultatai",
+    "time": "Laikas",
+    "files": "Failai",
+    "filesDone": "Baigti failai",
+    "status": "Būsena",
+    "actions": "Veiksmai",
+    "expandDetails": "Išskleisti detales",
+    "detailedFileInfo": "Išsami failo informacija:",
+    "deleteSelected": "Ištrinti pasirinktus",
+    "selectAll": "Pasirinkti visus",
+    "confirmDelete": "Ar tikrai norite ištrinti {count} užduotį(-is)? Šio veiksmo negalima atšaukti.",
+    "deleteSuccess": "Sėkmingai ištrinta {deleted} užduotis(-ių).",
+    "deleteFailed": "Nepavyko ištrinti {failed} užduoties(-ių).",
+    "deleteError": "Trinant užduotis įvyko klaida. Bandykite dar kartą."
+  },
+  "auth": {
+    "email": "El. paštas",
+    "password": "Slaptažodis",
+    "currentPassword": "Dabartinis slaptažodis",
+    "newPassword": "Slaptažodis (palikite tuščią, jei nepakeistas)",
+    "loginButton": "Prisijungti",
+    "registerButton": "Registruotis",
+    "updateButton": "Atnaujinti",
+    "createAccount": "Sukurti paskyrą",
+    "invalidCredentials": "Neteisingi prisijungimo duomenys.",
+    "emailInUse": "El. paštas jau naudojamas.",
+    "unauthorized": "Neautorizuota",
+    "cookiesRequired": "Norint naudoti šią programą, turi būti įjungti slapukai.",
+    "noCookies": "Nėra autentifikacijos slapuko, galbūt jūsų naršyklė blokuoja slapukus."
+  },
+  "setup": {
+    "welcome": "Sveiki atvykę į ConvertX-CN!",
+    "createYourAccount": "Sukurkite savo paskyrą",
+    "reportIssues": "Praneškite apie problemas",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Užduotis nerasta.",
+    "fileNotFound": "Failas nerastas.",
+    "uploadFailed": "Įkėlimas nepavyko.",
+    "conversionFailed": "Konvertavimas nepavyko.",
+    "serverError": "Serverio klaida."
+  },
+  "upload": {
+    "success": "Failai sėkmingai įkelti.",
+    "dragDrop": "Numeskite failus čia"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

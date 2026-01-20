@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Працює на",
+    "version": "v{version}",
+    "loading": "Завантаження...",
+    "error": "Помилка",
+    "success": "Успіх",
+    "confirm": "Підтвердити",
+    "cancel": "Скасувати",
+    "close": "Закрити",
+    "save": "Зберегти",
+    "delete": "Видалити",
+    "remove": "Прибрати",
+    "download": "Завантажити",
+    "upload": "Завантажити",
+    "submit": "Надіслати",
+    "back": "Назад",
+    "next": "Далі",
+    "yes": "Так",
+    "no": "Ні"
+  },
+  "nav": {
+    "history": "Історія",
+    "account": "Обліковий запис",
+    "logout": "Вийти",
+    "login": "Увійти",
+    "register": "Реєстрація",
+    "language": "Мова"
+  },
+  "convert": {
+    "title": "Конвертувати",
+    "titleWithType": "Конвертувати .{fileType}",
+    "chooseFile": "Виберіть файл",
+    "orDragHere": "або перетягніть сюди",
+    "searchConversions": "Пошук конвертацій",
+    "convertTo": "Конвертувати в",
+    "convertButton": "Конвертувати",
+    "uploading": "Завантаження...",
+    "processing": "Обробка..."
+  },
+  "results": {
+    "title": "Результати",
+    "convertedFileName": "Ім'я конвертованого файлу",
+    "status": "Статус",
+    "actions": "Дії",
+    "downloadAll": "Усі",
+    "downloadTar": "Tar",
+    "deleteJob": "Видалити",
+    "noFiles": "Файли ще не конвертовані.",
+    "statusPending": "Очікування",
+    "statusCompleted": "Завершено",
+    "statusFailed": "Помилка"
+  },
+  "history": {
+    "title": "Результати",
+    "time": "Час",
+    "files": "Файли",
+    "filesDone": "Готові файли",
+    "status": "Статус",
+    "actions": "Дії",
+    "expandDetails": "Розгорнути деталі",
+    "detailedFileInfo": "Детальна інформація про файл:",
+    "deleteSelected": "Видалити вибрані",
+    "selectAll": "Вибрати все",
+    "confirmDelete": "Ви впевнені, що хочете видалити {count} завдання? Цю дію не можна скасувати.",
+    "deleteSuccess": "Успішно видалено {deleted} завдання.",
+    "deleteFailed": "Не вдалося видалити {failed} завдання.",
+    "deleteError": "Сталася помилка під час видалення завдань. Спробуйте ще раз."
+  },
+  "auth": {
+    "email": "Електронна пошта",
+    "password": "Пароль",
+    "currentPassword": "Поточний пароль",
+    "newPassword": "Пароль (залиште порожнім, щоб не змінювати)",
+    "loginButton": "Увійти",
+    "registerButton": "Зареєструватися",
+    "updateButton": "Оновити",
+    "createAccount": "Створити обліковий запис",
+    "invalidCredentials": "Невірні облікові дані.",
+    "emailInUse": "Електронна пошта вже використовується.",
+    "unauthorized": "Не авторизовано",
+    "cookiesRequired": "Для використання цього додатка потрібно увімкнути cookies.",
+    "noCookies": "Немає cookie автентифікації, можливо, ваш браузер блокує cookies."
+  },
+  "setup": {
+    "welcome": "Ласкаво просимо до ConvertX-CN!",
+    "createYourAccount": "Створіть свій обліковий запис",
+    "reportIssues": "Повідомляйте про проблеми на",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Завдання не знайдено.",
+    "fileNotFound": "Файл не знайдено.",
+    "uploadFailed": "Помилка завантаження.",
+    "conversionFailed": "Помилка конвертації.",
+    "serverError": "Помилка сервера."
+  },
+  "upload": {
+    "success": "Файли успішно завантажено.",
+    "dragDrop": "Перетягніть файли сюди"
+  },
+  "file": {
+    "size": "{size} кБ"
+  }
+}

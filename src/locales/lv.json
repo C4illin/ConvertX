@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Darbina",
+    "version": "v{version}",
+    "loading": "Ielādē...",
+    "error": "Kļūda",
+    "success": "Veiksmīgi",
+    "confirm": "Apstiprināt",
+    "cancel": "Atcelt",
+    "close": "Aizvērt",
+    "save": "Saglabāt",
+    "delete": "Dzēst",
+    "remove": "Noņemt",
+    "download": "Lejupielādēt",
+    "upload": "Augšupielādēt",
+    "submit": "Iesniegt",
+    "back": "Atpakaļ",
+    "next": "Nākamais",
+    "yes": "Jā",
+    "no": "Nē"
+  },
+  "nav": {
+    "history": "Vēsture",
+    "account": "Konts",
+    "logout": "Izrakstīties",
+    "login": "Ierakstīties",
+    "register": "Reģistrēties",
+    "language": "Valoda"
+  },
+  "convert": {
+    "title": "Konvertēt",
+    "titleWithType": "Konvertēt .{fileType}",
+    "chooseFile": "Izvēlieties failu",
+    "orDragHere": "vai velciet to šeit",
+    "searchConversions": "Meklēt konversijas",
+    "convertTo": "Konvertēt uz",
+    "convertButton": "Konvertēt",
+    "uploading": "Augšupielādē...",
+    "processing": "Apstrādā..."
+  },
+  "results": {
+    "title": "Rezultāti",
+    "convertedFileName": "Konvertētā faila nosaukums",
+    "status": "Statuss",
+    "actions": "Darbības",
+    "downloadAll": "Visi",
+    "downloadTar": "Tar",
+    "deleteJob": "Dzēst",
+    "noFiles": "Vēl nav konvertētu failu.",
+    "statusPending": "Gaida",
+    "statusCompleted": "Pabeigts",
+    "statusFailed": "Neizdevās"
+  },
+  "history": {
+    "title": "Rezultāti",
+    "time": "Laiks",
+    "files": "Faili",
+    "filesDone": "Pabeigti faili",
+    "status": "Statuss",
+    "actions": "Darbības",
+    "expandDetails": "Izvērst detaļas",
+    "detailedFileInfo": "Detalizēta faila informācija:",
+    "deleteSelected": "Dzēst atlasītos",
+    "selectAll": "Atlasīt visus",
+    "confirmDelete": "Vai tiešām vēlaties dzēst {count} uzdevumu(-us)? Šo darbību nevar atsaukt.",
+    "deleteSuccess": "Veiksmīgi dzēsti {deleted} uzdevums(-i).",
+    "deleteFailed": "Neizdevās dzēst {failed} uzdevumu(-s).",
+    "deleteError": "Dzēšot uzdevumus, radās kļūda. Lūdzu, mēģiniet vēlreiz."
+  },
+  "auth": {
+    "email": "E-pasts",
+    "password": "Parole",
+    "currentPassword": "Pašreizējā parole",
+    "newPassword": "Parole (atstājiet tukšu, ja nemainās)",
+    "loginButton": "Ierakstīties",
+    "registerButton": "Reģistrēties",
+    "updateButton": "Atjaunināt",
+    "createAccount": "Izveidot kontu",
+    "invalidCredentials": "Nederīgi akreditācijas dati.",
+    "emailInUse": "E-pasts jau tiek lietots.",
+    "unauthorized": "Neautorizēts",
+    "cookiesRequired": "Lai lietotu šo lietotni, jābūt iespējotiem sīkfailiem.",
+    "noCookies": "Nav autentifikācijas sīkfaila, iespējams, jūsu pārlūkprogramma bloķē sīkfailus."
+  },
+  "setup": {
+    "welcome": "Laipni lūdzam ConvertX-CN!",
+    "createYourAccount": "Izveidojiet savu kontu",
+    "reportIssues": "Ziņojiet par jebkādām problēmām",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Uzdevums nav atrasts.",
+    "fileNotFound": "Fails nav atrasts.",
+    "uploadFailed": "Augšupielāde neizdevās.",
+    "conversionFailed": "Konvertēšana neizdevās.",
+    "serverError": "Servera kļūda."
+  },
+  "upload": {
+    "success": "Faili veiksmīgi augšupielādēti.",
+    "dragDrop": "Nometiet failus šeit"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

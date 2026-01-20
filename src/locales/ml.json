@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "പ്രവർത്തിപ്പിക്കുന്നത്",
+    "version": "v{version}",
+    "loading": "ലോഡ് ചെയ്യുന്നു...",
+    "error": "പിശക്",
+    "success": "വിജയം",
+    "confirm": "സ്ഥിരീകരിക്കുക",
+    "cancel": "റദ്ദാക്കുക",
+    "close": "അടയ്ക്കുക",
+    "save": "സേവ് ചെയ്യുക",
+    "delete": "ഇല്ലാതാക്കുക",
+    "remove": "നീക്കം ചെയ്യുക",
+    "download": "ഡൗൺലോഡ്",
+    "upload": "അപ്‌ലോഡ്",
+    "submit": "സമർപ്പിക്കുക",
+    "back": "പിന്നോട്ട്",
+    "next": "അടുത്തത്",
+    "yes": "അതെ",
+    "no": "ഇല്ല"
+  },
+  "nav": {
+    "history": "ചരിത്രം",
+    "account": "അക്കൗണ്ട്",
+    "logout": "ലോഗൗട്ട്",
+    "login": "ലോഗിൻ",
+    "register": "രജിസ്റ്റർ",
+    "language": "ഭാഷ"
+  },
+  "convert": {
+    "title": "പരിവർത്തനം ചെയ്യുക",
+    "titleWithType": ".{fileType} പരിവർത്തനം ചെയ്യുക",
+    "chooseFile": "ഒരു ഫയൽ തിരഞ്ഞെടുക്കുക",
+    "orDragHere": "അല്ലെങ്കിൽ ഇവിടെ വലിച്ചിടുക",
+    "searchConversions": "പരിവർത്തനങ്ങൾ തിരയുക",
+    "convertTo": "ഇതിലേക്ക് പരിവർത്തനം ചെയ്യുക",
+    "convertButton": "പരിവർത്തനം ചെയ്യുക",
+    "uploading": "അപ്‌ലോഡ് ചെയ്യുന്നു...",
+    "processing": "പ്രോസസ്സ് ചെയ്യുന്നു..."
+  },
+  "results": {
+    "title": "ഫലങ്ങൾ",
+    "convertedFileName": "പരിവർത്തനം ചെയ്ത ഫയൽ പേര്",
+    "status": "സ്റ്റാറ്റസ്",
+    "actions": "പ്രവർത്തനങ്ങൾ",
+    "downloadAll": "എല്ലാം",
+    "downloadTar": "Tar",
+    "deleteJob": "ഇല്ലാതാക്കുക",
+    "noFiles": "ഇതുവരെ ഫയലുകളൊന്നും പരിവർത്തനം ചെയ്തിട്ടില്ല.",
+    "statusPending": "തീർപ്പാക്കാത്ത",
+    "statusCompleted": "പൂർത്തിയായി",
+    "statusFailed": "പരാജയപ്പെട്ടു"
+  },
+  "history": {
+    "title": "ഫലങ്ങൾ",
+    "time": "സമയം",
+    "files": "ഫയലുകൾ",
+    "filesDone": "പൂർത്തിയായ ഫയലുകൾ",
+    "status": "സ്റ്റാറ്റസ്",
+    "actions": "പ്രവർത്തനങ്ങൾ",
+    "expandDetails": "വിശദാംശങ്ങൾ വിപുലീകരിക്കുക",
+    "detailedFileInfo": "വിശദമായ ഫയൽ വിവരങ്ങൾ:",
+    "deleteSelected": "തിരഞ്ഞെടുത്തവ ഇല്ലാതാക്കുക",
+    "selectAll": "എല്ലാം തിരഞ്ഞെടുക്കുക",
+    "confirmDelete": "{count} ജോബ്(കൾ) ഇല്ലാതാക്കണമെന്ന് തീർച്ചയാണോ? ഈ പ്രവർത്തനം പഴയപടിയാക്കാൻ കഴിയില്ല.",
+    "deleteSuccess": "{deleted} ജോബ്(കൾ) വിജയകരമായി ഇല്ലാതാക്കി.",
+    "deleteFailed": "{failed} ജോബ്(കൾ) ഇല്ലാതാക്കുന്നതിൽ പരാജയപ്പെട്ടു.",
+    "deleteError": "ജോബുകൾ ഇല്ലാതാക്കുമ്പോൾ ഒരു പിശക് സംഭവിച്ചു. വീണ്ടും ശ്രമിക്കുക."
+  },
+  "auth": {
+    "email": "ഇമെയിൽ",
+    "password": "പാസ്‌വേഡ്",
+    "currentPassword": "നിലവിലെ പാസ്‌വേഡ്",
+    "newPassword": "പാസ്‌വേഡ് (മാറ്റമില്ലെങ്കിൽ ശൂന്യമായി വിടുക)",
+    "loginButton": "ലോഗിൻ",
+    "registerButton": "രജിസ്റ്റർ",
+    "updateButton": "അപ്‌ഡേറ്റ്",
+    "createAccount": "അക്കൗണ്ട് സൃഷ്ടിക്കുക",
+    "invalidCredentials": "അസാധുവായ ക്രെഡൻഷ്യലുകൾ.",
+    "emailInUse": "ഇമെയിൽ ഇതിനകം ഉപയോഗത്തിലാണ്.",
+    "unauthorized": "അനധികൃതം",
+    "cookiesRequired": "ഈ ആപ്പ് ഉപയോഗിക്കാൻ കുക്കികൾ പ്രവർത്തനക്ഷമമാക്കിയിരിക്കണം.",
+    "noCookies": "ഓതൻറിക്കേഷൻ കുക്കി ഇല്ല, നിങ്ങളുടെ ബ്രൗസർ കുക്കികൾ ബ്ലോക്ക് ചെയ്യുന്നുണ്ടാകാം."
+  },
+  "setup": {
+    "welcome": "ConvertX-CN-ലേക്ക് സ്വാഗതം!",
+    "createYourAccount": "നിങ്ങളുടെ അക്കൗണ്ട് സൃഷ്ടിക്കുക",
+    "reportIssues": "പ്രശ്നങ്ങൾ റിപ്പോർട്ട് ചെയ്യുക",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "ജോബ് കണ്ടെത്തിയില്ല.",
+    "fileNotFound": "ഫയൽ കണ്ടെത്തിയില്ല.",
+    "uploadFailed": "അപ്‌ലോഡ് പരാജയപ്പെട്ടു.",
+    "conversionFailed": "പരിവർത്തനം പരാജയപ്പെട്ടു.",
+    "serverError": "സെർവർ പിശക്."
+  },
+  "upload": {
+    "success": "ഫയലുകൾ വിജയകരമായി അപ്‌ലോഡ് ചെയ്തു.",
+    "dragDrop": "ഫയലുകൾ ഇവിടെ ഇടുക"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Dikuasakan oleh",
+    "version": "v{version}",
+    "loading": "Memuatkan...",
+    "error": "Ralat",
+    "success": "Berjaya",
+    "confirm": "Sahkan",
+    "cancel": "Batal",
+    "close": "Tutup",
+    "save": "Simpan",
+    "delete": "Padam",
+    "remove": "Buang",
+    "download": "Muat turun",
+    "upload": "Muat naik",
+    "submit": "Hantar",
+    "back": "Kembali",
+    "next": "Seterusnya",
+    "yes": "Ya",
+    "no": "Tidak"
+  },
+  "nav": {
+    "history": "Sejarah",
+    "account": "Akaun",
+    "logout": "Log keluar",
+    "login": "Log masuk",
+    "register": "Daftar",
+    "language": "Bahasa"
+  },
+  "convert": {
+    "title": "Tukar",
+    "titleWithType": "Tukar .{fileType}",
+    "chooseFile": "Pilih fail",
+    "orDragHere": "atau seret ke sini",
+    "searchConversions": "Cari penukaran",
+    "convertTo": "Tukar ke",
+    "convertButton": "Tukar",
+    "uploading": "Memuat naik...",
+    "processing": "Memproses..."
+  },
+  "results": {
+    "title": "Keputusan",
+    "convertedFileName": "Nama Fail Ditukar",
+    "status": "Status",
+    "actions": "Tindakan",
+    "downloadAll": "Semua",
+    "downloadTar": "Tar",
+    "deleteJob": "Padam",
+    "noFiles": "Tiada fail ditukar lagi.",
+    "statusPending": "Menunggu",
+    "statusCompleted": "Selesai",
+    "statusFailed": "Gagal"
+  },
+  "history": {
+    "title": "Keputusan",
+    "time": "Masa",
+    "files": "Fail",
+    "filesDone": "Fail Selesai",
+    "status": "Status",
+    "actions": "Tindakan",
+    "expandDetails": "Kembangkan butiran",
+    "detailedFileInfo": "Maklumat Fail Terperinci:",
+    "deleteSelected": "Padam Terpilih",
+    "selectAll": "Pilih semua",
+    "confirmDelete": "Adakah anda pasti mahu memadam {count} kerja? Tindakan ini tidak boleh dibatalkan.",
+    "deleteSuccess": "Berjaya memadam {deleted} kerja.",
+    "deleteFailed": "Gagal memadam {failed} kerja.",
+    "deleteError": "Ralat berlaku semasa memadam kerja. Sila cuba lagi."
+  },
+  "auth": {
+    "email": "E-mel",
+    "password": "Kata Laluan",
+    "currentPassword": "Kata Laluan Semasa",
+    "newPassword": "Kata Laluan (kosongkan jika tidak berubah)",
+    "loginButton": "Log Masuk",
+    "registerButton": "Daftar",
+    "updateButton": "Kemaskini",
+    "createAccount": "Cipta akaun",
+    "invalidCredentials": "Kelayakan tidak sah.",
+    "emailInUse": "E-mel sudah digunakan.",
+    "unauthorized": "Tidak dibenarkan",
+    "cookiesRequired": "Kuki mesti diaktifkan untuk menggunakan aplikasi ini.",
+    "noCookies": "Tiada kuki pengesahan, mungkin pelayar anda menyekat kuki."
+  },
+  "setup": {
+    "welcome": "Selamat datang ke ConvertX-CN!",
+    "createYourAccount": "Cipta akaun anda",
+    "reportIssues": "Laporkan isu di",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Kerja tidak dijumpai.",
+    "fileNotFound": "Fail tidak dijumpai.",
+    "uploadFailed": "Muat naik gagal.",
+    "conversionFailed": "Penukaran gagal.",
+    "serverError": "Ralat pelayan."
+  },
+  "upload": {
+    "success": "Fail berjaya dimuat naik.",
+    "dragDrop": "Lepaskan fail di sini"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Wedi'i bweru gan",
+    "version": "v{version}",
+    "loading": "Yn llwytho...",
+    "error": "Gwall",
+    "success": "Llwyddiant",
+    "confirm": "Cadarnhau",
+    "cancel": "Canslo",
+    "close": "Cau",
+    "save": "Cadw",
+    "delete": "Dileu",
+    "remove": "Tynnu",
+    "download": "Lawrlwytho",
+    "upload": "Uwchlwytho",
+    "submit": "Cyflwyno",
+    "back": "Yn ôl",
+    "next": "Nesaf",
+    "yes": "Ie",
+    "no": "Na"
+  },
+  "nav": {
+    "history": "Hanes",
+    "account": "Cyfrif",
+    "logout": "Allgofnodi",
+    "login": "Mewngofnodi",
+    "register": "Cofrestru",
+    "language": "Iaith"
+  },
+  "convert": {
+    "title": "Trosi",
+    "titleWithType": "Trosi .{fileType}",
+    "chooseFile": "Dewis ffeil",
+    "orDragHere": "neu llusgwch hi yma",
+    "searchConversions": "Chwilio am drosiadau",
+    "convertTo": "Trosi i",
+    "convertButton": "Trosi",
+    "uploading": "Yn uwchlwytho...",
+    "processing": "Yn prosesu..."
+  },
+  "results": {
+    "title": "Canlyniadau",
+    "convertedFileName": "Enw ffeil wedi'i drosi",
+    "status": "Statws",
+    "actions": "Gweithredoedd",
+    "downloadAll": "Popeth",
+    "downloadTar": "Tar",
+    "deleteJob": "Dileu",
+    "noFiles": "Dim ffeiliau wedi'u trosi eto.",
+    "statusPending": "Yn aros",
+    "statusCompleted": "Wedi cwblhau",
+    "statusFailed": "Wedi methu"
+  },
+  "history": {
+    "title": "Canlyniadau",
+    "time": "Amser",
+    "files": "Ffeiliau",
+    "filesDone": "Ffeiliau wedi'u cwblhau",
+    "status": "Statws",
+    "actions": "Gweithredoedd",
+    "expandDetails": "Ehangu manylion",
+    "detailedFileInfo": "Gwybodaeth fanwl am y ffeil:",
+    "deleteSelected": "Dileu'r dewisiad",
+    "selectAll": "Dewis popeth",
+    "confirmDelete": "Ydych chi'n siŵr eich bod am ddileu {count} swydd(i)? Ni ellir dadwneud y weithred hon.",
+    "deleteSuccess": "Dilëwyd {deleted} swydd(i) yn llwyddiannus.",
+    "deleteFailed": "Methwyd dileu {failed} swydd(i).",
+    "deleteError": "Digwyddodd gwall wrth ddileu swyddi. Rhowch gynnig arall arni."
+  },
+  "auth": {
+    "email": "E-bost",
+    "password": "Cyfrinair",
+    "currentPassword": "Cyfrinair presennol",
+    "newPassword": "Cyfrinair (gadael yn wag os nad yw'n newid)",
+    "loginButton": "Mewngofnodi",
+    "registerButton": "Cofrestru",
+    "updateButton": "Diweddaru",
+    "createAccount": "Creu cyfrif",
+    "invalidCredentials": "Manylion annilys.",
+    "emailInUse": "Mae'r e-bost eisoes yn cael ei ddefnyddio.",
+    "unauthorized": "Heb awdurdod",
+    "cookiesRequired": "Dylai cwcis fod wedi'u galluogi i ddefnyddio'r ap hwn.",
+    "noCookies": "Dim cwci dilysu, efallai bod eich porwr yn blocio cwcis."
+  },
+  "setup": {
+    "welcome": "Croeso i ConvertX-CN!",
+    "createYourAccount": "Crëwch eich cyfrif",
+    "reportIssues": "Adroddwch unrhyw broblemau ar",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Ni chanfuwyd y swydd.",
+    "fileNotFound": "Ni chanfuwyd y ffeil.",
+    "uploadFailed": "Methwyd uwchlwytho.",
+    "conversionFailed": "Methwyd trosi.",
+    "serverError": "Gwall gweinydd."
+  },
+  "upload": {
+    "success": "Uwchlwythwyd ffeiliau'n llwyddiannus.",
+    "dragDrop": "Gollyngwch ffeiliau yma"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

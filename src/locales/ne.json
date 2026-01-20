@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "द्वारा संचालित",
+    "version": "v{version}",
+    "loading": "लोड हुँदैछ...",
+    "error": "त्रुटि",
+    "success": "सफल",
+    "confirm": "पुष्टि गर्नुहोस्",
+    "cancel": "रद्द गर्नुहोस्",
+    "close": "बन्द गर्नुहोस्",
+    "save": "सेभ गर्नुहोस्",
+    "delete": "मेट्नुहोस्",
+    "remove": "हटाउनुहोस्",
+    "download": "डाउनलोड",
+    "upload": "अपलोड",
+    "submit": "पेश गर्नुहोस्",
+    "back": "पछाडि",
+    "next": "अर्को",
+    "yes": "हो",
+    "no": "होइन"
+  },
+  "nav": {
+    "history": "इतिहास",
+    "account": "खाता",
+    "logout": "लग आउट",
+    "login": "लग इन",
+    "register": "दर्ता गर्नुहोस्",
+    "language": "भाषा"
+  },
+  "convert": {
+    "title": "रूपान्तरण गर्नुहोस्",
+    "titleWithType": ".{fileType} रूपान्तरण गर्नुहोस्",
+    "chooseFile": "फाइल छान्नुहोस्",
+    "orDragHere": "वा यहाँ तान्नुहोस्",
+    "searchConversions": "रूपान्तरणहरू खोज्नुहोस्",
+    "convertTo": "मा रूपान्तरण गर्नुहोस्",
+    "convertButton": "रूपान्तरण गर्नुहोस्",
+    "uploading": "अपलोड हुँदैछ...",
+    "processing": "प्रशोधन हुँदैछ..."
+  },
+  "results": {
+    "title": "परिणामहरू",
+    "convertedFileName": "रूपान्तरित फाइल नाम",
+    "status": "स्थिति",
+    "actions": "कार्यहरू",
+    "downloadAll": "सबै",
+    "downloadTar": "Tar",
+    "deleteJob": "मेट्नुहोस्",
+    "noFiles": "अझै कुनै फाइल रूपान्तरित भएको छैन।",
+    "statusPending": "पर्खिरहेको",
+    "statusCompleted": "पूरा भयो",
+    "statusFailed": "असफल"
+  },
+  "history": {
+    "title": "परिणामहरू",
+    "time": "समय",
+    "files": "फाइलहरू",
+    "filesDone": "पूरा भएका फाइलहरू",
+    "status": "स्थिति",
+    "actions": "कार्यहरू",
+    "expandDetails": "विवरण विस्तार गर्नुहोस्",
+    "detailedFileInfo": "विस्तृत फाइल जानकारी:",
+    "deleteSelected": "चयन गरिएका मेट्नुहोस्",
+    "selectAll": "सबै चयन गर्नुहोस्",
+    "confirmDelete": "के तपाईं {count} कार्य(हरू) मेट्न निश्चित हुनुहुन्छ? यो कार्य पूर्ववत गर्न सकिँदैन।",
+    "deleteSuccess": "{deleted} कार्य(हरू) सफलतापूर्वक मेटियो।",
+    "deleteFailed": "{failed} कार्य(हरू) मेट्न असफल।",
+    "deleteError": "कार्यहरू मेट्दा त्रुटि भयो। कृपया पुन: प्रयास गर्नुहोस्।"
+  },
+  "auth": {
+    "email": "इमेल",
+    "password": "पासवर्ड",
+    "currentPassword": "हालको पासवर्ड",
+    "newPassword": "पासवर्ड (नबदल्ने भए खाली छोड्नुहोस्)",
+    "loginButton": "लग इन",
+    "registerButton": "दर्ता गर्नुहोस्",
+    "updateButton": "अद्यावधिक गर्नुहोस्",
+    "createAccount": "खाता बनाउनुहोस्",
+    "invalidCredentials": "अवैध प्रमाणहरू।",
+    "emailInUse": "इमेल पहिले नै प्रयोगमा छ।",
+    "unauthorized": "अनधिकृत",
+    "cookiesRequired": "यो एप प्रयोग गर्न कुकीहरू सक्षम हुनुपर्छ।",
+    "noCookies": "कुनै प्रमाणीकरण कुकी छैन, सायद तपाईंको ब्राउजरले कुकीहरू रोक्दैछ।"
+  },
+  "setup": {
+    "welcome": "ConvertX-CN मा स्वागत छ!",
+    "createYourAccount": "आफ्नो खाता बनाउनुहोस्",
+    "reportIssues": "समस्याहरू रिपोर्ट गर्नुहोस्",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "कार्य फेला परेन।",
+    "fileNotFound": "फाइल फेला परेन।",
+    "uploadFailed": "अपलोड असफल।",
+    "conversionFailed": "रूपान्तरण असफल।",
+    "serverError": "सर्भर त्रुटि।"
+  },
+  "upload": {
+    "success": "फाइलहरू सफलतापूर्वक अपलोड भए।",
+    "dragDrop": "फाइलहरू यहाँ छोड्नुहोस्"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

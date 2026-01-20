@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Με την υποστήριξη",
+    "version": "v{version}",
+    "loading": "Φόρτωση...",
+    "error": "Σφάλμα",
+    "success": "Επιτυχία",
+    "confirm": "Επιβεβαίωση",
+    "cancel": "Ακύρωση",
+    "close": "Κλείσιμο",
+    "save": "Αποθήκευση",
+    "delete": "Διαγραφή",
+    "remove": "Αφαίρεση",
+    "download": "Λήψη",
+    "upload": "Μεταφόρτωση",
+    "submit": "Υποβολή",
+    "back": "Πίσω",
+    "next": "Επόμενο",
+    "yes": "Ναι",
+    "no": "Όχι"
+  },
+  "nav": {
+    "history": "Ιστορικό",
+    "account": "Λογαριασμός",
+    "logout": "Αποσύνδεση",
+    "login": "Σύνδεση",
+    "register": "Εγγραφή",
+    "language": "Γλώσσα"
+  },
+  "convert": {
+    "title": "Μετατροπή",
+    "titleWithType": "Μετατροπή .{fileType}",
+    "chooseFile": "Επιλέξτε ένα αρχείο",
+    "orDragHere": "ή σύρετέ το εδώ",
+    "searchConversions": "Αναζήτηση μετατροπών",
+    "convertTo": "Μετατροπή σε",
+    "convertButton": "Μετατροπή",
+    "uploading": "Μεταφόρτωση...",
+    "processing": "Επεξεργασία..."
+  },
+  "results": {
+    "title": "Αποτελέσματα",
+    "convertedFileName": "Όνομα μετατρεπόμενου αρχείου",
+    "status": "Κατάσταση",
+    "actions": "Ενέργειες",
+    "downloadAll": "Όλα",
+    "downloadTar": "Tar",
+    "deleteJob": "Διαγραφή",
+    "noFiles": "Δεν έχουν μετατραπεί αρχεία ακόμα.",
+    "statusPending": "Σε αναμονή",
+    "statusCompleted": "Ολοκληρώθηκε",
+    "statusFailed": "Απέτυχε"
+  },
+  "history": {
+    "title": "Αποτελέσματα",
+    "time": "Χρόνος",
+    "files": "Αρχεία",
+    "filesDone": "Αρχεία ολοκληρωμένα",
+    "status": "Κατάσταση",
+    "actions": "Ενέργειες",
+    "expandDetails": "Ανάπτυξη λεπτομερειών",
+    "detailedFileInfo": "Λεπτομερείς πληροφορίες αρχείου:",
+    "deleteSelected": "Διαγραφή επιλεγμένων",
+    "selectAll": "Επιλογή όλων",
+    "confirmDelete": "Είστε βέβαιοι ότι θέλετε να διαγράψετε {count} εργασία(ες); Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.",
+    "deleteSuccess": "Διαγράφηκαν επιτυχώς {deleted} εργασία(ες).",
+    "deleteFailed": "Αποτυχία διαγραφής {failed} εργασία(ες).",
+    "deleteError": "Παρουσιάστηκε σφάλμα κατά τη διαγραφή εργασιών. Παρακαλώ δοκιμάστε ξανά."
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Κωδικός πρόσβασης",
+    "currentPassword": "Τρέχων κωδικός πρόσβασης",
+    "newPassword": "Κωδικός πρόσβασης (αφήστε κενό για αμετάβλητο)",
+    "loginButton": "Σύνδεση",
+    "registerButton": "Εγγραφή",
+    "updateButton": "Ενημέρωση",
+    "createAccount": "Δημιουργία λογαριασμού",
+    "invalidCredentials": "Μη έγκυρα διαπιστευτήρια.",
+    "emailInUse": "Το email χρησιμοποιείται ήδη.",
+    "unauthorized": "Μη εξουσιοδοτημένο",
+    "cookiesRequired": "Τα cookies πρέπει να είναι ενεργοποιημένα για τη χρήση αυτής της εφαρμογής.",
+    "noCookies": "Δεν υπάρχει cookie ελέγχου ταυτότητας, ίσως ο περιηγητής σας μπλοκάρει τα cookies."
+  },
+  "setup": {
+    "welcome": "Καλώς ήρθατε στο ConvertX-CN!",
+    "createYourAccount": "Δημιουργήστε τον λογαριασμό σας",
+    "reportIssues": "Αναφέρετε τυχόν προβλήματα στο",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Η εργασία δεν βρέθηκε.",
+    "fileNotFound": "Το αρχείο δεν βρέθηκε.",
+    "uploadFailed": "Η μεταφόρτωση απέτυχε.",
+    "conversionFailed": "Η μετατροπή απέτυχε.",
+    "serverError": "Σφάλμα διακομιστή."
+  },
+  "upload": {
+    "success": "Τα αρχεία μεταφορτώθηκαν επιτυχώς.",
+    "dragDrop": "Αποθέστε αρχεία εδώ"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

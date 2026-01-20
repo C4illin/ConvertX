@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "מופעל על ידי",
+    "version": "v{version}",
+    "loading": "טוען...",
+    "error": "שגיאה",
+    "success": "הצלחה",
+    "confirm": "אישור",
+    "cancel": "ביטול",
+    "close": "סגור",
+    "save": "שמור",
+    "delete": "מחק",
+    "remove": "הסר",
+    "download": "הורד",
+    "upload": "העלה",
+    "submit": "שלח",
+    "back": "חזור",
+    "next": "הבא",
+    "yes": "כן",
+    "no": "לא"
+  },
+  "nav": {
+    "history": "היסטוריה",
+    "account": "חשבון",
+    "logout": "התנתק",
+    "login": "התחבר",
+    "register": "הירשם",
+    "language": "שפה"
+  },
+  "convert": {
+    "title": "המר",
+    "titleWithType": "המר .{fileType}",
+    "chooseFile": "בחר קובץ",
+    "orDragHere": "או גרור לכאן",
+    "searchConversions": "חפש המרות",
+    "convertTo": "המר ל",
+    "convertButton": "המר",
+    "uploading": "מעלה...",
+    "processing": "מעבד..."
+  },
+  "results": {
+    "title": "תוצאות",
+    "convertedFileName": "שם הקובץ המומר",
+    "status": "סטטוס",
+    "actions": "פעולות",
+    "downloadAll": "הכל",
+    "downloadTar": "Tar",
+    "deleteJob": "מחק",
+    "noFiles": "עדיין לא הומרו קבצים.",
+    "statusPending": "ממתין",
+    "statusCompleted": "הושלם",
+    "statusFailed": "נכשל"
+  },
+  "history": {
+    "title": "תוצאות",
+    "time": "זמן",
+    "files": "קבצים",
+    "filesDone": "קבצים שהושלמו",
+    "status": "סטטוס",
+    "actions": "פעולות",
+    "expandDetails": "הרחב פרטים",
+    "detailedFileInfo": "מידע מפורט על הקובץ:",
+    "deleteSelected": "מחק נבחרים",
+    "selectAll": "בחר הכל",
+    "confirmDelete": "האם אתה בטוח שברצונך למחוק {count} משימה/ות? פעולה זו אינה ניתנת לביטול.",
+    "deleteSuccess": "נמחקו בהצלחה {deleted} משימה/ות.",
+    "deleteFailed": "נכשלה מחיקת {failed} משימה/ות.",
+    "deleteError": "אירעה שגיאה בעת מחיקת משימות. נסה שוב."
+  },
+  "auth": {
+    "email": "דוא\"ל",
+    "password": "סיסמה",
+    "currentPassword": "סיסמה נוכחית",
+    "newPassword": "סיסמה (השאר ריק אם לא משתנה)",
+    "loginButton": "התחבר",
+    "registerButton": "הירשם",
+    "updateButton": "עדכן",
+    "createAccount": "צור חשבון",
+    "invalidCredentials": "פרטי התחברות שגויים.",
+    "emailInUse": "הדוא\"ל כבר בשימוש.",
+    "unauthorized": "לא מורשה",
+    "cookiesRequired": "יש להפעיל עוגיות כדי להשתמש באפליקציה זו.",
+    "noCookies": "אין עוגיית אימות, ייתכן שהדפדפן שלך חוסם עוגיות."
+  },
+  "setup": {
+    "welcome": "ברוכים הבאים ל-ConvertX-CN!",
+    "createYourAccount": "צור את החשבון שלך",
+    "reportIssues": "דווח על בעיות ב",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "המשימה לא נמצאה.",
+    "fileNotFound": "הקובץ לא נמצא.",
+    "uploadFailed": "ההעלאה נכשלה.",
+    "conversionFailed": "ההמרה נכשלה.",
+    "serverError": "שגיאת שרת."
+  },
+  "upload": {
+    "success": "הקבצים הועלו בהצלחה.",
+    "dragDrop": "גרור קבצים לכאן"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

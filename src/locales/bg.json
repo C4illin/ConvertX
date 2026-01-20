@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Задвижвано от",
+    "version": "v{version}",
+    "loading": "Зареждане...",
+    "error": "Грешка",
+    "success": "Успех",
+    "confirm": "Потвърди",
+    "cancel": "Отказ",
+    "close": "Затвори",
+    "save": "Запази",
+    "delete": "Изтрий",
+    "remove": "Премахни",
+    "download": "Изтегли",
+    "upload": "Качи",
+    "submit": "Изпрати",
+    "back": "Назад",
+    "next": "Напред",
+    "yes": "Да",
+    "no": "Не"
+  },
+  "nav": {
+    "history": "История",
+    "account": "Акаунт",
+    "logout": "Изход",
+    "login": "Вход",
+    "register": "Регистрация",
+    "language": "Език"
+  },
+  "convert": {
+    "title": "Конвертиране",
+    "titleWithType": "Конвертиране на .{fileType}",
+    "chooseFile": "Изберете файл",
+    "orDragHere": "или го плъзнете тук",
+    "searchConversions": "Търсене на конверсии",
+    "convertTo": "Конвертирай в",
+    "convertButton": "Конвертирай",
+    "uploading": "Качване...",
+    "processing": "Обработка..."
+  },
+  "results": {
+    "title": "Резултати",
+    "convertedFileName": "Име на конвертирания файл",
+    "status": "Статус",
+    "actions": "Действия",
+    "downloadAll": "Всички",
+    "downloadTar": "Tar",
+    "deleteJob": "Изтрий",
+    "noFiles": "Все още няма конвертирани файлове.",
+    "statusPending": "Изчакване",
+    "statusCompleted": "Завършено",
+    "statusFailed": "Неуспешно"
+  },
+  "history": {
+    "title": "Резултати",
+    "time": "Време",
+    "files": "Файлове",
+    "filesDone": "Готови файлове",
+    "status": "Статус",
+    "actions": "Действия",
+    "expandDetails": "Разгъни детайлите",
+    "detailedFileInfo": "Подробна информация за файла:",
+    "deleteSelected": "Изтрий избраните",
+    "selectAll": "Избери всички",
+    "confirmDelete": "Сигурни ли сте, че искате да изтриете {count} задача(и)? Това действие не може да бъде отменено.",
+    "deleteSuccess": "Успешно изтрити {deleted} задача(и).",
+    "deleteFailed": "Неуспешно изтриване на {failed} задача(и).",
+    "deleteError": "Възникна грешка при изтриването на задачи. Моля, опитайте отново."
+  },
+  "auth": {
+    "email": "Имейл",
+    "password": "Парола",
+    "currentPassword": "Текуща парола",
+    "newPassword": "Парола (оставете празно за непроменена)",
+    "loginButton": "Вход",
+    "registerButton": "Регистрация",
+    "updateButton": "Актуализиране",
+    "createAccount": "Създай акаунт",
+    "invalidCredentials": "Невалидни идентификационни данни.",
+    "emailInUse": "Имейлът вече се използва.",
+    "unauthorized": "Неоторизиран",
+    "cookiesRequired": "Бисквитките трябва да са активирани, за да използвате това приложение.",
+    "noCookies": "Няма бисквитка за удостоверяване, може би браузърът ви блокира бисквитките."
+  },
+  "setup": {
+    "welcome": "Добре дошли в ConvertX-CN!",
+    "createYourAccount": "Създайте своя акаунт",
+    "reportIssues": "Докладвайте проблеми на",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Задачата не е намерена.",
+    "fileNotFound": "Файлът не е намерен.",
+    "uploadFailed": "Качването е неуспешно.",
+    "conversionFailed": "Конвертирането е неуспешно.",
+    "serverError": "Сървърна грешка."
+  },
+  "upload": {
+    "success": "Файловете са качени успешно.",
+    "dragDrop": "Пуснете файловете тук"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

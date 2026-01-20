@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Bultzatua",
+    "version": "v{version}",
+    "loading": "Kargatzen...",
+    "error": "Errorea",
+    "success": "Arrakasta",
+    "confirm": "Berretsi",
+    "cancel": "Utzi",
+    "close": "Itxi",
+    "save": "Gorde",
+    "delete": "Ezabatu",
+    "remove": "Kendu",
+    "download": "Deskargatu",
+    "upload": "Igo",
+    "submit": "Bidali",
+    "back": "Atzera",
+    "next": "Hurrengoa",
+    "yes": "Bai",
+    "no": "Ez"
+  },
+  "nav": {
+    "history": "Historia",
+    "account": "Kontua",
+    "logout": "Saioa itxi",
+    "login": "Saioa hasi",
+    "register": "Erregistratu",
+    "language": "Hizkuntza"
+  },
+  "convert": {
+    "title": "Bihurtu",
+    "titleWithType": "Bihurtu .{fileType}",
+    "chooseFile": "Aukeratu fitxategi bat",
+    "orDragHere": "edo arrastatu hona",
+    "searchConversions": "Bilatu bihurketa",
+    "convertTo": "Bihurtu hona",
+    "convertButton": "Bihurtu",
+    "uploading": "Igotzen...",
+    "processing": "Prozesatzen..."
+  },
+  "results": {
+    "title": "Emaitzak",
+    "convertedFileName": "Bihurtutako fitxategiaren izena",
+    "status": "Egoera",
+    "actions": "Ekintzak",
+    "downloadAll": "Guztiak",
+    "downloadTar": "Tar",
+    "deleteJob": "Ezabatu",
+    "noFiles": "Oraindik ez da fitxategirik bihurtu.",
+    "statusPending": "Zain",
+    "statusCompleted": "Osatuta",
+    "statusFailed": "Huts egin du"
+  },
+  "history": {
+    "title": "Emaitzak",
+    "time": "Ordua",
+    "files": "Fitxategiak",
+    "filesDone": "Amaitutako fitxategiak",
+    "status": "Egoera",
+    "actions": "Ekintzak",
+    "expandDetails": "Xehetasunak zabaldu",
+    "detailedFileInfo": "Fitxategiaren informazio zehatza:",
+    "deleteSelected": "Ezabatu hautatutakoak",
+    "selectAll": "Hautatu guztiak",
+    "confirmDelete": "Ziur zaude {count} lan ezabatu nahi duzula? Ekintza hau ezin da desegin.",
+    "deleteSuccess": "{deleted} lan ondo ezabatu dira.",
+    "deleteFailed": "Ezin izan dira {failed} lan ezabatu.",
+    "deleteError": "Errorea gertatu da lanak ezabatzean. Saiatu berriro."
+  },
+  "auth": {
+    "email": "Emaila",
+    "password": "Pasahitza",
+    "currentPassword": "Uneko pasahitza",
+    "newPassword": "Pasahitza (utzi hutsik aldatu nahi ez baduzu)",
+    "loginButton": "Saioa hasi",
+    "registerButton": "Erregistratu",
+    "updateButton": "Eguneratu",
+    "createAccount": "Kontua sortu",
+    "invalidCredentials": "Kredentzial baliogabeak.",
+    "emailInUse": "Emaila dagoeneko erabiltzen ari da.",
+    "unauthorized": "Baimenik gabe",
+    "cookiesRequired": "Cookieak gaituta egon behar dute aplikazio hau erabiltzeko.",
+    "noCookies": "Ez dago autentifikazio cookierik, agian zure nabigatzaileak cookieak blokeatzen ditu."
+  },
+  "setup": {
+    "welcome": "Ongi etorri ConvertX-CN-ra!",
+    "createYourAccount": "Sortu zure kontua",
+    "reportIssues": "Jakinarazi edozein arazo hemen",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Lana ez da aurkitu.",
+    "fileNotFound": "Fitxategia ez da aurkitu.",
+    "uploadFailed": "Igoerak huts egin du.",
+    "conversionFailed": "Bihurketak huts egin du.",
+    "serverError": "Zerbitzariaren errorea."
+  },
+  "upload": {
+    "success": "Fitxategiak ondo igo dira.",
+    "dragDrop": "Jaregin fitxategiak hona"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

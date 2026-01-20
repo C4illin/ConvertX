@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Poganja",
+    "version": "v{version}",
+    "loading": "Nalaganje...",
+    "error": "Napaka",
+    "success": "Uspeh",
+    "confirm": "Potrdi",
+    "cancel": "Prekliči",
+    "close": "Zapri",
+    "save": "Shrani",
+    "delete": "Izbriši",
+    "remove": "Odstrani",
+    "download": "Prenesi",
+    "upload": "Naloži",
+    "submit": "Pošlji",
+    "back": "Nazaj",
+    "next": "Naprej",
+    "yes": "Da",
+    "no": "Ne"
+  },
+  "nav": {
+    "history": "Zgodovina",
+    "account": "Račun",
+    "logout": "Odjava",
+    "login": "Prijava",
+    "register": "Registracija",
+    "language": "Jezik"
+  },
+  "convert": {
+    "title": "Pretvori",
+    "titleWithType": "Pretvori .{fileType}",
+    "chooseFile": "Izberite datoteko",
+    "orDragHere": "ali jo povlecite sem",
+    "searchConversions": "Išči pretvorbe",
+    "convertTo": "Pretvori v",
+    "convertButton": "Pretvori",
+    "uploading": "Nalaganje...",
+    "processing": "Obdelava..."
+  },
+  "results": {
+    "title": "Rezultati",
+    "convertedFileName": "Ime pretvorjene datoteke",
+    "status": "Stanje",
+    "actions": "Dejanja",
+    "downloadAll": "Vse",
+    "downloadTar": "Tar",
+    "deleteJob": "Izbriši",
+    "noFiles": "Še ni pretvorjenih datotek.",
+    "statusPending": "V čakanju",
+    "statusCompleted": "Končano",
+    "statusFailed": "Neuspešno"
+  },
+  "history": {
+    "title": "Rezultati",
+    "time": "Čas",
+    "files": "Datoteke",
+    "filesDone": "Končane datoteke",
+    "status": "Stanje",
+    "actions": "Dejanja",
+    "expandDetails": "Razširi podrobnosti",
+    "detailedFileInfo": "Podrobne informacije o datoteki:",
+    "deleteSelected": "Izbriši izbrano",
+    "selectAll": "Izberi vse",
+    "confirmDelete": "Ali ste prepričani, da želite izbrisati {count} opravilo(a)? Tega dejanja ni mogoče razveljaviti.",
+    "deleteSuccess": "Uspešno izbrisanih {deleted} opravil.",
+    "deleteFailed": "Ni uspelo izbrisati {failed} opravil.",
+    "deleteError": "Pri brisanju opravil je prišlo do napake. Prosimo, poskusite znova."
+  },
+  "auth": {
+    "email": "E-pošta",
+    "password": "Geslo",
+    "currentPassword": "Trenutno geslo",
+    "newPassword": "Geslo (pustite prazno za nespremenjeno)",
+    "loginButton": "Prijava",
+    "registerButton": "Registracija",
+    "updateButton": "Posodobi",
+    "createAccount": "Ustvari račun",
+    "invalidCredentials": "Neveljavne poverilnice.",
+    "emailInUse": "E-pošta je že v uporabi.",
+    "unauthorized": "Nepooblaščeno",
+    "cookiesRequired": "Za uporabo te aplikacije morajo biti piškotki omogočeni.",
+    "noCookies": "Ni piškotka za preverjanje pristnosti, morda vaš brskalnik blokira piškotke."
+  },
+  "setup": {
+    "welcome": "Dobrodošli v ConvertX-CN!",
+    "createYourAccount": "Ustvarite svoj račun",
+    "reportIssues": "Prijavite kakršnekoli težave na",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Opravilo ni bilo najdeno.",
+    "fileNotFound": "Datoteka ni bila najdena.",
+    "uploadFailed": "Nalaganje ni uspelo.",
+    "conversionFailed": "Pretvorba ni uspela.",
+    "serverError": "Napaka strežnika."
+  },
+  "upload": {
+    "success": "Datoteke so bile uspešno naložene.",
+    "dragDrop": "Spustite datoteke tukaj"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

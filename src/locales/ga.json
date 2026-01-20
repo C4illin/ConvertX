@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Cumhachtaithe ag",
+    "version": "v{version}",
+    "loading": "Ag lódáil...",
+    "error": "Earráid",
+    "success": "Éirithe",
+    "confirm": "Deimhnigh",
+    "cancel": "Cealaigh",
+    "close": "Dún",
+    "save": "Sábháil",
+    "delete": "Scrios",
+    "remove": "Bain",
+    "download": "Íoslódáil",
+    "upload": "Uaslódáil",
+    "submit": "Cuir isteach",
+    "back": "Siar",
+    "next": "Ar aghaidh",
+    "yes": "Tá",
+    "no": "Níl"
+  },
+  "nav": {
+    "history": "Stair",
+    "account": "Cuntas",
+    "logout": "Logáil amach",
+    "login": "Logáil isteach",
+    "register": "Cláraigh",
+    "language": "Teanga"
+  },
+  "convert": {
+    "title": "Tiontaigh",
+    "titleWithType": "Tiontaigh .{fileType}",
+    "chooseFile": "Roghnaigh comhad",
+    "orDragHere": "nó tarraing anseo é",
+    "searchConversions": "Cuardaigh tiontuithe",
+    "convertTo": "Tiontaigh go",
+    "convertButton": "Tiontaigh",
+    "uploading": "Ag uaslódáil...",
+    "processing": "Ag próiseáil..."
+  },
+  "results": {
+    "title": "Torthaí",
+    "convertedFileName": "Ainm an chomhaid tiontaithe",
+    "status": "Stádas",
+    "actions": "Gníomhartha",
+    "downloadAll": "Gach rud",
+    "downloadTar": "Tar",
+    "deleteJob": "Scrios",
+    "noFiles": "Níl aon chomhaid tiontaithe fós.",
+    "statusPending": "Ar feitheamh",
+    "statusCompleted": "Críochnaithe",
+    "statusFailed": "Theip"
+  },
+  "history": {
+    "title": "Torthaí",
+    "time": "Am",
+    "files": "Comhaid",
+    "filesDone": "Comhaid déanta",
+    "status": "Stádas",
+    "actions": "Gníomhartha",
+    "expandDetails": "Leathnaigh sonraí",
+    "detailedFileInfo": "Eolas mionsonraithe comhaid:",
+    "deleteSelected": "Scrios roghnaithe",
+    "selectAll": "Roghnaigh gach rud",
+    "confirmDelete": "An bhfuil tú cinnte gur mian leat {count} post(anna) a scriosadh? Ní féidir an gníomh seo a chur ar ceal.",
+    "deleteSuccess": "Scriosadh {deleted} post(anna) go rathúil.",
+    "deleteFailed": "Theip ar scriosadh {failed} post(anna).",
+    "deleteError": "Tharla earráid agus postanna á scriosadh. Bain triail eile as."
+  },
+  "auth": {
+    "email": "Ríomhphost",
+    "password": "Pasfhocal",
+    "currentPassword": "Pasfhocal reatha",
+    "newPassword": "Pasfhocal (fág folamh mura n-athraítear)",
+    "loginButton": "Logáil isteach",
+    "registerButton": "Cláraigh",
+    "updateButton": "Nuashonraigh",
+    "createAccount": "Cruthaigh cuntas",
+    "invalidCredentials": "Dintiúir neamhbhailí.",
+    "emailInUse": "Tá an ríomhphost in úsáid cheana.",
+    "unauthorized": "Neamhúdaraithe",
+    "cookiesRequired": "Ba chóir fianáin a chumasú chun an feidhmchlár seo a úsáid.",
+    "noCookies": "Níl aon fhianán fíordheimhnithe, b'fhéidir go bhfuil do bhrabhsálaí ag blocáil fianáin."
+  },
+  "setup": {
+    "welcome": "Fáilte go ConvertX-CN!",
+    "createYourAccount": "Cruthaigh do chuntas",
+    "reportIssues": "Tuairiscigh aon fhadhbanna ar",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Níor aimsíodh an post.",
+    "fileNotFound": "Níor aimsíodh an comhad.",
+    "uploadFailed": "Theip ar an uaslódáil.",
+    "conversionFailed": "Theip ar an tiontú.",
+    "serverError": "Earráid freastalaí."
+  },
+  "upload": {
+    "success": "Uaslódáladh comhaid go rathúil.",
+    "dragDrop": "Scaoil comhaid anseo"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

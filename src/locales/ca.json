@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Impulsat per",
+    "version": "v{version}",
+    "loading": "Carregant...",
+    "error": "Error",
+    "success": "Èxit",
+    "confirm": "Confirmar",
+    "cancel": "Cancel·lar",
+    "close": "Tancar",
+    "save": "Desar",
+    "delete": "Eliminar",
+    "remove": "Treure",
+    "download": "Descarregar",
+    "upload": "Pujar",
+    "submit": "Enviar",
+    "back": "Enrere",
+    "next": "Següent",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "nav": {
+    "history": "Historial",
+    "account": "Compte",
+    "logout": "Tancar sessió",
+    "login": "Iniciar sessió",
+    "register": "Registrar-se",
+    "language": "Idioma"
+  },
+  "convert": {
+    "title": "Convertir",
+    "titleWithType": "Convertir .{fileType}",
+    "chooseFile": "Tria un fitxer",
+    "orDragHere": "o arrossega'l aquí",
+    "searchConversions": "Cercar conversions",
+    "convertTo": "Convertir a",
+    "convertButton": "Convertir",
+    "uploading": "Pujant...",
+    "processing": "Processant..."
+  },
+  "results": {
+    "title": "Resultats",
+    "convertedFileName": "Nom del fitxer convertit",
+    "status": "Estat",
+    "actions": "Accions",
+    "downloadAll": "Tot",
+    "downloadTar": "Tar",
+    "deleteJob": "Eliminar",
+    "noFiles": "Encara no s'han convertit fitxers.",
+    "statusPending": "Pendent",
+    "statusCompleted": "Completat",
+    "statusFailed": "Fallat"
+  },
+  "history": {
+    "title": "Resultats",
+    "time": "Hora",
+    "files": "Fitxers",
+    "filesDone": "Fitxers completats",
+    "status": "Estat",
+    "actions": "Accions",
+    "expandDetails": "Ampliar detalls",
+    "detailedFileInfo": "Informació detallada del fitxer:",
+    "deleteSelected": "Eliminar seleccionats",
+    "selectAll": "Seleccionar tot",
+    "confirmDelete": "Esteu segur que voleu eliminar {count} tasca/es? Aquesta acció no es pot desfer.",
+    "deleteSuccess": "S'han eliminat {deleted} tasca/es correctament.",
+    "deleteFailed": "No s'han pogut eliminar {failed} tasca/es.",
+    "deleteError": "S'ha produït un error en eliminar les tasques. Si us plau, torneu-ho a provar."
+  },
+  "auth": {
+    "email": "Correu electrònic",
+    "password": "Contrasenya",
+    "currentPassword": "Contrasenya actual",
+    "newPassword": "Contrasenya (deixa en blanc si no canvia)",
+    "loginButton": "Iniciar sessió",
+    "registerButton": "Registrar-se",
+    "updateButton": "Actualitzar",
+    "createAccount": "Crear compte",
+    "invalidCredentials": "Credencials no vàlides.",
+    "emailInUse": "El correu electrònic ja està en ús.",
+    "unauthorized": "No autoritzat",
+    "cookiesRequired": "Les galetes han d'estar habilitades per utilitzar aquesta aplicació.",
+    "noCookies": "No hi ha galeta d'autenticació, potser el vostre navegador bloqueja les galetes."
+  },
+  "setup": {
+    "welcome": "Benvingut a ConvertX-CN!",
+    "createYourAccount": "Creeu el vostre compte",
+    "reportIssues": "Informeu de qualsevol problema a",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Tasca no trobada.",
+    "fileNotFound": "Fitxer no trobat.",
+    "uploadFailed": "Error en pujar.",
+    "conversionFailed": "Error en la conversió.",
+    "serverError": "Error del servidor."
+  },
+  "upload": {
+    "success": "Fitxers pujats correctament.",
+    "dragDrop": "Deixa anar els fitxers aquí"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

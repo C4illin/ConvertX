@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Poháňané",
+    "version": "v{version}",
+    "loading": "Načítava sa...",
+    "error": "Chyba",
+    "success": "Úspech",
+    "confirm": "Potvrdiť",
+    "cancel": "Zrušiť",
+    "close": "Zavrieť",
+    "save": "Uložiť",
+    "delete": "Vymazať",
+    "remove": "Odstrániť",
+    "download": "Stiahnuť",
+    "upload": "Nahrať",
+    "submit": "Odoslať",
+    "back": "Späť",
+    "next": "Ďalej",
+    "yes": "Áno",
+    "no": "Nie"
+  },
+  "nav": {
+    "history": "História",
+    "account": "Účet",
+    "logout": "Odhlásiť sa",
+    "login": "Prihlásiť sa",
+    "register": "Registrovať",
+    "language": "Jazyk"
+  },
+  "convert": {
+    "title": "Konvertovať",
+    "titleWithType": "Konvertovať .{fileType}",
+    "chooseFile": "Vyberte súbor",
+    "orDragHere": "alebo ho sem potiahnite",
+    "searchConversions": "Hľadať konverzie",
+    "convertTo": "Konvertovať na",
+    "convertButton": "Konvertovať",
+    "uploading": "Nahráva sa...",
+    "processing": "Spracováva sa..."
+  },
+  "results": {
+    "title": "Výsledky",
+    "convertedFileName": "Názov konvertovaného súboru",
+    "status": "Stav",
+    "actions": "Akcie",
+    "downloadAll": "Všetky",
+    "downloadTar": "Tar",
+    "deleteJob": "Vymazať",
+    "noFiles": "Zatiaľ neboli konvertované žiadne súbory.",
+    "statusPending": "Čaká sa",
+    "statusCompleted": "Dokončené",
+    "statusFailed": "Zlyhalo"
+  },
+  "history": {
+    "title": "Výsledky",
+    "time": "Čas",
+    "files": "Súbory",
+    "filesDone": "Dokončené súbory",
+    "status": "Stav",
+    "actions": "Akcie",
+    "expandDetails": "Rozbaliť detaily",
+    "detailedFileInfo": "Podrobné informácie o súbore:",
+    "deleteSelected": "Vymazať vybrané",
+    "selectAll": "Vybrať všetko",
+    "confirmDelete": "Ste si istí, že chcete vymazať {count} úlohu(y)? Túto akciu nie je možné vrátiť späť.",
+    "deleteSuccess": "Úspešne vymazaných {deleted} úloh.",
+    "deleteFailed": "Nepodarilo sa vymazať {failed} úloh.",
+    "deleteError": "Pri mazaní úloh došlo k chybe. Skúste to prosím znova."
+  },
+  "auth": {
+    "email": "E-mail",
+    "password": "Heslo",
+    "currentPassword": "Aktuálne heslo",
+    "newPassword": "Heslo (nechajte prázdne pre nezmenené)",
+    "loginButton": "Prihlásiť sa",
+    "registerButton": "Registrovať",
+    "updateButton": "Aktualizovať",
+    "createAccount": "Vytvoriť účet",
+    "invalidCredentials": "Neplatné prihlasovacie údaje.",
+    "emailInUse": "E-mail sa už používa.",
+    "unauthorized": "Neautorizované",
+    "cookiesRequired": "Na používanie tejto aplikácie musia byť povolené súbory cookie.",
+    "noCookies": "Žiadny autentifikačný súbor cookie, možno váš prehliadač blokuje súbory cookie."
+  },
+  "setup": {
+    "welcome": "Vitajte v ConvertX-CN!",
+    "createYourAccount": "Vytvorte si svoj účet",
+    "reportIssues": "Nahláste akékoľvek problémy na",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Úloha sa nenašla.",
+    "fileNotFound": "Súbor sa nenašiel.",
+    "uploadFailed": "Nahrávanie zlyhalo.",
+    "conversionFailed": "Konverzia zlyhala.",
+    "serverError": "Chyba servera."
+  },
+  "upload": {
+    "success": "Súbory boli úspešne nahrané.",
+    "dragDrop": "Sem presuňte súbory"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

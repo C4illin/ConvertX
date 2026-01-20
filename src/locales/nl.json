@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Aangedreven door",
+    "version": "v{version}",
+    "loading": "Laden...",
+    "error": "Fout",
+    "success": "Succes",
+    "confirm": "Bevestigen",
+    "cancel": "Annuleren",
+    "close": "Sluiten",
+    "save": "Opslaan",
+    "delete": "Verwijderen",
+    "remove": "Verwijderen",
+    "download": "Downloaden",
+    "upload": "Uploaden",
+    "submit": "Verzenden",
+    "back": "Terug",
+    "next": "Volgende",
+    "yes": "Ja",
+    "no": "Nee"
+  },
+  "nav": {
+    "history": "Geschiedenis",
+    "account": "Account",
+    "logout": "Uitloggen",
+    "login": "Inloggen",
+    "register": "Registreren",
+    "language": "Taal"
+  },
+  "convert": {
+    "title": "Converteren",
+    "titleWithType": "Converteer .{fileType}",
+    "chooseFile": "Kies een bestand",
+    "orDragHere": "of sleep het hierheen",
+    "searchConversions": "Zoek conversies",
+    "convertTo": "Converteren naar",
+    "convertButton": "Converteren",
+    "uploading": "Uploaden...",
+    "processing": "Verwerken..."
+  },
+  "results": {
+    "title": "Resultaten",
+    "convertedFileName": "Geconverteerde bestandsnaam",
+    "status": "Status",
+    "actions": "Acties",
+    "downloadAll": "Alles",
+    "downloadTar": "Tar",
+    "deleteJob": "Verwijderen",
+    "noFiles": "Nog geen bestanden geconverteerd.",
+    "statusPending": "Wachtend",
+    "statusCompleted": "Voltooid",
+    "statusFailed": "Mislukt"
+  },
+  "history": {
+    "title": "Resultaten",
+    "time": "Tijd",
+    "files": "Bestanden",
+    "filesDone": "Bestanden klaar",
+    "status": "Status",
+    "actions": "Acties",
+    "expandDetails": "Details uitvouwen",
+    "detailedFileInfo": "Gedetailleerde bestandsinformatie:",
+    "deleteSelected": "Geselecteerde verwijderen",
+    "selectAll": "Alles selecteren",
+    "confirmDelete": "Weet u zeker dat u {count} taak/taken wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+    "deleteSuccess": "{deleted} taak/taken succesvol verwijderd.",
+    "deleteFailed": "Kon {failed} taak/taken niet verwijderen.",
+    "deleteError": "Er is een fout opgetreden bij het verwijderen van taken. Probeer het opnieuw."
+  },
+  "auth": {
+    "email": "E-mail",
+    "password": "Wachtwoord",
+    "currentPassword": "Huidig wachtwoord",
+    "newPassword": "Wachtwoord (leeg laten om niet te wijzigen)",
+    "loginButton": "Inloggen",
+    "registerButton": "Registreren",
+    "updateButton": "Bijwerken",
+    "createAccount": "Account aanmaken",
+    "invalidCredentials": "Ongeldige inloggegevens.",
+    "emailInUse": "E-mail is al in gebruik.",
+    "unauthorized": "Niet geautoriseerd",
+    "cookiesRequired": "Cookies moeten ingeschakeld zijn om deze app te gebruiken.",
+    "noCookies": "Geen authenticatiecookie, misschien blokkeert uw browser cookies."
+  },
+  "setup": {
+    "welcome": "Welkom bij ConvertX-CN!",
+    "createYourAccount": "Maak uw account aan",
+    "reportIssues": "Meld problemen op",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Taak niet gevonden.",
+    "fileNotFound": "Bestand niet gevonden.",
+    "uploadFailed": "Upload mislukt.",
+    "conversionFailed": "Conversie mislukt.",
+    "serverError": "Serverfout."
+  },
+  "upload": {
+    "success": "Bestanden succesvol geüpload.",
+    "dragDrop": "Bestanden hier neerzetten"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

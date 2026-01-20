@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Käyttää",
+    "version": "v{version}",
+    "loading": "Ladataan...",
+    "error": "Virhe",
+    "success": "Onnistui",
+    "confirm": "Vahvista",
+    "cancel": "Peruuta",
+    "close": "Sulje",
+    "save": "Tallenna",
+    "delete": "Poista",
+    "remove": "Poista",
+    "download": "Lataa",
+    "upload": "Lähetä",
+    "submit": "Lähetä",
+    "back": "Takaisin",
+    "next": "Seuraava",
+    "yes": "Kyllä",
+    "no": "Ei"
+  },
+  "nav": {
+    "history": "Historia",
+    "account": "Tili",
+    "logout": "Kirjaudu ulos",
+    "login": "Kirjaudu sisään",
+    "register": "Rekisteröidy",
+    "language": "Kieli"
+  },
+  "convert": {
+    "title": "Muunna",
+    "titleWithType": "Muunna .{fileType}",
+    "chooseFile": "Valitse tiedosto",
+    "orDragHere": "tai vedä tähän",
+    "searchConversions": "Etsi muunnoksia",
+    "convertTo": "Muunna muotoon",
+    "convertButton": "Muunna",
+    "uploading": "Lähetetään...",
+    "processing": "Käsitellään..."
+  },
+  "results": {
+    "title": "Tulokset",
+    "convertedFileName": "Muunnetun tiedoston nimi",
+    "status": "Tila",
+    "actions": "Toiminnot",
+    "downloadAll": "Kaikki",
+    "downloadTar": "Tar",
+    "deleteJob": "Poista",
+    "noFiles": "Ei vielä muunnettuja tiedostoja.",
+    "statusPending": "Odottaa",
+    "statusCompleted": "Valmis",
+    "statusFailed": "Epäonnistui"
+  },
+  "history": {
+    "title": "Tulokset",
+    "time": "Aika",
+    "files": "Tiedostot",
+    "filesDone": "Valmiit tiedostot",
+    "status": "Tila",
+    "actions": "Toiminnot",
+    "expandDetails": "Laajenna tiedot",
+    "detailedFileInfo": "Yksityiskohtaiset tiedostotiedot:",
+    "deleteSelected": "Poista valitut",
+    "selectAll": "Valitse kaikki",
+    "confirmDelete": "Haluatko varmasti poistaa {count} työtä? Tätä toimintoa ei voi kumota.",
+    "deleteSuccess": "Poistettiin onnistuneesti {deleted} työtä.",
+    "deleteFailed": "Epäonnistui {failed} työn poistaminen.",
+    "deleteError": "Virhe poistettaessa töitä. Yritä uudelleen."
+  },
+  "auth": {
+    "email": "Sähköposti",
+    "password": "Salasana",
+    "currentPassword": "Nykyinen salasana",
+    "newPassword": "Salasana (jätä tyhjäksi, jos ei muuteta)",
+    "loginButton": "Kirjaudu sisään",
+    "registerButton": "Rekisteröidy",
+    "updateButton": "Päivitä",
+    "createAccount": "Luo tili",
+    "invalidCredentials": "Virheelliset tunnistetiedot.",
+    "emailInUse": "Sähköposti on jo käytössä.",
+    "unauthorized": "Ei valtuuksia",
+    "cookiesRequired": "Evästeiden on oltava käytössä tämän sovelluksen käyttämiseksi.",
+    "noCookies": "Ei todennusevästettä, ehkä selaimesi estää evästeet."
+  },
+  "setup": {
+    "welcome": "Tervetuloa ConvertX-CN:ään!",
+    "createYourAccount": "Luo tilisi",
+    "reportIssues": "Ilmoita ongelmista",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Työtä ei löytynyt.",
+    "fileNotFound": "Tiedostoa ei löytynyt.",
+    "uploadFailed": "Lähetys epäonnistui.",
+    "conversionFailed": "Muunnos epäonnistui.",
+    "serverError": "Palvelinvirhe."
+  },
+  "upload": {
+    "success": "Tiedostot lähetetty onnistuneesti.",
+    "dragDrop": "Pudota tiedostot tähän"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

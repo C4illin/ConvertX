@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Mgħammar minn",
+    "version": "v{version}",
+    "loading": "Qed jitgħabba...",
+    "error": "Żball",
+    "success": "Suċċess",
+    "confirm": "Ikkonferma",
+    "cancel": "Ikkanċella",
+    "close": "Agħlaq",
+    "save": "Issejvja",
+    "delete": "Ħassar",
+    "remove": "Neħħi",
+    "download": "Niżżel",
+    "upload": "Tella'",
+    "submit": "Issottometti",
+    "back": "Lura",
+    "next": "Li jmiss",
+    "yes": "Iva",
+    "no": "Le"
+  },
+  "nav": {
+    "history": "Storja",
+    "account": "Kont",
+    "logout": "Oħroġ",
+    "login": "Idħol",
+    "register": "Irreġistra",
+    "language": "Lingwa"
+  },
+  "convert": {
+    "title": "Ikkonverti",
+    "titleWithType": "Ikkonverti .{fileType}",
+    "chooseFile": "Agħżel fajl",
+    "orDragHere": "jew iġbdu hawn",
+    "searchConversions": "Fittex konverżjonijiet",
+    "convertTo": "Ikkonverti għal",
+    "convertButton": "Ikkonverti",
+    "uploading": "Qed jittella'...",
+    "processing": "Qed jiġi pproċessat..."
+  },
+  "results": {
+    "title": "Riżultati",
+    "convertedFileName": "Isem tal-fajl ikkonvertit",
+    "status": "Status",
+    "actions": "Azzjonijiet",
+    "downloadAll": "Kollox",
+    "downloadTar": "Tar",
+    "deleteJob": "Ħassar",
+    "noFiles": "Għad m'hemmx fajls ikkonvertiti.",
+    "statusPending": "Pendenti",
+    "statusCompleted": "Komplut",
+    "statusFailed": "Falla"
+  },
+  "history": {
+    "title": "Riżultati",
+    "time": "Ħin",
+    "files": "Fajls",
+    "filesDone": "Fajls lesti",
+    "status": "Status",
+    "actions": "Azzjonijiet",
+    "expandDetails": "Espandi d-dettalji",
+    "detailedFileInfo": "Informazzjoni dettaljata tal-fajl:",
+    "deleteSelected": "Ħassar l-magħżulin",
+    "selectAll": "Agħżel kollox",
+    "confirmDelete": "Int żgur li trid tħassar {count} xogħol/xogħlijiet? Din l-azzjoni ma tistax tiġi rriversa.",
+    "deleteSuccess": "Tħassru {deleted} xogħol/xogħlijiet b'suċċess.",
+    "deleteFailed": "Falla t-tħassir ta' {failed} xogħol/xogħlijiet.",
+    "deleteError": "Sar żball waqt li kienu qed jitħassru x-xogħlijiet. Jekk jogħġbok erġa' pprova."
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "currentPassword": "Password attwali",
+    "newPassword": "Password (ħalli vojt jekk ma jinbidilx)",
+    "loginButton": "Idħol",
+    "registerButton": "Irreġistra",
+    "updateButton": "Aġġorna",
+    "createAccount": "Oħloq kont",
+    "invalidCredentials": "Kredenzjali invalidi.",
+    "emailInUse": "L-email diġà qed tintuża.",
+    "unauthorized": "Mhux awtorizzat",
+    "cookiesRequired": "Il-cookies għandhom ikunu attivati biex tuża din l-applikazzjoni.",
+    "noCookies": "M'hemmx cookie ta' awtentikazzjoni, forsi l-browser tiegħek qed jibblokka l-cookies."
+  },
+  "setup": {
+    "welcome": "Merħba għal ConvertX-CN!",
+    "createYourAccount": "Oħloq il-kont tiegħek",
+    "reportIssues": "Irrapporta kwalunkwe problema fuq",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Xogħol ma nstabx.",
+    "fileNotFound": "Fajl ma nstabx.",
+    "uploadFailed": "It-tella' falla.",
+    "conversionFailed": "Il-konverżjoni falliet.",
+    "serverError": "Żball tas-server."
+  },
+  "upload": {
+    "success": "Il-fajls ittellgħu b'suċċess.",
+    "dragDrop": "Itfa' l-fajls hawn"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

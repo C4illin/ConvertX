@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Mundësuar nga",
+    "version": "v{version}",
+    "loading": "Duke ngarkuar...",
+    "error": "Gabim",
+    "success": "Sukses",
+    "confirm": "Konfirmo",
+    "cancel": "Anulo",
+    "close": "Mbyll",
+    "save": "Ruaj",
+    "delete": "Fshi",
+    "remove": "Hiq",
+    "download": "Shkarko",
+    "upload": "Ngarko",
+    "submit": "Dërgo",
+    "back": "Prapa",
+    "next": "Tjetër",
+    "yes": "Po",
+    "no": "Jo"
+  },
+  "nav": {
+    "history": "Historia",
+    "account": "Llogaria",
+    "logout": "Dilni",
+    "login": "Hyni",
+    "register": "Regjistrohu",
+    "language": "Gjuha"
+  },
+  "convert": {
+    "title": "Konverto",
+    "titleWithType": "Konverto .{fileType}",
+    "chooseFile": "Zgjidhni një skedar",
+    "orDragHere": "ose tërhiqeni këtu",
+    "searchConversions": "Kërkoni konvertime",
+    "convertTo": "Konverto në",
+    "convertButton": "Konverto",
+    "uploading": "Duke ngarkuar...",
+    "processing": "Duke përpunuar..."
+  },
+  "results": {
+    "title": "Rezultatet",
+    "convertedFileName": "Emri i skedarit të konvertuar",
+    "status": "Statusi",
+    "actions": "Veprimet",
+    "downloadAll": "Të gjitha",
+    "downloadTar": "Tar",
+    "deleteJob": "Fshi",
+    "noFiles": "Ende nuk ka skedarë të konvertuar.",
+    "statusPending": "Në pritje",
+    "statusCompleted": "Përfunduar",
+    "statusFailed": "Dështoi"
+  },
+  "history": {
+    "title": "Rezultatet",
+    "time": "Koha",
+    "files": "Skedarët",
+    "filesDone": "Skedarët e përfunduar",
+    "status": "Statusi",
+    "actions": "Veprimet",
+    "expandDetails": "Zgjero detajet",
+    "detailedFileInfo": "Informacion i detajuar i skedarit:",
+    "deleteSelected": "Fshi të zgjedhurit",
+    "selectAll": "Zgjidh të gjitha",
+    "confirmDelete": "Jeni i sigurt që dëshironi të fshini {count} punë? Ky veprim nuk mund të zhbëhet.",
+    "deleteSuccess": "U fshinë me sukses {deleted} punë.",
+    "deleteFailed": "Dështoi fshirja e {failed} punëve.",
+    "deleteError": "Ndodhi një gabim gjatë fshirjes së punëve. Ju lutemi provoni përsëri."
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Fjalëkalimi",
+    "currentPassword": "Fjalëkalimi aktual",
+    "newPassword": "Fjalëkalimi (lëreni bosh nëse nuk ndryshon)",
+    "loginButton": "Hyni",
+    "registerButton": "Regjistrohu",
+    "updateButton": "Përditëso",
+    "createAccount": "Krijo llogari",
+    "invalidCredentials": "Kredencialet e pavlefshme.",
+    "emailInUse": "Emaili është tashmë në përdorim.",
+    "unauthorized": "I paautorizuar",
+    "cookiesRequired": "Cookies duhet të jenë të aktivizuara për të përdorur këtë aplikacion.",
+    "noCookies": "Nuk ka cookie autentifikimi, ndoshta shfletuesi juaj po bllokon cookies."
+  },
+  "setup": {
+    "welcome": "Mirë se vini në ConvertX-CN!",
+    "createYourAccount": "Krijoni llogarinë tuaj",
+    "reportIssues": "Raportoni çdo problem në",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Puna nuk u gjet.",
+    "fileNotFound": "Skedari nuk u gjet.",
+    "uploadFailed": "Ngarkimi dështoi.",
+    "conversionFailed": "Konvertimi dështoi.",
+    "serverError": "Gabim i serverit."
+  },
+  "upload": {
+    "success": "Skedarët u ngarkuan me sukses.",
+    "dragDrop": "Lëshoni skedarët këtu"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

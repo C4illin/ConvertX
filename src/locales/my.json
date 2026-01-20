@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "ဖြင့် လည်ပတ်သည်",
+    "version": "v{version}",
+    "loading": "ဖွင့်နေသည်...",
+    "error": "အမှား",
+    "success": "အောင်မြင်",
+    "confirm": "အတည်ပြု",
+    "cancel": "ပယ်ဖျက်",
+    "close": "ပိတ်",
+    "save": "သိမ်း",
+    "delete": "ဖျက်",
+    "remove": "ဖယ်ရှား",
+    "download": "ဒေါင်းလုဒ်",
+    "upload": "အပ်လုဒ်",
+    "submit": "တင်သွင်း",
+    "back": "နောက်သို့",
+    "next": "ရှေ့သို့",
+    "yes": "ဟုတ်",
+    "no": "မဟုတ်"
+  },
+  "nav": {
+    "history": "မှတ်တမ်း",
+    "account": "အကောင့်",
+    "logout": "ထွက်",
+    "login": "ဝင်",
+    "register": "စာရင်းသွင်း",
+    "language": "ဘာသာစကား"
+  },
+  "convert": {
+    "title": "ပြောင်း",
+    "titleWithType": ".{fileType} ပြောင်း",
+    "chooseFile": "ဖိုင်ရွေး",
+    "orDragHere": "သို့မဟုတ် ဤနေရာသို့ ဆွဲထည့်",
+    "searchConversions": "ပြောင်းလဲမှုများ ရှာ",
+    "convertTo": "သို့ ပြောင်း",
+    "convertButton": "ပြောင်း",
+    "uploading": "အပ်လုဒ်တင်နေသည်...",
+    "processing": "လုပ်ဆောင်နေသည်..."
+  },
+  "results": {
+    "title": "ရလဒ်များ",
+    "convertedFileName": "ပြောင်းပြီး ဖိုင်အမည်",
+    "status": "အခြေအနေ",
+    "actions": "လုပ်ဆောင်ချက်များ",
+    "downloadAll": "အားလုံး",
+    "downloadTar": "Tar",
+    "deleteJob": "ဖျက်",
+    "noFiles": "ဖိုင်များ မပြောင်းရသေးပါ။",
+    "statusPending": "စောင့်ဆိုင်း",
+    "statusCompleted": "ပြီးဆုံး",
+    "statusFailed": "မအောင်မြင်"
+  },
+  "history": {
+    "title": "ရလဒ်များ",
+    "time": "အချိန်",
+    "files": "ဖိုင်များ",
+    "filesDone": "ပြီးဆုံးသော ဖိုင်များ",
+    "status": "အခြေအနေ",
+    "actions": "လုပ်ဆောင်ချက်များ",
+    "expandDetails": "အသေးစိတ် ကြည့်",
+    "detailedFileInfo": "အသေးစိတ် ဖိုင်အချက်အလက်:",
+    "deleteSelected": "ရွေးထားသည်များ ဖျက်",
+    "selectAll": "အားလုံးရွေး",
+    "confirmDelete": "{count} အလုပ်(များ) ဖျက်မည်မှာ သေချာပါသလား? ဤလုပ်ဆောင်ချက်ကို ပြန်ပြင်၍မရပါ။",
+    "deleteSuccess": "{deleted} အလုပ်(များ) အောင်မြင်စွာ ဖျက်ပြီး။",
+    "deleteFailed": "{failed} အလုပ်(များ) ဖျက်ရန် မအောင်မြင်။",
+    "deleteError": "အလုပ်များ ဖျက်ရာတွင် အမှားတစ်ခု ဖြစ်ပွားခဲ့သည်။ ထပ်ကြိုးစားပါ။"
+  },
+  "auth": {
+    "email": "အီးမေးလ်",
+    "password": "စကားဝှက်",
+    "currentPassword": "လက်ရှိ စကားဝှက်",
+    "newPassword": "စကားဝှက် (မပြောင်းလျှင် ကွက်လပ်ထား)",
+    "loginButton": "ဝင်",
+    "registerButton": "စာရင်းသွင်း",
+    "updateButton": "အပ်ဒိတ်",
+    "createAccount": "အကောင့်ဖန်တီး",
+    "invalidCredentials": "မမှန်ကန်သော အထောက်အထား။",
+    "emailInUse": "အီးမေးလ် အသုံးပြုပြီး။",
+    "unauthorized": "ခွင့်ပြုချက်မရှိ",
+    "cookiesRequired": "ဤအက်ပ်ကို သုံးရန် cookies ဖွင့်ထားရမည်။",
+    "noCookies": "auth cookie မရှိပါ၊ သင့်ဘရောက်ဆာက cookies ပိတ်ထားနိုင်သည်။"
+  },
+  "setup": {
+    "welcome": "ConvertX-CN မှ ကြိုဆိုပါသည်!",
+    "createYourAccount": "သင့်အကောင့် ဖန်တီးပါ",
+    "reportIssues": "ပြဿနာများ အကြောင်းကြားပါ",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "အလုပ် မတွေ့ပါ။",
+    "fileNotFound": "ဖိုင် မတွေ့ပါ။",
+    "uploadFailed": "အပ်လုဒ် မအောင်မြင်ပါ။",
+    "conversionFailed": "ပြောင်းလဲခြင်း မအောင်မြင်ပါ။",
+    "serverError": "ဆာဗာ အမှား။"
+  },
+  "upload": {
+    "success": "ဖိုင်များ အောင်မြင်စွာ အပ်လုဒ်တင်ပြီး။",
+    "dragDrop": "ဖိုင်များကို ဤနေရာတွင် ချပါ"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

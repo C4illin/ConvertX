@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "ขับเคลื่อนโดย",
+    "version": "v{version}",
+    "loading": "กำลังโหลด...",
+    "error": "ข้อผิดพลาด",
+    "success": "สำเร็จ",
+    "confirm": "ยืนยัน",
+    "cancel": "ยกเลิก",
+    "close": "ปิด",
+    "save": "บันทึก",
+    "delete": "ลบ",
+    "remove": "นำออก",
+    "download": "ดาวน์โหลด",
+    "upload": "อัปโหลด",
+    "submit": "ส่ง",
+    "back": "กลับ",
+    "next": "ถัดไป",
+    "yes": "ใช่",
+    "no": "ไม่"
+  },
+  "nav": {
+    "history": "ประวัติ",
+    "account": "บัญชี",
+    "logout": "ออกจากระบบ",
+    "login": "เข้าสู่ระบบ",
+    "register": "ลงทะเบียน",
+    "language": "ภาษา"
+  },
+  "convert": {
+    "title": "แปลงไฟล์",
+    "titleWithType": "แปลงไฟล์ .{fileType}",
+    "chooseFile": "เลือกไฟล์",
+    "orDragHere": "หรือลากมาที่นี่",
+    "searchConversions": "ค้นหาการแปลง",
+    "convertTo": "แปลงเป็น",
+    "convertButton": "แปลง",
+    "uploading": "กำลังอัปโหลด...",
+    "processing": "กำลังประมวลผล..."
+  },
+  "results": {
+    "title": "ผลลัพธ์",
+    "convertedFileName": "ชื่อไฟล์ที่แปลงแล้ว",
+    "status": "สถานะ",
+    "actions": "การดำเนินการ",
+    "downloadAll": "ทั้งหมด",
+    "downloadTar": "Tar",
+    "deleteJob": "ลบ",
+    "noFiles": "ยังไม่มีไฟล์ที่แปลง",
+    "statusPending": "รอดำเนินการ",
+    "statusCompleted": "เสร็จสมบูรณ์",
+    "statusFailed": "ล้มเหลว"
+  },
+  "history": {
+    "title": "ผลลัพธ์",
+    "time": "เวลา",
+    "files": "ไฟล์",
+    "filesDone": "ไฟล์ที่เสร็จแล้ว",
+    "status": "สถานะ",
+    "actions": "การดำเนินการ",
+    "expandDetails": "ขยายรายละเอียด",
+    "detailedFileInfo": "ข้อมูลไฟล์โดยละเอียด:",
+    "deleteSelected": "ลบที่เลือก",
+    "selectAll": "เลือกทั้งหมด",
+    "confirmDelete": "คุณแน่ใจหรือไม่ว่าต้องการลบ {count} งาน? การดำเนินการนี้ไม่สามารถยกเลิกได้",
+    "deleteSuccess": "ลบ {deleted} งานสำเร็จ",
+    "deleteFailed": "ไม่สามารถลบ {failed} งาน",
+    "deleteError": "เกิดข้อผิดพลาดขณะลบงาน กรุณาลองอีกครั้ง"
+  },
+  "auth": {
+    "email": "อีเมล",
+    "password": "รหัสผ่าน",
+    "currentPassword": "รหัสผ่านปัจจุบัน",
+    "newPassword": "รหัสผ่าน (เว้นว่างเพื่อไม่เปลี่ยน)",
+    "loginButton": "เข้าสู่ระบบ",
+    "registerButton": "ลงทะเบียน",
+    "updateButton": "อัปเดต",
+    "createAccount": "สร้างบัญชี",
+    "invalidCredentials": "ข้อมูลรับรองไม่ถูกต้อง",
+    "emailInUse": "อีเมลถูกใช้งานแล้ว",
+    "unauthorized": "ไม่ได้รับอนุญาต",
+    "cookiesRequired": "ต้องเปิดใช้งานคุกกี้เพื่อใช้แอปนี้",
+    "noCookies": "ไม่มีคุกกี้การยืนยันตัวตน อาจเป็นเพราะเบราว์เซอร์ของคุณบล็อกคุกกี้"
+  },
+  "setup": {
+    "welcome": "ยินดีต้อนรับสู่ ConvertX-CN!",
+    "createYourAccount": "สร้างบัญชีของคุณ",
+    "reportIssues": "รายงานปัญหาที่",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "ไม่พบงาน",
+    "fileNotFound": "ไม่พบไฟล์",
+    "uploadFailed": "อัปโหลดล้มเหลว",
+    "conversionFailed": "การแปลงล้มเหลว",
+    "serverError": "ข้อผิดพลาดเซิร์ฟเวอร์"
+  },
+  "upload": {
+    "success": "อัปโหลดไฟล์สำเร็จ",
+    "dragDrop": "วางไฟล์ที่นี่"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

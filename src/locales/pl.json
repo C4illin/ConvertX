@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Obsługiwane przez",
+    "version": "v{version}",
+    "loading": "Ładowanie...",
+    "error": "Błąd",
+    "success": "Sukces",
+    "confirm": "Potwierdź",
+    "cancel": "Anuluj",
+    "close": "Zamknij",
+    "save": "Zapisz",
+    "delete": "Usuń",
+    "remove": "Usuń",
+    "download": "Pobierz",
+    "upload": "Prześlij",
+    "submit": "Wyślij",
+    "back": "Wstecz",
+    "next": "Dalej",
+    "yes": "Tak",
+    "no": "Nie"
+  },
+  "nav": {
+    "history": "Historia",
+    "account": "Konto",
+    "logout": "Wyloguj",
+    "login": "Zaloguj",
+    "register": "Zarejestruj",
+    "language": "Język"
+  },
+  "convert": {
+    "title": "Konwertuj",
+    "titleWithType": "Konwertuj .{fileType}",
+    "chooseFile": "Wybierz plik",
+    "orDragHere": "lub przeciągnij tutaj",
+    "searchConversions": "Szukaj konwersji",
+    "convertTo": "Konwertuj na",
+    "convertButton": "Konwertuj",
+    "uploading": "Przesyłanie...",
+    "processing": "Przetwarzanie..."
+  },
+  "results": {
+    "title": "Wyniki",
+    "convertedFileName": "Nazwa przekonwertowanego pliku",
+    "status": "Status",
+    "actions": "Akcje",
+    "downloadAll": "Wszystko",
+    "downloadTar": "Tar",
+    "deleteJob": "Usuń",
+    "noFiles": "Brak przekonwertowanych plików.",
+    "statusPending": "Oczekujące",
+    "statusCompleted": "Ukończone",
+    "statusFailed": "Niepowodzenie"
+  },
+  "history": {
+    "title": "Wyniki",
+    "time": "Czas",
+    "files": "Pliki",
+    "filesDone": "Ukończone pliki",
+    "status": "Status",
+    "actions": "Akcje",
+    "expandDetails": "Rozwiń szczegóły",
+    "detailedFileInfo": "Szczegółowe informacje o pliku:",
+    "deleteSelected": "Usuń wybrane",
+    "selectAll": "Zaznacz wszystko",
+    "confirmDelete": "Czy na pewno chcesz usunąć {count} zadanie(ń)? Ta czynność jest nieodwracalna.",
+    "deleteSuccess": "Pomyślnie usunięto {deleted} zadanie(ń).",
+    "deleteFailed": "Nie udało się usunąć {failed} zadania(ń).",
+    "deleteError": "Wystąpił błąd podczas usuwania zadań. Spróbuj ponownie."
+  },
+  "auth": {
+    "email": "E-mail",
+    "password": "Hasło",
+    "currentPassword": "Aktualne hasło",
+    "newPassword": "Hasło (pozostaw puste, aby nie zmieniać)",
+    "loginButton": "Zaloguj",
+    "registerButton": "Zarejestruj",
+    "updateButton": "Aktualizuj",
+    "createAccount": "Utwórz konto",
+    "invalidCredentials": "Nieprawidłowe dane uwierzytelniające.",
+    "emailInUse": "E-mail jest już używany.",
+    "unauthorized": "Brak autoryzacji",
+    "cookiesRequired": "Aby korzystać z tej aplikacji, należy włączyć obsługę plików cookie.",
+    "noCookies": "Brak pliku cookie uwierzytelniania, być może przeglądarka blokuje pliki cookie."
+  },
+  "setup": {
+    "welcome": "Witamy w ConvertX-CN!",
+    "createYourAccount": "Utwórz swoje konto",
+    "reportIssues": "Zgłaszaj problemy na",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Nie znaleziono zadania.",
+    "fileNotFound": "Nie znaleziono pliku.",
+    "uploadFailed": "Przesyłanie nie powiodło się.",
+    "conversionFailed": "Konwersja nie powiodła się.",
+    "serverError": "Błąd serwera."
+  },
+  "upload": {
+    "success": "Pliki zostały pomyślnie przesłane.",
+    "dragDrop": "Upuść pliki tutaj"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

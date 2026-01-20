@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "மூலம் இயக்கப்படுகிறது",
+    "version": "v{version}",
+    "loading": "ஏற்றுகிறது...",
+    "error": "பிழை",
+    "success": "வெற்றி",
+    "confirm": "உறுதிப்படுத்து",
+    "cancel": "ரத்து செய்",
+    "close": "மூடு",
+    "save": "சேமி",
+    "delete": "நீக்கு",
+    "remove": "அகற்று",
+    "download": "பதிவிறக்கு",
+    "upload": "பதிவேற்று",
+    "submit": "சமர்ப்பி",
+    "back": "பின்",
+    "next": "அடுத்து",
+    "yes": "ஆம்",
+    "no": "இல்லை"
+  },
+  "nav": {
+    "history": "வரலாறு",
+    "account": "கணக்கு",
+    "logout": "வெளியேறு",
+    "login": "உள்நுழை",
+    "register": "பதிவு செய்",
+    "language": "மொழி"
+  },
+  "convert": {
+    "title": "மாற்று",
+    "titleWithType": ".{fileType} மாற்று",
+    "chooseFile": "ஒரு கோப்பைத் தேர்ந்தெடுக்கவும்",
+    "orDragHere": "அல்லது இங்கே இழுக்கவும்",
+    "searchConversions": "மாற்றங்களைத் தேடு",
+    "convertTo": "இதற்கு மாற்று",
+    "convertButton": "மாற்று",
+    "uploading": "பதிவேற்றுகிறது...",
+    "processing": "செயலாக்குகிறது..."
+  },
+  "results": {
+    "title": "முடிவுகள்",
+    "convertedFileName": "மாற்றப்பட்ட கோப்பு பெயர்",
+    "status": "நிலை",
+    "actions": "செயல்கள்",
+    "downloadAll": "அனைத்தும்",
+    "downloadTar": "Tar",
+    "deleteJob": "நீக்கு",
+    "noFiles": "இன்னும் கோப்புகள் மாற்றப்படவில்லை.",
+    "statusPending": "நிலுவையில்",
+    "statusCompleted": "முடிந்தது",
+    "statusFailed": "தோல்வி"
+  },
+  "history": {
+    "title": "முடிவுகள்",
+    "time": "நேரம்",
+    "files": "கோப்புகள்",
+    "filesDone": "முடிந்த கோப்புகள்",
+    "status": "நிலை",
+    "actions": "செயல்கள்",
+    "expandDetails": "விவரங்களை விரிவாக்கு",
+    "detailedFileInfo": "விரிவான கோப்பு தகவல்:",
+    "deleteSelected": "தேர்ந்தெடுத்ததை நீக்கு",
+    "selectAll": "அனைத்தையும் தேர்ந்தெடு",
+    "confirmDelete": "{count} பணி(களை) நீக்க விரும்புகிறீர்களா? இந்த செயலை மாற்ற முடியாது.",
+    "deleteSuccess": "{deleted} பணி(கள்) வெற்றிகரமாக நீக்கப்பட்டன.",
+    "deleteFailed": "{failed} பணி(களை) நீக்க முடியவில்லை.",
+    "deleteError": "பணிகளை நீக்கும் போது பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்."
+  },
+  "auth": {
+    "email": "மின்னஞ்சல்",
+    "password": "கடவுச்சொல்",
+    "currentPassword": "தற்போதைய கடவுச்சொல்",
+    "newPassword": "கடவுச்சொல் (மாற்றவில்லை என்றால் காலியாக விடவும்)",
+    "loginButton": "உள்நுழை",
+    "registerButton": "பதிவு செய்",
+    "updateButton": "புதுப்பி",
+    "createAccount": "கணக்கை உருவாக்கு",
+    "invalidCredentials": "தவறான சான்றுகள்.",
+    "emailInUse": "மின்னஞ்சல் ஏற்கனவே பயன்பாட்டில் உள்ளது.",
+    "unauthorized": "அங்கீகரிக்கப்படவில்லை",
+    "cookiesRequired": "இந்த செயலியைப் பயன்படுத்த குக்கீகள் இயக்கப்பட வேண்டும்.",
+    "noCookies": "அங்கீகார குக்கீ இல்லை, உங்கள் உலாவி குக்கீகளைத் தடுக்கிறது."
+  },
+  "setup": {
+    "welcome": "ConvertX-CN-க்கு வரவேற்கிறோம்!",
+    "createYourAccount": "உங்கள் கணக்கை உருவாக்கவும்",
+    "reportIssues": "சிக்கல்களைப் புகாரளிக்கவும்",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "பணி கண்டறியப்படவில்லை.",
+    "fileNotFound": "கோப்பு கண்டறியப்படவில்லை.",
+    "uploadFailed": "பதிவேற்றம் தோல்வியடைந்தது.",
+    "conversionFailed": "மாற்றம் தோல்வியடைந்தது.",
+    "serverError": "சேவையக பிழை."
+  },
+  "upload": {
+    "success": "கோப்புகள் வெற்றிகரமாக பதிவேற்றப்பட்டன.",
+    "dragDrop": "கோப்புகளை இங்கே விடவும்"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Alimentat de",
+    "version": "v{version}",
+    "loading": "Se încarcă...",
+    "error": "Eroare",
+    "success": "Succes",
+    "confirm": "Confirmă",
+    "cancel": "Anulează",
+    "close": "Închide",
+    "save": "Salvează",
+    "delete": "Șterge",
+    "remove": "Elimină",
+    "download": "Descarcă",
+    "upload": "Încarcă",
+    "submit": "Trimite",
+    "back": "Înapoi",
+    "next": "Următorul",
+    "yes": "Da",
+    "no": "Nu"
+  },
+  "nav": {
+    "history": "Istoric",
+    "account": "Cont",
+    "logout": "Deconectare",
+    "login": "Autentificare",
+    "register": "Înregistrare",
+    "language": "Limbă"
+  },
+  "convert": {
+    "title": "Convertire",
+    "titleWithType": "Convertire .{fileType}",
+    "chooseFile": "Alegeți un fișier",
+    "orDragHere": "sau trageți-l aici",
+    "searchConversions": "Căutați conversii",
+    "convertTo": "Convertire în",
+    "convertButton": "Convertire",
+    "uploading": "Se încarcă...",
+    "processing": "Se procesează..."
+  },
+  "results": {
+    "title": "Rezultate",
+    "convertedFileName": "Nume fișier convertit",
+    "status": "Stare",
+    "actions": "Acțiuni",
+    "downloadAll": "Toate",
+    "downloadTar": "Tar",
+    "deleteJob": "Șterge",
+    "noFiles": "Nu au fost convertite fișiere încă.",
+    "statusPending": "În așteptare",
+    "statusCompleted": "Finalizat",
+    "statusFailed": "Eșuat"
+  },
+  "history": {
+    "title": "Rezultate",
+    "time": "Timp",
+    "files": "Fișiere",
+    "filesDone": "Fișiere finalizate",
+    "status": "Stare",
+    "actions": "Acțiuni",
+    "expandDetails": "Extinde detaliile",
+    "detailedFileInfo": "Informații detaliate despre fișier:",
+    "deleteSelected": "Șterge selectate",
+    "selectAll": "Selectează tot",
+    "confirmDelete": "Sunteți sigur că doriți să ștergeți {count} sarcină(i)? Această acțiune nu poate fi anulată.",
+    "deleteSuccess": "Au fost șterse cu succes {deleted} sarcină(i).",
+    "deleteFailed": "Nu s-au putut șterge {failed} sarcină(i).",
+    "deleteError": "A apărut o eroare la ștergerea sarcinilor. Vă rugăm să încercați din nou."
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Parolă",
+    "currentPassword": "Parola curentă",
+    "newPassword": "Parolă (lăsați gol pentru neschimbat)",
+    "loginButton": "Autentificare",
+    "registerButton": "Înregistrare",
+    "updateButton": "Actualizare",
+    "createAccount": "Creează cont",
+    "invalidCredentials": "Credențiale invalide.",
+    "emailInUse": "Email-ul este deja utilizat.",
+    "unauthorized": "Neautorizat",
+    "cookiesRequired": "Cookie-urile trebuie să fie activate pentru a utiliza această aplicație.",
+    "noCookies": "Nu există cookie de autentificare, poate browserul dvs. blochează cookie-urile."
+  },
+  "setup": {
+    "welcome": "Bine ați venit la ConvertX-CN!",
+    "createYourAccount": "Creați-vă contul",
+    "reportIssues": "Raportați orice probleme pe",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Sarcina nu a fost găsită.",
+    "fileNotFound": "Fișierul nu a fost găsit.",
+    "uploadFailed": "Încărcarea a eșuat.",
+    "conversionFailed": "Conversia a eșuat.",
+    "serverError": "Eroare de server."
+  },
+  "upload": {
+    "success": "Fișierele au fost încărcate cu succes.",
+    "dragDrop": "Trageți fișierele aici"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

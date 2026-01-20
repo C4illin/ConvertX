@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "ద్వారా శక్తి పొందింది",
+    "version": "v{version}",
+    "loading": "లోడ్ అవుతోంది...",
+    "error": "లోపం",
+    "success": "విజయం",
+    "confirm": "నిర్ధారించు",
+    "cancel": "రద్దు చేయి",
+    "close": "మూసివేయి",
+    "save": "సేవ్ చేయి",
+    "delete": "తొలగించు",
+    "remove": "తీసివేయి",
+    "download": "డౌన్‌లోడ్",
+    "upload": "అప్‌లోడ్",
+    "submit": "సమర్పించు",
+    "back": "వెనుకకు",
+    "next": "తదుపరి",
+    "yes": "అవును",
+    "no": "కాదు"
+  },
+  "nav": {
+    "history": "చరిత్ర",
+    "account": "ఖాతా",
+    "logout": "లాగ్ అవుట్",
+    "login": "లాగిన్",
+    "register": "నమోదు",
+    "language": "భాష"
+  },
+  "convert": {
+    "title": "మార్చు",
+    "titleWithType": ".{fileType} మార్చు",
+    "chooseFile": "ఫైల్ ఎంచుకోండి",
+    "orDragHere": "లేదా ఇక్కడ డ్రాగ్ చేయండి",
+    "searchConversions": "మార్పిడులు శోధించు",
+    "convertTo": "దీనికి మార్చు",
+    "convertButton": "మార్చు",
+    "uploading": "అప్‌లోడ్ అవుతోంది...",
+    "processing": "ప్రాసెస్ అవుతోంది..."
+  },
+  "results": {
+    "title": "ఫలితాలు",
+    "convertedFileName": "మార్చబడిన ఫైల్ పేరు",
+    "status": "స్థితి",
+    "actions": "చర్యలు",
+    "downloadAll": "అన్నీ",
+    "downloadTar": "Tar",
+    "deleteJob": "తొలగించు",
+    "noFiles": "ఇంకా ఫైళ్లు మార్చబడలేదు.",
+    "statusPending": "పెండింగ్",
+    "statusCompleted": "పూర్తయింది",
+    "statusFailed": "విఫలమైంది"
+  },
+  "history": {
+    "title": "ఫలితాలు",
+    "time": "సమయం",
+    "files": "ఫైళ్లు",
+    "filesDone": "పూర్తయిన ఫైళ్లు",
+    "status": "స్థితి",
+    "actions": "చర్యలు",
+    "expandDetails": "వివరాలు విస్తరించు",
+    "detailedFileInfo": "వివరణాత్మక ఫైల్ సమాచారం:",
+    "deleteSelected": "ఎంచుకున్నవి తొలగించు",
+    "selectAll": "అన్నీ ఎంచుకో",
+    "confirmDelete": "మీరు {count} జాబ్(లు) తొలగించాలనుకుంటున్నారా? ఈ చర్యను రద్దు చేయలేరు.",
+    "deleteSuccess": "{deleted} జాబ్(లు) విజయవంతంగా తొలగించబడ్డాయి.",
+    "deleteFailed": "{failed} జాబ్(లు) తొలగించడంలో విఫలమైంది.",
+    "deleteError": "జాబ్‌లు తొలగించేటప్పుడు లోపం సంభవించింది. దయచేసి మళ్ళీ ప్రయత్నించండి."
+  },
+  "auth": {
+    "email": "ఇమెయిల్",
+    "password": "పాస్‌వర్డ్",
+    "currentPassword": "ప్రస్తుత పాస్‌వర్డ్",
+    "newPassword": "పాస్‌వర్డ్ (మార్చకపోతే ఖాళీగా ఉంచండి)",
+    "loginButton": "లాగిన్",
+    "registerButton": "నమోదు",
+    "updateButton": "అప్‌డేట్",
+    "createAccount": "ఖాతా సృష్టించు",
+    "invalidCredentials": "చెల్లని ఆధారాలు.",
+    "emailInUse": "ఇమెయిల్ ఇప్పటికే వాడుకలో ఉంది.",
+    "unauthorized": "అనధికారం",
+    "cookiesRequired": "ఈ యాప్ ఉపయోగించడానికి కుకీలు ఎనేబుల్ చేయాలి.",
+    "noCookies": "ప్రమాణీకరణ కుకీ లేదు, మీ బ్రౌజర్ కుకీలను బ్లాక్ చేస్తోంది."
+  },
+  "setup": {
+    "welcome": "ConvertX-CN కు స్వాగతం!",
+    "createYourAccount": "మీ ఖాతాను సృష్టించండి",
+    "reportIssues": "సమస్యలను నివేదించండి",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "జాబ్ కనుగొనబడలేదు.",
+    "fileNotFound": "ఫైల్ కనుగొనబడలేదు.",
+    "uploadFailed": "అప్‌లోడ్ విఫలమైంది.",
+    "conversionFailed": "మార్పిడి విఫలమైంది.",
+    "serverError": "సర్వర్ లోపం."
+  },
+  "upload": {
+    "success": "ఫైళ్లు విజయవంతంగా అప్‌లోడ్ అయ్యాయి.",
+    "dragDrop": "ఫైళ్లను ఇక్కడ వదలండి"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

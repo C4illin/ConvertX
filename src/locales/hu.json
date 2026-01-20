@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Működteti",
+    "version": "v{version}",
+    "loading": "Betöltés...",
+    "error": "Hiba",
+    "success": "Sikeres",
+    "confirm": "Megerősítés",
+    "cancel": "Mégse",
+    "close": "Bezárás",
+    "save": "Mentés",
+    "delete": "Törlés",
+    "remove": "Eltávolítás",
+    "download": "Letöltés",
+    "upload": "Feltöltés",
+    "submit": "Küldés",
+    "back": "Vissza",
+    "next": "Következő",
+    "yes": "Igen",
+    "no": "Nem"
+  },
+  "nav": {
+    "history": "Előzmények",
+    "account": "Fiók",
+    "logout": "Kijelentkezés",
+    "login": "Bejelentkezés",
+    "register": "Regisztráció",
+    "language": "Nyelv"
+  },
+  "convert": {
+    "title": "Konvertálás",
+    "titleWithType": ".{fileType} konvertálása",
+    "chooseFile": "Válasszon fájlt",
+    "orDragHere": "vagy húzza ide",
+    "searchConversions": "Konverziók keresése",
+    "convertTo": "Konvertálás erre",
+    "convertButton": "Konvertálás",
+    "uploading": "Feltöltés...",
+    "processing": "Feldolgozás..."
+  },
+  "results": {
+    "title": "Eredmények",
+    "convertedFileName": "Konvertált fájlnév",
+    "status": "Állapot",
+    "actions": "Műveletek",
+    "downloadAll": "Mind",
+    "downloadTar": "Tar",
+    "deleteJob": "Törlés",
+    "noFiles": "Még nincsenek konvertált fájlok.",
+    "statusPending": "Függőben",
+    "statusCompleted": "Befejezve",
+    "statusFailed": "Sikertelen"
+  },
+  "history": {
+    "title": "Eredmények",
+    "time": "Idő",
+    "files": "Fájlok",
+    "filesDone": "Kész fájlok",
+    "status": "Állapot",
+    "actions": "Műveletek",
+    "expandDetails": "Részletek kibontása",
+    "detailedFileInfo": "Részletes fájlinformáció:",
+    "deleteSelected": "Kiválasztottak törlése",
+    "selectAll": "Összes kijelölése",
+    "confirmDelete": "Biztosan törölni szeretné a(z) {count} feladatot? Ez a művelet nem vonható vissza.",
+    "deleteSuccess": "Sikeresen törölve {deleted} feladat.",
+    "deleteFailed": "Nem sikerült törölni {failed} feladatot.",
+    "deleteError": "Hiba történt a feladatok törlésekor. Kérjük, próbálja újra."
+  },
+  "auth": {
+    "email": "E-mail",
+    "password": "Jelszó",
+    "currentPassword": "Jelenlegi jelszó",
+    "newPassword": "Jelszó (hagyja üresen, ha változatlan)",
+    "loginButton": "Bejelentkezés",
+    "registerButton": "Regisztráció",
+    "updateButton": "Frissítés",
+    "createAccount": "Fiók létrehozása",
+    "invalidCredentials": "Érvénytelen hitelesítő adatok.",
+    "emailInUse": "Az e-mail már használatban van.",
+    "unauthorized": "Jogosulatlan",
+    "cookiesRequired": "A sütiknek engedélyezve kell lenniük az alkalmazás használatához.",
+    "noCookies": "Nincs hitelesítési süti, talán a böngészője blokkolja a sütiket."
+  },
+  "setup": {
+    "welcome": "Üdvözöljük a ConvertX-CN-ben!",
+    "createYourAccount": "Hozza létre fiókját",
+    "reportIssues": "Jelentse a problémákat a",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Feladat nem található.",
+    "fileNotFound": "Fájl nem található.",
+    "uploadFailed": "Feltöltés sikertelen.",
+    "conversionFailed": "Konvertálás sikertelen.",
+    "serverError": "Szerverhiba."
+  },
+  "upload": {
+    "success": "Fájlok sikeresen feltöltve.",
+    "dragDrop": "Húzza ide a fájlokat"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

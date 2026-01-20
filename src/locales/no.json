@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Drevet av",
+    "version": "v{version}",
+    "loading": "Laster...",
+    "error": "Feil",
+    "success": "Suksess",
+    "confirm": "Bekreft",
+    "cancel": "Avbryt",
+    "close": "Lukk",
+    "save": "Lagre",
+    "delete": "Slett",
+    "remove": "Fjern",
+    "download": "Last ned",
+    "upload": "Last opp",
+    "submit": "Send",
+    "back": "Tilbake",
+    "next": "Neste",
+    "yes": "Ja",
+    "no": "Nei"
+  },
+  "nav": {
+    "history": "Historikk",
+    "account": "Konto",
+    "logout": "Logg ut",
+    "login": "Logg inn",
+    "register": "Registrer",
+    "language": "Språk"
+  },
+  "convert": {
+    "title": "Konverter",
+    "titleWithType": "Konverter .{fileType}",
+    "chooseFile": "Velg en fil",
+    "orDragHere": "eller dra den hit",
+    "searchConversions": "Søk etter konverteringer",
+    "convertTo": "Konverter til",
+    "convertButton": "Konverter",
+    "uploading": "Laster opp...",
+    "processing": "Behandler..."
+  },
+  "results": {
+    "title": "Resultater",
+    "convertedFileName": "Konvertert filnavn",
+    "status": "Status",
+    "actions": "Handlinger",
+    "downloadAll": "Alle",
+    "downloadTar": "Tar",
+    "deleteJob": "Slett",
+    "noFiles": "Ingen filer konvertert ennå.",
+    "statusPending": "Venter",
+    "statusCompleted": "Fullført",
+    "statusFailed": "Mislyktes"
+  },
+  "history": {
+    "title": "Resultater",
+    "time": "Tid",
+    "files": "Filer",
+    "filesDone": "Filer fullført",
+    "status": "Status",
+    "actions": "Handlinger",
+    "expandDetails": "Utvid detaljer",
+    "detailedFileInfo": "Detaljert filinformasjon:",
+    "deleteSelected": "Slett valgte",
+    "selectAll": "Velg alle",
+    "confirmDelete": "Er du sikker på at du vil slette {count} jobb(er)? Denne handlingen kan ikke angres.",
+    "deleteSuccess": "Slettet {deleted} jobb(er) vellykket.",
+    "deleteFailed": "Kunne ikke slette {failed} jobb(er).",
+    "deleteError": "Det oppstod en feil under sletting av jobber. Prøv igjen."
+  },
+  "auth": {
+    "email": "E-post",
+    "password": "Passord",
+    "currentPassword": "Nåværende passord",
+    "newPassword": "Passord (la stå tomt for uendret)",
+    "loginButton": "Logg inn",
+    "registerButton": "Registrer",
+    "updateButton": "Oppdater",
+    "createAccount": "Opprett konto",
+    "invalidCredentials": "Ugyldige legitimasjonsopplysninger.",
+    "emailInUse": "E-post er allerede i bruk.",
+    "unauthorized": "Uautorisert",
+    "cookiesRequired": "Informasjonskapsler må være aktivert for å bruke denne appen.",
+    "noCookies": "Ingen autentiseringsinformasjonskapsel, kanskje nettleseren din blokkerer informasjonskapsler."
+  },
+  "setup": {
+    "welcome": "Velkommen til ConvertX-CN!",
+    "createYourAccount": "Opprett kontoen din",
+    "reportIssues": "Rapporter eventuelle problemer på",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Jobb ikke funnet.",
+    "fileNotFound": "Fil ikke funnet.",
+    "uploadFailed": "Opplasting mislyktes.",
+    "conversionFailed": "Konvertering mislyktes.",
+    "serverError": "Serverfeil."
+  },
+  "upload": {
+    "success": "Filer lastet opp vellykket.",
+    "dragDrop": "Slipp filer her"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

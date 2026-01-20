@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Tarafından desteklenmektedir",
+    "version": "v{version}",
+    "loading": "Yükleniyor...",
+    "error": "Hata",
+    "success": "Başarılı",
+    "confirm": "Onayla",
+    "cancel": "İptal",
+    "close": "Kapat",
+    "save": "Kaydet",
+    "delete": "Sil",
+    "remove": "Kaldır",
+    "download": "İndir",
+    "upload": "Yükle",
+    "submit": "Gönder",
+    "back": "Geri",
+    "next": "İleri",
+    "yes": "Evet",
+    "no": "Hayır"
+  },
+  "nav": {
+    "history": "Geçmiş",
+    "account": "Hesap",
+    "logout": "Çıkış",
+    "login": "Giriş",
+    "register": "Kayıt Ol",
+    "language": "Dil"
+  },
+  "convert": {
+    "title": "Dönüştür",
+    "titleWithType": ".{fileType} Dönüştür",
+    "chooseFile": "Bir dosya seçin",
+    "orDragHere": "veya buraya sürükleyin",
+    "searchConversions": "Dönüşümleri ara",
+    "convertTo": "Dönüştür",
+    "convertButton": "Dönüştür",
+    "uploading": "Yükleniyor...",
+    "processing": "İşleniyor..."
+  },
+  "results": {
+    "title": "Sonuçlar",
+    "convertedFileName": "Dönüştürülen Dosya Adı",
+    "status": "Durum",
+    "actions": "İşlemler",
+    "downloadAll": "Tümü",
+    "downloadTar": "Tar",
+    "deleteJob": "Sil",
+    "noFiles": "Henüz dönüştürülmüş dosya yok.",
+    "statusPending": "Bekliyor",
+    "statusCompleted": "Tamamlandı",
+    "statusFailed": "Başarısız"
+  },
+  "history": {
+    "title": "Sonuçlar",
+    "time": "Zaman",
+    "files": "Dosyalar",
+    "filesDone": "Tamamlanan Dosyalar",
+    "status": "Durum",
+    "actions": "İşlemler",
+    "expandDetails": "Ayrıntıları genişlet",
+    "detailedFileInfo": "Ayrıntılı Dosya Bilgisi:",
+    "deleteSelected": "Seçilenleri Sil",
+    "selectAll": "Tümünü seç",
+    "confirmDelete": "{count} işi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+    "deleteSuccess": "{deleted} iş başarıyla silindi.",
+    "deleteFailed": "{failed} iş silinemedi.",
+    "deleteError": "İşler silinirken bir hata oluştu. Lütfen tekrar deneyin."
+  },
+  "auth": {
+    "email": "E-posta",
+    "password": "Şifre",
+    "currentPassword": "Mevcut Şifre",
+    "newPassword": "Şifre (değiştirmemek için boş bırakın)",
+    "loginButton": "Giriş Yap",
+    "registerButton": "Kayıt Ol",
+    "updateButton": "Güncelle",
+    "createAccount": "Hesap oluştur",
+    "invalidCredentials": "Geçersiz kimlik bilgileri.",
+    "emailInUse": "E-posta zaten kullanımda.",
+    "unauthorized": "Yetkisiz",
+    "cookiesRequired": "Bu uygulamayı kullanmak için çerezler etkinleştirilmelidir.",
+    "noCookies": "Kimlik doğrulama çerezi yok, belki tarayıcınız çerezleri engelliyor."
+  },
+  "setup": {
+    "welcome": "ConvertX-CN'e Hoş Geldiniz!",
+    "createYourAccount": "Hesabınızı oluşturun",
+    "reportIssues": "Sorunları bildirin",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "İş bulunamadı.",
+    "fileNotFound": "Dosya bulunamadı.",
+    "uploadFailed": "Yükleme başarısız.",
+    "conversionFailed": "Dönüştürme başarısız.",
+    "serverError": "Sunucu hatası."
+  },
+  "upload": {
+    "success": "Dosyalar başarıyla yüklendi.",
+    "dragDrop": "Dosyaları buraya bırakın"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

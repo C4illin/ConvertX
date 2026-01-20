@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Aangedryf deur",
+    "version": "v{version}",
+    "loading": "Laai...",
+    "error": "Fout",
+    "success": "Sukses",
+    "confirm": "Bevestig",
+    "cancel": "Kanselleer",
+    "close": "Sluit",
+    "save": "Stoor",
+    "delete": "Vee uit",
+    "remove": "Verwyder",
+    "download": "Laai af",
+    "upload": "Laai op",
+    "submit": "Dien in",
+    "back": "Terug",
+    "next": "Volgende",
+    "yes": "Ja",
+    "no": "Nee"
+  },
+  "nav": {
+    "history": "Geskiedenis",
+    "account": "Rekening",
+    "logout": "Teken uit",
+    "login": "Teken in",
+    "register": "Registreer",
+    "language": "Taal"
+  },
+  "convert": {
+    "title": "Omskakel",
+    "titleWithType": "Omskakel .{fileType}",
+    "chooseFile": "Kies 'n lêer",
+    "orDragHere": "of sleep dit hierheen",
+    "searchConversions": "Soek vir omskakelings",
+    "convertTo": "Omskakel na",
+    "convertButton": "Omskakel",
+    "uploading": "Laai op...",
+    "processing": "Verwerk..."
+  },
+  "results": {
+    "title": "Resultate",
+    "convertedFileName": "Omgeskakelde lêernaam",
+    "status": "Status",
+    "actions": "Aksies",
+    "downloadAll": "Alles",
+    "downloadTar": "Tar",
+    "deleteJob": "Vee uit",
+    "noFiles": "Nog geen lêers omgeskakel nie.",
+    "statusPending": "Hangend",
+    "statusCompleted": "Voltooi",
+    "statusFailed": "Misluk"
+  },
+  "history": {
+    "title": "Resultate",
+    "time": "Tyd",
+    "files": "Lêers",
+    "filesDone": "Lêers klaar",
+    "status": "Status",
+    "actions": "Aksies",
+    "expandDetails": "Brei besonderhede uit",
+    "detailedFileInfo": "Gedetailleerde lêerinligting:",
+    "deleteSelected": "Vee gekose uit",
+    "selectAll": "Kies alles",
+    "confirmDelete": "Is jy seker jy wil {count} taak/take uitvee? Hierdie aksie kan nie ongedaan gemaak word nie.",
+    "deleteSuccess": "{deleted} taak/take suksesvol uitgevee.",
+    "deleteFailed": "Kon nie {failed} taak/take uitvee nie.",
+    "deleteError": "'n Fout het voorgekom tydens die uitvee van take. Probeer asseblief weer."
+  },
+  "auth": {
+    "email": "E-pos",
+    "password": "Wagwoord",
+    "currentPassword": "Huidige wagwoord",
+    "newPassword": "Wagwoord (laat leeg vir onveranderd)",
+    "loginButton": "Teken in",
+    "registerButton": "Registreer",
+    "updateButton": "Werk op",
+    "createAccount": "Skep rekening",
+    "invalidCredentials": "Ongeldige geloofsbriewe.",
+    "emailInUse": "E-pos word reeds gebruik.",
+    "unauthorized": "Ongemagtig",
+    "cookiesRequired": "Koekies moet geaktiveer wees om hierdie toepassing te gebruik.",
+    "noCookies": "Geen verifikasie-koekie nie, miskien blokkeer jou blaaier koekies."
+  },
+  "setup": {
+    "welcome": "Welkom by ConvertX-CN!",
+    "createYourAccount": "Skep jou rekening",
+    "reportIssues": "Rapporteer enige probleme op",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Taak nie gevind nie.",
+    "fileNotFound": "Lêer nie gevind nie.",
+    "uploadFailed": "Oplaai het misluk.",
+    "conversionFailed": "Omskakeling het misluk.",
+    "serverError": "Bediener fout."
+  },
+  "upload": {
+    "success": "Lêers suksesvol opgelaai.",
+    "dragDrop": "Laat lêers hier val"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

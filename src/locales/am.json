@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "የሚሰራው በ",
+    "version": "v{version}",
+    "loading": "በመጫን ላይ...",
+    "error": "ስህተት",
+    "success": "ተሳክቷል",
+    "confirm": "አረጋግጥ",
+    "cancel": "ሰርዝ",
+    "close": "ዝጋ",
+    "save": "አስቀምጥ",
+    "delete": "ሰርዝ",
+    "remove": "አስወግድ",
+    "download": "አውርድ",
+    "upload": "ስቀል",
+    "submit": "አስገባ",
+    "back": "ተመለስ",
+    "next": "ቀጣይ",
+    "yes": "አዎ",
+    "no": "አይ"
+  },
+  "nav": {
+    "history": "ታሪክ",
+    "account": "መለያ",
+    "logout": "ውጣ",
+    "login": "ግባ",
+    "register": "ተመዝገብ",
+    "language": "ቋንቋ"
+  },
+  "convert": {
+    "title": "ቀይር",
+    "titleWithType": ".{fileType} ቀይር",
+    "chooseFile": "ፋይል ይምረጡ",
+    "orDragHere": "ወይም እዚህ ይጎትቱ",
+    "searchConversions": "ቅየራዎችን ይፈልጉ",
+    "convertTo": "ወደ ቀይር",
+    "convertButton": "ቀይር",
+    "uploading": "በመስቀል ላይ...",
+    "processing": "በማስኬድ ላይ..."
+  },
+  "results": {
+    "title": "ውጤቶች",
+    "convertedFileName": "የተቀየረ ፋይል ስም",
+    "status": "ሁኔታ",
+    "actions": "ድርጊቶች",
+    "downloadAll": "ሁሉም",
+    "downloadTar": "Tar",
+    "deleteJob": "ሰርዝ",
+    "noFiles": "እስካሁን የተቀየሩ ፋይሎች የሉም።",
+    "statusPending": "በመጠባበቅ ላይ",
+    "statusCompleted": "ተጠናቋል",
+    "statusFailed": "አልተሳካም"
+  },
+  "history": {
+    "title": "ውጤቶች",
+    "time": "ጊዜ",
+    "files": "ፋይሎች",
+    "filesDone": "የተጠናቀቁ ፋይሎች",
+    "status": "ሁኔታ",
+    "actions": "ድርጊቶች",
+    "expandDetails": "ዝርዝሮችን አስፋ",
+    "detailedFileInfo": "ዝርዝር የፋይል መረጃ:",
+    "deleteSelected": "የተመረጡትን ሰርዝ",
+    "selectAll": "ሁሉንም ምረጥ",
+    "confirmDelete": "{count} ስራ(ዎች)ን መሰረዝ እንደሚፈልጉ እርግጠኛ ነዎት? ይህ ድርጊት ሊቀለበስ አይችልም።",
+    "deleteSuccess": "{deleted} ስራ(ዎች) በተሳካ ሁኔታ ተሰርዘዋል።",
+    "deleteFailed": "{failed} ስራ(ዎች)ን መሰረዝ አልተሳካም።",
+    "deleteError": "ስራዎችን በመሰረዝ ጊዜ ስህተት ተከስቷል። እባክዎ እንደገና ይሞክሩ።"
+  },
+  "auth": {
+    "email": "ኢሜይል",
+    "password": "የይለፍ ቃል",
+    "currentPassword": "የአሁኑ የይለፍ ቃል",
+    "newPassword": "የይለፍ ቃል (ሳይቀየር ለመተው ባዶ ይተው)",
+    "loginButton": "ግባ",
+    "registerButton": "ተመዝገብ",
+    "updateButton": "አዘምን",
+    "createAccount": "መለያ ፍጠር",
+    "invalidCredentials": "ልክ ያልሆነ መረጃ።",
+    "emailInUse": "ኢሜይሉ አስቀድሞ ጥቅም ላይ ውሏል።",
+    "unauthorized": "ያልተፈቀደ",
+    "cookiesRequired": "ይህን መተግበሪያ ለመጠቀም ኩኪዎች መንቃት አለባቸው።",
+    "noCookies": "የማረጋገጫ ኩኪ የለም፣ ምናልባት ብራውዘርዎ ኩኪዎችን እያገደ ሊሆን ይችላል።"
+  },
+  "setup": {
+    "welcome": "ወደ ConvertX-CN እንኳን ደህና መጡ!",
+    "createYourAccount": "መለያዎን ይፍጠሩ",
+    "reportIssues": "ማንኛውንም ችግር ያሳውቁ በ",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "ስራ አልተገኘም።",
+    "fileNotFound": "ፋይል አልተገኘም።",
+    "uploadFailed": "መስቀል አልተሳካም።",
+    "conversionFailed": "መቀየር አልተሳካም።",
+    "serverError": "የሰርቨር ስህተት።"
+  },
+  "upload": {
+    "success": "ፋይሎች በተሳካ ሁኔታ ተሰቅለዋል።",
+    "dragDrop": "ፋይሎችን እዚህ ይጣሉ"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

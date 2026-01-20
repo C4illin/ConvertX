@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Poháněno",
+    "version": "v{version}",
+    "loading": "Načítání...",
+    "error": "Chyba",
+    "success": "Úspěch",
+    "confirm": "Potvrdit",
+    "cancel": "Zrušit",
+    "close": "Zavřít",
+    "save": "Uložit",
+    "delete": "Smazat",
+    "remove": "Odstranit",
+    "download": "Stáhnout",
+    "upload": "Nahrát",
+    "submit": "Odeslat",
+    "back": "Zpět",
+    "next": "Další",
+    "yes": "Ano",
+    "no": "Ne"
+  },
+  "nav": {
+    "history": "Historie",
+    "account": "Účet",
+    "logout": "Odhlásit",
+    "login": "Přihlásit",
+    "register": "Registrovat",
+    "language": "Jazyk"
+  },
+  "convert": {
+    "title": "Převést",
+    "titleWithType": "Převést .{fileType}",
+    "chooseFile": "Vyberte soubor",
+    "orDragHere": "nebo ho sem přetáhněte",
+    "searchConversions": "Hledat převody",
+    "convertTo": "Převést na",
+    "convertButton": "Převést",
+    "uploading": "Nahrávání...",
+    "processing": "Zpracování..."
+  },
+  "results": {
+    "title": "Výsledky",
+    "convertedFileName": "Název převedeného souboru",
+    "status": "Stav",
+    "actions": "Akce",
+    "downloadAll": "Vše",
+    "downloadTar": "Tar",
+    "deleteJob": "Smazat",
+    "noFiles": "Zatím nebyly převedeny žádné soubory.",
+    "statusPending": "Čekající",
+    "statusCompleted": "Dokončeno",
+    "statusFailed": "Selhalo"
+  },
+  "history": {
+    "title": "Výsledky",
+    "time": "Čas",
+    "files": "Soubory",
+    "filesDone": "Dokončené soubory",
+    "status": "Stav",
+    "actions": "Akce",
+    "expandDetails": "Rozbalit podrobnosti",
+    "detailedFileInfo": "Podrobné informace o souboru:",
+    "deleteSelected": "Smazat vybrané",
+    "selectAll": "Vybrat vše",
+    "confirmDelete": "Opravdu chcete smazat {count} úlohu/úloh? Tuto akci nelze vrátit zpět.",
+    "deleteSuccess": "Úspěšně smazáno {deleted} úloha/úloh.",
+    "deleteFailed": "Nepodařilo se smazat {failed} úloha/úloh.",
+    "deleteError": "Při mazání úloh došlo k chybě. Zkuste to prosím znovu."
+  },
+  "auth": {
+    "email": "E-mail",
+    "password": "Heslo",
+    "currentPassword": "Aktuální heslo",
+    "newPassword": "Heslo (ponechte prázdné pro nezměnění)",
+    "loginButton": "Přihlásit",
+    "registerButton": "Registrovat",
+    "updateButton": "Aktualizovat",
+    "createAccount": "Vytvořit účet",
+    "invalidCredentials": "Neplatné přihlašovací údaje.",
+    "emailInUse": "E-mail je již používán.",
+    "unauthorized": "Neautorizováno",
+    "cookiesRequired": "Pro použití této aplikace musí být povoleny cookies.",
+    "noCookies": "Žádný autentizační cookie, možná váš prohlížeč blokuje cookies."
+  },
+  "setup": {
+    "welcome": "Vítejte v ConvertX-CN!",
+    "createYourAccount": "Vytvořte si účet",
+    "reportIssues": "Nahlaste problémy na",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Úloha nenalezena.",
+    "fileNotFound": "Soubor nenalezen.",
+    "uploadFailed": "Nahrávání selhalo.",
+    "conversionFailed": "Převod selhal.",
+    "serverError": "Chyba serveru."
+  },
+  "upload": {
+    "success": "Soubory byly úspěšně nahrány.",
+    "dragDrop": "Přetáhněte soubory sem"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

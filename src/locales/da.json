@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Drevet af",
+    "version": "v{version}",
+    "loading": "Indlæser...",
+    "error": "Fejl",
+    "success": "Succes",
+    "confirm": "Bekræft",
+    "cancel": "Annuller",
+    "close": "Luk",
+    "save": "Gem",
+    "delete": "Slet",
+    "remove": "Fjern",
+    "download": "Download",
+    "upload": "Upload",
+    "submit": "Send",
+    "back": "Tilbage",
+    "next": "Næste",
+    "yes": "Ja",
+    "no": "Nej"
+  },
+  "nav": {
+    "history": "Historik",
+    "account": "Konto",
+    "logout": "Log ud",
+    "login": "Log ind",
+    "register": "Registrer",
+    "language": "Sprog"
+  },
+  "convert": {
+    "title": "Konverter",
+    "titleWithType": "Konverter .{fileType}",
+    "chooseFile": "Vælg en fil",
+    "orDragHere": "eller træk den hertil",
+    "searchConversions": "Søg efter konverteringer",
+    "convertTo": "Konverter til",
+    "convertButton": "Konverter",
+    "uploading": "Uploader...",
+    "processing": "Behandler..."
+  },
+  "results": {
+    "title": "Resultater",
+    "convertedFileName": "Konverteret filnavn",
+    "status": "Status",
+    "actions": "Handlinger",
+    "downloadAll": "Alle",
+    "downloadTar": "Tar",
+    "deleteJob": "Slet",
+    "noFiles": "Ingen filer konverteret endnu.",
+    "statusPending": "Afventer",
+    "statusCompleted": "Afsluttet",
+    "statusFailed": "Mislykket"
+  },
+  "history": {
+    "title": "Resultater",
+    "time": "Tid",
+    "files": "Filer",
+    "filesDone": "Færdige filer",
+    "status": "Status",
+    "actions": "Handlinger",
+    "expandDetails": "Udvid detaljer",
+    "detailedFileInfo": "Detaljeret filinformation:",
+    "deleteSelected": "Slet valgte",
+    "selectAll": "Vælg alle",
+    "confirmDelete": "Er du sikker på, at du vil slette {count} job? Denne handling kan ikke fortrydes.",
+    "deleteSuccess": "Slettet {deleted} job med succes.",
+    "deleteFailed": "Kunne ikke slette {failed} job.",
+    "deleteError": "Der opstod en fejl under sletning af jobs. Prøv venligst igen."
+  },
+  "auth": {
+    "email": "E-mail",
+    "password": "Adgangskode",
+    "currentPassword": "Nuværende adgangskode",
+    "newPassword": "Adgangskode (lad være tom for uændret)",
+    "loginButton": "Log ind",
+    "registerButton": "Registrer",
+    "updateButton": "Opdater",
+    "createAccount": "Opret konto",
+    "invalidCredentials": "Ugyldige loginoplysninger.",
+    "emailInUse": "E-mail er allerede i brug.",
+    "unauthorized": "Ikke autoriseret",
+    "cookiesRequired": "Cookies skal være aktiveret for at bruge denne app.",
+    "noCookies": "Ingen godkendelsescookie, måske blokerer din browser cookies."
+  },
+  "setup": {
+    "welcome": "Velkommen til ConvertX-CN!",
+    "createYourAccount": "Opret din konto",
+    "reportIssues": "Rapporter problemer på",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Job ikke fundet.",
+    "fileNotFound": "Fil ikke fundet.",
+    "uploadFailed": "Upload mislykkedes.",
+    "conversionFailed": "Konvertering mislykkedes.",
+    "serverError": "Serverfejl."
+  },
+  "upload": {
+    "success": "Filer uploadet succesfuldt.",
+    "dragDrop": "Slip filer her"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

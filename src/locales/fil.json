@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Pinapagana ng",
+    "version": "v{version}",
+    "loading": "Naglo-load...",
+    "error": "Error",
+    "success": "Tagumpay",
+    "confirm": "Kumpirmahin",
+    "cancel": "Kanselahin",
+    "close": "Isara",
+    "save": "I-save",
+    "delete": "Burahin",
+    "remove": "Alisin",
+    "download": "I-download",
+    "upload": "I-upload",
+    "submit": "Isumite",
+    "back": "Bumalik",
+    "next": "Susunod",
+    "yes": "Oo",
+    "no": "Hindi"
+  },
+  "nav": {
+    "history": "Kasaysayan",
+    "account": "Account",
+    "logout": "Mag-logout",
+    "login": "Mag-login",
+    "register": "Magrehistro",
+    "language": "Wika"
+  },
+  "convert": {
+    "title": "I-convert",
+    "titleWithType": "I-convert ang .{fileType}",
+    "chooseFile": "Pumili ng file",
+    "orDragHere": "o i-drag dito",
+    "searchConversions": "Maghanap ng conversions",
+    "convertTo": "I-convert sa",
+    "convertButton": "I-convert",
+    "uploading": "Nag-a-upload...",
+    "processing": "Pinoproseso..."
+  },
+  "results": {
+    "title": "Mga Resulta",
+    "convertedFileName": "Pangalan ng Na-convert na File",
+    "status": "Status",
+    "actions": "Mga Aksyon",
+    "downloadAll": "Lahat",
+    "downloadTar": "Tar",
+    "deleteJob": "Burahin",
+    "noFiles": "Walang mga file na na-convert pa.",
+    "statusPending": "Nakabinbin",
+    "statusCompleted": "Kumpleto",
+    "statusFailed": "Nabigo"
+  },
+  "history": {
+    "title": "Mga Resulta",
+    "time": "Oras",
+    "files": "Mga File",
+    "filesDone": "Mga Natapos na File",
+    "status": "Status",
+    "actions": "Mga Aksyon",
+    "expandDetails": "Palawakin ang mga detalye",
+    "detailedFileInfo": "Detalyadong Impormasyon ng File:",
+    "deleteSelected": "Burahin ang Napili",
+    "selectAll": "Piliin lahat",
+    "confirmDelete": "Sigurado ka bang gusto mong burahin ang {count} na trabaho? Ang aksyon na ito ay hindi na maibabalik.",
+    "deleteSuccess": "Matagumpay na nabura ang {deleted} na trabaho.",
+    "deleteFailed": "Hindi nabura ang {failed} na trabaho.",
+    "deleteError": "May error na naganap habang nagbubura ng mga trabaho. Pakisubukang muli."
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "currentPassword": "Kasalukuyang Password",
+    "newPassword": "Password (iwanang blangko kung hindi babaguhin)",
+    "loginButton": "Mag-login",
+    "registerButton": "Magrehistro",
+    "updateButton": "I-update",
+    "createAccount": "Gumawa ng account",
+    "invalidCredentials": "Invalid na credentials.",
+    "emailInUse": "Ginagamit na ang email.",
+    "unauthorized": "Hindi awtorisado",
+    "cookiesRequired": "Dapat i-enable ang cookies para magamit ang app na ito.",
+    "noCookies": "Walang auth cookie, maaaring hinaharangan ng iyong browser ang cookies."
+  },
+  "setup": {
+    "welcome": "Maligayang pagdating sa ConvertX-CN!",
+    "createYourAccount": "Gumawa ng iyong account",
+    "reportIssues": "Mag-ulat ng mga isyu sa",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Hindi nahanap ang trabaho.",
+    "fileNotFound": "Hindi nahanap ang file.",
+    "uploadFailed": "Nabigo ang pag-upload.",
+    "conversionFailed": "Nabigo ang conversion.",
+    "serverError": "Error sa server."
+  },
+  "upload": {
+    "success": "Matagumpay na na-upload ang mga file.",
+    "dragDrop": "I-drop ang mga file dito"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

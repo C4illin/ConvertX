@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "ຂັບເຄື່ອນໂດຍ",
+    "version": "v{version}",
+    "loading": "ກຳລັງໂຫລດ...",
+    "error": "ຜິດພາດ",
+    "success": "ສຳເລັດ",
+    "confirm": "ຢືນຢັນ",
+    "cancel": "ຍົກເລີກ",
+    "close": "ປິດ",
+    "save": "ບັນທຶກ",
+    "delete": "ລຶບ",
+    "remove": "ເອົາອອກ",
+    "download": "ດາວໂຫລດ",
+    "upload": "ອັບໂຫລດ",
+    "submit": "ສົ່ງ",
+    "back": "ກັບຄືນ",
+    "next": "ຕໍ່ໄປ",
+    "yes": "ແມ່ນ",
+    "no": "ບໍ່"
+  },
+  "nav": {
+    "history": "ປະຫວັດ",
+    "account": "ບັນຊີ",
+    "logout": "ອອກຈາກລະບົບ",
+    "login": "ເຂົ້າສູ່ລະບົບ",
+    "register": "ລົງທະບຽນ",
+    "language": "ພາສາ"
+  },
+  "convert": {
+    "title": "ແປງ",
+    "titleWithType": "ແປງ .{fileType}",
+    "chooseFile": "ເລືອກໄຟລ໌",
+    "orDragHere": "ຫຼືລາກມາທີ່ນີ້",
+    "searchConversions": "ຄົ້ນຫາການແປງ",
+    "convertTo": "ແປງເປັນ",
+    "convertButton": "ແປງ",
+    "uploading": "ກຳລັງອັບໂຫລດ...",
+    "processing": "ກຳລັງປະມວນຜົນ..."
+  },
+  "results": {
+    "title": "ຜົນລັບ",
+    "convertedFileName": "ຊື່ໄຟລ໌ທີ່ແປງແລ້ວ",
+    "status": "ສະຖານະ",
+    "actions": "ການກະທຳ",
+    "downloadAll": "ທັງໝົດ",
+    "downloadTar": "Tar",
+    "deleteJob": "ລຶບ",
+    "noFiles": "ຍັງບໍ່ມີໄຟລ໌ຖືກແປງ.",
+    "statusPending": "ລໍຖ້າ",
+    "statusCompleted": "ສຳເລັດ",
+    "statusFailed": "ລົ້ມເຫລວ"
+  },
+  "history": {
+    "title": "ຜົນລັບ",
+    "time": "ເວລາ",
+    "files": "ໄຟລ໌",
+    "filesDone": "ໄຟລ໌ສຳເລັດ",
+    "status": "ສະຖານະ",
+    "actions": "ການກະທຳ",
+    "expandDetails": "ຂະຫຍາຍລາຍລະອຽດ",
+    "detailedFileInfo": "ຂໍ້ມູນໄຟລ໌ລະອຽດ:",
+    "deleteSelected": "ລຶບທີ່ເລືອກ",
+    "selectAll": "ເລືອກທັງໝົດ",
+    "confirmDelete": "ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບ {count} ວຽກ? ການກະທຳນີ້ບໍ່ສາມາດຍ້ອນກັບໄດ້.",
+    "deleteSuccess": "ລຶບ {deleted} ວຽກສຳເລັດແລ້ວ.",
+    "deleteFailed": "ລຶບ {failed} ວຽກບໍ່ສຳເລັດ.",
+    "deleteError": "ເກີດຄວາມຜິດພາດໃນການລຶບວຽກ. ກະລຸນາລອງໃໝ່."
+  },
+  "auth": {
+    "email": "ອີເມວ",
+    "password": "ລະຫັດຜ່ານ",
+    "currentPassword": "ລະຫັດຜ່ານປັດຈຸບັນ",
+    "newPassword": "ລະຫັດຜ່ານ (ປ່ອຍວ່າງຖ້າບໍ່ປ່ຽນ)",
+    "loginButton": "ເຂົ້າສູ່ລະບົບ",
+    "registerButton": "ລົງທະບຽນ",
+    "updateButton": "ອັບເດດ",
+    "createAccount": "ສ້າງບັນຊີ",
+    "invalidCredentials": "ຂໍ້ມູນບໍ່ຖືກຕ້ອງ.",
+    "emailInUse": "ອີເມວນີ້ຖືກໃຊ້ແລ້ວ.",
+    "unauthorized": "ບໍ່ໄດ້ຮັບອະນຸຍາດ",
+    "cookiesRequired": "ຕ້ອງເປີດໃຊ້ cookies ເພື່ອໃຊ້ແອັບນີ້.",
+    "noCookies": "ບໍ່ມີ cookie ຢືນຢັນ, ບາງທີບຣາວເຊີຂອງທ່ານອາດປິດ cookies."
+  },
+  "setup": {
+    "welcome": "ຍິນດີຕ້ອນຮັບສູ່ ConvertX-CN!",
+    "createYourAccount": "ສ້າງບັນຊີຂອງທ່ານ",
+    "reportIssues": "ລາຍງານບັນຫາໃນ",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "ບໍ່ພົບວຽກ.",
+    "fileNotFound": "ບໍ່ພົບໄຟລ໌.",
+    "uploadFailed": "ອັບໂຫລດລົ້ມເຫລວ.",
+    "conversionFailed": "ການແປງລົ້ມເຫລວ.",
+    "serverError": "ຜິດພາດເຊີເວີ."
+  },
+  "upload": {
+    "success": "ອັບໂຫລດໄຟລ໌ສຳເລັດແລ້ວ.",
+    "dragDrop": "ວາງໄຟລ໌ທີ່ນີ້"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "قدرت گرفته از",
+    "version": "v{version}",
+    "loading": "در حال بارگذاری...",
+    "error": "خطا",
+    "success": "موفقیت",
+    "confirm": "تأیید",
+    "cancel": "لغو",
+    "close": "بستن",
+    "save": "ذخیره",
+    "delete": "حذف",
+    "remove": "برداشتن",
+    "download": "دانلود",
+    "upload": "آپلود",
+    "submit": "ارسال",
+    "back": "بازگشت",
+    "next": "بعدی",
+    "yes": "بله",
+    "no": "خیر"
+  },
+  "nav": {
+    "history": "تاریخچه",
+    "account": "حساب کاربری",
+    "logout": "خروج",
+    "login": "ورود",
+    "register": "ثبت نام",
+    "language": "زبان"
+  },
+  "convert": {
+    "title": "تبدیل",
+    "titleWithType": "تبدیل .{fileType}",
+    "chooseFile": "انتخاب فایل",
+    "orDragHere": "یا اینجا بکشید",
+    "searchConversions": "جستجوی تبدیل‌ها",
+    "convertTo": "تبدیل به",
+    "convertButton": "تبدیل",
+    "uploading": "در حال آپلود...",
+    "processing": "در حال پردازش..."
+  },
+  "results": {
+    "title": "نتایج",
+    "convertedFileName": "نام فایل تبدیل شده",
+    "status": "وضعیت",
+    "actions": "عملیات",
+    "downloadAll": "همه",
+    "downloadTar": "Tar",
+    "deleteJob": "حذف",
+    "noFiles": "هنوز فایلی تبدیل نشده است.",
+    "statusPending": "در انتظار",
+    "statusCompleted": "تکمیل شد",
+    "statusFailed": "ناموفق"
+  },
+  "history": {
+    "title": "نتایج",
+    "time": "زمان",
+    "files": "فایل‌ها",
+    "filesDone": "فایل‌های انجام شده",
+    "status": "وضعیت",
+    "actions": "عملیات",
+    "expandDetails": "نمایش جزئیات",
+    "detailedFileInfo": "اطلاعات دقیق فایل:",
+    "deleteSelected": "حذف انتخاب شده‌ها",
+    "selectAll": "انتخاب همه",
+    "confirmDelete": "آیا مطمئن هستید که می‌خواهید {count} کار را حذف کنید؟ این عمل قابل بازگشت نیست.",
+    "deleteSuccess": "{deleted} کار با موفقیت حذف شد.",
+    "deleteFailed": "حذف {failed} کار ناموفق بود.",
+    "deleteError": "هنگام حذف کارها خطایی رخ داد. لطفاً دوباره تلاش کنید."
+  },
+  "auth": {
+    "email": "ایمیل",
+    "password": "رمز عبور",
+    "currentPassword": "رمز عبور فعلی",
+    "newPassword": "رمز عبور (برای عدم تغییر خالی بگذارید)",
+    "loginButton": "ورود",
+    "registerButton": "ثبت نام",
+    "updateButton": "به‌روزرسانی",
+    "createAccount": "ایجاد حساب",
+    "invalidCredentials": "اطلاعات ورود نامعتبر است.",
+    "emailInUse": "این ایمیل قبلاً استفاده شده است.",
+    "unauthorized": "غیرمجاز",
+    "cookiesRequired": "برای استفاده از این برنامه باید کوکی‌ها فعال باشند.",
+    "noCookies": "کوکی احراز هویت وجود ندارد، شاید مرورگر شما کوکی‌ها را مسدود کرده باشد."
+  },
+  "setup": {
+    "welcome": "به ConvertX-CN خوش آمدید!",
+    "createYourAccount": "حساب کاربری خود را بسازید",
+    "reportIssues": "گزارش مشکلات در",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "کار پیدا نشد.",
+    "fileNotFound": "فایل پیدا نشد.",
+    "uploadFailed": "آپلود ناموفق بود.",
+    "conversionFailed": "تبدیل ناموفق بود.",
+    "serverError": "خطای سرور."
+  },
+  "upload": {
+    "success": "فایل‌ها با موفقیت آپلود شدند.",
+    "dragDrop": "فایل‌ها را اینجا رها کنید"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

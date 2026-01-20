@@ -1,50 +1,52 @@
-![ConvertX](images/logo.png)
+![ConvertX-CN](images/logo.png)
 
-# ConvertX-CN（完整版）
+# ConvertX-CN
+
+**開箱即用的全功能檔案轉換服務** | **Self-hosted File Converter - Full Edition**
 
 [![Docker](https://github.com/pi-docket/ConvertX-CN/actions/workflows/release.yml/badge.svg)](https://github.com/pi-docket/ConvertX-CN/actions/workflows/release.yml)
 [![Docker Pulls](https://img.shields.io/docker/pulls/convertx/convertx-cn?style=flat&logo=docker&label=Docker%20Hub)](https://hub.docker.com/r/convertx/convertx-cn)
 [![GitHub Release](https://img.shields.io/github/v/release/pi-docket/ConvertX-CN)](https://github.com/pi-docket/ConvertX-CN/releases)
-
-> 🎉 **這是完整版 ConvertX-CN image，已內建所有轉換依賴！**
->
-> 使用者 **不需要自己寫 Dockerfile**，直接 `docker run` 或 `docker compose up` 即可使用。
-
-基於 [C4illin/ConvertX](https://github.com/C4illin/ConvertX) 的中文優化版本。目前還在實作請等到1月底發布
+[![License](https://img.shields.io/github/license/pi-docket/ConvertX-CN)](LICENSE)
 
 ---
 
-## ✨ 完整版特色
+## ✨ 什麼是 ConvertX-CN？
 
-此 image 已經內建以下所有依賴，開箱即用：
+ConvertX-CN 是基於 [C4illin/ConvertX](https://github.com/C4illin/ConvertX) 的**完整版 Fork**，專為中文使用者優化，並預載所有轉換依賴。
 
-| 類別         | 內建內容                                                         |
-| ------------ | ---------------------------------------------------------------- |
-| **文件轉換** | LibreOffice (headless)、Pandoc                                   |
-| **LaTeX**    | TexLive Full（完整版，支援所有 LaTeX 需求）                      |
-| **OCR 識別** | Tesseract OCR + 繁體中文、簡體中文、日文、韓文、英文、德文語言包 |
-| **CJK 字型** | Noto CJK（中日韓）、Noto Emoji、微軟核心字型、標楷體             |
-| **影音轉換** | FFmpeg、ImageMagick、GraphicsMagick                              |
-| **向量圖形** | Inkscape、Potrace、VTracer、resvg                                |
-| **電子書**   | Calibre                                                          |
-| **其他**     | Ghostscript、MuPDF、Poppler、libheif、libjxl 等                  |
+> 🎉 **一鍵部署，無需額外配置**  
+> 使用者 **不需要自己寫 Dockerfile**，直接 `docker run` 或 `docker compose up` 即可使用。
+
+### 主要特色
+
+| 特色 | 說明 |
+|------|------|
+| 🌍 **65+ 語言支援** | 繁體中文、簡體中文、英文、日文、韓文等 65 種語言 |
+| 📦 **完整內建** | LibreOffice、FFmpeg、Pandoc、Calibre 等 20+ 轉換器 |
+| 🎨 **CJK 字型** | Noto CJK、微軟核心字型、標楷體等中日韓字型 |
+| 🔤 **OCR 支援** | Tesseract + 多語言語言包 |
+| ⚡ **LaTeX 完整版** | TexLive Full，支援所有 LaTeX 需求 |
+| 🐳 **開箱即用** | 一個 Docker 命令即可啟動 |
 
 ---
 
 ## 🚀 快速開始
 
-### 方法一：Docker Run
+### 最快方式：Docker Run
 
 ```bash
 docker run -d \
   --name convertx-cn \
   -p 3000:3000 \
   -v ./data:/app/data \
-  -e TZ=Asia/Taipei \
+  -e ACCOUNT_REGISTRATION=true \
   convertx/convertx-cn:latest
 ```
 
-### 方法二：Docker Compose（推薦）
+開啟瀏覽器訪問 `http://localhost:3000`，建立帳號即可開始使用！
+
+### 推薦方式：Docker Compose
 
 建立 `docker-compose.yml`：
 
@@ -60,141 +62,96 @@ services:
       - ./data:/app/data
     environment:
       - TZ=Asia/Taipei
-      - JWT_SECRET=請更換為一個長且隨機的字串
-      - ACCOUNT_REGISTRATION=false
-      - HTTP_ALLOWED=false
-      - AUTO_DELETE_EVERY_N_HOURS=24
+      - JWT_SECRET=your-secret-key-change-me
+      - ACCOUNT_REGISTRATION=true
 ```
-
-啟動服務：
 
 ```bash
 docker compose up -d
 ```
 
-然後瀏覽 `http://localhost:3000` 並建立第一個帳號。
+📖 完整部署指南請見 → [docs/getting-started.md](docs/getting-started.md)
 
 ---
 
-## 📦 Docker Image
+## 🌍 語言支援
 
-| Image                         | 說明       |
-| ----------------------------- | ---------- |
+ConvertX-CN 支援 **65 種語言**，包括：
+
+| 區域 | 語言 |
+|------|------|
+| **東亞** | 繁體中文（預設）、简体中文、日本語、한국어 |
+| **歐洲** | English, Deutsch, Français, Español, Italiano, Português, Русский, Polski, Nederlands, Українська, Čeština, Svenska, Dansk, Suomi, Norsk, Ελληνικά, Magyar, Română, Български, Hrvatski, Slovenčina, Slovenščina, Lietuvių, Latviešu, Eesti, Српски, Català, Euskara, Galego, Íslenska, Gaeilge, Cymraeg, Malti, Македонски, Shqip |
+| **中東/南亞** | العربية, עברית, فارسی, Türkçe, हिन्दी, বাংলা, தமிழ், తెలుగు, मराठी, ગુજરાતી, ಕನ್ನಡ, മലയാളം, नेपाली, සිංහල |
+| **東南亞** | ไทย, Tiếng Việt, Bahasa Indonesia, Bahasa Melayu, Filipino, မြန်မာ, ខ្មែរ, ລາວ |
+| **非洲** | Afrikaans, Kiswahili, አማርኛ, isiZulu |
+
+語言會根據瀏覽器設定自動偵測，也可透過右上角選單手動切換。
+
+---
+
+## 📦 內建轉換器
+
+| 轉換器 | 用途 | 輸入格式 | 輸出格式 |
+|--------|------|----------|----------|
+| FFmpeg | 影音 | ~472 | ~199 |
+| ImageMagick | 圖片 | 245 | 183 |
+| GraphicsMagick | 圖片 | 167 | 130 |
+| LibreOffice | 文件 | 41 | 22 |
+| Pandoc | 文件 | 43 | 65 |
+| Calibre | 電子書 | 26 | 19 |
+| Inkscape | 向量圖 | 7 | 17 |
+| Assimp | 3D 模型 | 77 | 23 |
+
+完整列表 → [docs/converters.md](docs/converters.md)
+
+---
+
+## 📖 文件導覽
+
+| 文件 | 說明 |
+|------|------|
+| [🚀 快速開始](docs/getting-started.md) | Docker 部署教學 |
+| [🐳 Docker 配置](docs/docker.md) | 完整 Docker 設定指南 |
+| [⚙️ 環境變數](docs/environment-variables.md) | 所有環境變數說明 |
+| [💾 儲存與 URL](docs/url-id-and-storage.md) | 檔案儲存機制說明 |
+| [🔧 進階用法](docs/advanced-usage.md) | 硬體加速、反向代理等 |
+| [🌍 多語言](docs/i18n.md) | i18n 語言設定與新增 |
+| [📦 轉換器列表](docs/converters.md) | 支援的轉換格式完整列表 |
+
+---
+
+## 🐳 Docker Image
+
+| Tag | 說明 |
+|-----|------|
 | `convertx/convertx-cn:latest` | 最新穩定版 |
-| `convertx/convertx-cn:v0.1.1` | 指定版本   |
+| `convertx/convertx-cn:v0.1.3` | 指定版本 |
 
-> ⚠️ 由於內建完整依賴，image 大小約 4-6 GB，首次下載需要較長時間。
-
----
-
-## 🔧 支援的轉換器
-
-| Converter                                                       | Use case         | Converts from | Converts to |
-| --------------------------------------------------------------- | ---------------- | ------------- | ----------- |
-| [Inkscape](https://inkscape.org/)                               | Vector images    | 7             | 17          |
-| [libjxl](https://github.com/libjxl/libjxl)                      | JPEG XL          | 11            | 11          |
-| [resvg](https://github.com/RazrFalcon/resvg)                    | SVG              | 1             | 1           |
-| [Vips](https://github.com/libvips/libvips)                      | Images           | 45            | 23          |
-| [libheif](https://github.com/strukturag/libheif)                | HEIF             | 2             | 4           |
-| [XeLaTeX](https://tug.org/xetex/)                               | LaTeX            | 1             | 1           |
-| [Calibre](https://calibre-ebook.com/)                           | E-books          | 26            | 19          |
-| [LibreOffice](https://www.libreoffice.org/)                     | Documents        | 41            | 22          |
-| [Dasel](https://github.com/TomWright/dasel)                     | Data Files       | 5             | 4           |
-| [Pandoc](https://pandoc.org/)                                   | Documents        | 43            | 65          |
-| [msgconvert](https://github.com/mvz/email-outlook-message-perl) | Outlook          | 1             | 1           |
-| VCF to CSV                                                      | Contacts         | 1             | 1           |
-| [dvisvgm](https://dvisvgm.de/)                                  | Vector images    | 4             | 2           |
-| [ImageMagick](https://imagemagick.org/)                         | Images           | 245           | 183         |
-| [GraphicsMagick](http://www.graphicsmagick.org/)                | Images           | 167           | 130         |
-| [Assimp](https://github.com/assimp/assimp)                      | 3D Assets        | 77            | 23          |
-| [FFmpeg](https://ffmpeg.org/)                                   | Video            | ~472          | ~199        |
-| [Potrace](https://potrace.sourceforge.net/)                     | Raster to vector | 4             | 11          |
-| [VTracer](https://github.com/visioncortex/vtracer)              | Raster to vector | 8             | 1           |
-| [Markitdown](https://github.com/microsoft/markitdown)           | Documents        | 6             | 1           |
-
-<!-- many ffmpeg fileformats are duplicates -->
-
-缺少什麼轉換器？歡迎開 issue 或 pull request！
+> ⚠️ 由於內建完整依賴，Image 約 4-6 GB，首次下載需較長時間。
 
 ---
 
-## ⚙️ 環境變數
+## 📸 預覽
 
-所有環境變數皆為選填，建議設定 `JWT_SECRET`。
-
-| 變數名稱                  | 預設值       | 說明                                     |
-| ------------------------- | ------------ | ---------------------------------------- |
-| JWT_SECRET                | randomUUID() | 用於簽署 JWT 的密鑰字串                  |
-| ACCOUNT_REGISTRATION      | false        | 是否允許註冊新帳號                       |
-| HTTP_ALLOWED              | false        | 是否允許 HTTP 連線（僅本地使用）         |
-| ALLOW_UNAUTHENTICATED     | false        | 是否允許未登入使用                       |
-| AUTO_DELETE_EVERY_N_HOURS | 24           | 自動刪除超過 N 小時的檔案（0 = 停用）    |
-| WEBROOT                   |              | 子路徑部署，例如 `/convertx`             |
-| FFMPEG_ARGS               |              | FFmpeg 輸入參數，例如 `-hwaccel vaapi`   |
-| FFMPEG_OUTPUT_ARGS        |              | FFmpeg 輸出參數，例如 `-preset veryfast` |
-| HIDE_HISTORY              | false        | 隱藏歷史紀錄頁面                         |
-| LANGUAGE                  | en           | 日期格式語言（BCP 47 格式）              |
-| TZ                        | UTC          | 時區設定                                 |
-| MAX_CONVERT_PROCESS       | 0            | 最大同時轉換數（0 = 無限制）             |
+![ConvertX-CN Preview](images/preview.png)
 
 ---
-
-## 🌍 多語言支援（i18n）
-
-ConvertX-CN 支援以下語言：
-
-| 語言代碼 | 語言名稱         |
-| -------- | ---------------- |
-| zh-TW    | 繁體中文（預設） |
-| zh-CN    | 简体中文         |
-| en       | English          |
-| ja       | 日本語           |
-| ko       | 한국어           |
-
-### 語言切換
-
-- 在網站右上角的導航列可看到語言選擇器（地球圖示）
-- 點擊後可選擇偏好語言
-- 語言偏好會自動保存到 Cookie 中
-- 首次訪問時會自動偵測瀏覽器語言設定
-
-### 新增語言
-
-如要添加新語言，請：
-
-1. 在 `src/locales/` 目錄新增語言檔案（例如 `fr.json`）
-2. 在 `src/i18n/index.ts` 中：
-   - 導入新語言檔案
-   - 在 `supportedLocales` 陣列中添加語言配置
-   - 在 `translations` 物件中註冊翻譯
-
-歡迎提交 Pull Request 來新增更多語言！
-
----
-
-## 📖 教學文章
-
-> [!NOTE]
-> 以下教學由社群撰寫，可能有過時或錯誤之處。
-
-- 法文教學：<https://belginux.com/installer-convertx-avec-docker/>
-- 中文教學：<https://xzllll.com/24092901/>
-- 波蘭文教學：<https://www.kreatywnyprogramista.pl/convertx-lokalny-konwerter-plikow>
-
----
-
-## 📸 Screenshots
-
-![ConvertX Preview](images/preview.png)
 
 ## 🛠️ 開發
 
-0. 安裝 [Bun](https://bun.sh/) 和 Git
-1. Clone 這個 repository
-2. `bun install`
-3. `bun run dev`
+```bash
+# 安裝依賴
+bun install
 
-歡迎 Pull Request！請使用 [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#summary) 格式。
+# 開發模式
+bun run dev
+
+# 建構
+bun run build
+```
+
+歡迎 Pull Request！請使用 [Conventional Commits](https://www.conventionalcommits.org/) 格式。
 
 ---
 
@@ -203,11 +160,18 @@ ConvertX-CN 支援以下語言：
 本專案基於 [C4illin/ConvertX](https://github.com/C4illin/ConvertX) 開發。
 
 <a href="https://github.com/C4illin/ConvertX/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=C4illin/ConvertX" alt="Image with all contributors"/>
+  <img src="https://contrib.rocks/image?repo=C4illin/ConvertX" alt="Contributors" />
 </a>
 
 ---
 
 ## 📜 License
 
-MIT License
+[MIT License](LICENSE)
+
+---
+
+<p align="center">
+  <b>Powered by ConvertX-CN</b><br>
+  <a href="https://github.com/pi-docket/ConvertX-CN">https://github.com/pi-docket/ConvertX-CN</a>
+</p>

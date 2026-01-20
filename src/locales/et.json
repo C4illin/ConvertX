@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Toetab",
+    "version": "v{version}",
+    "loading": "Laadimine...",
+    "error": "Viga",
+    "success": "Õnnestus",
+    "confirm": "Kinnita",
+    "cancel": "Tühista",
+    "close": "Sulge",
+    "save": "Salvesta",
+    "delete": "Kustuta",
+    "remove": "Eemalda",
+    "download": "Laadi alla",
+    "upload": "Laadi üles",
+    "submit": "Esita",
+    "back": "Tagasi",
+    "next": "Järgmine",
+    "yes": "Jah",
+    "no": "Ei"
+  },
+  "nav": {
+    "history": "Ajalugu",
+    "account": "Konto",
+    "logout": "Logi välja",
+    "login": "Logi sisse",
+    "register": "Registreeru",
+    "language": "Keel"
+  },
+  "convert": {
+    "title": "Teisenda",
+    "titleWithType": "Teisenda .{fileType}",
+    "chooseFile": "Vali fail",
+    "orDragHere": "või lohista siia",
+    "searchConversions": "Otsi teisendusi",
+    "convertTo": "Teisenda vormingusse",
+    "convertButton": "Teisenda",
+    "uploading": "Üleslaadimine...",
+    "processing": "Töötlemine..."
+  },
+  "results": {
+    "title": "Tulemused",
+    "convertedFileName": "Teisendatud faili nimi",
+    "status": "Olek",
+    "actions": "Toimingud",
+    "downloadAll": "Kõik",
+    "downloadTar": "Tar",
+    "deleteJob": "Kustuta",
+    "noFiles": "Faile pole veel teisendatud.",
+    "statusPending": "Ootel",
+    "statusCompleted": "Lõpetatud",
+    "statusFailed": "Ebaõnnestunud"
+  },
+  "history": {
+    "title": "Tulemused",
+    "time": "Aeg",
+    "files": "Failid",
+    "filesDone": "Valmis failid",
+    "status": "Olek",
+    "actions": "Toimingud",
+    "expandDetails": "Laienda üksikasju",
+    "detailedFileInfo": "Üksikasjalik failiteave:",
+    "deleteSelected": "Kustuta valitud",
+    "selectAll": "Vali kõik",
+    "confirmDelete": "Kas olete kindel, et soovite kustutada {count} töö(d)? Seda toimingut ei saa tagasi võtta.",
+    "deleteSuccess": "Edukalt kustutatud {deleted} töö(d).",
+    "deleteFailed": "Ei õnnestunud kustutada {failed} töö(d).",
+    "deleteError": "Tööde kustutamisel ilmnes viga. Palun proovige uuesti."
+  },
+  "auth": {
+    "email": "E-post",
+    "password": "Parool",
+    "currentPassword": "Praegune parool",
+    "newPassword": "Parool (jätke tühjaks, kui ei muuda)",
+    "loginButton": "Logi sisse",
+    "registerButton": "Registreeru",
+    "updateButton": "Uuenda",
+    "createAccount": "Loo konto",
+    "invalidCredentials": "Vigased andmed.",
+    "emailInUse": "E-post on juba kasutusel.",
+    "unauthorized": "Volitamata",
+    "cookiesRequired": "Selle rakenduse kasutamiseks peavad küpsised olema lubatud.",
+    "noCookies": "Autentimisküpsist pole, võib-olla teie brauser blokeerib küpsised."
+  },
+  "setup": {
+    "welcome": "Tere tulemast ConvertX-CN-i!",
+    "createYourAccount": "Looge oma konto",
+    "reportIssues": "Teatage probleemidest",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Tööd ei leitud.",
+    "fileNotFound": "Faili ei leitud.",
+    "uploadFailed": "Üleslaadimine ebaõnnestus.",
+    "conversionFailed": "Teisendamine ebaõnnestus.",
+    "serverError": "Serveri viga."
+  },
+  "upload": {
+    "success": "Failid edukalt üles laaditud.",
+    "dragDrop": "Lohistage failid siia"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

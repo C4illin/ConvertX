@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Didukung oleh",
+    "version": "v{version}",
+    "loading": "Memuat...",
+    "error": "Kesalahan",
+    "success": "Berhasil",
+    "confirm": "Konfirmasi",
+    "cancel": "Batal",
+    "close": "Tutup",
+    "save": "Simpan",
+    "delete": "Hapus",
+    "remove": "Hapus",
+    "download": "Unduh",
+    "upload": "Unggah",
+    "submit": "Kirim",
+    "back": "Kembali",
+    "next": "Berikutnya",
+    "yes": "Ya",
+    "no": "Tidak"
+  },
+  "nav": {
+    "history": "Riwayat",
+    "account": "Akun",
+    "logout": "Keluar",
+    "login": "Masuk",
+    "register": "Daftar",
+    "language": "Bahasa"
+  },
+  "convert": {
+    "title": "Konversi",
+    "titleWithType": "Konversi .{fileType}",
+    "chooseFile": "Pilih file",
+    "orDragHere": "atau seret ke sini",
+    "searchConversions": "Cari konversi",
+    "convertTo": "Konversi ke",
+    "convertButton": "Konversi",
+    "uploading": "Mengunggah...",
+    "processing": "Memproses..."
+  },
+  "results": {
+    "title": "Hasil",
+    "convertedFileName": "Nama File Terkonversi",
+    "status": "Status",
+    "actions": "Tindakan",
+    "downloadAll": "Semua",
+    "downloadTar": "Tar",
+    "deleteJob": "Hapus",
+    "noFiles": "Belum ada file yang dikonversi.",
+    "statusPending": "Menunggu",
+    "statusCompleted": "Selesai",
+    "statusFailed": "Gagal"
+  },
+  "history": {
+    "title": "Hasil",
+    "time": "Waktu",
+    "files": "File",
+    "filesDone": "File Selesai",
+    "status": "Status",
+    "actions": "Tindakan",
+    "expandDetails": "Perluas detail",
+    "detailedFileInfo": "Informasi File Detail:",
+    "deleteSelected": "Hapus Terpilih",
+    "selectAll": "Pilih semua",
+    "confirmDelete": "Apakah Anda yakin ingin menghapus {count} pekerjaan? Tindakan ini tidak dapat dibatalkan.",
+    "deleteSuccess": "Berhasil menghapus {deleted} pekerjaan.",
+    "deleteFailed": "Gagal menghapus {failed} pekerjaan.",
+    "deleteError": "Terjadi kesalahan saat menghapus pekerjaan. Silakan coba lagi."
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Kata Sandi",
+    "currentPassword": "Kata Sandi Saat Ini",
+    "newPassword": "Kata Sandi (kosongkan jika tidak berubah)",
+    "loginButton": "Masuk",
+    "registerButton": "Daftar",
+    "updateButton": "Perbarui",
+    "createAccount": "Buat akun",
+    "invalidCredentials": "Kredensial tidak valid.",
+    "emailInUse": "Email sudah digunakan.",
+    "unauthorized": "Tidak diizinkan",
+    "cookiesRequired": "Cookie harus diaktifkan untuk menggunakan aplikasi ini.",
+    "noCookies": "Tidak ada cookie autentikasi, mungkin browser Anda memblokir cookie."
+  },
+  "setup": {
+    "welcome": "Selamat datang di ConvertX-CN!",
+    "createYourAccount": "Buat akun Anda",
+    "reportIssues": "Laporkan masalah di",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Pekerjaan tidak ditemukan.",
+    "fileNotFound": "File tidak ditemukan.",
+    "uploadFailed": "Unggahan gagal.",
+    "conversionFailed": "Konversi gagal.",
+    "serverError": "Kesalahan server."
+  },
+  "upload": {
+    "success": "File berhasil diunggah.",
+    "dragDrop": "Letakkan file di sini"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

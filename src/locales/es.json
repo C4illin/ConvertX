@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Desarrollado por",
+    "version": "v{version}",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "remove": "Quitar",
+    "download": "Descargar",
+    "upload": "Subir",
+    "submit": "Enviar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "nav": {
+    "history": "Historial",
+    "account": "Cuenta",
+    "logout": "Cerrar sesión",
+    "login": "Iniciar sesión",
+    "register": "Registrarse",
+    "language": "Idioma"
+  },
+  "convert": {
+    "title": "Convertir",
+    "titleWithType": "Convertir .{fileType}",
+    "chooseFile": "Elegir un archivo",
+    "orDragHere": "o arrástrelo aquí",
+    "searchConversions": "Buscar conversiones",
+    "convertTo": "Convertir a",
+    "convertButton": "Convertir",
+    "uploading": "Subiendo...",
+    "processing": "Procesando..."
+  },
+  "results": {
+    "title": "Resultados",
+    "convertedFileName": "Nombre del archivo convertido",
+    "status": "Estado",
+    "actions": "Acciones",
+    "downloadAll": "Todo",
+    "downloadTar": "Tar",
+    "deleteJob": "Eliminar",
+    "noFiles": "No hay archivos convertidos aún.",
+    "statusPending": "Pendiente",
+    "statusCompleted": "Completado",
+    "statusFailed": "Fallido"
+  },
+  "history": {
+    "title": "Resultados",
+    "time": "Hora",
+    "files": "Archivos",
+    "filesDone": "Archivos completados",
+    "status": "Estado",
+    "actions": "Acciones",
+    "expandDetails": "Expandir detalles",
+    "detailedFileInfo": "Información detallada del archivo:",
+    "deleteSelected": "Eliminar seleccionados",
+    "selectAll": "Seleccionar todo",
+    "confirmDelete": "¿Está seguro de que desea eliminar {count} trabajo(s)? Esta acción no se puede deshacer.",
+    "deleteSuccess": "Se eliminaron {deleted} trabajo(s) correctamente.",
+    "deleteFailed": "No se pudieron eliminar {failed} trabajo(s).",
+    "deleteError": "Ocurrió un error al eliminar los trabajos. Por favor, inténtelo de nuevo."
+  },
+  "auth": {
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Contraseña (dejar en blanco para no cambiar)",
+    "loginButton": "Iniciar sesión",
+    "registerButton": "Registrarse",
+    "updateButton": "Actualizar",
+    "createAccount": "Crear cuenta",
+    "invalidCredentials": "Credenciales inválidas.",
+    "emailInUse": "El correo electrónico ya está en uso.",
+    "unauthorized": "No autorizado",
+    "cookiesRequired": "Las cookies deben estar habilitadas para usar esta aplicación.",
+    "noCookies": "No hay cookie de autenticación, quizás su navegador está bloqueando las cookies."
+  },
+  "setup": {
+    "welcome": "¡Bienvenido a ConvertX-CN!",
+    "createYourAccount": "Cree su cuenta",
+    "reportIssues": "Reportar problemas en",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Trabajo no encontrado.",
+    "fileNotFound": "Archivo no encontrado.",
+    "uploadFailed": "Error al subir.",
+    "conversionFailed": "Error en la conversión.",
+    "serverError": "Error del servidor."
+  },
+  "upload": {
+    "success": "Archivos subidos correctamente.",
+    "dragDrop": "Suelte los archivos aquí"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

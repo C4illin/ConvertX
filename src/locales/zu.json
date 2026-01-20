@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX-CN",
+    "poweredBy": "Iqhutshwa yi",
+    "version": "v{version}",
+    "loading": "Iyalayisha...",
+    "error": "Iphutha",
+    "success": "Impumelelo",
+    "confirm": "Qinisekisa",
+    "cancel": "Khansela",
+    "close": "Vala",
+    "save": "Londoloza",
+    "delete": "Susa",
+    "remove": "Susa",
+    "download": "Landa",
+    "upload": "Layisha",
+    "submit": "Thumela",
+    "back": "Emuva",
+    "next": "Okulandelayo",
+    "yes": "Yebo",
+    "no": "Cha"
+  },
+  "nav": {
+    "history": "Umlando",
+    "account": "I-akhawunti",
+    "logout": "Phuma",
+    "login": "Ngena",
+    "register": "Bhalisa",
+    "language": "Ulimi"
+  },
+  "convert": {
+    "title": "Guqula",
+    "titleWithType": "Guqula .{fileType}",
+    "chooseFile": "Khetha ifayela",
+    "orDragHere": "noma yihudulele lapha",
+    "searchConversions": "Sesha ukuguqulwa",
+    "convertTo": "Guqulela ku",
+    "convertButton": "Guqula",
+    "uploading": "Iyalayisha...",
+    "processing": "Iyacubungula..."
+  },
+  "results": {
+    "title": "Imiphumela",
+    "convertedFileName": "Igama lefayela eliguquliwe",
+    "status": "Isimo",
+    "actions": "Izenzo",
+    "downloadAll": "Konke",
+    "downloadTar": "Tar",
+    "deleteJob": "Susa",
+    "noFiles": "Awakho amafayela aguquliwe okwamanje.",
+    "statusPending": "Kulindwe",
+    "statusCompleted": "Kuqediwe",
+    "statusFailed": "Kwehlulekile"
+  },
+  "history": {
+    "title": "Imiphumela",
+    "time": "Isikhathi",
+    "files": "Amafayela",
+    "filesDone": "Amafayela aqediwe",
+    "status": "Isimo",
+    "actions": "Izenzo",
+    "expandDetails": "Nweba imininingwane",
+    "detailedFileInfo": "Imininingwane yefayela enemininingwane:",
+    "deleteSelected": "Susa okukhethiwe",
+    "selectAll": "Khetha konke",
+    "confirmDelete": "Uqinisekile ukuthi ufuna ukususa imisebenzi engu-{count}? Lesi senzo asinakubuyiselwa emuva.",
+    "deleteSuccess": "Kususiwe ngempumelelo imisebenzi engu-{deleted}.",
+    "deleteFailed": "Kwehlulekile ukususa imisebenzi engu-{failed}.",
+    "deleteError": "Kwenzeke iphutha ngenkathi kususa imisebenzi. Sicela uzame futhi."
+  },
+  "auth": {
+    "email": "I-imeyili",
+    "password": "Iphasiwedi",
+    "currentPassword": "Iphasiwedi yamanje",
+    "newPassword": "Iphasiwedi (shiya kungenalutho uma ingashintshiwe)",
+    "loginButton": "Ngena",
+    "registerButton": "Bhalisa",
+    "updateButton": "Buyekeza",
+    "createAccount": "Dala i-akhawunti",
+    "invalidCredentials": "Imininingwane engavumelekile.",
+    "emailInUse": "I-imeyili isivele isetshenziswa.",
+    "unauthorized": "Akuvunyelwe",
+    "cookiesRequired": "Amakhukhi kufanele avunyelwe ukuze usebenzise lolu hlelo lokusebenza.",
+    "noCookies": "Awekho amakhukhi okuqinisekisa, mhlawumbe isiphequluli sakho sivimbela amakhukhi."
+  },
+  "setup": {
+    "welcome": "Siyakwamukela ku-ConvertX-CN!",
+    "createYourAccount": "Dala i-akhawunti yakho",
+    "reportIssues": "Bika noma yiziphi izinkinga ku",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Umsebenzi awutholakali.",
+    "fileNotFound": "Ifayela alitholakali.",
+    "uploadFailed": "Ukulayisha kwehlulekile.",
+    "conversionFailed": "Ukuguqula kwehlulekile.",
+    "serverError": "Iphutha leseva."
+  },
+  "upload": {
+    "success": "Amafayela alayishwe ngempumelelo.",
+    "dragDrop": "Lahla amafayela lapha"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}
