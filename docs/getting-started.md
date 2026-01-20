@@ -1,5 +1,9 @@
 # 快速開始
 
+> 本文件提供完整部署步驟。若只需最快啟動，請參考 [README](../README.md)。
+
+---
+
 ## 系統需求
 
 | 需求     | 最低   | 建議   |
@@ -11,26 +15,28 @@
 
 ---
 
-## 事前準備（可選）
+## 事前準備
 
-如果您想預先建立資料夾結構：
+建立資料夾（重要）：
 
 ```bash
-mkdir -p data
+mkdir -p ~/convertx-cn/data && cd ~/convertx-cn
 ```
 
-> 💡 Docker 會自動建立 `data` 資料夾，此步驟為可選
+> `data` 資料夾是主機上的實體資料夾，用於存放上傳檔案與轉換結果。
 
 ---
 
-## 最快方式：一行指令
+## 最快方式：Docker Run
 
 ```bash
 docker run -d \
   --name convertx-cn \
+  --restart unless-stopped \
   -p 3000:3000 \
   -v ./data:/app/data \
   -e TZ=Asia/Taipei \
+  -e JWT_SECRET=你的隨機字串至少32字元 \
   convertx/convertx-cn:latest
 ```
 
@@ -39,8 +45,6 @@ docker run -d \
 1. 點擊右上角 **Register** 註冊帳號
 2. 輸入 Email 和密碼
 3. 完成！開始使用
-
-> ✅ **預設開放註冊**，無需設定環境變數
 
 ---
 
