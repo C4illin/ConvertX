@@ -28,7 +28,7 @@ export const LanguageSelector = ({
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="h-5 w-5"
+          class="h-6 w-6"
         >
           <path
             stroke-linecap="round"
@@ -58,8 +58,9 @@ export const LanguageSelector = ({
       <ul
         id="language-dropdown"
         class={`
-          absolute top-full right-0 z-50 mt-2 hidden max-h-[320px] min-w-[160px] flex-col
-          overflow-y-auto rounded border border-neutral-700 bg-neutral-800 shadow-lg
+          absolute top-full right-0 z-50 mt-2 scrollbar hidden max-h-[320px] min-w-[180px] flex-col
+          overflow-y-auto rounded border border-neutral-600 bg-neutral-800 shadow-xl
+          scrollbar-thumb-neutral-600 scrollbar-track-neutral-800
         `}
         role="menu"
       >

@@ -3,6 +3,7 @@ import { jwt } from "@elysiajs/jwt";
 import { Elysia, t } from "elysia";
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
+import { LanguageSelector } from "../components/languageSelector";
 import db from "../db/db";
 import { User } from "../db/types";
 import {
@@ -93,57 +94,69 @@ export const user = new Elysia()
 
     return (
       <BaseHtml title="ConvertX-CN | Setup" webroot={WEBROOT} locale={locale}>
-        <main
-          class={`
-            mx-auto w-full max-w-4xl flex-1 px-2
-            sm:px-4
-          `}
-        >
-          <h1 class="my-8 text-3xl">{t("setup", "welcome")}</h1>
-          <article class="article p-0">
-            <header class="w-full bg-neutral-800 p-4">{t("setup", "createYourAccount")}</header>
-            <form method="post" action={`${WEBROOT}/register`} class="p-4">
-              <fieldset class="mb-4 flex flex-col gap-4">
-                <label class="flex flex-col gap-1">
-                  {t("auth", "email")}
-                  <input
-                    type="email"
-                    name="email"
-                    class="rounded-sm bg-neutral-800 p-3"
-                    placeholder={t("auth", "email")}
-                    autocomplete="email"
-                    required
-                  />
-                </label>
-                <label class="flex flex-col gap-1">
-                  {t("auth", "password")}
-                  <input
-                    type="password"
-                    name="password"
-                    class="rounded-sm bg-neutral-800 p-3"
-                    placeholder={t("auth", "password")}
-                    autocomplete="current-password"
-                    required
-                  />
-                </label>
-              </fieldset>
-              <input type="submit" value={t("auth", "createAccount")} class="btn-primary" />
-            </form>
-            <footer class="p-4">
-              {t("setup", "reportIssues")}{" "}
-              <a
-                class={`
-                  text-accent-500 underline
-                  hover:text-accent-400
-                `}
-                href="https://github.com/pi-docket/ConvertX-CN"
-              >
-                {t("setup", "github")}
-              </a>
-              .
-            </footer>
-          </article>
-        </main>
+        <>
+          <header class="w-full p-4">
+            <nav
+              class={`
+                mx-auto flex max-w-4xl items-center justify-between rounded-sm bg-neutral-900 p-4
+              `}
+            >
+              <strong>ConvertX-CN</strong>
+              <LanguageSelector currentLocale={locale} webroot={WEBROOT} t={t} />
+            </nav>
+          </header>
+          <main
+            class={`
+              mx-auto w-full max-w-4xl flex-1 px-2
+              sm:px-4
+            `}
+          >
+            <h1 class="my-8 text-3xl">{t("setup", "welcome")}</h1>
+            <article class="article p-0">
+              <header class="w-full bg-neutral-800 p-4">{t("setup", "createYourAccount")}</header>
+              <form method="post" action={`${WEBROOT}/register`} class="p-4">
+                <fieldset class="mb-4 flex flex-col gap-4">
+                  <label class="flex flex-col gap-1">
+                    {t("auth", "email")}
+                    <input
+                      type="email"
+                      name="email"
+                      class="rounded-sm bg-neutral-800 p-3"
+                      placeholder={t("auth", "email")}
+                      autocomplete="email"
+                      required
+                    />
+                  </label>
+                  <label class="flex flex-col gap-1">
+                    {t("auth", "password")}
+                    <input
+                      type="password"
+                      name="password"
+                      class="rounded-sm bg-neutral-800 p-3"
+                      placeholder={t("auth", "password")}
+                      autocomplete="current-password"
+                      required
+                    />
+                  </label>
+                </fieldset>
+                <input type="submit" value={t("auth", "createAccount")} class="btn-primary" />
+              </form>
+              <footer class="p-4">
+                {t("setup", "reportIssues")}{" "}
+                <a
+                  class={`
+                    text-accent-500 underline
+                    hover:text-accent-400
+                  `}
+                  href="https://github.com/pi-docket/ConvertX-CN"
+                >
+                  {t("setup", "github")}
+                </a>
+                .
+              </footer>
+            </article>
+          </main>
+        </>
       </BaseHtml>
     );
   })
