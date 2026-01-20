@@ -1,0 +1,24 @@
+# ==============================================================================
+# ConvertX-CN 精簡版 Docker Compose（適合 Docker 老手）
+#
+# ⚠️ 使用前請確認：
+#    1. 已建立 data 資料夾
+#    2. 已將 JWT_SECRET 改成你自己的值
+#
+# 📚 完整設定說明請見：docs/environment-variables.md
+# ==============================================================================
+
+services:
+  convertx:
+    image: convertx/convertx-cn:latest
+    container_name: convertx-cn
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - TZ=Asia/Taipei
+      - JWT_SECRET=change-me-to-a-random-string-at-least-32-chars
+      - ACCOUNT_REGISTRATION=false
+      - HTTP_ALLOWED=false

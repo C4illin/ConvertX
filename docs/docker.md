@@ -11,7 +11,7 @@ ConvertX-CN 提供兩種 Docker Image 選項：
 | Tag                           | 說明       |
 | ----------------------------- | ---------- |
 | `convertx/convertx-cn:latest` | 最新穩定版 |
-| `convertx/convertx-cn:v0.1.6` | 指定版本號 |
+| `convertx/convertx-cn:v0.1.9` | 指定版本號 |
 
 **內建功能：**
 

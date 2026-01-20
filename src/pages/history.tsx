@@ -311,7 +311,8 @@ export const history = new Elysia()
 
                   if (jobIds.length === 0) return;
 
-                  const confirmed = confirm(\`Are you sure you want to delete \${jobIds.length} job(s)? This action cannot be undone.\`);
+                  const confirmMessage = window.t('history', 'confirmDelete', { count: jobIds.length });
+                  const confirmed = confirm(confirmMessage);
                   if (!confirmed) return;
 
                   try {
@@ -330,14 +331,18 @@ export const history = new Elysia()
                     const result = await response.json();
 
                     if (result.success || result.deleted > 0) {
-                      alert(\`Successfully deleted \${result.deleted} job(s).\${result.failed > 0 ? \` Failed to delete \${result.failed} job(s).\` : ''}\`);
+                      let successMessage = window.t('history', 'deleteSuccess', { deleted: result.deleted });
+                      if (result.failed > 0) {
+                        successMessage += ' ' + window.t('history', 'deleteFailed', { failed: result.failed });
+                      }
+                      alert(successMessage);
                       window.location.reload();
                     } else {
-                      alert('Failed to delete jobs. Please try again.');
+                      alert(window.t('history', 'deleteError'));
                     }
                   } catch (error) {
                     console.error('Error deleting jobs:', error);
-                    alert('An error occurred while deleting jobs. Please try again.');
+                    alert(window.t('history', 'deleteError'));
                   }
                 });
               });

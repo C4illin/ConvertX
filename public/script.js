@@ -55,6 +55,57 @@ dropZone.addEventListener("drop", (e) => {
   }
 });
 
+// ===== 全頁拖曳上傳支援 =====
+// 允許使用者將檔案拖曳到頁面任何位置即可上傳
+// UI 完全不變，只是擴大拖曳的偵測範圍
+
+let dragCounter = 0;
+
+document.addEventListener("dragenter", (e) => {
+  e.preventDefault();
+  dragCounter++;
+  // 當檔案進入頁面時，顯示 dropzone 的 dragover 效果
+  if (e.dataTransfer.types.includes("Files")) {
+    dropZone.classList.add("dragover");
+  }
+});
+
+document.addEventListener("dragleave", (e) => {
+  e.preventDefault();
+  dragCounter--;
+  // 只有當完全離開頁面時才移除效果
+  if (dragCounter === 0) {
+    dropZone.classList.remove("dragover");
+  }
+});
+
+document.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  // 保持 dragover 效果
+  if (e.dataTransfer.types.includes("Files")) {
+    dropZone.classList.add("dragover");
+  }
+});
+
+document.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dragCounter = 0;
+  dropZone.classList.remove("dragover");
+
+  const files = e.dataTransfer.files;
+
+  if (files.length === 0) {
+    console.warn("No files dropped — likely a URL or unsupported source.");
+    return;
+  }
+
+  for (const file of files) {
+    console.log("Handling dropped file (page-level):", file.name);
+    handleFile(file);
+  }
+});
+// ===== 全頁拖曳上傳支援結束 =====
+
 // Extracted handleFile function for reusability in drag-and-drop and file input
 function handleFile(file) {
   const fileList = document.querySelector("#file-list");

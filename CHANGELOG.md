@@ -1,5 +1,63 @@
 # Changelog
 
+## [0.1.9](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.9) (2026-01-20)
+
+### ✨ Features
+
+- **全頁拖曳上傳**：檔案可拖曳到頁面任何位置上傳
+  - 不再需要精準拖到上傳框內
+  - 原本的上傳框視覺效果保持不變
+  - 點擊上傳功能不受影響
+
+### 🌍 i18n
+
+- **提示訊息國際化**：所有 confirm / alert 訊息改用 i18n
+  - 刪除任務前的確認提示
+  - 刪除成功 / 失敗提示
+  - 錯誤訊息
+  - 隨語言切換即時更新顯示內容
+
+### 📚 Documentation
+
+- **新增版本更新教學**：README 新增「如何更新 ConvertX-CN 版本」章節
+  - 完整的 Docker Compose 更新步驟
+  - 更新到指定版本的方法
+  - 驗證更新成功的方式
+
+- **README 重新定位**：從參考手冊改為「新手教學入口」
+  - 完整 5 步驟部署教學（從安裝 Docker 到成功使用）
+  - 跨平台 data 資料夾建立指令（Linux / macOS / Windows）
+  - 常見問題 FAQ（登入失敗、資料遺失、被登出）
+  - 明確說明為何範例保留完整註解（教學導向）
+
+- **Docker Compose 範例分層**：
+  - `compose.minimal.yml` - 精簡版（Docker 老手）
+  - `compose.production.yml` - 生產環境（含 Reverse Proxy 說明）
+  - `compose.reference.yml` - 完整參考（所有環境變數）
+
+- **新增 deployment.md**：
+  - Reverse Proxy 設定（Nginx / Traefik / Caddy）
+  - HTTPS / Let's Encrypt 設定
+  - 安全性建議與防火牆設定
+  - 備份與還原指南
+
+- **更新 environment-variables.md**：
+  - 依重要程度分類（必填 / 建議 / 可選）
+  - 每個變數都有詳細設定指南
+  - 常見情境範例
+
+### 🎯 Design Philosophy
+
+本專案的 README 與 docker-compose.yml 定位為「教學版」：
+
+- README 是新手的第一個成功體驗
+- docker-compose.yml 寧願註解多，也不要極簡
+- 強調「為什麼要這樣設」與「不這樣設會怎樣」
+
+如需精簡版配置，請使用 `docs/docker-compose/compose.minimal.yml`。
+
+---
+
 ## [0.1.8](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.8) (2026-01-20)
 
 ### 🐛 Bug Fixes
