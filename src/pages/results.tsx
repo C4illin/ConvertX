@@ -163,7 +163,7 @@ export const results = new Elysia()
         .all(params.jobId);
 
       return (
-        <BaseHtml webroot={WEBROOT} title="ConvertX | Result" locale={locale}>
+        <BaseHtml webroot={WEBROOT} title="ConvertX-CN | Result" locale={locale}>
           <>
             <Header webroot={WEBROOT} allowUnauthenticated={ALLOW_UNAUTHENTICATED} loggedIn locale={locale} t={t} />
             <main

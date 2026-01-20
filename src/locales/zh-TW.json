@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "ConvertX",
+    "appName": "ConvertX-CN",
     "poweredBy": "由",
     "version": "v{version}",
     "loading": "載入中...",
@@ -84,7 +84,7 @@
     "noCookies": "無法取得驗證 Cookie，您的瀏覽器可能阻擋了 Cookie。"
   },
   "setup": {
-    "welcome": "歡迎使用 ConvertX！",
+    "welcome": "歡迎使用 ConvertX-CN！",
     "createYourAccount": "建立您的帳戶",
     "reportIssues": "在以下網址回報問題",
     "github": "GitHub"

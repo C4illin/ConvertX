@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "ConvertX",
+    "appName": "ConvertX-CN",
     "poweredBy": "Powered by",
     "version": "v{version}",
     "loading": "Loading...",
@@ -84,7 +84,7 @@
     "noCookies": "No auth cookie, perhaps your browser is blocking cookies."
   },
   "setup": {
-    "welcome": "Welcome to ConvertX!",
+    "welcome": "Welcome to ConvertX-CN!",
     "createYourAccount": "Create your account",
     "reportIssues": "Report any issues on",
     "github": "GitHub"

@@ -3,7 +3,7 @@ import { type SupportedLocale, defaultLocale, getTranslations } from "../i18n";
 
 export const BaseHtml = ({
   children,
-  title = "ConvertX",
+  title = "ConvertX-CN",
   webroot = "",
   locale = defaultLocale,
 }: {
@@ -33,17 +33,17 @@ export const BaseHtml = ({
       {children}
       <footer class="w-full">
         <div class="p-4 text-center text-sm text-neutral-500">
-          <span>{locale === "en" ? "Powered by " : `${getTranslations(locale).common.poweredBy} `}</span>
+          <span>Powered by </span>
           <a
-            href="https://github.com/C4illin/ConvertX"
+            href="https://github.com/pi-docket/ConvertX-CN"
             class={`
               text-neutral-400
               hover:text-accent-500
             `}
           >
-            ConvertX{" "}
+            ConvertX-CN
           </a>
-          <span safe>v{version || ""}</span>
+          <span safe> v{version || ""}</span>
         </div>
       </footer>
     </body>

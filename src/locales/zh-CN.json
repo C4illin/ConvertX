@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "ConvertX",
+    "appName": "ConvertX-CN",
     "poweredBy": "由",
     "version": "v{version}",
     "loading": "加载中...",
@@ -84,7 +84,7 @@
     "noCookies": "无法获取验证 Cookie，您的浏览器可能阻止了 Cookie。"
   },
   "setup": {
-    "welcome": "欢迎使用 ConvertX！",
+    "welcome": "欢迎使用 ConvertX-CN！",
     "createYourAccount": "创建您的账户",
     "reportIssues": "在以下网址报告问题",
     "github": "GitHub"

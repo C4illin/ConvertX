@@ -73,7 +73,7 @@ export const user = new Elysia()
     }
 
     return (
-      <BaseHtml title="ConvertX | Setup" webroot={WEBROOT} locale={locale}>
+      <BaseHtml title="ConvertX-CN | Setup" webroot={WEBROOT} locale={locale}>
         <main
           class={`
             mx-auto w-full max-w-4xl flex-1 px-2
@@ -117,7 +117,7 @@ export const user = new Elysia()
                   text-accent-500 underline
                   hover:text-accent-400
                 `}
-                href="https://github.com/C4illin/ConvertX"
+                href="https://github.com/pi-docket/ConvertX-CN"
               >
                 {t("setup", "github")}
               </a>
@@ -134,7 +134,7 @@ export const user = new Elysia()
     }
 
     return (
-      <BaseHtml webroot={WEBROOT} title="ConvertX | Register" locale={locale}>
+      <BaseHtml webroot={WEBROOT} title="ConvertX-CN | Register" locale={locale}>
         <>
           <Header
             webroot={WEBROOT}
@@ -258,7 +258,7 @@ export const user = new Elysia()
       }
 
       return (
-        <BaseHtml webroot={WEBROOT} title="ConvertX | Login" locale={locale}>
+        <BaseHtml webroot={WEBROOT} title="ConvertX-CN | Login" locale={locale}>
           <>
             <Header
               webroot={WEBROOT}
@@ -394,7 +394,7 @@ export const user = new Elysia()
       }
 
       return (
-        <BaseHtml webroot={WEBROOT} title="ConvertX | Account" locale={locale}>
+        <BaseHtml webroot={WEBROOT} title="ConvertX-CN | Account" locale={locale}>
           <>
             <Header
               webroot={WEBROOT}

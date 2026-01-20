@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "ConvertX",
+    "appName": "ConvertX-CN",
     "poweredBy": "Powered by",
     "version": "v{version}",
     "loading": "読み込み中...",
@@ -84,7 +84,7 @@
     "noCookies": "認証Cookieが見つかりません。ブラウザがCookieをブロックしている可能性があります。"
   },
   "setup": {
-    "welcome": "ConvertXへようこそ！",
+    "welcome": "ConvertX-CNへようこそ！",
     "createYourAccount": "アカウントを作成",
     "reportIssues": "問題があれば報告",
     "github": "GitHub"

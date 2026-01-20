@@ -13,14 +13,16 @@ export interface LocaleConfig {
 }
 
 export const supportedLocales: LocaleConfig[] = [
-  { code: "en", name: "English", nativeName: "English" },
   { code: "zh-TW", name: "Chinese (Traditional)", nativeName: "繁體中文" },
   { code: "zh-CN", name: "Chinese (Simplified)", nativeName: "简体中文" },
+  { code: "en", name: "English", nativeName: "English" },
   { code: "ja", name: "Japanese", nativeName: "日本語" },
   { code: "ko", name: "Korean", nativeName: "한국어" },
 ];
 
-export const defaultLocale: SupportedLocale = "en";
+// Default to zh-TW, fallback to en
+export const defaultLocale: SupportedLocale = "zh-TW";
+export const fallbackLocale: SupportedLocale = "en";
 
 // Type definitions for translation keys
 export type TranslationData = typeof en;

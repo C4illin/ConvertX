@@ -33,7 +33,7 @@ export const history = new Elysia().use(userService).use(localeService).get(
     userJobs = userJobs.filter((job) => job.num_files > 0);
 
     return (
-      <BaseHtml webroot={WEBROOT} title="ConvertX | Results" locale={locale}>
+      <BaseHtml webroot={WEBROOT} title="ConvertX-CN | Results" locale={locale}>
         <>
           <Header
             webroot={WEBROOT}

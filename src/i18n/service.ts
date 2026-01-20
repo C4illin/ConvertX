@@ -1,8 +1,7 @@
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import {
   type SupportedLocale,
   createTranslator,
-  defaultLocale,
   detectLocale,
   getLocale,
 } from "../i18n";
@@ -12,29 +11,31 @@ import {
  * Adds locale detection and translator to the context
  */
 export const localeService = new Elysia({ name: "locale/service" })
-  .model({
-    localeSession: t.Cookie({
-      locale: t.Optional(t.String()),
-    }),
-  })
-  .derive({ as: "global" }, ({ cookie, request }) => {
-    // Get locale from cookie or detect from Accept-Language header
-    const cookieLocale = cookie.locale?.value;
+  .derive({ as: "global" }, ({ request }) => {
+    // Get locale from cookie (parsed from headers) or detect from Accept-Language header
+    const cookieHeader = request.headers.get("cookie") ?? "";
     const acceptLanguage = request.headers.get("accept-language") ?? undefined;
+
+    // Parse locale from cookie string
+    let cookieLocale: string | undefined;
+    const localeMatch = cookieHeader.match(/locale=([^;]+)/);
+    if (localeMatch) {
+      cookieLocale = localeMatch[1];
+    }
 
     let locale: SupportedLocale;
 
-    if (cookieLocale) {
+    if (cookieLocale && typeof cookieLocale === "string") {
       locale = getLocale(cookieLocale);
     } else {
       locale = detectLocale(acceptLanguage);
     }
 
-    const t = createTranslator(locale);
+    const translator = createTranslator(locale);
 
     return {
       locale,
-      t,
+      t: translator,
     };
   });
 
