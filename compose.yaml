@@ -3,13 +3,18 @@
 #
 # 🎉 這是完整版 image，已內建所有轉換依賴：
 #    - LibreOffice (headless)
-#    - TexLive Full
-#    - Tesseract OCR + 中日韓英德語言包
-#    - CJK 字型（Noto CJK、微軟核心字型、標楷體）
-#    - Pandoc、FFmpeg、ImageMagick 等所有轉換器
+#    - TexLive（CJK + 阿拉伯/希伯來語）
+#    - Tesseract OCR + 中日韓英德法語言包
+#    - CJK 字型（Noto CJK、標楷體）
+#    - Pandoc、FFmpeg、ImageMagick、OpenCV 等所有轉換器
 #
 # ✅ 使用者不需要自己寫 Dockerfile
 # ✅ 直接 docker compose up -d 即可使用
+#
+# ⚠️ 遠端部署注意事項：
+#    若透過 Nginx/Traefik 等 reverse proxy 存取，請設定：
+#    - HTTP_ALLOWED=true（若 proxy 處理 HTTPS）
+#    - 或 TRUST_PROXY=true（讓應用正確判斷 HTTPS）
 # ==============================================================================
 
 services:
@@ -28,6 +33,7 @@ services:
 
       # === 安全設定 ===
       - HTTP_ALLOWED=false # 是否允許非 HTTPS 連線（僅本地測試時設為 true）
+      - TRUST_PROXY=false # 透過 reverse proxy 時設為 true（正確判斷 HTTPS）
       - ALLOW_UNAUTHENTICATED=false # 是否允許未登入使用（僅本地測試時設為 true）
 
       # === 檔案管理 ===

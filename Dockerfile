@@ -1,23 +1,19 @@
 # ==============================================================================
 # ConvertX-CN 官方 Docker Image
-# 版本：v0.1.6
+# 版本：v0.1.7
 # ==============================================================================
 #
 # 📦 Image 說明：
 #   - 這是 ConvertX-CN 官方 Docker Hub Image 的生產 Dockerfile
-#   - 目標：在功能完整性與 image 體積間取得平衡
-#   - 適合一般使用者日常文件轉換需求
+#   - 已內建完整功能，無需額外擴充
 #
 # 🌍 內建語言支援：
 #   - OCR: 英文、繁體中文、簡體中文、日文、韓文、德文、法文
 #   - Locale: en_US, zh_TW, zh_CN, ja_JP, ko_KR, de_DE, fr_FR
-#   - 字型: Noto CJK, Liberation, 自訂中文字型
+#   - 字型: Noto CJK, Liberation, 標楷體
+#   - LaTeX: CJK、德文、法文、阿拉伯語、希伯來語
 #
-# 📊 Image 大小：約 4-6 GB
-#
-# 💡 如需完整 65 種 OCR 語言或進階功能，請參考：
-#   - Dockerfile.full (完整版，使用者自行 build)
-#   - 文件：docs/docker.md
+# 📊 Image 大小：約 5-7 GB
 #
 # ==============================================================================
 
@@ -73,14 +69,11 @@ FROM base AS release
 # ==============================================================================
 #
 # ✅ 核心轉換工具：完整保留
-# ✅ TexLive：最小集合（支援 CJK、德文、法文）
+# ✅ TexLive：完整 CJK + 德法 + 阿拉伯/希伯來語
 # ✅ OCR：7 種主要語言
-# ✅ 字型：Noto CJK + Liberation
-#
-# ❌ 未內建（體積過大，請參考 Dockerfile.full）：
-#   - texlive-full（約 +3GB）
-#   - 65 種 OCR 語言（約 +2GB）
-#   - fonts-noto-extra（約 +500MB）
+# ✅ 字型：Noto CJK + Liberation + 標楷體
+# ✅ OpenCV：電腦視覺轉換支援
+# ✅ 額外影片編解碼器
 #
 # ==============================================================================
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -104,17 +97,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   poppler-utils \
   potrace \
   resvg \
+  # === 額外影片編解碼器 ===
+  libavcodec-extra \
   # === LibreOffice (headless) ===
   libreoffice \
-  # === TexLive 最小集合（取代 texlive-full）===
-  # texlive-base: LaTeX 核心
-  # texlive-latex-base: 基本 LaTeX 類別
-  # texlive-latex-recommended: 常用套件（geometry, hyperref 等）
-  # texlive-fonts-recommended: 基本字型（Computer Modern 等）
-  # texlive-xetex: XeTeX 引擎（Unicode/CJK 支援必需）
-  # texlive-lang-cjk: 中日韓 LaTeX 支援
-  # texlive-lang-german: 德文 LaTeX 支援
-  # texlive-lang-french: 法文 LaTeX 支援
+  # === TexLive 完整語言支援 ===
   texlive-base \
   texlive-latex-base \
   texlive-latex-recommended \
@@ -123,17 +110,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   texlive-lang-cjk \
   texlive-lang-german \
   texlive-lang-french \
+  texlive-lang-arabic \
+  texlive-lang-other \
   latexmk \
   lmodern \
   # === Pandoc 文件轉換 ===
   pandoc \
-  # === OCR 支援（僅限指定語言）===
-  # eng: 英文
-  # chi_tra/chi_sim: 繁/簡中文
-  # jpn: 日文
-  # kor: 韓文
-  # deu: 德文
-  # fra: 法文
+  # === OCR 支援（7 種語言）===
   tesseract-ocr \
   tesseract-ocr-eng \
   tesseract-ocr-chi-tra \
@@ -142,21 +125,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   tesseract-ocr-kor \
   tesseract-ocr-deu \
   tesseract-ocr-fra \
-  # === 字型（精簡版）===
-  # fonts-noto-core: Noto Sans/Serif Latin（歐語基礎）
-  # fonts-noto-color-emoji: Emoji 支援（僅此一套）
-  # fonts-liberation: Liberation 字型（Arial/Times 替代）
-  # ❌ 已移除：fonts-noto-extra（包含過多語言）
-  # ❌ 已移除：fonts-liberation2（重複）
+  # === 字型 ===
   fonts-noto-cjk \
   fonts-noto-core \
   fonts-noto-color-emoji \
   fonts-liberation \
-  # === Python 依賴（精簡）===
+  # === Python 依賴 + OpenCV ===
   python3 \
   python3-pip \
   python3-numpy \
   python3-tinycss2 \
+  python3-opencv \
   pipx \
   # === 系統工具 ===
   locales \
@@ -179,7 +158,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV PATH="/root/.local/bin:${PATH}"
 
 # ==============================================================================
-# 設定 locale（僅限指定語言）
+# 設定 locale（支援中文 PDF 避免亂碼）
 # ==============================================================================
 RUN sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
   sed -i 's/# zh_TW.UTF-8 UTF-8/zh_TW.UTF-8 UTF-8/' /etc/locale.gen && \
@@ -190,8 +169,9 @@ RUN sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
   sed -i 's/# fr_FR.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen && \
   locale-gen
 
-ENV LANG=en_US.UTF-8
-ENV LC_ALL=en_US.UTF-8
+# 預設使用 zh_TW.UTF-8 確保中文 PDF 正確顯示
+ENV LANG=zh_TW.UTF-8
+ENV LC_ALL=zh_TW.UTF-8
 
 # ==============================================================================
 # 安裝自訂字型（標楷體等台灣常用字型）
@@ -228,8 +208,8 @@ EXPOSE 3000/tcp
 # ==============================================================================
 # Calibre 需要
 ENV QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox"
-# Pandoc PDF 引擎
-ENV PANDOC_PDF_ENGINE=xelatex
+# Pandoc PDF 引擎（使用 pdflatex 以獲得最佳相容性）
+ENV PANDOC_PDF_ENGINE=pdflatex
 # Node 環境
 ENV NODE_ENV=production
 

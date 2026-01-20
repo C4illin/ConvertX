@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.1.7](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.7) (2026-01-20)
+
+### 🐛 Bug Fixes
+
+- **登入問題**: 修復遠端部署時登入後被導回登入頁的問題
+  - 將 Cookie `sameSite` 從 `strict` 改為 `lax`
+  - 新增 Cookie `path` 設定確保覆蓋整個應用
+  - 新增 `TRUST_PROXY` 環境變數支援 reverse proxy
+
+### 🚀 Features
+
+- **Dockerfile 擴充**: 直接內建進階功能（不再分 Full 版）
+  - 新增 `texlive-lang-arabic` 阿拉伯語 LaTeX 支援
+  - 新增 `texlive-lang-other` 希伯來語等 LaTeX 支援
+  - 新增 `python3-opencv` 電腦視覺轉換支援
+  - 新增 `libavcodec-extra` 額外影片編解碼器
+- **Locale**: 預設改為 `zh_TW.UTF-8` 確保中文 PDF 正確顯示
+- **Pandoc**: PDF 引擎改用 `pdflatex` 提高相容性
+
+### 📝 Docs
+
+- 更新 compose.yaml 加入 `TRUST_PROXY` 說明
+- 新增遠端部署注意事項
+
+---
+
 ## [0.1.6](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.6) (2026-01-20)
 
 ### Features

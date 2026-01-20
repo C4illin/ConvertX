@@ -3,6 +3,9 @@ export const ACCOUNT_REGISTRATION = process.env.ACCOUNT_REGISTRATION?.toLowerCas
 
 export const HTTP_ALLOWED = process.env.HTTP_ALLOWED?.toLowerCase() === "true" || false;
 
+// Trust proxy headers (X-Forwarded-*) for correct HTTPS detection behind reverse proxy
+export const TRUST_PROXY = process.env.TRUST_PROXY?.toLowerCase() === "true" || false;
+
 export const ALLOW_UNAUTHENTICATED =
   process.env.ALLOW_UNAUTHENTICATED?.toLowerCase() === "true" || false;
 

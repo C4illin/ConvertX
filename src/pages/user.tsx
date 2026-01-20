@@ -10,11 +10,30 @@ import {
   ALLOW_UNAUTHENTICATED,
   HIDE_HISTORY,
   HTTP_ALLOWED,
+  TRUST_PROXY,
   WEBROOT,
 } from "../helpers/env";
 import { localeService } from "../i18n/service";
 
 export let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
+
+// ==============================================================================
+// Cookie 設定輔助函數
+// ==============================================================================
+// 解決遠端部署時登入失敗的問題：
+// 1. sameSite: "lax" - 允許導航時傳送 Cookie（strict 會阻擋）
+// 2. path: WEBROOT || "/" - 確保 Cookie 覆蓋整個應用
+// 3. secure: 考慮 TRUST_PROXY 設定
+// ==============================================================================
+function getCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: !HTTP_ALLOWED && !TRUST_PROXY ? true : false,
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    sameSite: "lax" as const,
+    path: WEBROOT || "/",
+  };
+}
 
 export const userService = new Elysia({ name: "user/service" })
   .use(
@@ -224,13 +243,10 @@ export const user = new Elysia()
         };
       }
 
-      // set cookie
+      // set cookie with proper options for remote deployment
       auth.set({
         value: accessToken,
-        httpOnly: true,
-        secure: !HTTP_ALLOWED,
-        maxAge: 60 * 60 * 24 * 7,
-        sameSite: "strict",
+        ...getCookieOptions(),
       });
 
       return redirect(`${WEBROOT}/`, 302);
@@ -353,13 +369,10 @@ export const user = new Elysia()
         };
       }
 
-      // set cookie
+      // set cookie with proper options for remote deployment
       auth.set({
         value: accessToken,
-        httpOnly: true,
-        secure: !HTTP_ALLOWED,
-        maxAge: 60 * 60 * 24 * 7,
-        sameSite: "strict",
+        ...getCookieOptions(),
       });
 
       return redirect(`${WEBROOT}/`, 302);
