@@ -43,6 +43,8 @@ mkdir -p ~/convertx-cn/data && cd ~/convertx-cn
 
 ### 2. 啟動容器
 
+JWT_SECRET=請改成你自己的隨機字串至少32字元
+
 ```bash
 docker run -d \
   --name convertx-cn \
@@ -80,9 +82,10 @@ services:
       - ./data:/app/data
     environment:
       - TZ=Asia/Taipei
-      #請改成你自己的隨機字串至少32字元
       - JWT_SECRET=e78a2da4-135f-06a8-fa46-17ef7990f5d1
 ```
+
+JWT_SECRET=請改成你自己的隨機字串至少32字元
 
 啟動：
 
