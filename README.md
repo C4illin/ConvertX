@@ -35,11 +35,15 @@
 
 ## 快速啟動（Docker Run）
 
-```bash
-# 1. 建立資料夾
-mkdir -p ~/convertx-cn/data && cd ~/convertx-cn
+### 1. 建立資料夾
 
-# 2. 啟動容器
+```bash
+mkdir -p ~/convertx-cn/data && cd ~/convertx-cn
+```
+
+### 2. 啟動容器
+
+```bash
 docker run -d \
   --name convertx-cn \
   --restart unless-stopped \
@@ -48,9 +52,12 @@ docker run -d \
   -e TZ=Asia/Taipei \
   -e JWT_SECRET=請改成你自己的隨機字串至少32字元 \
   convertx/convertx-cn:latest
+```
 
-# 3. 開啟瀏覽器
-# http://localhost:3000
+### 3. 開啟瀏覽器
+
+```bash
+  http://localhost:3000
 ```
 
 > 首次下載約 4-6 GB，請耐心等待。
