@@ -68,7 +68,7 @@ docker run -d \
 
 ## Docker Compose（推薦）
 
-1. 建立專案資料夾
+### 1. 建立專案資料夾
 
 ### Linux / macOS
 
@@ -89,7 +89,7 @@ mkdir C:\convertx-cn
 cd C:\convertx-cn
 ```
 
-2. 建立 docker-compose.yml（在專案資料夾下）
+### 2. 建立 docker-compose.yml（在專案資料夾下）
 
 - 範例內容（請修改 JWT_SECRET=請改成你自己的隨機字串至少32字元）：
 
@@ -108,7 +108,7 @@ services:
       - JWT_SECRET=e78a2da4-135f-06a8-fa46-17ef7990f5d1
 ```
 
-3. 啟動：
+### 3. 啟動：
 
 ```bash
 docker compose up -d
