@@ -2,7 +2,7 @@
 
 # ConvertX-CN
 
-**開箱即用的全功能檔案轉換服務** — 5 分鐘完成部署
+**開箱即用的全功能檔案轉換服務**
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/convertx/convertx-cn?style=flat&logo=docker)](https://hub.docker.com/r/convertx/convertx-cn)
 [![GitHub Release](https://img.shields.io/github/v/release/pi-docket/ConvertX-CN)](https://github.com/pi-docket/ConvertX-CN/releases)
@@ -22,11 +22,24 @@
 
 ```bash
 mkdir -p ~/convertx-cn/data && cd ~/convertx-cn
+
+docker run -d \
+  --name convertx-cn \
+  -p 3000:3000 \
+  -v ./data:/app/data \
+  -e JWT_SECRET=your-secret-key-at-least-32-chars \
+  convertx/convertx-cn:latest
 ```
 
-> Windows 請用 `mkdir C:\convertx-cn\data` 並 `cd C:\convertx-cn`
+開啟 `http://localhost:3000` 註冊即可使用。
 
-### 2. 建立 docker-compose.yml
+> Windows 用戶請先 `mkdir C:\convertx-cn\data`，並將 `./data` 改為 `C:\convertx-cn\data`
+
+---
+
+## ✅ 推薦方式（Docker Compose）
+
+建立 `docker-compose.yml`：
 
 ```yaml
 services:
@@ -40,7 +53,7 @@ services:
       - ./data:/app/data
     environment:
       - TZ=Asia/Taipei
-      - JWT_SECRET=請改成你自己的隨機字串至少32字元
+      - JWT_SECRET=your-secret-key-at-least-32-chars
 ```
 
 | 參數         | 說明                               | 必要 |
@@ -55,48 +68,52 @@ services:
 docker compose up -d
 ```
 
-首次下載約 4-6 GB，需等待幾分鐘。
+| 參數         | 說明               |
+| ------------ | ------------------ |
+| `./data`     | 資料夾，需先建立   |
+| `JWT_SECRET` | 登入金鑰，必須設定 |
 
-### 4. 使用
+首次下載約 4-6 GB。
 
-開啟 `http://localhost:3000`，註冊帳號即可使用。
+---
+
+## 支援格式
+
+| 類型   | 轉換器                     | 格式數 |
+| ------ | -------------------------- | ------ |
+| 影音   | FFmpeg                     | 400+   |
+| 圖片   | ImageMagick, libvips       | 200+   |
+| 文件   | LibreOffice, Pandoc        | 150+   |
+| 電子書 | Calibre                    | 40+    |
+| 向量圖 | Inkscape, resvg, Potrace   | 20+    |
+| 資料   | Dasel (JSON/YAML/TOML/XML) | 10+    |
+
+完整列表 → [docs/converters.md](docs/converters.md)
 
 ---
 
 ## 常見問題
 
-| 問題                 | 解法                                                                  |
-| -------------------- | --------------------------------------------------------------------- |
-| 登入後又被踢回登入頁 | 設定 `HTTP_ALLOWED=true`（本地測試）或 `TRUST_PROXY=true`（反向代理） |
-| 重啟後資料消失       | 確認 `./data:/app/data` 且資料夾存在                                  |
-| 重啟後被登出         | 設定固定的 `JWT_SECRET`                                               |
+| 問題         | 解法                                           |
+| ------------ | ---------------------------------------------- |
+| 登入後被踢回 | 設定 `HTTP_ALLOWED=true` 或 `TRUST_PROXY=true` |
+| 資料消失     | 確認 `./data:/app/data` 已掛載                 |
+| 重啟後登出   | 設定固定 `JWT_SECRET`                          |
 
-更多問題 → [docs/faq.md](docs/faq.md)
-
----
-
-## 更新版本
-
-```bash
-cd ~/convertx-cn
-docker compose down
-docker compose pull
-docker compose up -d
-```
-
-詳細說明 → [docs/deployment/update.md](docs/deployment/update.md)
+更多 → [docs/faq.md](docs/faq.md)
 
 ---
 
-## 進階設定
+## 進階文件
 
-| 需求                | 文件                                                     |
-| ------------------- | -------------------------------------------------------- |
-| 完整環境變數        | [docs/config/environment.md](docs/config/environment.md) |
-| 反向代理 / HTTPS    | [docs/deployment.md](docs/deployment.md)                 |
-| 安全性設定          | [docs/config/security.md](docs/config/security.md)       |
-| Docker Compose 範例 | [docs/docker-compose/](docs/docker-compose/)             |
-| 版本選擇指南        | [docs/versions/](docs/versions/)                         |
+| 主題             | 連結                                                     |
+| ---------------- | -------------------------------------------------------- |
+| 環境變數         | [docs/config/environment.md](docs/config/environment.md) |
+| 安全性設定       | [docs/config/security.md](docs/config/security.md)       |
+| 反向代理 / HTTPS | [docs/deployment.md](docs/deployment.md)                 |
+| Docker Compose   | [docs/docker-compose/](docs/docker-compose/)             |
+| 版本選擇         | [docs/versions/](docs/versions/)                         |
+| 更新方法         | [docs/deployment/update.md](docs/deployment/update.md)   |
 
 ---
 
@@ -105,7 +122,5 @@ docker compose up -d
 ![ConvertX-CN Preview](images/preview.png)
 
 ---
-
-## License
 
 [MIT](LICENSE) | 基於 [C4illin/ConvertX](https://github.com/C4illin/ConvertX)
