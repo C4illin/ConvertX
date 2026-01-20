@@ -9,8 +9,8 @@ ConvertX-CN 提供預建的 Docker Image，包含所有轉換依賴。
 | Tag                                | 說明                     |
 | ---------------------------------- | ------------------------ |
 | `convertx/convertx-cn:latest`      | 最新穩定版               |
-| `convertx/convertx-cn:v0.1.4`      | 指定版本號               |
-| `convertx/convertx-cn:v0.1.4-FULL` | 完整版（與 latest 相同） |
+| `convertx/convertx-cn:v0.1.5`      | 指定版本號               |
+| `convertx/convertx-cn:v0.1.5-FULL` | 完整版（與 latest 相同） |
 
 ### Image 大小
 

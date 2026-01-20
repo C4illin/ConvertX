@@ -11,13 +11,35 @@
 
 ---
 
+## 事前準備（可選）
+
+如果您想預先建立資料夾結構：
+
+```bash
+mkdir -p data
+```
+
+> 💡 Docker 會自動建立 `data` 資料夾，此步驟為可選
+
+---
+
 ## 最快方式：一行指令
 
 ```bash
-docker run -d -p 3000:3000 -v ./data:/app/data -e ACCOUNT_REGISTRATION=true convertx/convertx-cn:latest
+docker run -d \
+  --name convertx-cn \
+  -p 3000:3000 \
+  -v ./data:/app/data \
+  -e TZ=Asia/Taipei \
+  convertx/convertx-cn:latest
 ```
 
-開啟瀏覽器訪問 `http://localhost:3000`，註冊帳號即可開始使用！
+開啟瀏覽器訪問 `http://localhost:3000`：
+1. 點擊右上角 **Register** 註冊帳號
+2. 輸入 Email 和密碼
+3. 完成！開始使用
+
+> ✅ **預設開放註冊**，無需設定環境變數
 
 ---
 
@@ -40,7 +62,6 @@ services:
     environment:
       - TZ=Asia/Taipei
       - JWT_SECRET=請更換為一個長且隨機的字串
-      - ACCOUNT_REGISTRATION=true
       - HTTP_ALLOWED=false
       - AUTO_DELETE_EVERY_N_HOURS=24
 ```

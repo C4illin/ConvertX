@@ -128,17 +128,14 @@ export const user = new Elysia()
       </BaseHtml>
     );
   })
-  .get("/register", ({ redirect, locale, t }) => {
-    if (!ACCOUNT_REGISTRATION) {
-      return redirect(`${WEBROOT}/login`, 302);
-    }
-
+  .get("/register", ({ locale, t }) => {
+    // 移除 ACCOUNT_REGISTRATION 限制，讓註冊頁面始終可用
     return (
       <BaseHtml webroot={WEBROOT} title="ConvertX-CN | Register" locale={locale}>
         <>
           <Header
             webroot={WEBROOT}
-            accountRegistration={ACCOUNT_REGISTRATION}
+            accountRegistration={true}
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
             hideHistory={HIDE_HISTORY}
             locale={locale}
@@ -187,10 +184,7 @@ export const user = new Elysia()
   .post(
     "/register",
     async ({ body: { email, password }, set, redirect, jwt, cookie: { auth } }) => {
-      if (!ACCOUNT_REGISTRATION && !FIRST_RUN) {
-        return redirect(`${WEBROOT}/login`, 302);
-      }
-
+      // 移除 ACCOUNT_REGISTRATION 限制，讓註冊功能始終可用
       if (FIRST_RUN) {
         FIRST_RUN = false;
       }
@@ -301,15 +295,13 @@ export const user = new Elysia()
                     </label>
                   </fieldset>
                   <div class="flex flex-row gap-4">
-                    {ACCOUNT_REGISTRATION ? (
-                      <a
-                        href={`${WEBROOT}/register`}
-                        role="button"
-                        class="w-full btn-secondary text-center"
-                      >
-                        {t("nav", "register")}
-                      </a>
-                    ) : null}
+                    <a
+                      href={`${WEBROOT}/register`}
+                      role="button"
+                      class="w-full btn-secondary text-center"
+                    >
+                      {t("nav", "register")}
+                    </a>
                     <input type="submit" value={t("auth", "loginButton")} class="w-full btn-primary" />
                   </div>
                 </form>

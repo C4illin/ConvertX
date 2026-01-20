@@ -117,7 +117,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   tesseract-ocr-deu \
   tesseract-ocr-fra \
   # === 字型（精簡版）===
-  # fonts-noto-cjk: 中日韓統一字型（必需）
+  #fonts-noto-cjk
   # fonts-noto-core: Noto Sans/Serif Latin（歐語基礎）
   # fonts-noto-color-emoji: Emoji 支援（僅此一套）
   # fonts-liberation: Liberation 字型（Arial/Times 替代）

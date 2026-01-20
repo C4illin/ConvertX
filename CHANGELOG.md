@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.1.5](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.5) (2026-01-20)
+
+### Features
+
+- **註冊功能**: 移除 ACCOUNT_REGISTRATION 限制，註冊頁面始終可用
+- **語言選單**: UI 改為可滾動（max-height: 320px），避免畫面被撐爆
+- **文件系統**: 新增 FAQ 常見問題文件
+
+### Bug Fixes
+
+- Login 頁面始終顯示 Register 連結
+- 註冊後可直接登入（與原作者 v0.17.0 行為一致）
+
+### Docs
+
+- 簡化 README 快速開始說明
+- 更新 getting-started.md 加入資料夾初始化指令
+- 新增 docs/faq.md 常見問題
+
+---
+
 ## [0.1.4](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.4) (2026-01-20)
 
 ### Features

@@ -36,15 +36,21 @@ ConvertX-CN 是基於 [C4illin/ConvertX](https://github.com/C4illin/ConvertX) �
 ### 最快方式：Docker Run
 
 ```bash
+# 1. 建立資料夾
+mkdir -p data
+
+# 2. 啟動容器
 docker run -d \
   --name convertx-cn \
   -p 3000:3000 \
   -v ./data:/app/data \
-  -e ACCOUNT_REGISTRATION=true \
+  -e TZ=Asia/Taipei \
   convertx/convertx-cn:latest
 ```
 
-開啟瀏覽器訪問 `http://localhost:3000`，建立帳號即可開始使用！
+開啟瀏覽器訪問 `http://localhost:3000`，**直接註冊帳號**即可使用！
+
+> ✅ **預設開放註冊**：無需設定環境變數，首次使用直接點擊 Register 註冊
 
 ### 推薦方式：Docker Compose
 
@@ -63,7 +69,6 @@ services:
     environment:
       - TZ=Asia/Taipei
       - JWT_SECRET=your-secret-key-change-me
-      - ACCOUNT_REGISTRATION=true
 ```
 
 ```bash
@@ -114,8 +119,7 @@ ConvertX-CN 支援 **65 種語言**，包括：
 | [🚀 快速開始](docs/getting-started.md)       | Docker 部署教學        |
 | [🐳 Docker 配置](docs/docker.md)             | 完整 Docker 設定指南   |
 | [⚙️ 環境變數](docs/environment-variables.md) | 所有環境變數說明       |
-| [💾 儲存與 URL](docs/url-id-and-storage.md)  | 檔案儲存機制說明       |
-| [🔧 進階用法](docs/advanced-usage.md)        | 硬體加速、反向代理等   |
+| [❓ 常見問題](docs/faq.md)                   | FAQ 疑難排解           |
 | [🌍 多語言](docs/i18n.md)                    | i18n 語言設定與新增    |
 | [📦 轉換器列表](docs/converters.md)          | 支援的轉換格式完整列表 |
 
@@ -126,7 +130,7 @@ ConvertX-CN 支援 **65 種語言**，包括：
 | Tag                           | 說明       |
 | ----------------------------- | ---------- |
 | `convertx/convertx-cn:latest` | 最新穩定版 |
-| `convertx/convertx-cn:v0.1.4` | 指定版本   |
+| `convertx/convertx-cn:v0.1.5` | 指定版本   |
 
 > ⚠️ 由於內建完整依賴，Image 約 4-6 GB，首次下載需較長時間。
 

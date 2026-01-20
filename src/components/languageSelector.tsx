@@ -51,7 +51,7 @@ export const LanguageSelector = ({
       <ul
         id="language-dropdown"
         class={`
-          absolute right-0 top-full z-50 mt-2 hidden min-w-[140px] flex-col overflow-hidden rounded
+          absolute right-0 top-full z-50 mt-2 hidden min-w-[160px] max-h-[320px] flex-col overflow-y-auto rounded
           border border-neutral-700 bg-neutral-800 shadow-lg
         `}
         role="menu"
