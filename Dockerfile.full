@@ -1,0 +1,253 @@
+# ==============================================================================
+# ConvertX-CN Full 擴充版 Dockerfile
+# 版本：v0.1.6
+# ==============================================================================
+#
+# ⚠️  重要說明：
+#     此 Dockerfile 必須基於 ConvertX-CN 官方 Image
+#     用途：為進階使用者提供擴充功能的範本
+#
+# 📦 使用方式：
+#   1. 確保已有 convertx/convertx-cn:latest 或自行 build
+#   2. 取消註解需要的功能區塊
+#   3. 執行：docker build -f Dockerfile.full -t convertx-cn-full .
+#
+# ⚠️  風險提示：
+#   - 每個擴充功能都會增加 Image 大小
+#   - 全部啟用可能使 Image 超過 10GB
+#   - 請依實際需求選擇性啟用
+#
+# ==============================================================================
+
+# 基於 ConvertX-CN 官方 Image
+FROM convertx/convertx-cn:latest
+
+# ==============================================================================
+# 📚 完整 TexLive（約 +3GB）
+# ==============================================================================
+# 說明：完整 LaTeX 支援，適合需要特殊 LaTeX 套件的使用者
+# 風險：Image 體積大幅增加
+# ------------------------------------------------------------------------------
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#   texlive-full \
+#   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# ==============================================================================
+# 🔤 OCR 語言擴充（按地區分類）
+# ==============================================================================
+#
+# 📊 預估大小：
+#   - 每個語言包：5-50MB
+#   - 全部語言：約 +2GB
+#
+# 💡 建議：僅安裝實際需要的語言
+# ------------------------------------------------------------------------------
+
+# --- 歐洲語言（西歐）---
+# 約 +150MB
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#   tesseract-ocr-spa \
+#   tesseract-ocr-ita \
+#   tesseract-ocr-por \
+#   tesseract-ocr-nld \
+#   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# --- 歐洲語言（北歐）---
+# 約 +100MB
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#   tesseract-ocr-swe \
+#   tesseract-ocr-dan \
+#   tesseract-ocr-nor \
+#   tesseract-ocr-fin \
+#   tesseract-ocr-isl \
+#   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# --- 歐洲語言（東歐/斯拉夫）---
+# 約 +200MB
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#   tesseract-ocr-pol \
+#   tesseract-ocr-rus \
+#   tesseract-ocr-ukr \
+#   tesseract-ocr-ces \
+#   tesseract-ocr-slk \
+#   tesseract-ocr-hun \
+#   tesseract-ocr-ron \
+#   tesseract-ocr-bul \
+#   tesseract-ocr-hrv \
+#   tesseract-ocr-srp \
+#   tesseract-ocr-slv \
+#   tesseract-ocr-lit \
+#   tesseract-ocr-lav \
+#   tesseract-ocr-est \
+#   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# --- 歐洲語言（其他）---
+# 約 +80MB
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#   tesseract-ocr-ell \
+#   tesseract-ocr-tur \
+#   tesseract-ocr-cat \
+#   tesseract-ocr-eus \
+#   tesseract-ocr-glg \
+#   tesseract-ocr-gle \
+#   tesseract-ocr-cym \
+#   tesseract-ocr-mlt \
+#   tesseract-ocr-mkd \
+#   tesseract-ocr-sqi \
+#   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# --- 中東語言 ---
+# 約 +100MB
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#   tesseract-ocr-ara \
+#   tesseract-ocr-heb \
+#   tesseract-ocr-fas \
+#   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# --- 南亞語言 ---
+# 約 +200MB
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#   tesseract-ocr-hin \
+#   tesseract-ocr-ben \
+#   tesseract-ocr-tam \
+#   tesseract-ocr-tel \
+#   tesseract-ocr-kan \
+#   tesseract-ocr-mal \
+#   tesseract-ocr-mar \
+#   tesseract-ocr-guj \
+#   tesseract-ocr-pan \
+#   tesseract-ocr-sin \
+#   tesseract-ocr-nep \
+#   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# --- 東南亞語言 ---
+# 約 +100MB
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#   tesseract-ocr-tha \
+#   tesseract-ocr-vie \
+#   tesseract-ocr-ind \
+#   tesseract-ocr-msa \
+#   tesseract-ocr-fil \
+#   tesseract-ocr-mya \
+#   tesseract-ocr-khm \
+#   tesseract-ocr-lao \
+#   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# --- 非洲語言 ---
+# 約 +50MB
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#   tesseract-ocr-afr \
+#   tesseract-ocr-swa \
+#   tesseract-ocr-amh \
+#   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# ------------------------------------------------------------------------------
+# 🌍 一鍵安裝所有 OCR 語言（約 +2GB）
+# ⚠️ 警告：這會顯著增加 Image 大小與 build 時間
+# ------------------------------------------------------------------------------
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#   tesseract-ocr-all \
+#   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# ==============================================================================
+# 🔤 額外字型套件
+# ==============================================================================
+
+# --- Noto 完整字型集（約 +500MB）---
+# 包含全球所有語言的 Noto 字型
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#   fonts-noto-extra \
+#   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# --- 阿拉伯語/希伯來語字型 ---
+# 約 +50MB
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#   fonts-noto-ui-core \
+#   fonts-arabeyes \
+#   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# --- 印度語系字型 ---
+# 約 +100MB
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#   fonts-indic \
+#   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# --- 泰文字型 ---
+# 約 +20MB
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#   fonts-thai-tlwg \
+#   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# ==============================================================================
+# 📚 額外 TexLive 語言包
+# ==============================================================================
+
+# --- 更多歐洲語言 LaTeX 支援 ---
+# 約 +300MB
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#   texlive-lang-spanish \
+#   texlive-lang-italian \
+#   texlive-lang-portuguese \
+#   texlive-lang-polish \
+#   texlive-lang-cyrillic \
+#   texlive-lang-greek \
+#   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# --- 阿拉伯語/希伯來語 LaTeX 支援 ---
+# 約 +150MB
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#   texlive-lang-arabic \
+#   texlive-lang-other \
+#   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# ==============================================================================
+# 🔧 進階轉換工具
+# ==============================================================================
+
+# --- OpenCV（電腦視覺相關轉換）---
+# 約 +200MB
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#   python3-opencv \
+#   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# --- 額外影片編解碼器 ---
+# 約 +50MB
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#   libavcodec-extra \
+#   && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# ==============================================================================
+# 🌐 額外 Locale 設定
+# ==============================================================================
+# 如需更多語言的 locale 支援，取消以下註解
+# ------------------------------------------------------------------------------
+# RUN sed -i 's/# es_ES.UTF-8 UTF-8/es_ES.UTF-8 UTF-8/' /etc/locale.gen && \
+#   sed -i 's/# it_IT.UTF-8 UTF-8/it_IT.UTF-8 UTF-8/' /etc/locale.gen && \
+#   sed -i 's/# pt_BR.UTF-8 UTF-8/pt_BR.UTF-8 UTF-8/' /etc/locale.gen && \
+#   sed -i 's/# ru_RU.UTF-8 UTF-8/ru_RU.UTF-8 UTF-8/' /etc/locale.gen && \
+#   sed -i 's/# ar_SA.UTF-8 UTF-8/ar_SA.UTF-8 UTF-8/' /etc/locale.gen && \
+#   sed -i 's/# th_TH.UTF-8 UTF-8/th_TH.UTF-8 UTF-8/' /etc/locale.gen && \
+#   sed -i 's/# vi_VN.UTF-8 UTF-8/vi_VN.UTF-8 UTF-8/' /etc/locale.gen && \
+#   locale-gen
+
+# ==============================================================================
+# 📋 擴充功能總覽
+# ==============================================================================
+#
+# | 功能                    | 預估大小  | 風險等級 |
+# |-------------------------|----------|----------|
+# | 完整 TexLive            | +3GB     | 高       |
+# | 全部 OCR 語言           | +2GB     | 高       |
+# | 歐洲 OCR（西歐）        | +150MB   | 低       |
+# | 歐洲 OCR（北歐）        | +100MB   | 低       |
+# | 歐洲 OCR（東歐）        | +200MB   | 中       |
+# | 中東 OCR                | +100MB   | 低       |
+# | 南亞 OCR                | +200MB   | 中       |
+# | 東南亞 OCR              | +100MB   | 低       |
+# | 非洲 OCR                | +50MB    | 低       |
+# | Noto Extra 字型         | +500MB   | 中       |
+# | 印度語系字型            | +100MB   | 低       |
+# | 額外 TexLive 語言       | +300MB   | 中       |
+# | OpenCV                  | +200MB   | 中       |
+#
+# ==============================================================================

@@ -1,20 +1,89 @@
 # Docker 配置指南
 
-## Docker Image
+## Docker Image 版本說明
 
-ConvertX-CN 提供預建的 Docker Image，包含所有轉換依賴。
+ConvertX-CN 提供兩種 Docker Image 選項：
 
-### 可用 Tag
+### 1. 官方 Image（推薦）
 
-| Tag                                | 說明                     |
-| ---------------------------------- | ------------------------ |
-| `convertx/convertx-cn:latest`      | 最新穩定版               |
-| `convertx/convertx-cn:v0.1.5`      | 指定版本號               |
-| `convertx/convertx-cn:v0.1.5-FULL` | 完整版（與 latest 相同） |
+從 Docker Hub 拉取的預建 Image，適合大多數使用者。
 
-### Image 大小
+| Tag                           | 說明       |
+| ----------------------------- | ---------- |
+| `convertx/convertx-cn:latest` | 最新穩定版 |
+| `convertx/convertx-cn:v0.1.6` | 指定版本號 |
 
-由於內建完整依賴（LibreOffice、TexLive、FFmpeg 等），Image 約 **4-6 GB**。
+**內建功能：**
+
+- ✅ 核心轉換工具（FFmpeg、LibreOffice、ImageMagick 等）
+- ✅ OCR 支援：英文、繁/簡中文、日文、韓文、德文、法文
+- ✅ 字型：Noto CJK、Liberation、自訂中文字型
+- ✅ TexLive 最小集合（支援 CJK/德/法）
+
+**Image 大小：約 4-6 GB**
+
+### 2. 完整版（自行 Build）
+
+使用 `Dockerfile.full` 自行建構，適合需要：
+
+- 65 種 OCR 語言
+- 完整 TexLive
+- 額外字型套件
+
+**⚠️ 注意事項：**
+
+- Image 大小可能超過 **10GB**
+- Build 時間約 **30-60 分鐘**
+- 需要自行維護更新
+
+```bash
+# 自行建構完整版
+docker build -f Dockerfile.full -t convertx-cn-full .
+```
+
+---
+
+## 自訂 Build 指南（進階使用者）
+
+如果官方 Image 不符合需求，可以使用 `Dockerfile.full` 自行建構：
+
+### 步驟
+
+1. **複製 Dockerfile.full**
+
+   ```bash
+   cp Dockerfile.full Dockerfile.custom
+   ```
+
+2. **取消註解需要的功能**
+   - 編輯 `Dockerfile.custom`
+   - 找到需要的功能區塊
+   - 移除 `#` 註解符號
+
+3. **建構 Image**
+   ```bash
+   docker build -f Dockerfile.custom -t convertx-cn-custom .
+   ```
+
+### 可選功能
+
+| 功能            | 預估大小 | 說明             |
+| --------------- | -------- | ---------------- |
+| 完整 TexLive    | +3GB     | 完整 LaTeX 支援  |
+| 全部 OCR 語言   | +2GB     | 65 種語言辨識    |
+| Noto Extra 字型 | +500MB   | 全球語言字型     |
+| 歐洲 OCR 語言   | +200MB   | 25 種歐洲語言    |
+| 中東/南亞 OCR   | +150MB   | 阿拉伯、印度語系 |
+| 東南亞 OCR      | +100MB   | 泰、越、印尼等   |
+
+### 範例：僅加入西班牙文 OCR
+
+```dockerfile
+# 在 Dockerfile.full 中取消以下註解：
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  tesseract-ocr-spa \
+  && rm -rf /var/lib/apt/lists/*
+```
 
 ---
 

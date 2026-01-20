@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.1.6](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.6) (2026-01-20)
+
+### Features
+
+- **Docker 架構**: 整理並優化官方 Dockerfile
+  - 更新 Dockerfile 註解與文件說明
+  - 新增 Dockerfile.full 完整版範本
+- **Dockerfile.full**: 進階使用者自行 build 的完整範本
+  - 包含 65 種 OCR 語言（預設關閉）
+  - 包含完整 TexLive 選項（預設關閉）
+  - 包含額外字型套件（預設關閉）
+  - 所有進階功能以註解方式提供，使用者自行選擇
+
+### Docs
+
+- 更新 docs/docker.md
+  - 說明官方 Image vs 完整版差異
+  - 新增自訂 Build 指南
+  - 新增可選功能大小說明
+
+### Optimization
+
+- 優化 Dockerfile 結構與註解
+- 清楚標示哪些功能未內建於官方 Image
+
+---
+
 ## [0.1.5](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.5) (2026-01-20)
 
 ### Features
