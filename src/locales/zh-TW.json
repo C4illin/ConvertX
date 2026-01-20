@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX",
+    "poweredBy": "由",
+    "version": "v{version}",
+    "loading": "載入中...",
+    "error": "錯誤",
+    "success": "成功",
+    "confirm": "確認",
+    "cancel": "取消",
+    "close": "關閉",
+    "save": "儲存",
+    "delete": "刪除",
+    "remove": "移除",
+    "download": "下載",
+    "upload": "上傳",
+    "submit": "提交",
+    "back": "返回",
+    "next": "下一步",
+    "yes": "是",
+    "no": "否"
+  },
+  "nav": {
+    "history": "歷史記錄",
+    "account": "帳戶",
+    "logout": "登出",
+    "login": "登入",
+    "register": "註冊",
+    "language": "語言"
+  },
+  "convert": {
+    "title": "轉換",
+    "titleWithType": "轉換 .{fileType}",
+    "chooseFile": "選擇檔案",
+    "orDragHere": "或拖曳到這裡",
+    "searchConversions": "搜尋轉換格式",
+    "convertTo": "轉換為",
+    "convertButton": "轉換",
+    "uploading": "上傳中...",
+    "processing": "處理中..."
+  },
+  "results": {
+    "title": "結果",
+    "convertedFileName": "轉換後檔名",
+    "status": "狀態",
+    "actions": "操作",
+    "downloadAll": "全部",
+    "downloadTar": "Tar",
+    "deleteJob": "刪除",
+    "noFiles": "尚未轉換任何檔案。",
+    "statusPending": "處理中",
+    "statusCompleted": "已完成",
+    "statusFailed": "失敗"
+  },
+  "history": {
+    "title": "結果",
+    "time": "時間",
+    "files": "檔案數",
+    "filesDone": "已完成",
+    "status": "狀態",
+    "actions": "操作",
+    "expandDetails": "展開詳情",
+    "detailedFileInfo": "檔案詳細資訊：",
+    "deleteSelected": "刪除選取",
+    "selectAll": "全選",
+    "confirmDelete": "確定要刪除 {count} 個任務嗎？此操作無法復原。",
+    "deleteSuccess": "已成功刪除 {deleted} 個任務。",
+    "deleteFailed": "刪除 {failed} 個任務失敗。",
+    "deleteError": "刪除任務時發生錯誤，請重試。"
+  },
+  "auth": {
+    "email": "電子郵件",
+    "password": "密碼",
+    "currentPassword": "目前密碼",
+    "newPassword": "密碼（如不變更請留空）",
+    "loginButton": "登入",
+    "registerButton": "註冊",
+    "updateButton": "更新",
+    "createAccount": "建立帳戶",
+    "invalidCredentials": "憑證無效。",
+    "emailInUse": "電子郵件已被使用。",
+    "unauthorized": "未授權",
+    "cookiesRequired": "使用此應用程式需要啟用 Cookie。",
+    "noCookies": "無法取得驗證 Cookie，您的瀏覽器可能阻擋了 Cookie。"
+  },
+  "setup": {
+    "welcome": "歡迎使用 ConvertX！",
+    "createYourAccount": "建立您的帳戶",
+    "reportIssues": "在以下網址回報問題",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "找不到任務。",
+    "fileNotFound": "找不到檔案。",
+    "uploadFailed": "上傳失敗。",
+    "conversionFailed": "轉換失敗。",
+    "serverError": "伺服器錯誤。"
+  },
+  "upload": {
+    "success": "檔案上傳成功。",
+    "dragDrop": "將檔案拖曳至此"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

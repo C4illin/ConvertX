@@ -4,13 +4,14 @@ import { Header } from "../components/header";
 import db from "../db/db";
 import { Filename, Jobs } from "../db/types";
 import { ALLOW_UNAUTHENTICATED, HIDE_HISTORY, LANGUAGE, TIMEZONE, WEBROOT } from "../helpers/env";
+import { localeService } from "../i18n/service";
 import { userService } from "./user";
 import { EyeIcon } from "../icons/eye";
 import { DeleteIcon } from "../icons/delete";
 
-export const history = new Elysia().use(userService).get(
+export const history = new Elysia().use(userService).use(localeService).get(
   "/history",
-  async ({ redirect, user }) => {
+  async ({ redirect, user, locale, t }) => {
     if (HIDE_HISTORY) {
       return redirect(`${WEBROOT}/`, 302);
     }
@@ -32,13 +33,15 @@ export const history = new Elysia().use(userService).get(
     userJobs = userJobs.filter((job) => job.num_files > 0);
 
     return (
-      <BaseHtml webroot={WEBROOT} title="ConvertX | Results">
+      <BaseHtml webroot={WEBROOT} title="ConvertX | Results" locale={locale}>
         <>
           <Header
             webroot={WEBROOT}
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
             hideHistory={HIDE_HISTORY}
             loggedIn
+            locale={locale}
+            t={t}
           />
           <main
             class={`
@@ -48,7 +51,7 @@ export const history = new Elysia().use(userService).get(
           >
             <article class="article">
               <div class="mb-4 flex items-center justify-between">
-                <h1 class="text-xl">Results</h1>
+                <h1 class="text-xl">{t("history", "title")}</h1>
                 <div id="delete-selected-container">
                   <button
                     id="delete-selected-btn"
@@ -60,7 +63,7 @@ export const history = new Elysia().use(userService).get(
                   >
                     <DeleteIcon />{" "}
                     <span>
-                      Delete Selected (<span id="selected-count">0</span>)
+                      {t("history", "deleteSelected")} (<span id="selected-count">0</span>)
                     </span>
                   </button>
                 </div>
@@ -84,7 +87,7 @@ export const history = new Elysia().use(userService).get(
                         type="checkbox"
                         id="select-all"
                         class="h-4 w-4 cursor-pointer"
-                        title="Select all"
+                        title={t("history", "selectAll")}
                       />
                     </th>
                     <th
@@ -93,7 +96,7 @@ export const history = new Elysia().use(userService).get(
                         sm:px-4
                       `}
                     >
-                      <span class="sr-only">Expand details</span>
+                      <span class="sr-only">{t("history", "expandDetails")}</span>
                     </th>
                     <th
                       class={`
@@ -101,7 +104,7 @@ export const history = new Elysia().use(userService).get(
                         sm:px-4
                       `}
                     >
-                      Time
+                      {t("history", "time")}
                     </th>
                     <th
                       class={`
@@ -109,7 +112,7 @@ export const history = new Elysia().use(userService).get(
                         sm:px-4
                       `}
                     >
-                      Files
+                      {t("history", "files")}
                     </th>
                     <th
                       class={`
@@ -118,7 +121,7 @@ export const history = new Elysia().use(userService).get(
                         sm:px-4
                       `}
                     >
-                      Files Done
+                      {t("history", "filesDone")}
                     </th>
                     <th
                       class={`
@@ -126,7 +129,7 @@ export const history = new Elysia().use(userService).get(
                         sm:px-4
                       `}
                     >
-                      Status
+                      {t("history", "status")}
                     </th>
                     <th
                       class={`
@@ -134,7 +137,7 @@ export const history = new Elysia().use(userService).get(
                         sm:px-4
                       `}
                     >
-                      Actions
+                      {t("history", "actions")}
                     </th>
                   </tr>
                 </thead>
@@ -199,7 +202,7 @@ export const history = new Elysia().use(userService).get(
                       <tr id={`details-${job.id}`} class="hidden">
                         <td colspan="7">
                           <div class="p-2 text-sm text-neutral-500">
-                            <div class="mb-1 font-semibold">Detailed File Information:</div>
+                            <div class="mb-1 font-semibold">{t("history", "detailedFileInfo")}</div>
                             {job.files_detailed.map((file: Filename) => (
                               <div class="flex items-center">
                                 <span class="w-5/12 truncate" title={file.file_name} safe>

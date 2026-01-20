@@ -9,6 +9,7 @@
         "@elysiajs/jwt": "^1.4.0",
         "@elysiajs/static": "^1.4.6",
         "@kitajs/html": "^4.2.11",
+        "@sinclair/typebox": "^0.34.47",
         "elysia": "^1.4.16",
         "sanitize-filename": "^1.6.3",
         "tar": "^7.5.2",

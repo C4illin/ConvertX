@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.1.3](https://github.com/C4illin/ConvertX/releases/tag/v0.1.3) (2026-01-20)
+
+### Features
+
+- **i18n**: Add multi-language UI support with 5 languages
+  - English (en) - default
+  - Traditional Chinese (zh-TW) / 繁體中文
+  - Simplified Chinese (zh-CN) / 简体中文
+  - Japanese (ja) / 日本語
+  - Korean (ko) / 한국어
+- Add language selector dropdown in navigation header
+- Auto-detect user's preferred language from browser settings
+- Persist language preference in cookies
+- All UI text (buttons, labels, messages, errors) now supports translation
+- Extensible i18n architecture for adding more languages in the future
+
+### Technical Details
+
+- New `/src/i18n/` directory with translation core functionality
+- New `/src/locales/` directory with JSON translation files
+- New `LanguageSelector` component for language switching
+- Updated all page components to support localization
+- Client-side translation helper for dynamic content
+
+---
+
 ## [0.15.0](https://github.com/C4illin/ConvertX/compare/v0.14.1...v0.15.0) (2025-10-07)
 
 ### Features

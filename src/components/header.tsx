@@ -1,20 +1,27 @@
+import { type SupportedLocale, type Translator, createTranslator, defaultLocale } from "../i18n";
+import { LanguageSelector } from "./languageSelector";
+
 export const Header = ({
   loggedIn,
   accountRegistration,
   allowUnauthenticated,
   hideHistory,
   webroot = "",
+  locale = defaultLocale,
+  t = createTranslator(defaultLocale),
 }: {
   loggedIn?: boolean;
   accountRegistration?: boolean;
   allowUnauthenticated?: boolean;
   hideHistory?: boolean;
   webroot?: string;
+  locale?: SupportedLocale;
+  t?: Translator;
 }) => {
   let rightNav: JSX.Element;
   if (loggedIn) {
     rightNav = (
-      <ul class="flex gap-4">
+      <ul class="flex items-center gap-4">
         {!hideHistory && (
           <li>
             <a
@@ -24,7 +31,7 @@ export const Header = ({
               `}
               href={`${webroot}/history`}
             >
-              History
+              {t("nav", "history")}
             </a>
           </li>
         )}
@@ -37,7 +44,7 @@ export const Header = ({
               `}
               href={`${webroot}/account`}
             >
-              Account
+              {t("nav", "account")}
             </a>
           </li>
         ) : null}
@@ -50,15 +57,18 @@ export const Header = ({
               `}
               href={`${webroot}/logoff`}
             >
-              Logout
+              {t("nav", "logout")}
             </a>
           </li>
         ) : null}
+        <li>
+          <LanguageSelector currentLocale={locale} webroot={webroot} t={t} />
+        </li>
       </ul>
     );
   } else {
     rightNav = (
-      <ul class="flex gap-4">
+      <ul class="flex items-center gap-4">
         <li>
           <a
             class={`
@@ -67,7 +77,7 @@ export const Header = ({
             `}
             href={`${webroot}/login`}
           >
-            Login
+            {t("nav", "login")}
           </a>
         </li>
         {accountRegistration ? (
@@ -79,10 +89,13 @@ export const Header = ({
               `}
               href={`${webroot}/register`}
             >
-              Register
+              {t("nav", "register")}
             </a>
           </li>
         ) : null}
+        <li>
+          <LanguageSelector currentLocale={locale} webroot={webroot} t={t} />
+        </li>
       </ul>
     );
   }

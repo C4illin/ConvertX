@@ -14,11 +14,12 @@ import {
   UNAUTHENTICATED_USER_SHARING,
   WEBROOT,
 } from "../helpers/env";
+import { localeService } from "../i18n/service";
 import { FIRST_RUN, userService } from "./user";
 
-export const root = new Elysia().use(userService).get(
+export const root = new Elysia().use(userService).use(localeService).get(
   "/",
-  async ({ jwt, redirect, cookie: { auth, jobId } }) => {
+  async ({ jwt, redirect, cookie: { auth, jobId }, locale, t }) => {
     if (!ALLOW_UNAUTHENTICATED) {
       if (FIRST_RUN) {
         return redirect(`${WEBROOT}/setup`, 302);
@@ -44,7 +45,7 @@ export const root = new Elysia().use(userService).get(
       user = { id: newUserId };
       if (!auth) {
         return {
-          message: "No auth cookie, perhaps your browser is blocking cookies.",
+          message: t("auth", "noCookies"),
         };
       }
 
@@ -91,7 +92,7 @@ export const root = new Elysia().use(userService).get(
       .get(user.id) as { id: number };
 
     if (!jobId) {
-      return { message: "Cookies should be enabled to use this app." };
+      return { message: t("auth", "cookiesRequired") };
     }
 
     jobId.set({
@@ -105,7 +106,7 @@ export const root = new Elysia().use(userService).get(
     console.log("jobId set to:", id);
 
     return (
-      <BaseHtml webroot={WEBROOT}>
+      <BaseHtml webroot={WEBROOT} locale={locale}>
         <>
           <Header
             webroot={WEBROOT}
@@ -113,6 +114,8 @@ export const root = new Elysia().use(userService).get(
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
             hideHistory={HIDE_HISTORY}
             loggedIn
+            locale={locale}
+            t={t}
           />
           <main
             class={`
@@ -121,7 +124,7 @@ export const root = new Elysia().use(userService).get(
             `}
           >
             <article class="article">
-              <h1 class="mb-4 text-xl">Convert</h1>
+              <h1 class="mb-4 text-xl">{t("convert", "title")}</h1>
               <div class="mb-4 scrollbar-thin max-h-[50vh] overflow-y-auto">
                 <table
                   id="file-list"
@@ -142,7 +145,7 @@ export const root = new Elysia().use(userService).get(
                 `}
               >
                 <span>
-                  <b>Choose a file</b> or drag it here
+                  <b>{t("convert", "chooseFile")}</b> {t("convert", "orDragHere")}
                 </span>
                 <input
                   type="file"
@@ -162,7 +165,7 @@ export const root = new Elysia().use(userService).get(
                 <input
                   type="search"
                   name="convert_to_search"
-                  placeholder="Search for conversions"
+                  placeholder={t("convert", "searchConversions")}
                   autocomplete="off"
                   class="w-full rounded-sm bg-neutral-800 p-4"
                 />
@@ -208,9 +211,9 @@ export const root = new Elysia().use(userService).get(
                   </article>
 
                   {/* Hidden element which determines the format to convert the file too and the converter to use */}
-                  <select name="convert_to" aria-label="Convert to" required hidden>
+                  <select name="convert_to" aria-label={t("convert", "convertTo")} required hidden>
                     <option selected disabled value="">
-                      Convert to
+                      {t("convert", "convertTo")}
                     </option>
                     {Object.entries(getAllTargets()).map(([converter, targets]) => (
                       <optgroup label={converter}>
@@ -230,7 +233,7 @@ export const root = new Elysia().use(userService).get(
                   disabled:cursor-not-allowed disabled:opacity-50
                 `}
                 type="submit"
-                value="Convert"
+                value={t("convert", "convertButton")}
                 disabled
               />
             </form>
@@ -244,6 +247,7 @@ export const root = new Elysia().use(userService).get(
     cookie: t.Cookie({
       auth: t.Optional(t.String()),
       jobId: t.Optional(t.String()),
+      locale: t.Optional(t.String()),
     }),
   },
 );

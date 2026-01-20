@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX",
+    "poweredBy": "Powered by",
+    "version": "v{version}",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "confirm": "確認",
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "save": "保存",
+    "delete": "削除",
+    "remove": "削除",
+    "download": "ダウンロード",
+    "upload": "アップロード",
+    "submit": "送信",
+    "back": "戻る",
+    "next": "次へ",
+    "yes": "はい",
+    "no": "いいえ"
+  },
+  "nav": {
+    "history": "履歴",
+    "account": "アカウント",
+    "logout": "ログアウト",
+    "login": "ログイン",
+    "register": "登録",
+    "language": "言語"
+  },
+  "convert": {
+    "title": "変換",
+    "titleWithType": ".{fileType} を変換",
+    "chooseFile": "ファイルを選択",
+    "orDragHere": "またはここにドラッグ",
+    "searchConversions": "変換形式を検索",
+    "convertTo": "変換先",
+    "convertButton": "変換",
+    "uploading": "アップロード中...",
+    "processing": "処理中..."
+  },
+  "results": {
+    "title": "結果",
+    "convertedFileName": "変換後のファイル名",
+    "status": "ステータス",
+    "actions": "操作",
+    "downloadAll": "すべて",
+    "downloadTar": "Tar",
+    "deleteJob": "削除",
+    "noFiles": "まだファイルが変換されていません。",
+    "statusPending": "処理中",
+    "statusCompleted": "完了",
+    "statusFailed": "失敗"
+  },
+  "history": {
+    "title": "結果",
+    "time": "時間",
+    "files": "ファイル数",
+    "filesDone": "完了",
+    "status": "ステータス",
+    "actions": "操作",
+    "expandDetails": "詳細を展開",
+    "detailedFileInfo": "ファイル詳細情報：",
+    "deleteSelected": "選択を削除",
+    "selectAll": "すべて選択",
+    "confirmDelete": "{count}件のジョブを削除しますか？この操作は取り消せません。",
+    "deleteSuccess": "{deleted}件のジョブを削除しました。",
+    "deleteFailed": "{failed}件のジョブの削除に失敗しました。",
+    "deleteError": "ジョブの削除中にエラーが発生しました。もう一度お試しください。"
+  },
+  "auth": {
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "currentPassword": "現在のパスワード",
+    "newPassword": "パスワード（変更しない場合は空欄）",
+    "loginButton": "ログイン",
+    "registerButton": "登録",
+    "updateButton": "更新",
+    "createAccount": "アカウントを作成",
+    "invalidCredentials": "認証情報が無効です。",
+    "emailInUse": "このメールアドレスは既に使用されています。",
+    "unauthorized": "未認証",
+    "cookiesRequired": "このアプリを使用するにはCookieを有効にしてください。",
+    "noCookies": "認証Cookieが見つかりません。ブラウザがCookieをブロックしている可能性があります。"
+  },
+  "setup": {
+    "welcome": "ConvertXへようこそ！",
+    "createYourAccount": "アカウントを作成",
+    "reportIssues": "問題があれば報告",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "ジョブが見つかりません。",
+    "fileNotFound": "ファイルが見つかりません。",
+    "uploadFailed": "アップロードに失敗しました。",
+    "conversionFailed": "変換に失敗しました。",
+    "serverError": "サーバーエラー。"
+  },
+  "upload": {
+    "success": "ファイルのアップロードに成功しました。",
+    "dragDrop": "ここにファイルをドロップ"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

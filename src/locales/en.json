@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX",
+    "poweredBy": "Powered by",
+    "version": "v{version}",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save",
+    "delete": "Delete",
+    "remove": "Remove",
+    "download": "Download",
+    "upload": "Upload",
+    "submit": "Submit",
+    "back": "Back",
+    "next": "Next",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "nav": {
+    "history": "History",
+    "account": "Account",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register",
+    "language": "Language"
+  },
+  "convert": {
+    "title": "Convert",
+    "titleWithType": "Convert .{fileType}",
+    "chooseFile": "Choose a file",
+    "orDragHere": "or drag it here",
+    "searchConversions": "Search for conversions",
+    "convertTo": "Convert to",
+    "convertButton": "Convert",
+    "uploading": "Uploading...",
+    "processing": "Processing..."
+  },
+  "results": {
+    "title": "Results",
+    "convertedFileName": "Converted File Name",
+    "status": "Status",
+    "actions": "Actions",
+    "downloadAll": "All",
+    "downloadTar": "Tar",
+    "deleteJob": "Delete",
+    "noFiles": "No files converted yet.",
+    "statusPending": "Pending",
+    "statusCompleted": "Completed",
+    "statusFailed": "Failed"
+  },
+  "history": {
+    "title": "Results",
+    "time": "Time",
+    "files": "Files",
+    "filesDone": "Files Done",
+    "status": "Status",
+    "actions": "Actions",
+    "expandDetails": "Expand details",
+    "detailedFileInfo": "Detailed File Information:",
+    "deleteSelected": "Delete Selected",
+    "selectAll": "Select all",
+    "confirmDelete": "Are you sure you want to delete {count} job(s)? This action cannot be undone.",
+    "deleteSuccess": "Successfully deleted {deleted} job(s).",
+    "deleteFailed": "Failed to delete {failed} job(s).",
+    "deleteError": "An error occurred while deleting jobs. Please try again."
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "currentPassword": "Current Password",
+    "newPassword": "Password (leave blank for unchanged)",
+    "loginButton": "Login",
+    "registerButton": "Register",
+    "updateButton": "Update",
+    "createAccount": "Create account",
+    "invalidCredentials": "Invalid credentials.",
+    "emailInUse": "Email already in use.",
+    "unauthorized": "Unauthorized",
+    "cookiesRequired": "Cookies should be enabled to use this app.",
+    "noCookies": "No auth cookie, perhaps your browser is blocking cookies."
+  },
+  "setup": {
+    "welcome": "Welcome to ConvertX!",
+    "createYourAccount": "Create your account",
+    "reportIssues": "Report any issues on",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "Job not found.",
+    "fileNotFound": "File not found.",
+    "uploadFailed": "Upload failed.",
+    "conversionFailed": "Conversion failed.",
+    "serverError": "Server error."
+  },
+  "upload": {
+    "success": "Files uploaded successfully.",
+    "dragDrop": "Drop files here"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

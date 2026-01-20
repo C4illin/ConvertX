@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX",
+    "poweredBy": "由",
+    "version": "v{version}",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "confirm": "确认",
+    "cancel": "取消",
+    "close": "关闭",
+    "save": "保存",
+    "delete": "删除",
+    "remove": "移除",
+    "download": "下载",
+    "upload": "上传",
+    "submit": "提交",
+    "back": "返回",
+    "next": "下一步",
+    "yes": "是",
+    "no": "否"
+  },
+  "nav": {
+    "history": "历史记录",
+    "account": "账户",
+    "logout": "登出",
+    "login": "登录",
+    "register": "注册",
+    "language": "语言"
+  },
+  "convert": {
+    "title": "转换",
+    "titleWithType": "转换 .{fileType}",
+    "chooseFile": "选择文件",
+    "orDragHere": "或拖放到这里",
+    "searchConversions": "搜索转换格式",
+    "convertTo": "转换为",
+    "convertButton": "转换",
+    "uploading": "上传中...",
+    "processing": "处理中..."
+  },
+  "results": {
+    "title": "结果",
+    "convertedFileName": "转换后文件名",
+    "status": "状态",
+    "actions": "操作",
+    "downloadAll": "全部",
+    "downloadTar": "Tar",
+    "deleteJob": "删除",
+    "noFiles": "尚未转换任何文件。",
+    "statusPending": "处理中",
+    "statusCompleted": "已完成",
+    "statusFailed": "失败"
+  },
+  "history": {
+    "title": "结果",
+    "time": "时间",
+    "files": "文件数",
+    "filesDone": "已完成",
+    "status": "状态",
+    "actions": "操作",
+    "expandDetails": "展开详情",
+    "detailedFileInfo": "文件详细信息：",
+    "deleteSelected": "删除所选",
+    "selectAll": "全选",
+    "confirmDelete": "确定要删除 {count} 个任务吗？此操作无法撤销。",
+    "deleteSuccess": "已成功删除 {deleted} 个任务。",
+    "deleteFailed": "删除 {failed} 个任务失败。",
+    "deleteError": "删除任务时发生错误，请重试。"
+  },
+  "auth": {
+    "email": "电子邮箱",
+    "password": "密码",
+    "currentPassword": "当前密码",
+    "newPassword": "密码（如不更改请留空）",
+    "loginButton": "登录",
+    "registerButton": "注册",
+    "updateButton": "更新",
+    "createAccount": "创建账户",
+    "invalidCredentials": "凭证无效。",
+    "emailInUse": "电子邮箱已被使用。",
+    "unauthorized": "未授权",
+    "cookiesRequired": "使用此应用程序需要启用 Cookie。",
+    "noCookies": "无法获取验证 Cookie，您的浏览器可能阻止了 Cookie。"
+  },
+  "setup": {
+    "welcome": "欢迎使用 ConvertX！",
+    "createYourAccount": "创建您的账户",
+    "reportIssues": "在以下网址报告问题",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "找不到任务。",
+    "fileNotFound": "找不到文件。",
+    "uploadFailed": "上传失败。",
+    "conversionFailed": "转换失败。",
+    "serverError": "服务器错误。"
+  },
+  "upload": {
+    "success": "文件上传成功。",
+    "dragDrop": "将文件拖放至此"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

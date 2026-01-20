@@ -1,0 +1,106 @@
+{
+  "common": {
+    "appName": "ConvertX",
+    "poweredBy": "Powered by",
+    "version": "v{version}",
+    "loading": "로딩 중...",
+    "error": "오류",
+    "success": "성공",
+    "confirm": "확인",
+    "cancel": "취소",
+    "close": "닫기",
+    "save": "저장",
+    "delete": "삭제",
+    "remove": "제거",
+    "download": "다운로드",
+    "upload": "업로드",
+    "submit": "제출",
+    "back": "뒤로",
+    "next": "다음",
+    "yes": "예",
+    "no": "아니오"
+  },
+  "nav": {
+    "history": "기록",
+    "account": "계정",
+    "logout": "로그아웃",
+    "login": "로그인",
+    "register": "회원가입",
+    "language": "언어"
+  },
+  "convert": {
+    "title": "변환",
+    "titleWithType": ".{fileType} 변환",
+    "chooseFile": "파일 선택",
+    "orDragHere": "또는 여기로 드래그",
+    "searchConversions": "변환 형식 검색",
+    "convertTo": "변환 대상",
+    "convertButton": "변환",
+    "uploading": "업로드 중...",
+    "processing": "처리 중..."
+  },
+  "results": {
+    "title": "결과",
+    "convertedFileName": "변환된 파일명",
+    "status": "상태",
+    "actions": "작업",
+    "downloadAll": "전체",
+    "downloadTar": "Tar",
+    "deleteJob": "삭제",
+    "noFiles": "아직 변환된 파일이 없습니다.",
+    "statusPending": "처리 중",
+    "statusCompleted": "완료",
+    "statusFailed": "실패"
+  },
+  "history": {
+    "title": "결과",
+    "time": "시간",
+    "files": "파일 수",
+    "filesDone": "완료됨",
+    "status": "상태",
+    "actions": "작업",
+    "expandDetails": "상세 정보 펼치기",
+    "detailedFileInfo": "파일 상세 정보:",
+    "deleteSelected": "선택 삭제",
+    "selectAll": "전체 선택",
+    "confirmDelete": "{count}개의 작업을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    "deleteSuccess": "{deleted}개의 작업이 삭제되었습니다.",
+    "deleteFailed": "{failed}개의 작업 삭제에 실패했습니다.",
+    "deleteError": "작업 삭제 중 오류가 발생했습니다. 다시 시도해 주세요."
+  },
+  "auth": {
+    "email": "이메일",
+    "password": "비밀번호",
+    "currentPassword": "현재 비밀번호",
+    "newPassword": "비밀번호 (변경하지 않으려면 빈칸)",
+    "loginButton": "로그인",
+    "registerButton": "회원가입",
+    "updateButton": "업데이트",
+    "createAccount": "계정 생성",
+    "invalidCredentials": "잘못된 인증 정보입니다.",
+    "emailInUse": "이미 사용 중인 이메일입니다.",
+    "unauthorized": "인증되지 않음",
+    "cookiesRequired": "이 앱을 사용하려면 쿠키를 활성화해야 합니다.",
+    "noCookies": "인증 쿠키를 찾을 수 없습니다. 브라우저에서 쿠키를 차단하고 있을 수 있습니다."
+  },
+  "setup": {
+    "welcome": "ConvertX에 오신 것을 환영합니다!",
+    "createYourAccount": "계정 생성",
+    "reportIssues": "문제가 있으시면 보고해 주세요",
+    "github": "GitHub"
+  },
+  "errors": {
+    "jobNotFound": "작업을 찾을 수 없습니다.",
+    "fileNotFound": "파일을 찾을 수 없습니다.",
+    "uploadFailed": "업로드에 실패했습니다.",
+    "conversionFailed": "변환에 실패했습니다.",
+    "serverError": "서버 오류."
+  },
+  "upload": {
+    "success": "파일이 업로드되었습니다.",
+    "dragDrop": "여기에 파일을 놓으세요"
+  },
+  "file": {
+    "size": "{size} kB"
+  }
+}

@@ -7,6 +7,28 @@ let fileType;
 let pendingFiles = 0;
 let formatSelected = false;
 
+// Get translation helper
+const getTranslation = (category, key, params) => {
+  if (typeof window.t === 'function') {
+    return window.t(category, key, params);
+  }
+  // Fallback to English if t is not available
+  const fallbacks = {
+    'common.remove': 'Remove',
+    'convert.title': 'Convert',
+    'convert.titleWithType': 'Convert .{fileType}',
+    'convert.convertButton': 'Convert',
+    'convert.uploading': 'Uploading...'
+  };
+  let text = fallbacks[`${category}.${key}`] || key;
+  if (params) {
+    Object.entries(params).forEach(([k, v]) => {
+      text = text.replace(`{${k}}`, v);
+    });
+  }
+  return text;
+};
+
 dropZone.addEventListener("dragover", (e) => {
   e.preventDefault();
   dropZone.classList.add("dragover");
@@ -36,13 +58,14 @@ dropZone.addEventListener("drop", (e) => {
 // Extracted handleFile function for reusability in drag-and-drop and file input
 function handleFile(file) {
   const fileList = document.querySelector("#file-list");
+  const removeText = getTranslation('common', 'remove');
 
   const row = document.createElement("tr");
   row.innerHTML = `
     <td>${file.name}</td>
     <td><progress max="100" class="inline-block h-2 appearance-none overflow-hidden rounded-full border-0 bg-neutral-700 bg-none text-accent-500 accent-accent-500 [&::-moz-progress-bar]:bg-accent-500 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:[background:none] [&[value]::-webkit-progress-value]:bg-accent-500 [&[value]::-webkit-progress-value]:transition-[inline-size]"></progress></td>
     <td>${(file.size / 1024).toFixed(2)} kB</td>
-    <td><a onclick="deleteRow(this)">Remove</a></td>
+    <td><a onclick="deleteRow(this)">${removeText}</a></td>
   `;
 
   if (!fileType) {
@@ -162,7 +185,11 @@ fileInput.addEventListener("change", (e) => {
 
 const setTitle = () => {
   const title = document.querySelector("h1");
-  title.textContent = `Convert ${fileType ? `.${fileType}` : ""}`;
+  if (fileType) {
+    title.textContent = getTranslation('convert', 'titleWithType', { fileType });
+  } else {
+    title.textContent = getTranslation('convert', 'title');
+  }
 };
 
 // Add a onclick for the delete button
@@ -198,7 +225,7 @@ const deleteRow = (target) => {
 
 const uploadFile = (file) => {
   convertButton.disabled = true;
-  convertButton.textContent = "Uploading...";
+  convertButton.value = getTranslation('convert', 'uploading');
   pendingFiles += 1;
 
   const formData = new FormData();
@@ -216,7 +243,7 @@ const uploadFile = (file) => {
       if (formatSelected) {
         convertButton.disabled = false;
       }
-      convertButton.textContent = "Convert";
+      convertButton.value = getTranslation('convert', 'convertButton');
     }
 
     //Remove the progress bar when upload is done
