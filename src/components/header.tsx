@@ -1,4 +1,9 @@
-import { type SupportedLocale, type Translator, createTranslator, defaultLocale } from "../i18n/index";
+import {
+  type SupportedLocale,
+  type Translator,
+  createTranslator,
+  defaultLocale,
+} from "../i18n/index";
 import { LanguageSelector } from "./languageSelector";
 
 export const Header = ({

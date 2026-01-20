@@ -1,6 +1,6 @@
 # ==============================================================================
 # ConvertX-CN 部署範例（docker-compose.yml / compose.yaml）
-# 
+#
 # 🎉 這是完整版 image，已內建所有轉換依賴：
 #    - LibreOffice (headless)
 #    - TexLive Full
@@ -23,19 +23,19 @@ services:
       - ./data:/app/data
     environment:
       # === 帳號設定 ===
-      - ACCOUNT_REGISTRATION=false    # 是否允許註冊新帳號（首次帳號不受此限制）
-      - JWT_SECRET=請更換為一個長且隨機的字串  # 若不設定則使用 randomUUID()
-      
+      - ACCOUNT_REGISTRATION=false # 是否允許註冊新帳號（首次帳號不受此限制）
+      - JWT_SECRET=請更換為一個長且隨機的字串 # 若不設定則使用 randomUUID()
+
       # === 安全設定 ===
-      - HTTP_ALLOWED=false             # 是否允許非 HTTPS 連線（僅本地測試時設為 true）
-      - ALLOW_UNAUTHENTICATED=false    # 是否允許未登入使用（僅本地測試時設為 true）
-      
+      - HTTP_ALLOWED=false # 是否允許非 HTTPS 連線（僅本地測試時設為 true）
+      - ALLOW_UNAUTHENTICATED=false # 是否允許未登入使用（僅本地測試時設為 true）
+
       # === 檔案管理 ===
-      - AUTO_DELETE_EVERY_N_HOURS=24   # 自動刪除超過 N 小時的檔案（0 = 停用）
-      
+      - AUTO_DELETE_EVERY_N_HOURS=24 # 自動刪除超過 N 小時的檔案（0 = 停用）
+
       # === 時區設定 ===
       - TZ=Asia/Taipei
-      
+
       # === 可選設定 ===
       # - WEBROOT=/convertx            # 子路徑部署（例如 example.com/convertx/）
       # - HIDE_HISTORY=true            # 隱藏歷史紀錄頁面

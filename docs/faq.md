@@ -5,8 +5,9 @@
 ### Q: 如何註冊帳號？
 
 首次訪問 ConvertX-CN 時：
+
 1. 開啟 `http://localhost:3000`
-2. 點擊右上角 **Register** 
+2. 點擊右上角 **Register**
 3. 輸入 Email 和密碼
 4. 完成！系統會自動登入
 
@@ -26,6 +27,7 @@ environment:
 ### Q: 忘記密碼怎麼辦？
 
 目前版本尚未提供密碼重設功能。您可以：
+
 1. 刪除 `data/convertx.db`
 2. 重新啟動容器
 3. 重新註冊
@@ -39,6 +41,7 @@ environment:
 ### Q: 為什麼 Image 這麼大（4-6 GB）？
 
 ConvertX-CN 是「完整版」，內建：
+
 - LibreOffice（文件轉換）
 - TexLive（LaTeX 支援）
 - FFmpeg（影音轉換）
@@ -46,11 +49,13 @@ ConvertX-CN 是「完整版」，內建：
 - CJK 字型
 
 如果您只需要基本功能，可使用原作者的輕量版：
+
 - `ghcr.io/c4illin/convertx:latest`
 
 ### Q: Docker 啟動失敗？
 
 常見原因：
+
 1. **Port 被占用**：改用其他 port，如 `-p 3001:3000`
 2. **磁碟空間不足**：Image 需約 6GB
 3. **權限問題**：確保 `./data` 資料夾有寫入權限
@@ -62,6 +67,7 @@ chmod -R 777 ./data
 ### Q: 資料存在哪裡？
 
 所有資料存放在掛載的 `/app/data` 目錄：
+
 - `convertx.db` - SQLite 資料庫
 - `uploads/` - 上傳的原始檔案
 - `output/` - 轉換後的檔案
@@ -97,6 +103,7 @@ chmod -R 777 ./data
 ### Q: 支援哪些格式？
 
 ConvertX-CN 支援數百種格式，包括：
+
 - **影音**：MP4, AVI, MKV, MP3, WAV 等
 - **圖片**：PNG, JPG, WEBP, SVG, PDF 等
 - **文件**：DOCX, PDF, XLSX, PPTX 等
@@ -116,6 +123,7 @@ ConvertX-CN 支援數百種格式，包括：
 ### Q: 檔案大小有限制嗎？
 
 預設無硬性限制，但大檔案：
+
 - 上傳需要更長時間
 - 轉換可能耗用大量記憶體
 

@@ -35,6 +35,7 @@ docker run -d \
 ```
 
 開啟瀏覽器訪問 `http://localhost:3000`：
+
 1. 點擊右上角 **Register** 註冊帳號
 2. 輸入 Email 和密碼
 3. 完成！開始使用

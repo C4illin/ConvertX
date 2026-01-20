@@ -1,6 +1,5 @@
 // 預設開放註冊（開箱即用），管理者可設為 false 來關閉
-export const ACCOUNT_REGISTRATION =
-  process.env.ACCOUNT_REGISTRATION?.toLowerCase() !== "false";
+export const ACCOUNT_REGISTRATION = process.env.ACCOUNT_REGISTRATION?.toLowerCase() !== "false";
 
 export const HTTP_ALLOWED = process.env.HTTP_ALLOWED?.toLowerCase() === "true" || false;
 

@@ -1,17 +1,13 @@
 import { Elysia } from "elysia";
-import {
-  type SupportedLocale,
-  createTranslator,
-  detectLocale,
-  getLocale,
-} from "./index";
+import { type SupportedLocale, createTranslator, detectLocale, getLocale } from "./index";
 
 /**
  * Elysia plugin for i18n/locale handling
  * Adds locale detection and translator to the context
  */
-export const localeService = new Elysia({ name: "locale/service" })
-  .derive({ as: "global" }, ({ request }) => {
+export const localeService = new Elysia({ name: "locale/service" }).derive(
+  { as: "global" },
+  ({ request }) => {
     // Get locale from cookie (parsed from headers) or detect from Accept-Language header
     const cookieHeader = request.headers.get("cookie") ?? "";
     const acceptLanguage = request.headers.get("accept-language") ?? undefined;
@@ -37,7 +33,8 @@ export const localeService = new Elysia({ name: "locale/service" })
       locale,
       t: translator,
     };
-  });
+  },
+);
 
 export type LocaleContext = {
   locale: SupportedLocale;

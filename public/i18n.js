@@ -90,7 +90,7 @@
     options.forEach((option) => {
       option.addEventListener("click", () => {
         const locale = option.dataset.locale;
-        const webroot = option.dataset.webroot || "";
+        // webroot is available in option.dataset.webroot if needed for future use
 
         // Save to cookie
         setCookie(LOCALE_COOKIE_NAME, locale, LOCALE_EXPIRY_DAYS);

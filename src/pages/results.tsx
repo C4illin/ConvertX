@@ -7,7 +7,7 @@ import { ALLOW_UNAUTHENTICATED, WEBROOT } from "../helpers/env";
 import { DownloadIcon } from "../icons/download";
 import { DeleteIcon } from "../icons/delete";
 import { EyeIcon } from "../icons/eye";
-import { type SupportedLocale, type Translator, createTranslator, defaultLocale } from "../i18n/index";
+import { type Translator, createTranslator, defaultLocale } from "../i18n/index";
 import { localeService } from "../i18n/service";
 import { userService } from "./user";
 
@@ -165,7 +165,13 @@ export const results = new Elysia()
       return (
         <BaseHtml webroot={WEBROOT} title="ConvertX-CN | Result" locale={locale}>
           <>
-            <Header webroot={WEBROOT} allowUnauthenticated={ALLOW_UNAUTHENTICATED} loggedIn locale={locale} t={t} />
+            <Header
+              webroot={WEBROOT}
+              allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+              loggedIn
+              locale={locale}
+              t={t}
+            />
             <main
               class={`
                 w-full flex-1 px-2

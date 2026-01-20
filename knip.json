@@ -1,8 +1,11 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "entry": ["tests/**/*.test.ts"],
+  "entry": ["tests/**/*.test.ts", "src/i18n/index.ts"],
   "project": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts"],
   "tailwind": {
     "entry": ["src/main.css"]
-  }
+  },
+  "ignore": ["src/i18n/**"],
+  "ignoreDependencies": [],
+  "ignoreExportsUsedInFile": true
 }

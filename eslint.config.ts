@@ -61,6 +61,8 @@ export default tseslint.config(
             "target",
             "convert_to_target",
             "job-details-toggle",
+            "language-selector",
+            "language-option",
           ],
         },
       ],

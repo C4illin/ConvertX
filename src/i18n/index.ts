@@ -76,15 +76,71 @@ import am from "../locales/am.json";
 import zu from "../locales/zu.json";
 
 export type SupportedLocale =
-  | "en" | "zh-TW" | "zh-CN" | "ja" | "ko"
-  | "de" | "fr" | "es" | "it" | "pt" | "ru" | "nl" | "pl" | "uk"
-  | "cs" | "sv" | "da" | "fi" | "no" | "el" | "hu" | "ro" | "bg"
-  | "hr" | "sk" | "sl" | "lt" | "lv" | "et" | "sr" | "ca" | "eu"
-  | "gl" | "is" | "ga" | "cy" | "mt" | "mk" | "sq"
-  | "ar" | "he" | "fa" | "tr"
-  | "hi" | "bn" | "ta" | "te" | "mr" | "gu" | "kn" | "ml" | "ne" | "si"
-  | "th" | "vi" | "id" | "ms" | "fil" | "my" | "km" | "lo"
-  | "af" | "sw" | "am" | "zu";
+  | "en"
+  | "zh-TW"
+  | "zh-CN"
+  | "ja"
+  | "ko"
+  | "de"
+  | "fr"
+  | "es"
+  | "it"
+  | "pt"
+  | "ru"
+  | "nl"
+  | "pl"
+  | "uk"
+  | "cs"
+  | "sv"
+  | "da"
+  | "fi"
+  | "no"
+  | "el"
+  | "hu"
+  | "ro"
+  | "bg"
+  | "hr"
+  | "sk"
+  | "sl"
+  | "lt"
+  | "lv"
+  | "et"
+  | "sr"
+  | "ca"
+  | "eu"
+  | "gl"
+  | "is"
+  | "ga"
+  | "cy"
+  | "mt"
+  | "mk"
+  | "sq"
+  | "ar"
+  | "he"
+  | "fa"
+  | "tr"
+  | "hi"
+  | "bn"
+  | "ta"
+  | "te"
+  | "mr"
+  | "gu"
+  | "kn"
+  | "ml"
+  | "ne"
+  | "si"
+  | "th"
+  | "vi"
+  | "id"
+  | "ms"
+  | "fil"
+  | "my"
+  | "km"
+  | "lo"
+  | "af"
+  | "sw"
+  | "am"
+  | "zu";
 
 export interface LocaleConfig {
   code: SupportedLocale;
@@ -99,7 +155,7 @@ export const supportedLocales: LocaleConfig[] = [
   { code: "en", name: "English", nativeName: "English" },
   { code: "ja", name: "Japanese", nativeName: "日本語" },
   { code: "ko", name: "Korean", nativeName: "한국어" },
-  
+
   // European languages
   { code: "de", name: "German", nativeName: "Deutsch" },
   { code: "fr", name: "French", nativeName: "Français" },
@@ -135,13 +191,13 @@ export const supportedLocales: LocaleConfig[] = [
   { code: "mt", name: "Maltese", nativeName: "Malti" },
   { code: "mk", name: "Macedonian", nativeName: "Македонски" },
   { code: "sq", name: "Albanian", nativeName: "Shqip" },
-  
+
   // Middle East & Central Asian languages
   { code: "ar", name: "Arabic", nativeName: "العربية" },
   { code: "he", name: "Hebrew", nativeName: "עברית" },
   { code: "fa", name: "Persian", nativeName: "فارسی" },
   { code: "tr", name: "Turkish", nativeName: "Türkçe" },
-  
+
   // South Asian languages
   { code: "hi", name: "Hindi", nativeName: "हिन्दी" },
   { code: "bn", name: "Bengali", nativeName: "বাংলা" },
@@ -153,7 +209,7 @@ export const supportedLocales: LocaleConfig[] = [
   { code: "ml", name: "Malayalam", nativeName: "മലയാളം" },
   { code: "ne", name: "Nepali", nativeName: "नेपाली" },
   { code: "si", name: "Sinhala", nativeName: "සිංහල" },
-  
+
   // Southeast Asian languages
   { code: "th", name: "Thai", nativeName: "ไทย" },
   { code: "vi", name: "Vietnamese", nativeName: "Tiếng Việt" },
@@ -163,7 +219,7 @@ export const supportedLocales: LocaleConfig[] = [
   { code: "my", name: "Burmese", nativeName: "မြန်မာ" },
   { code: "km", name: "Khmer", nativeName: "ខ្មែរ" },
   { code: "lo", name: "Lao", nativeName: "ລາວ" },
-  
+
   // African languages
   { code: "af", name: "Afrikaans", nativeName: "Afrikaans" },
   { code: "sw", name: "Swahili", nativeName: "Kiswahili" },
@@ -187,7 +243,7 @@ const translations: Record<SupportedLocale, TranslationData> = {
   "zh-CN": zhCN as TranslationData,
   ja: ja as TranslationData,
   ko: ko as TranslationData,
-  
+
   // European languages
   de: de as TranslationData,
   fr: fr as TranslationData,
@@ -223,13 +279,13 @@ const translations: Record<SupportedLocale, TranslationData> = {
   mt: mt as TranslationData,
   mk: mk as TranslationData,
   sq: sq as TranslationData,
-  
+
   // Middle East & Central Asian languages
   ar: ar as TranslationData,
   he: he as TranslationData,
   fa: fa as TranslationData,
   tr: tr as TranslationData,
-  
+
   // South Asian languages
   hi: hi as TranslationData,
   bn: bn as TranslationData,
@@ -241,7 +297,7 @@ const translations: Record<SupportedLocale, TranslationData> = {
   ml: ml as TranslationData,
   ne: ne as TranslationData,
   si: si as TranslationData,
-  
+
   // Southeast Asian languages
   th: th as TranslationData,
   vi: vi as TranslationData,
@@ -251,7 +307,7 @@ const translations: Record<SupportedLocale, TranslationData> = {
   my: my as TranslationData,
   km: km as TranslationData,
   lo: lo as TranslationData,
-  
+
   // African languages
   af: af as TranslationData,
   sw: sw as TranslationData,
@@ -278,8 +334,7 @@ export function t<T extends TranslationKey>(
 
   if (typeof translation !== "string") {
     // Fallback to English
-    const fallback =
-      translations[fallbackLocale]?.[category]?.[key as keyof TranslationData[T]];
+    const fallback = translations[fallbackLocale]?.[category]?.[key as keyof TranslationData[T]];
     if (typeof fallback !== "string") {
       return `${category}.${String(key)}`;
     }
@@ -326,9 +381,7 @@ export function detectLocale(acceptLanguage?: string): SupportedLocale {
   // Try to find a match
   for (const lang of languages) {
     // Direct match (case-insensitive)
-    const directMatch = supportedLocales.find(
-      (l) => l.code.toLowerCase() === lang.code
-    );
+    const directMatch = supportedLocales.find((l) => l.code.toLowerCase() === lang.code);
     if (directMatch) {
       return directMatch.code;
     }
@@ -347,7 +400,7 @@ export function detectLocale(acceptLanguage?: string): SupportedLocale {
     const baseCode = lang.code.split("-")[0];
     if (baseCode) {
       const baseMatch = supportedLocales.find(
-        (l) => l.code.toLowerCase() === baseCode || l.code.toLowerCase().startsWith(baseCode + "-")
+        (l) => l.code.toLowerCase() === baseCode || l.code.toLowerCase().startsWith(baseCode + "-"),
       );
       if (baseMatch) {
         return baseMatch.code;
@@ -364,9 +417,7 @@ export function detectLocale(acceptLanguage?: string): SupportedLocale {
  * @returns Whether the locale is valid
  */
 export function isValidLocale(locale: string): locale is SupportedLocale {
-  return supportedLocales.some(
-    (l) => l.code.toLowerCase() === locale.toLowerCase(),
-  );
+  return supportedLocales.some((l) => l.code.toLowerCase() === locale.toLowerCase());
 }
 
 /**
@@ -376,11 +427,11 @@ export function isValidLocale(locale: string): locale is SupportedLocale {
  */
 export function getLocale(locale?: string): SupportedLocale {
   if (!locale) return defaultLocale;
-  
+
   // Handle case-insensitive matching
   const normalized = locale.toLowerCase();
   const found = supportedLocales.find((l) => l.code.toLowerCase() === normalized);
-  
+
   return found?.code ?? defaultLocale;
 }
 

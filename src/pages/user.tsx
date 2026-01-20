@@ -173,7 +173,11 @@ export const user = new Elysia()
                     />
                   </label>
                 </fieldset>
-                <input type="submit" value={t("auth", "registerButton")} class="w-full btn-primary" />
+                <input
+                  type="submit"
+                  value={t("auth", "registerButton")}
+                  class="w-full btn-primary"
+                />
               </form>
             </article>
           </main>
@@ -302,7 +306,11 @@ export const user = new Elysia()
                     >
                       {t("nav", "register")}
                     </a>
-                    <input type="submit" value={t("auth", "loginButton")} class="w-full btn-primary" />
+                    <input
+                      type="submit"
+                      value={t("auth", "loginButton")}
+                      class="w-full btn-primary"
+                    />
                   </div>
                 </form>
               </article>
@@ -441,7 +449,11 @@ export const user = new Elysia()
                     </label>
                   </fieldset>
                   <div role="group">
-                    <input type="submit" value={t("auth", "updateButton")} class="w-full btn-primary" />
+                    <input
+                      type="submit"
+                      value={t("auth", "updateButton")}
+                      class={`w-full btn-primary`}
+                    />
                   </div>
                 </form>
               </article>
