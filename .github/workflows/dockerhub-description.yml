@@ -1,8 +1,12 @@
 name: Update Docker Hub Description
 
+# ==============================================================================
+# 🔧 非關鍵流程 - 即使失敗也不影響 Release
+# ==============================================================================
+
 env:
-  IMAGE_NAME: ${{ github.repository }}
-  DOCKERHUB_USERNAME: c4illin
+  # Docker Hub Repository 名稱（與 GitHub repo 不同）
+  DOCKER_IMAGE: convertx/convertx-cn
 
 on:
   push:
@@ -11,17 +15,34 @@ on:
     paths:
       - README.md
       - .github/workflows/dockerhub-description.yml
+  # 也在 Release 完成後觸發
+  workflow_run:
+    workflows: ["Release"]
+    types:
+      - completed
+
 jobs:
   dockerHubDescription:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
+    # 只在 workflow_run 成功或直接 push 時執行
+    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
 
-      - name: Docker Hub Description
-        uses: peter-evans/dockerhub-description@v5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update Docker Hub Description
+        # 非關鍵流程 - 失敗不阻擋
+        continue-on-error: true
+        uses: peter-evans/dockerhub-description@v4
         with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: ${{ env.IMAGE_NAME }}
+          repository: ${{ env.DOCKER_IMAGE }}
           short-description: ${{ github.event.repository.description }}
           enable-url-completion: true
+
+      - name: Summary
+        run: |
+          echo "## 📝 Docker Hub Description Update" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Repository: \`${{ env.DOCKER_IMAGE }}\`" >> $GITHUB_STEP_SUMMARY

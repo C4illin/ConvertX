@@ -4,13 +4,26 @@ on:
   push:
     tags:
       - "v*.*.*"
+  # 允許手動觸發
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g., v0.1.6)"
+        required: true
+        type: string
 
 env:
   DOCKER_IMAGE: convertx/convertx-cn
 
 jobs:
+  # ==============================================================================
+  # 🐳 Build and Push Docker Image（關鍵流程）
+  # ==============================================================================
   build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout repository
@@ -25,27 +38,32 @@ jobs:
           df -h
 
           # 移除不需要的預裝軟體
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo rm -rf /usr/local/share/boost
-          sudo rm -rf /usr/share/swift
-          sudo rm -rf /opt/hostedtoolcache
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /usr/local/lib/android || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+          sudo rm -rf /usr/local/share/boost || true
+          sudo rm -rf /usr/share/swift || true
+          sudo rm -rf /opt/hostedtoolcache || true
 
           # 清理 apt cache
-          sudo apt-get clean
-          sudo apt-get autoremove -y
+          sudo apt-get clean || true
+          sudo apt-get autoremove -y || true
 
           # 清理 Docker 舊資料
           docker system prune -af --volumes || true
 
-          echo "After cleanup:"
+          echo "✅ After cleanup:"
           df -h
 
       - name: Get tag name
         id: tag
-        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -71,14 +89,21 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Summary
+      - name: Docker Build Summary
         run: |
           echo "## 🐳 Docker Image Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository:** \`${{ env.DOCKER_IMAGE }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Tags:**" >> $GITHUB_STEP_SUMMARY
           echo "- \`${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- \`${{ env.DOCKER_IMAGE }}:latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Platforms:** linux/amd64, linux/arm64" >> $GITHUB_STEP_SUMMARY
 
+  # ==============================================================================
+  # 📦 Create GitHub Release
+  # ==============================================================================
   create-release:
     runs-on: ubuntu-latest
     needs: build-and-push
@@ -93,7 +118,12 @@ jobs:
 
       - name: Get tag name
         id: tag
-        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
 
       - name: Generate changelog
         id: changelog
