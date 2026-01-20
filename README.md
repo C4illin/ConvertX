@@ -50,7 +50,7 @@ docker run -d \
   -p 3000:3000 \
   -v ./data:/app/data \
   -e TZ=Asia/Taipei \
-  -e JWT_SECRET=請改成你自己的隨機字串至少32字元 \
+  -e JWT_SECRET=e78a2da4-135f-06a8-fa46-17ef7990f5d1 \
   convertx/convertx-cn:latest
 ```
 
@@ -80,7 +80,8 @@ services:
       - ./data:/app/data
     environment:
       - TZ=Asia/Taipei
-      - JWT_SECRET=請改成你自己的隨機字串至少32字元
+      #請改成你自己的隨機字串至少32字元
+      - JWT_SECRET=e78a2da4-135f-06a8-fa46-17ef7990f5d1
 ```
 
 啟動：
