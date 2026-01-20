@@ -9,16 +9,16 @@ let formatSelected = false;
 
 // Get translation helper
 const getTranslation = (category, key, params) => {
-  if (typeof window.t === 'function') {
+  if (typeof window.t === "function") {
     return window.t(category, key, params);
   }
   // Fallback to English if t is not available
   const fallbacks = {
-    'common.remove': 'Remove',
-    'convert.title': 'Convert',
-    'convert.titleWithType': 'Convert .{fileType}',
-    'convert.convertButton': 'Convert',
-    'convert.uploading': 'Uploading...'
+    "common.remove": "Remove",
+    "convert.title": "Convert",
+    "convert.titleWithType": "Convert .{fileType}",
+    "convert.convertButton": "Convert",
+    "convert.uploading": "Uploading...",
   };
   let text = fallbacks[`${category}.${key}`] || key;
   if (params) {
@@ -58,7 +58,7 @@ dropZone.addEventListener("drop", (e) => {
 // Extracted handleFile function for reusability in drag-and-drop and file input
 function handleFile(file) {
   const fileList = document.querySelector("#file-list");
-  const removeText = getTranslation('common', 'remove');
+  const removeText = getTranslation("common", "remove");
 
   const row = document.createElement("tr");
   row.innerHTML = `
@@ -186,9 +186,9 @@ fileInput.addEventListener("change", (e) => {
 const setTitle = () => {
   const title = document.querySelector("h1");
   if (fileType) {
-    title.textContent = getTranslation('convert', 'titleWithType', { fileType });
+    title.textContent = getTranslation("convert", "titleWithType", { fileType });
   } else {
-    title.textContent = getTranslation('convert', 'title');
+    title.textContent = getTranslation("convert", "title");
   }
 };
 
@@ -225,7 +225,7 @@ const deleteRow = (target) => {
 
 const uploadFile = (file) => {
   convertButton.disabled = true;
-  convertButton.value = getTranslation('convert', 'uploading');
+  convertButton.value = getTranslation("convert", "uploading");
   pendingFiles += 1;
 
   const formData = new FormData();
@@ -243,7 +243,7 @@ const uploadFile = (file) => {
       if (formatSelected) {
         convertButton.disabled = false;
       }
-      convertButton.value = getTranslation('convert', 'convertButton');
+      convertButton.value = getTranslation("convert", "convertButton");
     }
 
     //Remove the progress bar when upload is done

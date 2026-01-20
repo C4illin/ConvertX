@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.1.4](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.4) (2026-01-20)
+
+### Features
+
+- **i18n**: 擴展支援 65 種語言（從 5 種大幅擴展）
+  - 歐洲語系：de, fr, es, it, pt, ru, nl, pl, uk, cs, sv, da, fi, no, el, hu, ro, bg, hr, sk, sl, lt, lv, et, sr, ca, eu, gl, is, ga, cy, mt, mk, sq
+  - 中東語系：ar, he, fa, tr
+  - 南亞語系：hi, bn, ta, te, mr, gu, kn, ml, ne, si
+  - 東南亞語系：th, vi, id, ms, fil, my, km, lo
+  - 非洲語系：af, sw, am, zu
+- **註冊功能**: 預設開放使用者註冊（開箱即用）
+- **文件**: 完整的文件系統
+  - 新增 getting-started.md 快速入門指南
+  - 新增 docker.md Docker 部署指南
+  - 新增 environment-variables.md 環境變數說明
+  - 新增 url-id-and-storage.md 儲存結構說明
+  - 新增 advanced-usage.md 進階使用指南
+  - 更新 i18n.md 65 種語言清單
+
+### Bug Fixes
+
+- 修復 i18n 模組導入路徑問題
+- 修復 TypeScript 編譯錯誤
+
+### Breaking Changes
+
+- `ACCOUNT_REGISTRATION` 預設值從 `false` 改為 `true`（開箱即用）
+
+---
+
 ## [0.1.3](https://github.com/C4illin/ConvertX/releases/tag/v0.1.3) (2026-01-20)
 
 ### Features

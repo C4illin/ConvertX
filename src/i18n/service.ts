@@ -4,7 +4,7 @@ import {
   createTranslator,
   detectLocale,
   getLocale,
-} from "../i18n";
+} from "./index";
 
 /**
  * Elysia plugin for i18n/locale handling

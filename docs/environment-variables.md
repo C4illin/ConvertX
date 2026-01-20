@@ -6,17 +6,17 @@
 
 ## 安全性設定
 
-| 變數名稱 | 預設值 | 說明 |
-|----------|--------|------|
-| `JWT_SECRET` | `randomUUID()` | 用於簽署 JWT 的密鑰字串。**生產環境請務必設定** |
-| `ACCOUNT_REGISTRATION` | `false` | 是否允許註冊新帳號 |
-| `HTTP_ALLOWED` | `false` | 是否允許 HTTP 連線（僅本地使用建議開啟） |
-| `ALLOW_UNAUTHENTICATED` | `false` | 是否允許未登入使用 |
+| 變數名稱                | 預設值         | 說明                                            |
+| ----------------------- | -------------- | ----------------------------------------------- |
+| `JWT_SECRET`            | `randomUUID()` | 用於簽署 JWT 的密鑰字串。**生產環境請務必設定** |
+| `ACCOUNT_REGISTRATION`  | `true`         | 是否允許註冊新帳號（預設開放）                  |
+| `HTTP_ALLOWED`          | `false`        | 是否允許 HTTP 連線（僅本地使用建議開啟）        |
+| `ALLOW_UNAUTHENTICATED` | `false`        | 是否允許未登入使用                              |
 
 ### 安全建議
 
 ```yaml
-# 生產環境
+# 生產環境（關閉註冊）
 environment:
   - JWT_SECRET=a-very-long-random-string-at-least-32-characters
   - ACCOUNT_REGISTRATION=false
@@ -28,9 +28,9 @@ environment:
 
 ## 檔案管理
 
-| 變數名稱 | 預設值 | 說明 |
-|----------|--------|------|
-| `AUTO_DELETE_EVERY_N_HOURS` | `24` | 自動刪除超過 N 小時的檔案（0 = 停用） |
+| 變數名稱                    | 預設值 | 說明                                  |
+| --------------------------- | ------ | ------------------------------------- |
+| `AUTO_DELETE_EVERY_N_HOURS` | `24`   | 自動刪除超過 N 小時的檔案（0 = 停用） |
 
 ### 範例
 
@@ -46,11 +46,11 @@ environment:
 
 ## 轉換設定
 
-| 變數名稱 | 預設值 | 說明 |
-|----------|--------|------|
-| `MAX_CONVERT_PROCESS` | `0` | 最大同時轉換數（0 = 無限制） |
-| `FFMPEG_ARGS` | - | FFmpeg 輸入參數，例如 `-hwaccel vaapi` |
-| `FFMPEG_OUTPUT_ARGS` | - | FFmpeg 輸出參數，例如 `-preset veryfast` |
+| 變數名稱              | 預設值 | 說明                                     |
+| --------------------- | ------ | ---------------------------------------- |
+| `MAX_CONVERT_PROCESS` | `0`    | 最大同時轉換數（0 = 無限制）             |
+| `FFMPEG_ARGS`         | -      | FFmpeg 輸入參數，例如 `-hwaccel vaapi`   |
+| `FFMPEG_OUTPUT_ARGS`  | -      | FFmpeg 輸出參數，例如 `-preset veryfast` |
 
 ### 硬體加速範例
 
@@ -69,10 +69,10 @@ environment:
 
 ## 介面設定
 
-| 變數名稱 | 預設值 | 說明 |
-|----------|--------|------|
-| `WEBROOT` | - | 子路徑部署，例如 `/convertx` |
-| `HIDE_HISTORY` | `false` | 隱藏歷史紀錄頁面 |
+| 變數名稱       | 預設值  | 說明                         |
+| -------------- | ------- | ---------------------------- |
+| `WEBROOT`      | -       | 子路徑部署，例如 `/convertx` |
+| `HIDE_HISTORY` | `false` | 隱藏歷史紀錄頁面             |
 
 ### 子路徑部署
 
@@ -86,10 +86,10 @@ environment:
 
 ## 本地化設定
 
-| 變數名稱 | 預設值 | 說明 |
-|----------|--------|------|
-| `LANGUAGE` | `en` | 日期格式語言（BCP 47 格式） |
-| `TZ` | `UTC` | 時區設定 |
+| 變數名稱   | 預設值 | 說明                        |
+| ---------- | ------ | --------------------------- |
+| `LANGUAGE` | `en`   | 日期格式語言（BCP 47 格式） |
+| `TZ`       | `UTC`  | 時區設定                    |
 
 ### 常用時區
 
@@ -111,8 +111,8 @@ environment:
 
 ## 進階設定
 
-| 變數名稱 | 預設值 | 說明 |
-|----------|--------|------|
+| 變數名稱                       | 預設值  | 說明                         |
+| ------------------------------ | ------- | ---------------------------- |
 | `UNAUTHENTICATED_USER_SHARING` | `false` | 未登入使用者是否共享檔案空間 |
 
 ---

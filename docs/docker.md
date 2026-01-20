@@ -6,11 +6,11 @@ ConvertX-CN 提供預建的 Docker Image，包含所有轉換依賴。
 
 ### 可用 Tag
 
-| Tag | 說明 |
-|-----|------|
-| `convertx/convertx-cn:latest` | 最新穩定版 |
-| `convertx/convertx-cn:v0.1.3` | 指定版本號 |
-| `convertx/convertx-cn:v0.1.3-FULL` | 完整版（與 latest 相同） |
+| Tag                                | 說明                     |
+| ---------------------------------- | ------------------------ |
+| `convertx/convertx-cn:latest`      | 最新穩定版               |
+| `convertx/convertx-cn:v0.1.4`      | 指定版本號               |
+| `convertx/convertx-cn:v0.1.4-FULL` | 完整版（與 latest 相同） |
 
 ### Image 大小
 
@@ -34,13 +34,13 @@ docker run -d \
 
 ### 參數說明
 
-| 參數 | 說明 |
-|------|------|
-| `-d` | 背景執行 |
-| `--name convertx-cn` | 容器名稱 |
-| `-p 3000:3000` | 連接埠映射 |
+| 參數                  | 說明       |
+| --------------------- | ---------- |
+| `-d`                  | 背景執行   |
+| `--name convertx-cn`  | 容器名稱   |
+| `-p 3000:3000`        | 連接埠映射 |
 | `-v ./data:/app/data` | 資料持久化 |
-| `-e TZ=Asia/Taipei` | 時區設定 |
+| `-e TZ=Asia/Taipei`   | 時區設定   |
 
 ---
 

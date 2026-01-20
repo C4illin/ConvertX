@@ -98,7 +98,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
-        
+
         # 長時間連線支援（大檔案轉換）
         proxy_read_timeout 3600s;
         proxy_send_timeout 3600s;
@@ -114,7 +114,7 @@ convert.example.com {
         header_up X-Real-IP {remote_host}
         header_up X-Forwarded-Proto {scheme}
     }
-    
+
     request_body {
         max_size 0  # 無限制
     }
@@ -165,7 +165,7 @@ example.com {
 
 ```yaml
 environment:
-  - MAX_CONVERT_PROCESS=4  # 最多同時 4 個轉換任務
+  - MAX_CONVERT_PROCESS=4 # 最多同時 4 個轉換任務
 ```
 
 ---
@@ -177,8 +177,8 @@ environment:
 ```yaml
 environment:
   - ALLOW_UNAUTHENTICATED=true
-  - HIDE_HISTORY=true  # 建議同時隱藏歷史
-  - AUTO_DELETE_EVERY_N_HOURS=1  # 快速清理
+  - HIDE_HISTORY=true # 建議同時隱藏歷史
+  - AUTO_DELETE_EVERY_N_HOURS=1 # 快速清理
 ```
 
 ---
@@ -201,7 +201,7 @@ services:
       - shared-data:/app/data
     environment:
       - JWT_SECRET=${JWT_SECRET}
-  
+
   convertx-2:
     image: convertx/convertx-cn:latest
     volumes:
@@ -246,9 +246,9 @@ deploy:
 deploy:
   resources:
     limits:
-      cpus: '4'
+      cpus: "4"
     reservations:
-      cpus: '1'
+      cpus: "1"
 ```
 
 ---

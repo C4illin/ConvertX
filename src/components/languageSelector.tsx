@@ -1,4 +1,4 @@
-import { supportedLocales, type SupportedLocale, type Translator } from "../i18n";
+import { supportedLocales, type SupportedLocale, type Translator } from "../i18n/index";
 
 export const LanguageSelector = ({
   currentLocale,

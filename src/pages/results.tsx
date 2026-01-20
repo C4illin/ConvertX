@@ -7,7 +7,7 @@ import { ALLOW_UNAUTHENTICATED, WEBROOT } from "../helpers/env";
 import { DownloadIcon } from "../icons/download";
 import { DeleteIcon } from "../icons/delete";
 import { EyeIcon } from "../icons/eye";
-import { type SupportedLocale, type Translator, createTranslator, defaultLocale } from "../i18n";
+import { type SupportedLocale, type Translator, createTranslator, defaultLocale } from "../i18n/index";
 import { localeService } from "../i18n/service";
 import { userService } from "./user";
 

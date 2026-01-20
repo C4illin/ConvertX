@@ -48,6 +48,7 @@ Job ID 是一個 UUID v4 格式的字串，例如：
 ```
 
 例如：
+
 ```
 http://localhost:3000/results/550e8400-e29b-41d4-a716-446655440000
 ```
@@ -123,30 +124,30 @@ ConvertX-CN 使用 SQLite 作為資料庫，儲存於 `/app/data/convertx.db`。
 
 #### users
 
-| 欄位 | 類型 | 說明 |
-|------|------|------|
-| id | INTEGER | 使用者 ID |
-| email | TEXT | 電子郵件 |
-| password | TEXT | 密碼雜湊 |
+| 欄位     | 類型    | 說明      |
+| -------- | ------- | --------- |
+| id       | INTEGER | 使用者 ID |
+| email    | TEXT    | 電子郵件  |
+| password | TEXT    | 密碼雜湊  |
 
 #### jobs
 
-| 欄位 | 類型 | 說明 |
-|------|------|------|
-| id | TEXT | Job UUID |
-| user_id | INTEGER | 使用者 ID |
-| num_files | INTEGER | 檔案數量 |
-| date_created | TEXT | 建立時間 |
+| 欄位         | 類型    | 說明      |
+| ------------ | ------- | --------- |
+| id           | TEXT    | Job UUID  |
+| user_id      | INTEGER | 使用者 ID |
+| num_files    | INTEGER | 檔案數量  |
+| date_created | TEXT    | 建立時間  |
 
 #### file_names
 
-| 欄位 | 類型 | 說明 |
-|------|------|------|
-| id | INTEGER | 檔案 ID |
-| job_id | TEXT | Job UUID |
-| input_file_name | TEXT | 原始檔名 |
-| output_file_name | TEXT | 輸出檔名 |
-| status | TEXT | 轉換狀態 |
+| 欄位             | 類型    | 說明     |
+| ---------------- | ------- | -------- |
+| id               | INTEGER | 檔案 ID  |
+| job_id           | TEXT    | Job UUID |
+| input_file_name  | TEXT    | 原始檔名 |
+| output_file_name | TEXT    | 輸出檔名 |
+| status           | TEXT    | 轉換狀態 |
 
 ---
 

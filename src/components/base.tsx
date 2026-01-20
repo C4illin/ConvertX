@@ -1,5 +1,5 @@
 import { version } from "../../package.json";
-import { type SupportedLocale, defaultLocale, getTranslations } from "../i18n";
+import { type SupportedLocale, defaultLocale, getTranslations } from "../i18n/index";
 
 export const BaseHtml = ({
   children,
