@@ -70,6 +70,8 @@ docker run -d \
 
 建立 `docker-compose.yml`：
 
+JWT_SECRET=請改成你自己的隨機字串至少32字元
+
 ```yaml
 services:
   convertx:
@@ -84,8 +86,6 @@ services:
       - TZ=Asia/Taipei
       - JWT_SECRET=e78a2da4-135f-06a8-fa46-17ef7990f5d1
 ```
-
-JWT_SECRET=請改成你自己的隨機字串至少32字元
 
 啟動：
 
