@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.1.8](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.8) (2026-01-20)
+
+### 🐛 Bug Fixes
+
+- **LibreOffice PDF→DOCX**: 修復 PDF 轉 DOCX 一定失敗的問題
+  - 新增 PDF Import Pipeline：使用 `--infilter=writer_pdf_import`
+  - 分流邏輯：PDF→文字格式 vs 一般轉換
+  - 支援 PDF→DOCX/ODT/RTF/TXT/HTML
+
+### 🛡️ Reliability
+
+- **輸出檔案驗證**: 新增 `existsSync` 檢查，確保轉換真的成功
+- **錯誤訊息優化**: 根據 stderr 內容提供有意義的中文錯誤訊息
+  - 識別加密檔案、損壞檔案、缺少 filter 等情況
+  - 避免 ENOENT 錯誤擴散
+
+### 📝 Technical Notes
+
+- LibreOffice 架構說明：
+  - Export Pipeline：原生格式→導出格式（DOCX→PDF）
+  - Import Pipeline：非原生格式→原生格式（PDF→DOCX）
+  - PDF 作為輸入時必須使用 `writer_pdf_import`
+
+### ⚠️ Known Limitations
+
+以下情況仍會失敗（LibreOffice 限制）：
+
+- 加密/密碼保護的 PDF/DOCX
+- 損壞的檔案
+- 缺少必要字型（可能成功但版面錯亂）
+- 並行大量轉檔（LibreOffice 對 concurrent instance 不友善）
+
+---
+
 ## [0.1.7](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.7) (2026-01-20)
 
 ### 🐛 Bug Fixes

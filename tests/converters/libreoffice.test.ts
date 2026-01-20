@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, expect, test } from "bun:test";
-import { convert } from "../../src/converters/libreoffice";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { convert, type ExistsSyncFn } from "../../src/converters/libreoffice";
 import type { ExecFileFn } from "../../src/converters/types";
 
 function requireDefined<T>(value: T, msg: string): NonNullable<T> {
@@ -13,16 +13,22 @@ let calls: Call[] = [];
 
 let behavior:
   | { kind: "success"; stdout?: string; stderr?: string }
-  | { kind: "error"; message?: string; stderr?: string } = { kind: "success" };
+  | { kind: "error"; message?: string; stderr?: string; code?: string } = { kind: "success" };
+
+// Mock fs.existsSync to control output file existence check
+let mockFileExists = true;
+
+const mockExistsSync: ExistsSyncFn = () => mockFileExists;
 
 const mockExecFile: ExecFileFn = (cmd, args, cb) => {
   calls.push({ cmd, args });
   if (behavior.kind === "error") {
-    cb(new Error(behavior.message ?? "mock failure"), "", behavior.stderr ?? "");
+    const error = new Error(behavior.message ?? "mock failure") as Error & { code?: string };
+    if (behavior.code) error.code = behavior.code;
+    cb(error, "", behavior.stderr ?? "");
   } else {
     cb(null, behavior.stdout ?? "ok", behavior.stderr ?? "");
   }
-  // We don't return a real ChildProcess in tests.
   return undefined;
 };
 
@@ -33,7 +39,6 @@ let errors: string[] = [];
 const originalLog = console.log;
 const originalError = console.error;
 
-// Use Console["log"] for typing; avoids explicit `any`
 const makeSink =
   (sink: string[]): Console["log"] =>
   (...data) => {
@@ -43,6 +48,7 @@ const makeSink =
 beforeEach(() => {
   calls = [];
   behavior = { kind: "success" };
+  mockFileExists = true;
 
   logs = [];
   errors = [];
@@ -55,107 +61,214 @@ afterEach(() => {
   console.error = originalError;
 });
 
-// --- core behavior -----------------------------------------------------------
-test("invokes soffice with --headless and outdir derived from targetPath", async () => {
-  await convert("in.docx", "docx", "odt", "out/out.odt", undefined, mockExecFile);
+// ==============================================================================
+// PDF → DOCX (Import Pipeline) 測試
+// ==============================================================================
+describe("PDF Import Pipeline", () => {
+  test("PDF → DOCX uses writer_pdf_import filter", async () => {
+    await convert("in.pdf", "pdf", "docx", "out/out.docx", undefined, mockExecFile, mockExistsSync);
 
-  const { cmd, args } = requireDefined(calls[0], "Expected at least one execFile call");
-  expect(cmd).toBe("soffice");
-  expect(args).toEqual([
-    "--headless",
-    `--infilter="MS Word 2007 XML"`,
-    "--convert-to",
-    "odt:writer8",
-    "--outdir",
-    "out",
-    "in.docx",
-  ]);
+    const { cmd, args } = requireDefined(calls[0], "Expected at least one execFile call");
+    expect(cmd).toBe("soffice");
+    expect(args).toContain("--infilter=writer_pdf_import");
+    expect(args).toContain("--convert-to");
+
+    // 驗證輸出格式包含正確的 filter
+    const convertToIdx = args.indexOf("--convert-to");
+    expect(args[convertToIdx + 1]).toBe("docx:MS Word 2007 XML");
+  });
+
+  test("PDF → ODT uses writer_pdf_import filter", async () => {
+    await convert("in.pdf", "pdf", "odt", "out/out.odt", undefined, mockExecFile, mockExistsSync);
+
+    const { args } = requireDefined(calls[0], "Expected at least one execFile call");
+    expect(args).toContain("--infilter=writer_pdf_import");
+
+    const convertToIdx = args.indexOf("--convert-to");
+    expect(args[convertToIdx + 1]).toBe("odt:writer8");
+  });
+
+  test("PDF → RTF uses writer_pdf_import filter", async () => {
+    await convert("in.pdf", "pdf", "rtf", "out/out.rtf", undefined, mockExecFile, mockExistsSync);
+
+    const { args } = requireDefined(calls[0], "Expected at least one execFile call");
+    expect(args).toContain("--infilter=writer_pdf_import");
+  });
+
+  test("PDF → TXT uses writer_pdf_import filter", async () => {
+    await convert("in.pdf", "pdf", "txt", "out/out.txt", undefined, mockExecFile, mockExistsSync);
+
+    const { args } = requireDefined(calls[0], "Expected at least one execFile call");
+    expect(args).toContain("--infilter=writer_pdf_import");
+  });
 });
 
-test("uses only outFilter when input has no filter (e.g., pdf -> txt)", async () => {
-  await convert("in.pdf", "pdf", "txt", "out/out.txt", undefined, mockExecFile);
+// ==============================================================================
+// 一般轉換流程（Export Pipeline）測試
+// ==============================================================================
+describe("Export Pipeline", () => {
+  test("DOCX → PDF uses normal export pipeline (no infilter)", async () => {
+    await convert("in.docx", "docx", "pdf", "out/out.pdf", undefined, mockExecFile, mockExistsSync);
 
-  const { args } = requireDefined(calls[0], "Expected at least one execFile call");
+    const { args } = requireDefined(calls[0], "Expected at least one execFile call");
 
-  expect(args).not.toContainEqual(expect.stringMatching(/^--infilter=/));
-  expect(args).toEqual(["--headless", "--convert-to", "txt", "--outdir", "out", "in.pdf"]);
+    // DOCX → PDF 不應該使用 PDF import filter
+    expect(args).not.toContain("--infilter=writer_pdf_import");
+    expect(args).toContain("--convert-to");
+
+    const convertToIdx = args.indexOf("--convert-to");
+    expect(args[convertToIdx + 1]).toBe("pdf:writer_pdf_Export");
+  });
+
+  test("DOCX → ODT uses correct filters", async () => {
+    await convert("in.docx", "docx", "odt", "out/out.odt", undefined, mockExecFile, mockExistsSync);
+
+    const { cmd, args } = requireDefined(calls[0], "Expected at least one execFile call");
+    expect(cmd).toBe("soffice");
+
+    // 應該有 infilter 和 outfilter
+    expect(args).toContain("--infilter=MS Word 2007 XML");
+
+    const convertToIdx = args.indexOf("--convert-to");
+    expect(args[convertToIdx + 1]).toBe("odt:writer8");
+  });
+
+  test("ODT → PDF uses export pipeline", async () => {
+    await convert("in.odt", "odt", "pdf", "out/out.pdf", undefined, mockExecFile, mockExistsSync);
+
+    const { args } = requireDefined(calls[0], "Expected at least one execFile call");
+    expect(args).not.toContain("--infilter=writer_pdf_import");
+  });
 });
 
-test("uses only infilter when convertTo has no out filter (e.g., docx -> pdf)", async () => {
-  await convert("in.docx", "docx", "pdf", "out/out.pdf", undefined, mockExecFile);
+// ==============================================================================
+// 輸出檔案驗證測試
+// ==============================================================================
+describe("Output File Verification", () => {
+  test("resolves with 'Done' when output file exists", async () => {
+    mockFileExists = true;
+    behavior = { kind: "success", stdout: "Conversion completed", stderr: "" };
 
-  const { args } = requireDefined(calls[0], "Expected at least one execFile call");
+    await expect(
+      convert("in.docx", "docx", "pdf", "out/out.pdf", undefined, mockExecFile, mockExistsSync),
+    ).resolves.toBe("Done");
+  });
 
-  // If docx has an infilter, it should be present
-  expect(args).toEqual(["--headless", "--convert-to", "pdf", "--outdir", "out", "in.docx"]);
+  test("rejects when output file does not exist", async () => {
+    mockFileExists = false;
+    behavior = { kind: "success", stdout: "", stderr: "" };
 
-  const i = args.indexOf("--convert-to");
-  expect(i).toBeGreaterThanOrEqual(0);
-  expect(args[i + 1]).toBe("pdf");
-  expect(args.slice(-2)).toEqual(["out", "in.docx"]);
+    await expect(
+      convert("in.pdf", "pdf", "docx", "out/out.docx", undefined, mockExecFile, mockExistsSync),
+    ).rejects.toMatch(/輸出檔案不存在/);
+  });
+
+  test("rejects when execFile returns an error", async () => {
+    behavior = { kind: "error", message: "convert failed", stderr: "oops" };
+
+    await expect(
+      convert("in.txt", "txt", "docx", "out/out.docx", undefined, mockExecFile, mockExistsSync),
+    ).rejects.toMatch(/LibreOffice 轉換失敗/);
+  });
 });
 
-test("strips leading './' from outdir", async () => {
-  await convert("in.txt", "txt", "docx", "./out/out.docx", undefined, mockExecFile);
+// ==============================================================================
+// 錯誤訊息測試
+// ==============================================================================
+describe("Error Messages", () => {
+  test("provides helpful message for 'no export filter' error", async () => {
+    behavior = { kind: "error", message: "failed", stderr: "Error: no export filter for this" };
 
-  const { args } = requireDefined(calls[0], "Expected at least one execFile call");
+    await expect(
+      convert("in.pdf", "pdf", "docx", "out/out.docx", undefined, mockExecFile, mockExistsSync),
+    ).rejects.toMatch(/找不到 export filter/);
+  });
 
-  const outDirIdx = args.indexOf("--outdir");
-  expect(outDirIdx).toBeGreaterThanOrEqual(0);
-  expect(args[outDirIdx + 1]).toBe("out");
+  test("provides helpful message for password-protected files", async () => {
+    behavior = { kind: "error", message: "failed", stderr: "password required" };
+
+    await expect(
+      convert("in.docx", "docx", "pdf", "out/out.pdf", undefined, mockExecFile, mockExistsSync),
+    ).rejects.toMatch(/加密|密碼/);
+  });
+
+  test("provides helpful message for corrupt files", async () => {
+    behavior = { kind: "error", message: "failed", stderr: "file is corrupt" };
+
+    await expect(
+      convert("in.docx", "docx", "pdf", "out/out.pdf", undefined, mockExecFile, mockExistsSync),
+    ).rejects.toMatch(/損壞|無效/);
+  });
+
+  test("provides helpful message when soffice not found", async () => {
+    behavior = { kind: "error", message: "ENOENT", stderr: "", code: "ENOENT" };
+
+    await expect(
+      convert("in.docx", "docx", "pdf", "out/out.pdf", undefined, mockExecFile, mockExistsSync),
+    ).rejects.toMatch(/找不到 soffice/);
+  });
 });
 
-// --- promise settlement ------------------------------------------------------
-test("resolves with 'Done' when execFile succeeds", async () => {
-  behavior = { kind: "success", stdout: "fine", stderr: "" };
-  await expect(
-    convert("in.txt", "txt", "docx", "out/out.docx", undefined, mockExecFile),
-  ).resolves.toBe("Done");
+// ==============================================================================
+// 路徑處理測試
+// ==============================================================================
+describe("Path Handling", () => {
+  test("strips leading './' from outdir", async () => {
+    await convert(
+      "in.txt",
+      "txt",
+      "docx",
+      "./out/out.docx",
+      undefined,
+      mockExecFile,
+      mockExistsSync,
+    );
+
+    const { args } = requireDefined(calls[0], "Expected at least one execFile call");
+
+    const outDirIdx = args.indexOf("--outdir");
+    expect(outDirIdx).toBeGreaterThanOrEqual(0);
+    expect(args[outDirIdx + 1]).toBe("out");
+  });
+
+  test("handles nested output directories", async () => {
+    await convert(
+      "in.txt",
+      "txt",
+      "docx",
+      "a/b/c/out.docx",
+      undefined,
+      mockExecFile,
+      mockExistsSync,
+    );
+
+    const { args } = requireDefined(calls[0], "Expected at least one execFile call");
+
+    const outDirIdx = args.indexOf("--outdir");
+    expect(args[outDirIdx + 1]).toBe("a/b/c");
+  });
 });
 
-test("rejects when execFile returns an error", async () => {
-  behavior = { kind: "error", message: "convert failed", stderr: "oops" };
-  await expect(
-    convert("in.txt", "txt", "docx", "out/out.docx", undefined, mockExecFile),
-  ).rejects.toMatch(/error: Error: convert failed/);
-});
+// ==============================================================================
+// 日誌測試
+// ==============================================================================
+describe("Logging", () => {
+  test("logs command being executed", async () => {
+    await convert("in.pdf", "pdf", "docx", "out/out.docx", undefined, mockExecFile, mockExistsSync);
 
-// --- logging behavior --------------------------------------------------------
-test("logs stdout when present", async () => {
-  behavior = { kind: "success", stdout: "hello", stderr: "" };
+    expect(logs.some((l) => l.includes("[LibreOffice] Command:"))).toBe(true);
+  });
 
-  await convert("in.txt", "txt", "docx", "out/out.docx", undefined, mockExecFile);
+  test("logs when using PDF import pipeline", async () => {
+    await convert("in.pdf", "pdf", "docx", "out/out.docx", undefined, mockExecFile, mockExistsSync);
 
-  expect(logs).toContain("stdout: hello");
-  expect(errors).toHaveLength(0);
-});
+    expect(logs.some((l) => l.includes("PDF import pipeline"))).toBe(true);
+  });
 
-test("logs stderr when present", async () => {
-  behavior = { kind: "success", stdout: "", stderr: "uh-oh" };
+  test("logs successful conversion", async () => {
+    mockFileExists = true;
+    await convert("in.docx", "docx", "pdf", "out/out.pdf", undefined, mockExecFile, mockExistsSync);
 
-  await convert("in.txt", "txt", "docx", "out/out.docx", undefined, mockExecFile);
-
-  expect(errors).toContain("stderr: uh-oh");
-  // When stdout is empty, no stdout log
-  expect(logs.find((l) => l.startsWith("stdout:"))).toBeUndefined();
-});
-
-test("logs both stdout and stderr when both are present", async () => {
-  behavior = { kind: "success", stdout: "alpha", stderr: "beta" };
-
-  await convert("in.txt", "txt", "docx", "out/out.docx", undefined, mockExecFile);
-
-  expect(logs).toContain("stdout: alpha");
-  expect(errors).toContain("stderr: beta");
-});
-
-test("logs stderr on exec error as well", async () => {
-  behavior = { kind: "error", message: "boom", stderr: "EPIPE" };
-
-  expect(convert("in.txt", "txt", "docx", "out/out.docx", undefined, mockExecFile)).rejects.toMatch(
-    /error: Error: boom/,
-  );
-
-  // The callback still provided stderr; your implementation logs it before settling
-  expect(errors).toContain("stderr: EPIPE");
+    expect(logs.some((l) => l.includes("Successfully created"))).toBe(true);
+  });
 });
