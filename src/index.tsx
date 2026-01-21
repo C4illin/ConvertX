@@ -11,11 +11,13 @@ import { convert } from "./pages/convert";
 import { deleteFile } from "./pages/deleteFile";
 import { deleteJob } from "./pages/deleteJob";
 import { download } from "./pages/download";
+import { downloadChunk } from "./pages/downloadChunk";
 import { history } from "./pages/history";
 import { listConverters } from "./pages/listConverters";
 import { results } from "./pages/results";
 import { root } from "./pages/root";
 import { upload } from "./pages/upload";
+import { uploadChunk, uploadInfo } from "./pages/uploadChunk";
 import { user } from "./pages/user";
 import { healthcheck } from "./pages/healthcheck";
 
@@ -41,9 +43,12 @@ const app = new Elysia({
   .use(user)
   .use(root)
   .use(upload)
+  .use(uploadChunk)
+  .use(uploadInfo)
   .use(history)
   .use(convert)
   .use(download)
+  .use(downloadChunk)
   .use(deleteJob)
   .use(results)
   .use(deleteFile)

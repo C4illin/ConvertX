@@ -157,15 +157,15 @@ docker compose up -d
 
 ## 支援格式
 
-| 轉換器      | 用途   | 格式數 |
-| ----------- | ------ | ------ |
-| FFmpeg      | 影音   | 400+   |
-| ImageMagick | 圖片   | 200+   |
-| LibreOffice | 文件   | 60+    |
-| Pandoc      | 文件   | 100+   |
-| Calibre     | 電子書 | 40+    |
-| Inkscape    | 向量圖 | 20+    |
-| MinerU      | 文件→MD | 2     |
+| 轉換器      | 用途    | 格式數 |
+| ----------- | ------- | ------ |
+| FFmpeg      | 影音    | 400+   |
+| ImageMagick | 圖片    | 200+   |
+| LibreOffice | 文件    | 60+    |
+| Pandoc      | 文件    | 100+   |
+| Calibre     | 電子書  | 40+    |
+| Inkscape    | 向量圖  | 20+    |
+| MinerU      | 文件→MD | 2      |
 
 完整列表 → [docs/converters.md](docs/converters.md)
 
@@ -175,10 +175,32 @@ docker compose up -d
 
 ConvertX 內建文件轉換引擎。
 
-- md-t
-- md-i
+- md-t（表格以 Markdown 呈現）
+- md-i（表格以圖片呈現）
 
-輸出格式：tar.gz
+輸出格式：.tar（不壓縮封裝）
+
+---
+
+## 檔案傳輸機制
+
+Contents.CN 使用統一的檔案傳輸策略：
+
+| 檔案大小 | 傳輸方式 | 說明 |
+| -------- | -------- | ---- |
+| ≤ 10MB | 直接傳輸 | 單一請求完成上傳/下載 |
+| > 10MB | 分段傳輸 | 使用 5MB chunks 分段傳輸 |
+
+### 多檔輸出封裝
+
+- ✅ 唯一允許格式：`.tar`
+- ❌ 禁止使用：`.tar.gz`、`.tgz`、`.zip`
+
+### 設計原則
+
+- 分段傳輸僅存在於傳輸層
+- 轉換引擎只接收完整檔案
+- 前後端使用共用傳輸模組
 
 ---
 

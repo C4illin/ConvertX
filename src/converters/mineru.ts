@@ -2,6 +2,7 @@ import { execFile as execFileOriginal } from "node:child_process";
 import { mkdirSync, existsSync, readdirSync, unlinkSync, rmdirSync } from "node:fs";
 import { join, basename, dirname } from "node:path";
 import { ExecFileFn } from "./types";
+import { createConverterArchive, getArchiveFileName } from "../transfer";
 
 export const properties = {
   from: {
@@ -14,19 +15,22 @@ export const properties = {
 };
 
 /**
- * Helper function to create a tar.gz archive from a directory
+ * Helper function to create a .tar archive from a directory (no compression)
+ * 
+ * ⚠️ 重要：僅使用 .tar 格式，禁止 .tar.gz / .tgz / .zip
  */
-function createTarGzArchive(
+function createTarArchive(
   sourceDir: string,
-  outputTarGz: string,
+  outputTar: string,
   execFile: ExecFileFn,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    // Use tar command to create gzipped archive
-    // tar -czf <output.tar.gz> -C <sourceDir> .
+    // Use tar command to create archive (without gzip compression)
+    // tar -cf <output.tar> -C <sourceDir> .
+    // 注意：使用 -cf 而非 -czf，避免 gzip 壓縮
     execFile(
       "tar",
-      ["-czf", outputTarGz, "-C", sourceDir, "."],
+      ["-cf", outputTar, "-C", sourceDir, "."],
       (error, stdout, stderr) => {
         if (error) {
           reject(`tar error: ${error}`);
@@ -122,15 +126,14 @@ export async function convert(
         // MinerU outputs to a subdirectory, find the actual output
         const mineruActualOutput = join(mineruOutputDir, "auto");
 
-        // Create tar.gz archive from the output directory
-        const tarGzPath = targetPath.endsWith(".tar.gz")
-          ? targetPath
-          : `${targetPath}.tar.gz`;
+        // Create .tar archive from the output directory (不使用壓縮)
+        // 強制使用 .tar 格式，禁止 .tar.gz
+        const tarPath = getArchiveFileName(targetPath);
 
         // Ensure the parent directory exists
-        const tarGzDir = dirname(tarGzPath);
-        if (!existsSync(tarGzDir)) {
-          mkdirSync(tarGzDir, { recursive: true });
+        const tarDir = dirname(tarPath);
+        if (!existsSync(tarDir)) {
+          mkdirSync(tarDir, { recursive: true });
         }
 
         // Use the actual MinerU output directory for archiving
@@ -138,14 +141,14 @@ export async function convert(
           ? mineruActualOutput
           : mineruOutputDir;
 
-        await createTarGzArchive(outputToArchive, tarGzPath, execFile);
+        await createTarArchive(outputToArchive, tarPath, execFile);
 
         // Clean up the temporary directory
         removeDir(mineruOutputDir);
 
         resolve("Done");
       } catch (tarError) {
-        reject(`Failed to create tar.gz archive: ${tarError}`);
+        reject(`Failed to create .tar archive: ${tarError}`);
       }
     });
   });

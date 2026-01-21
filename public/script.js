@@ -242,11 +242,54 @@ const deleteRow = (target) => {
   }).catch((err) => console.log(err));
 };
 
+// ==================== 全域傳輸常數 ====================
+const CHUNK_THRESHOLD_BYTES = 10 * 1024 * 1024; // 10MB
+const CHUNK_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+
+/**
+ * 判斷是否需要使用 chunk 傳輸
+ */
+function shouldUseChunkedUpload(fileSize) {
+  return fileSize > CHUNK_THRESHOLD_BYTES;
+}
+
+/**
+ * 生成 UUID
+ */
+function generateUploadId() {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === "x" ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+/**
+ * 統一上傳檔案（自動判斷使用直傳或 chunk）
+ * 
+ * @param {File} file - 要上傳的檔案
+ */
 const uploadFile = (file) => {
   convertButton.disabled = true;
   convertButton.value = getTranslation("convert", "uploading");
   pendingFiles += 1;
 
+  if (shouldUseChunkedUpload(file.size)) {
+    // 大檔：使用 chunk 上傳
+    uploadFileChunked(file);
+  } else {
+    // 小檔：直接上傳
+    uploadFileDirect(file);
+  }
+};
+
+/**
+ * 直接上傳（≤10MB）
+ */
+const uploadFileDirect = (file) => {
   const formData = new FormData();
   formData.append("file", file, file.name);
 
@@ -255,7 +298,12 @@ const uploadFile = (file) => {
   xhr.open("POST", `${webroot}/upload`, true);
 
   xhr.onload = () => {
-    let data = JSON.parse(xhr.responseText);
+    let data = {};
+    try {
+      data = JSON.parse(xhr.responseText);
+    } catch (e) {
+      console.log("Parse error:", e);
+    }
 
     pendingFiles -= 1;
     if (pendingFiles === 0) {
@@ -265,10 +313,12 @@ const uploadFile = (file) => {
       convertButton.value = getTranslation("convert", "convertButton");
     }
 
-    //Remove the progress bar when upload is done
+    // Remove the progress bar when upload is done
     let progressbar = file.htmlRow.getElementsByTagName("progress");
-    progressbar[0].parentElement.remove();
-    console.log(data);
+    if (progressbar[0]) {
+      progressbar[0].parentElement.remove();
+    }
+    console.log("Direct upload complete:", data);
   };
 
   xhr.upload.onprogress = (e) => {
@@ -277,14 +327,86 @@ const uploadFile = (file) => {
     console.log(`upload progress (${file.name}):`, (100 * sent) / total);
 
     let progressbar = file.htmlRow.getElementsByTagName("progress");
-    progressbar[0].value = (100 * sent) / total;
+    if (progressbar[0]) {
+      progressbar[0].value = (100 * sent) / total;
+    }
   };
 
   xhr.onerror = (e) => {
-    console.log(e);
+    console.log("Upload error:", e);
+    pendingFiles -= 1;
+    if (pendingFiles === 0) {
+      convertButton.value = getTranslation("convert", "convertButton");
+    }
   };
 
   xhr.send(formData);
+};
+
+/**
+ * Chunk 上傳（>10MB）
+ */
+const uploadFileChunked = async (file) => {
+  const uploadId = generateUploadId();
+  const totalChunks = Math.ceil(file.size / CHUNK_SIZE_BYTES);
+  
+  console.log(`Starting chunked upload: ${file.name}, size: ${file.size}, chunks: ${totalChunks}`);
+
+  try {
+    for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+      const start = chunkIndex * CHUNK_SIZE_BYTES;
+      const end = Math.min(start + CHUNK_SIZE_BYTES, file.size);
+      const chunk = file.slice(start, end);
+
+      const formData = new FormData();
+      formData.append("upload_id", uploadId);
+      formData.append("chunk_index", chunkIndex.toString());
+      formData.append("total_chunks", totalChunks.toString());
+      formData.append("file_name", file.name);
+      formData.append("total_size", file.size.toString());
+      formData.append("chunk", chunk);
+
+      const response = await fetch(`${webroot}/upload-chunk`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Chunk ${chunkIndex} upload failed: ${response.status}`);
+      }
+
+      // 更新進度
+      const percent = ((chunkIndex + 1) / totalChunks) * 100;
+      let progressbar = file.htmlRow.getElementsByTagName("progress");
+      if (progressbar[0]) {
+        progressbar[0].value = percent;
+      }
+      console.log(`Chunk ${chunkIndex + 1}/${totalChunks} uploaded (${percent.toFixed(1)}%)`);
+    }
+
+    // 完成
+    pendingFiles -= 1;
+    if (pendingFiles === 0) {
+      if (formatSelected) {
+        convertButton.disabled = false;
+      }
+      convertButton.value = getTranslation("convert", "convertButton");
+    }
+
+    // Remove the progress bar
+    let progressbar = file.htmlRow.getElementsByTagName("progress");
+    if (progressbar[0]) {
+      progressbar[0].parentElement.remove();
+    }
+    console.log("Chunked upload complete:", file.name);
+
+  } catch (error) {
+    console.error("Chunked upload failed:", error);
+    pendingFiles -= 1;
+    if (pendingFiles === 0) {
+      convertButton.value = getTranslation("convert", "convertButton");
+    }
+  }
 };
 
 const formConvert = document.querySelector(`form[action='${webroot}/convert']`);
