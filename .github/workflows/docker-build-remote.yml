@@ -300,11 +300,21 @@ jobs:
           echo "🔨 開始 Multi-Arch Docker Build"
           echo "========================================"
           echo "映像名稱: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
-          echo "同時標記: ${{ env.DOCKER_IMAGE_REPO }}:latest"
+          
+          # 判斷是否為正式版本（純數字+點號）
+          IMAGE_TAG="${{ github.event.inputs.image_tag }}"
+          if [[ "$IMAGE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "✅ 正式版本，將同時標記 latest"
+            ADD_LATEST="true"
+          else
+            echo "⚠️ 測試版本，不標記 latest"
+            ADD_LATEST="false"
+          fi
+          
           echo "目標架構: linux/amd64, linux/arm64"
           echo ""
 
-          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << REMOTE_EOF
           set -e
 
           WORKDIR="${{ env.REMOTE_WORKDIR }}"
@@ -312,27 +322,34 @@ jobs:
           IMAGE="${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
           IMAGE_LATEST="${{ env.DOCKER_IMAGE_REPO }}:latest"
           BUILDER_NAME="multiarch-builder-${{ github.run_id }}"
+          ADD_LATEST="${ADD_LATEST}"
 
           echo "📂 進入專案目錄..."
-          cd "${WORKDIR}/${PROJECT}"
+          cd "\${WORKDIR}/\${PROJECT}"
           pwd
 
           echo ""
           echo "🔨 執行 Multi-Arch Docker buildx..."
-          echo "映像標籤: ${IMAGE}"
+          echo "映像標籤: \${IMAGE}"
           echo "目標平台: linux/amd64, linux/arm64"
           echo ""
 
           # 確保使用正確的 builder
-          docker buildx use "${BUILDER_NAME}"
+          docker buildx use "\${BUILDER_NAME}"
 
-          # Multi-arch build（只建構，不推送，載入到本地）
-          # 使用 --progress=plain 顯示完整 log
-          # 同時標記版本號和 latest
+          # 根據版本類型決定是否加入 latest tag
+          if [ "\${ADD_LATEST}" = "true" ]; then
+            echo "📌 同時標記 latest"
+            BUILD_TAGS="-t \${IMAGE} -t \${IMAGE_LATEST}"
+          else
+            echo "📌 僅標記版本號（測試版本）"
+            BUILD_TAGS="-t \${IMAGE}"
+          fi
+
+          # Multi-arch build（只建構，不推送）
           if ! docker buildx build \
             --platform linux/amd64,linux/arm64 \
-            -t "${IMAGE}" \
-            -t "${IMAGE_LATEST}" \
+            \${BUILD_TAGS} \
             --progress=plain \
             . 2>&1; then
             
@@ -376,6 +393,16 @@ jobs:
           echo "📤 推送映像到 Docker Hub"
           echo "========================================"
           echo "映像: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
+          
+          # 判斷是否為正式版本（純數字+點號）
+          IMAGE_TAG="${{ github.event.inputs.image_tag }}"
+          if [[ "$IMAGE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "✅ 正式版本，將同時推送 latest"
+            ADD_LATEST="true"
+          else
+            echo "⚠️ 測試版本，不推送 latest"
+            ADD_LATEST="false"
+          fi
           echo ""
 
           # 檢查 Docker Hub 登錄狀態，未登錄則重新登錄
@@ -390,7 +417,7 @@ jobs:
           fi
           EOF
 
-          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << REMOTE_EOF
           set -e
 
           WORKDIR="${{ env.REMOTE_WORKDIR }}"
@@ -398,25 +425,32 @@ jobs:
           IMAGE="${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
           IMAGE_LATEST="${{ env.DOCKER_IMAGE_REPO }}:latest"
           BUILDER_NAME="multiarch-builder-${{ github.run_id }}"
+          ADD_LATEST="${ADD_LATEST}"
 
           echo "📂 進入專案目錄..."
-          cd "${WORKDIR}/${PROJECT}"
+          cd "\${WORKDIR}/\${PROJECT}"
 
           echo ""
           echo "📤 執行 Docker Push..."
-          echo "映像標籤: ${IMAGE}"
-          echo "同時標記: ${IMAGE_LATEST}"
+          echo "映像標籤: \${IMAGE}"
+          
+          # 確保使用正確的 builder
+          docker buildx use "\${BUILDER_NAME}"
+
+          # 根據版本類型決定是否加入 latest tag
+          if [ "\${ADD_LATEST}" = "true" ]; then
+            echo "同時推送: \${IMAGE_LATEST}"
+            BUILD_TAGS="-t \${IMAGE} -t \${IMAGE_LATEST}"
+          else
+            echo "（測試版本，不推送 latest）"
+            BUILD_TAGS="-t \${IMAGE}"
+          fi
           echo ""
 
-          # 確保使用正確的 builder
-          docker buildx use "${BUILDER_NAME}"
-
           # 使用 buildx build --push 來推送 multi-arch 映像
-          # 同時推送版本號和 latest
           if ! docker buildx build \
             --platform linux/amd64,linux/arm64 \
-            -t "${IMAGE}" \
-            -t "${IMAGE_LATEST}" \
+            \${BUILD_TAGS} \
             --push \
             --progress=plain \
             . 2>&1; then
@@ -438,8 +472,10 @@ jobs:
           echo "✅ Docker Push 完成！"
           echo ""
           echo "📦 映像已推送至 Docker Hub："
-          echo "   ${IMAGE}"
-          echo "   ${IMAGE_LATEST}"
+          echo "   \${IMAGE}"
+          if [ "\${ADD_LATEST}" = "true" ]; then
+            echo "   \${IMAGE_LATEST}"
+          fi
           echo ""
           echo "🏗️ 支援的架構："
           echo "   - linux/amd64"
@@ -548,7 +584,15 @@ jobs:
           echo ""
           echo "📦 映像資訊："
           echo "  - 版本標籤: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
-          echo "  - Latest 標籤: ${{ env.DOCKER_IMAGE_REPO }}:latest"
+          
+          # 判斷是否為正式版本
+          IMAGE_TAG="${{ github.event.inputs.image_tag }}"
+          if [[ "$IMAGE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "  - Latest 標籤: ${{ env.DOCKER_IMAGE_REPO }}:latest ✅"
+          else
+            echo "  - Latest 標籤: （測試版本，未更新）"
+          fi
+          
           echo "  - Docker Hub: https://hub.docker.com/r/${{ env.DOCKER_IMAGE_REPO }}/tags"
           echo ""
           echo "🏗️ 支援的架構："
@@ -562,7 +606,9 @@ jobs:
           echo ""
           echo "📝 使用方式："
           echo "  docker pull ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
-          echo "  docker pull ${{ env.DOCKER_IMAGE_REPO }}:latest"
+          if [[ "$IMAGE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "  docker pull ${{ env.DOCKER_IMAGE_REPO }}:latest"
+          fi
           echo ""
           echo "========================================"
           echo "🎉 所有步驟已成功完成！"
