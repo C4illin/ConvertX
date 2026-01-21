@@ -27,14 +27,23 @@ CREATE TABLE IF NOT EXISTS jobs (
   num_files INTEGER DEFAULT 0,
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
-PRAGMA user_version = 1;`);
+CREATE TABLE IF NOT EXISTS storage_metadata (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  job_id INTEGER NOT NULL,
+  file_name TEXT NOT NULL,
+  storage_key TEXT NOT NULL,
+  FOREIGN KEY (job_id) REFERENCES jobs(id),
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+PRAGMA user_version = 2;`);
 }
 
-const dbVersion = (db.query("PRAGMA user_version").get() as { user_version?: number }).user_version;
-if (dbVersion === 0) {
-  db.exec("ALTER TABLE file_names ADD COLUMN status TEXT DEFAULT 'not started';");
-  db.exec("PRAGMA user_version = 1;");
-  console.log("Updated database to version 1.");
+const dbVersion = (db.query("PRAGMA user_version").get() as { user_version?: number }).user_version!;
+if (dbVersion < 2) {
+  db.exec("ALTER TABLE file_names ADD COLUMN storage_key TEXT;");
+  db.exec("PRAGMA user_version = 2;");
+  console.log("Updated database to version 2.");
 }
 
 // enable WAL mode

@@ -1,18 +1,15 @@
-import path from "node:path";
 import { Elysia } from "elysia";
 import sanitize from "sanitize-filename";
-import * as tar from "tar";
-import { outputDir } from "..";
 import db from "../db/db";
 import { WEBROOT } from "../helpers/env";
 import { userService } from "./user";
+import { getStorage } from "../storage/index";
 
 export const download = new Elysia()
   .use(userService)
   .get(
     "/download/:userId/:jobId/:fileName",
     async ({ params, redirect, user }) => {
-      const userId = user.id;
       const job = await db
         .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
         .get(user.id, params.jobId);
@@ -20,44 +17,30 @@ export const download = new Elysia()
       if (!job) {
         return redirect(`${WEBROOT}/results`, 302);
       }
-      // parse from URL encoded string
-      const jobId = decodeURIComponent(params.jobId);
+      
       const fileName = sanitize(decodeURIComponent(params.fileName));
 
-      const filePath = `${outputDir}${userId}/${jobId}/${fileName}`;
-      return Bun.file(filePath);
-    },
-    {
-      auth: true,
-    },
-  )
-  .get(
-    "/archive/:jobId",
-    async ({ params, redirect, user }) => {
-      const userId = user.id;
-      const job = await db
-        .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
-        .get(user.id, params.jobId);
+      const fileRow = db
+        .query(`
+          SELECT storage_key FROM file_names
+          WHERE job_id = ? AND file_name = ?
+        `,
+      )
+      .get(params.jobId, fileName) as { storage_key: string } | undefined;
 
-      if (!job) {
+      if (!fileRow) {
         return redirect(`${WEBROOT}/results`, 302);
       }
 
-      const jobId = decodeURIComponent(params.jobId);
-      const outputPath = `${outputDir}${userId}/${jobId}`;
-      const outputTar = path.join(outputPath, `converted_files_${jobId}.tar`);
+      const storage = getStorage();
+      const fileBuffer = await storage.get(fileRow.storage_key);
 
-      await tar.create(
-        {
-          file: outputTar,
-          cwd: outputPath,
-          filter: (path) => {
-            return !path.match(".*\\.tar");
-          },
+      return new Response(fileBuffer, {
+        headers: {
+          "Content-Type": "application/octet-stream",
+          "Content-Disposition": `attachment; filename="${fileName}"`,
         },
-        ["."],
-      );
-      return Bun.file(outputTar);
+      });
     },
     {
       auth: true,
