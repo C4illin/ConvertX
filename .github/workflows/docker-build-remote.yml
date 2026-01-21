@@ -110,6 +110,7 @@ jobs:
       # ========================================
       # Step 4: 測試 Tailscale SSH 連線（非互動式）
       # 說明：使用 tailscale ssh 測試連線，確保不需要人工登入
+      # 重要：需要在 Tailscale ACL 中設定 SSH policy
       # ========================================
       - name: 🔐 測試 Tailscale SSH 連線（非互動式）
         run: |
@@ -123,45 +124,54 @@ jobs:
           # 設定超時時間，避免卡住
           echo "⏳ 嘗試 SSH 連線（超時 30 秒）..."
           
+          # tailscale ssh 不支援 -o 選項，直接使用
           # 使用 timeout 命令確保不會卡住
-          if timeout 30 tailscale ssh -o "StrictHostKeyChecking=no" -o "BatchMode=yes" \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-            "echo '✅ Tailscale SSH 連線成功！' && echo '主機名稱:' && hostname && echo '當前使用者:' && whoami" 2>&1; then
+          RESULT=$(timeout 30 tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "echo '✅ Tailscale SSH 連線成功！' && echo '主機名稱:' && hostname && echo '當前使用者:' && whoami" 2>&1) || true
+          
+          echo "${RESULT}"
+          
+          # 檢查是否成功
+          if echo "${RESULT}" | grep -q "Tailscale SSH 連線成功"; then
             echo ""
             echo "✅ SSH 非互動式測試成功！"
+          elif echo "${RESULT}" | grep -qi "authenticate\|login.tailscale.com\|additional check"; then
+            echo ""
+            echo "========================================"
+            echo "❌ 錯誤：Tailscale SSH 需要設定 ACL Policy！"
+            echo "========================================"
+            echo ""
+            echo "🔧 這不是 Auth Key 的問題，而是 Tailscale SSH ACL 設定問題"
+            echo ""
+            echo "📋 請在 Tailscale Admin Console 中設定 SSH Policy："
+            echo ""
+            echo "  1. 前往 https://login.tailscale.com/admin/acls"
+            echo ""
+            echo "  2. 在 ACL 中加入以下 SSH policy（放在 acls 之後）："
+            echo ""
+            echo '     "ssh": ['
+            echo '       {'
+            echo '         "action": "accept",'
+            echo '         "src": ["autogroup:member"],'
+            echo '         "dst": ["tag:ci-target"],'
+            echo '         "users": ["autogroup:nonroot"]'
+            echo '       }'
+            echo '     ]'
+            echo ""
+            echo "  3. 在遠端主機上執行："
+            echo "     sudo tailscale up --ssh --advertise-tags=tag:ci-target"
+            echo ""
+            echo "  4. 確保 Auth Key 有 tag:ci-target 的權限"
+            echo ""
+            echo "========================================"
+            echo "🔄 或者：使用傳統 SSH over Tailscale 網路（備選方案）"
+            echo "========================================"
+            exit 1
           else
-            # 檢查是否出現需要登入的訊息
             echo ""
-            echo "❌ SSH 連線失敗，嘗試診斷..."
-            echo ""
-            
-            # 嘗試不帶選項的連線
-            RESULT=$(timeout 10 tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "hostname" 2>&1 || true)
-            echo "診斷輸出: ${RESULT}"
-            
-            if echo "${RESULT}" | grep -qi "authenticate\|login.tailscale.com\|additional check"; then
-              echo ""
-              echo "========================================"
-              echo "❌ 錯誤：Tailscale SSH 需要互動式登入！"
-              echo "========================================"
-              echo ""
-              echo "🔧 可能的原因："
-              echo "  1. TAILSCALE_AUTHKEY 沒有啟用 SSH 權限"
-              echo "  2. 遠端主機的 Tailscale SSH policy 需要調整"
-              echo "  3. Auth Key 需要重新產生（勾選 'Pre-authorized'）"
-              echo ""
-              echo "📋 建議修復步驟："
-              echo "  1. 前往 https://login.tailscale.com/admin/settings/keys"
-              echo "  2. 產生新的 Auth Key，確保勾選："
-              echo "     - Reusable"
-              echo "     - Ephemeral"
-              echo "     - Pre-authorized（重要！）"
-              echo "  3. 更新 GitHub Secret: TAILSCALE_AUTHKEY"
-              echo ""
-              exit 1
-            fi
-            
-            echo "⚠️ 連線可能有其他問題，但不是登入問題"
+            echo "⚠️ 連線失敗，錯誤訊息："
+            echo "${RESULT}"
+            exit 1
           fi
 
           echo ""
