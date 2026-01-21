@@ -128,7 +128,7 @@ export async function convert(
           : mineruOutputDir;
 
         console.log(`[MinerU] Archiving directory: ${outputToArchive}`);
-        
+
         // 列出要封裝的內容
         if (existsSync(outputToArchive)) {
           const contents = readdirSync(outputToArchive);

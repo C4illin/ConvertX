@@ -266,21 +266,15 @@ export async function convert(
     //   - mono: 純翻譯版本（translated-<lang>.pdf）
     //   - dual: 雙語對照版本（bilingual-<lang>.pdf）
     // ⚠️ 不包含原始 PDF，只包含翻譯結果
-    
+
     const translatedDest = join(archiveDir, `translated-${targetLang}.pdf`);
     const bilingualDest = join(archiveDir, `bilingual-${targetLang}.pdf`);
 
     // 檢查各種可能的 mono 輸出檔案名稱
-    const possibleMonoOutputs = [
-      monoPath,
-      join(tempDir, `${inputFileName}-mono.pdf`),
-    ];
+    const possibleMonoOutputs = [monoPath, join(tempDir, `${inputFileName}-mono.pdf`)];
 
     // 檢查各種可能的 dual 輸出檔案名稱
-    const possibleDualOutputs = [
-      dualPath,
-      join(tempDir, `${inputFileName}-dual.pdf`),
-    ];
+    const possibleDualOutputs = [dualPath, join(tempDir, `${inputFileName}-dual.pdf`)];
 
     let foundMono = false;
     let foundDual = false;
@@ -309,7 +303,7 @@ export async function convert(
     if (!foundMono && !foundDual) {
       const allFiles = readdirSync(tempDir);
       const pdfFiles = allFiles.filter((f) => f.endsWith(".pdf") && f !== basename(filePath));
-      
+
       for (const pdfName of pdfFiles) {
         const pdfPath = join(tempDir, pdfName);
         if (pdfName.includes("mono") || pdfName.includes("translated")) {

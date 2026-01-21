@@ -25,14 +25,14 @@ export const download = new Elysia()
       const fileName = sanitize(decodeURIComponent(params.fileName));
 
       const filePath = `${outputDir}${userId}/${jobId}/${fileName}`;
-      
+
       // 檢查檔案是否存在
       if (!existsSync(filePath)) {
         console.error(`[Download] File not found: ${filePath}`);
         set.status = 404;
         return { error: "File not found", path: filePath };
       }
-      
+
       return Bun.file(filePath);
     },
     {

@@ -189,12 +189,12 @@ export async function handleConvert(
         new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`),
         newFileExt,
       );
-      
+
       // For archive output converters, the actual file will have .tar extension
       if (isArchiveOutput) {
         newFileName = `${newFileName}.tar`;
       }
-      
+
       const targetPath = `${userOutputDir}${newFileName.replace(/\.tar$/, "")}`;
       toProcess.push(
         new Promise((resolve, reject) => {
