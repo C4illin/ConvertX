@@ -157,16 +157,16 @@ docker compose up -d
 
 ## 支援格式
 
-| 轉換器           | 用途         | 格式數 |
-| ---------------- | ------------ | ------ |
-| FFmpeg           | 影音         | 400+   |
-| ImageMagick      | 圖片         | 200+   |
-| LibreOffice      | 文件         | 60+    |
-| Pandoc           | 文件         | 100+   |
-| Calibre          | 電子書       | 40+    |
-| Inkscape         | 向量圖       | 20+    |
-| MinerU           | 文件→MD      | 2      |
-| PDFMathTranslate | PDF 翻譯     | 15+    |
+| 轉換器           | 用途     | 格式數 |
+| ---------------- | -------- | ------ |
+| FFmpeg           | 影音     | 400+   |
+| ImageMagick      | 圖片     | 200+   |
+| LibreOffice      | 文件     | 60+    |
+| Pandoc           | 文件     | 100+   |
+| Calibre          | 電子書   | 40+    |
+| Inkscape         | 向量圖   | 20+    |
+| MinerU           | 文件→MD  | 2      |
+| PDFMathTranslate | PDF 翻譯 | 15+    |
 
 完整列表 → [docs/converters.md](docs/converters.md)
 
@@ -196,6 +196,7 @@ PDFMathTranslate 是一個內容轉換引擎，用於翻譯 PDF 文件同時保�
 ### 輸出格式
 
 所有輸出一律打包為 `.tar` 檔案，包含：
+
 - `original.pdf` — 原始 PDF 文件
 - `translated-<lang>.pdf` — 翻譯後的 PDF 文件
 
@@ -215,10 +216,10 @@ PDFMathTranslate
 
 ### 環境變數
 
-| 變數                        | 說明                       | 預設值  |
-| --------------------------- | -------------------------- | ------- |
-| `PDFMATHTRANSLATE_SERVICE`  | 翻譯服務提供商             | google  |
-| `PDFMATHTRANSLATE_MODELS_PATH` | 模型路徑                | /models/pdfmathtranslate |
+| 變數                           | 說明           | 預設值                   |
+| ------------------------------ | -------------- | ------------------------ |
+| `PDFMATHTRANSLATE_SERVICE`     | 翻譯服務提供商 | google                   |
+| `PDFMATHTRANSLATE_MODELS_PATH` | 模型路徑       | /models/pdfmathtranslate |
 
 ### 注意事項
 

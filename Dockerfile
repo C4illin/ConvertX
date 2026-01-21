@@ -174,9 +174,9 @@ ENV PATH="/root/.local/bin:${PATH}"
 RUN mkdir -p /models/pdfmathtranslate && \
   # 預先下載 DocLayout-YOLO ONNX 模型
   python3 -c "from huggingface_hub import hf_hub_download; \
-    hf_hub_download(repo_id='wybxc/DocLayout-YOLO-DocStructBench-onnx', \
-                    filename='model.onnx', \
-                    local_dir='/models/pdfmathtranslate')" && \
+  hf_hub_download(repo_id='wybxc/DocLayout-YOLO-DocStructBench-onnx', \
+  filename='model.onnx', \
+  local_dir='/models/pdfmathtranslate')" && \
   # 執行 babeldoc warmup 預載入模型
   babeldoc --warmup || true && \
   # 清理 cache
@@ -185,15 +185,15 @@ RUN mkdir -p /models/pdfmathtranslate && \
 # 下載 PDFMathTranslate 所需字型
 RUN mkdir -p /app && \
   curl -L -o /app/GoNotoKurrent-Regular.ttf \
-    "https://github.com/satbyy/go-noto-universal/releases/download/v7.0/GoNotoKurrent-Regular.ttf" && \
+  "https://github.com/satbyy/go-noto-universal/releases/download/v7.0/GoNotoKurrent-Regular.ttf" && \
   curl -L -o /app/SourceHanSerifCN-Regular.ttf \
-    "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifCN-Regular.ttf" && \
+  "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifCN-Regular.ttf" && \
   curl -L -o /app/SourceHanSerifTW-Regular.ttf \
-    "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifTW-Regular.ttf" && \
+  "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifTW-Regular.ttf" && \
   curl -L -o /app/SourceHanSerifJP-Regular.ttf \
-    "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifJP-Regular.ttf" && \
+  "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifJP-Regular.ttf" && \
   curl -L -o /app/SourceHanSerifKR-Regular.ttf \
-    "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifKR-Regular.ttf"
+  "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifKR-Regular.ttf"
 
 # PDFMathTranslate 環境變數
 ENV PDFMATHTRANSLATE_MODELS_PATH="/models/pdfmathtranslate"
