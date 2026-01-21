@@ -125,9 +125,9 @@ RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
 # 階段 2.1：安裝 dasel（從 GitHub 下載二進位檔案）
 RUN ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
-    DASEL_ARCH="linux_arm64"; \
+  DASEL_ARCH="linux_arm64"; \
   else \
-    DASEL_ARCH="linux_amd64"; \
+  DASEL_ARCH="linux_amd64"; \
   fi && \
   curl -sSLf "https://github.com/TomWright/dasel/releases/download/v2.8.1/dasel_${DASEL_ARCH}" -o /usr/local/bin/dasel && \
   chmod +x /usr/local/bin/dasel
@@ -136,13 +136,13 @@ RUN ARCH=$(uname -m) && \
 # 注意：resvg 官方只提供 x86_64 版本，ARM64 需從源碼編譯或跳過
 RUN ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
-    echo "⚠️ resvg 沒有 ARM64 預編譯版本，跳過安裝（可改用 ImageMagick 或 Inkscape 替代）"; \
+  echo "⚠️ resvg 沒有 ARM64 預編譯版本，跳過安裝（可改用 ImageMagick 或 Inkscape 替代）"; \
   else \
-    curl -sSLf "https://github.com/linebender/resvg/releases/download/v0.44.0/resvg-linux-x86_64.tar.gz" -o /tmp/resvg.tar.gz && \
-    tar -xzf /tmp/resvg.tar.gz -C /tmp/ && \
-    mv /tmp/resvg /usr/local/bin/resvg && \
-    chmod +x /usr/local/bin/resvg && \
-    rm -rf /tmp/resvg.tar.gz; \
+  curl -sSLf "https://github.com/linebender/resvg/releases/download/v0.44.0/resvg-linux-x86_64.tar.gz" -o /tmp/resvg.tar.gz && \
+  tar -xzf /tmp/resvg.tar.gz -C /tmp/ && \
+  mv /tmp/resvg /usr/local/bin/resvg && \
+  chmod +x /usr/local/bin/resvg && \
+  rm -rf /tmp/resvg.tar.gz; \
   fi
 
 # 階段 3：影音處理工具
