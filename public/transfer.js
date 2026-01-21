@@ -1,10 +1,10 @@
 /**
  * Contents.CN 前端檔案傳輸管理器
- * 
+ *
  * 統一處理所有檔案的上傳與下載：
  * - 檔案 ≤ 10MB：直接傳輸
  * - 檔案 > 10MB：使用 chunk 分段傳輸
- * 
+ *
  * ⚠️ 重要：所有功能必須使用此模組，不得自行實作傳輸邏輯
  */
 
@@ -30,9 +30,9 @@ function generateUploadId() {
     return crypto.randomUUID();
   }
   // 降級方案
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0;
-    const v = c === "x" ? r : (r & 0x3 | 0x8);
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
@@ -67,7 +67,7 @@ class UploadManager {
 
   /**
    * 上傳檔案（自動判斷使用直傳或 chunk）
-   * 
+   *
    * @param {File} file - 要上傳的檔案
    * @param {object} options - 選項
    * @param {function} options.onProgress - 進度回調 (percent: number) => void
@@ -80,7 +80,7 @@ class UploadManager {
 
     try {
       let result;
-      
+
       if (shouldUseChunkedTransfer(file.size)) {
         // 大檔：使用 chunk 上傳
         result = await this.uploadChunked(file, onProgress);
@@ -139,12 +139,12 @@ class UploadManager {
   async uploadChunked(file, onProgress) {
     const uploadId = generateUploadId();
     const totalChunks = calculateChunkCount(file.size);
-    
+
     this.activeUploads.set(uploadId, {
       file,
       totalChunks,
       uploadedChunks: 0,
-      status: "uploading"
+      status: "uploading",
     });
 
     try {
@@ -223,7 +223,7 @@ class DownloadManager {
 
   /**
    * 下載檔案（自動判斷使用直傳或 chunk）
-   * 
+   *
    * @param {string} url - 下載 URL
    * @param {string} fileName - 檔案名稱
    * @param {object} options - 選項
@@ -235,7 +235,7 @@ class DownloadManager {
 
     // 先取得檔案資訊
     const info = await this.getFileInfo(url);
-    
+
     if (!info) {
       // 無法取得資訊，使用直接下載
       return this.downloadDirect(url, fileName);
@@ -270,14 +270,14 @@ class DownloadManager {
    */
   async downloadDirect(url, fileName, onProgress) {
     const response = await fetch(url);
-    
+
     if (!response.ok) {
       throw new Error(`Download failed: ${response.status}`);
     }
 
     const contentLength = response.headers.get("Content-Length");
     const total = contentLength ? parseInt(contentLength, 10) : 0;
-    
+
     const reader = response.body.getReader();
     const chunks = [];
     let loaded = 0;
@@ -285,7 +285,7 @@ class DownloadManager {
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      
+
       chunks.push(value);
       loaded += value.length;
 
@@ -305,11 +305,11 @@ class DownloadManager {
   async downloadChunked(url, fileName, info, onProgress) {
     const { total_chunks, chunk_size, total_size } = info;
     const chunks = [];
-    
+
     for (let i = 0; i < total_chunks; i++) {
       const chunkData = await this.downloadChunk(url, i);
       chunks.push(chunkData);
-      
+
       if (onProgress) {
         const loaded = Math.min((i + 1) * chunk_size, total_size);
         onProgress((loaded / total_size) * 100);
@@ -326,7 +326,7 @@ class DownloadManager {
    */
   async downloadChunk(url, chunkIndex) {
     const response = await fetch(`${url}/chunk/${chunkIndex}`);
-    
+
     if (!response.ok) {
       throw new Error(`Chunk ${chunkIndex} download failed: ${response.status}`);
     }
@@ -371,18 +371,20 @@ const webroot = webrootMeta ? webrootMeta.content : "";
 window.ContentsTransfer = {
   uploadManager: new UploadManager(webroot),
   downloadManager: new DownloadManager(webroot),
-  
+
   // 工具函數
   shouldUseChunkedTransfer,
   calculateChunkCount,
-  
+
   // 常數
   CHUNK_THRESHOLD_BYTES,
   CHUNK_SIZE_BYTES,
 };
 
 // 向後相容：提供簡化的 API
-window.uploadFile = (file, options) => window.ContentsTransfer.uploadManager.uploadFile(file, options);
-window.downloadFile = (url, fileName, options) => window.ContentsTransfer.downloadManager.downloadFile(url, fileName, options);
+window.uploadFile = (file, options) =>
+  window.ContentsTransfer.uploadManager.uploadFile(file, options);
+window.downloadFile = (url, fileName, options) =>
+  window.ContentsTransfer.downloadManager.downloadFile(url, fileName, options);
 
 console.log("Contents.CN Transfer Module initialized");

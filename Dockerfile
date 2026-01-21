@@ -74,6 +74,7 @@ FROM base AS release
 # ✅ 字型：Noto CJK + Liberation + 標楷體
 # ✅ OpenCV：電腦視覺轉換支援
 # ✅ 額外影片編解碼器
+# ✅ PDFMathTranslate：PDF 翻譯引擎
 #
 # ==============================================================================
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -142,6 +143,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   # === 清理 ===
   && pipx install "markitdown[all]" \
   && pipx install "mineru[all]" \
+  && pipx install "pdf2zh" \
   # 清理 apt cache
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* \
@@ -157,6 +159,45 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Add pipx bin directory to PATH
 ENV PATH="/root/.local/bin:${PATH}"
+
+# ==============================================================================
+# PDFMathTranslate 模型預下載（Docker build 階段）
+# ==============================================================================
+# 
+# ⚠️ 重要：模型必須在 build 階段下載，禁止 runtime 隱式下載
+# 
+# 模型說明：
+#   - DocLayout-YOLO ONNX 模型：用於 PDF 布局分析
+#   - 多語言字型：用於翻譯後的 PDF 渲染
+#
+# ==============================================================================
+RUN mkdir -p /models/pdfmathtranslate && \
+  # 預先下載 DocLayout-YOLO ONNX 模型
+  python3 -c "from huggingface_hub import hf_hub_download; \
+    hf_hub_download(repo_id='wybxc/DocLayout-YOLO-DocStructBench-onnx', \
+                    filename='model.onnx', \
+                    local_dir='/models/pdfmathtranslate')" && \
+  # 執行 babeldoc warmup 預載入模型
+  babeldoc --warmup || true && \
+  # 清理 cache
+  rm -rf /root/.cache/huggingface
+
+# 下載 PDFMathTranslate 所需字型
+RUN mkdir -p /app && \
+  curl -L -o /app/GoNotoKurrent-Regular.ttf \
+    "https://github.com/satbyy/go-noto-universal/releases/download/v7.0/GoNotoKurrent-Regular.ttf" && \
+  curl -L -o /app/SourceHanSerifCN-Regular.ttf \
+    "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifCN-Regular.ttf" && \
+  curl -L -o /app/SourceHanSerifTW-Regular.ttf \
+    "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifTW-Regular.ttf" && \
+  curl -L -o /app/SourceHanSerifJP-Regular.ttf \
+    "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifJP-Regular.ttf" && \
+  curl -L -o /app/SourceHanSerifKR-Regular.ttf \
+    "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifKR-Regular.ttf"
+
+# PDFMathTranslate 環境變數
+ENV PDFMATHTRANSLATE_MODELS_PATH="/models/pdfmathtranslate"
+ENV NOTO_FONT_PATH="/app/GoNotoKurrent-Regular.ttf"
 
 # ==============================================================================
 # 設定 locale（支援中文 PDF 避免亂碼）
@@ -213,5 +254,7 @@ ENV QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox"
 ENV PANDOC_PDF_ENGINE=pdflatex
 # Node 環境
 ENV NODE_ENV=production
+# PDFMathTranslate 預設翻譯服務（可透過環境變數覆寫）
+ENV PDFMATHTRANSLATE_SERVICE="google"
 
 ENTRYPOINT [ "bun", "run", "dist/src/index.js" ]

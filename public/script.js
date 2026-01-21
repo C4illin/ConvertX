@@ -260,16 +260,16 @@ function generateUploadId() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return crypto.randomUUID();
   }
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0;
-    const v = c === "x" ? r : (r & 0x3 | 0x8);
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
 
 /**
  * 統一上傳檔案（自動判斷使用直傳或 chunk）
- * 
+ *
  * @param {File} file - 要上傳的檔案
  */
 const uploadFile = (file) => {
@@ -349,7 +349,7 @@ const uploadFileDirect = (file) => {
 const uploadFileChunked = async (file) => {
   const uploadId = generateUploadId();
   const totalChunks = Math.ceil(file.size / CHUNK_SIZE_BYTES);
-  
+
   console.log(`Starting chunked upload: ${file.name}, size: ${file.size}, chunks: ${totalChunks}`);
 
   try {
@@ -399,7 +399,6 @@ const uploadFileChunked = async (file) => {
       progressbar[0].parentElement.remove();
     }
     console.log("Chunked upload complete:", file.name);
-
   } catch (error) {
     console.error("Chunked upload failed:", error);
     pendingFiles -= 1;

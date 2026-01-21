@@ -157,15 +157,16 @@ docker compose up -d
 
 ## 支援格式
 
-| 轉換器      | 用途    | 格式數 |
-| ----------- | ------- | ------ |
-| FFmpeg      | 影音    | 400+   |
-| ImageMagick | 圖片    | 200+   |
-| LibreOffice | 文件    | 60+    |
-| Pandoc      | 文件    | 100+   |
-| Calibre     | 電子書  | 40+    |
-| Inkscape    | 向量圖  | 20+    |
-| MinerU      | 文件→MD | 2      |
+| 轉換器           | 用途         | 格式數 |
+| ---------------- | ------------ | ------ |
+| FFmpeg           | 影音         | 400+   |
+| ImageMagick      | 圖片         | 200+   |
+| LibreOffice      | 文件         | 60+    |
+| Pandoc           | 文件         | 100+   |
+| Calibre          | 電子書       | 40+    |
+| Inkscape         | 向量圖       | 20+    |
+| MinerU           | 文件→MD      | 2      |
+| PDFMathTranslate | PDF 翻譯     | 15+    |
 
 完整列表 → [docs/converters.md](docs/converters.md)
 
@@ -182,14 +183,59 @@ ConvertX 內建文件轉換引擎。
 
 ---
 
+## PDFMathTranslate 引擎
+
+PDFMathTranslate 是一個內容轉換引擎，用於翻譯 PDF 文件同時保留數學公式與排版。
+
+### 功能特點
+
+- 📊 保留數學公式、圖表、目錄與註解
+- 🌐 支援多種目標語言（中文、英文、日文、韓文等）
+- 🤖 支援多種翻譯服務（Google、DeepL、OpenAI 等）
+
+### 輸出格式
+
+所有輸出一律打包為 `.tar` 檔案，包含：
+- `original.pdf` — 原始 PDF 文件
+- `translated-<lang>.pdf` — 翻譯後的 PDF 文件
+
+### 可用的目標格式
+
+```
+PDFMathTranslate
+├─ pdf-en    （翻譯為英文）
+├─ pdf-zh    （翻譯為簡體中文）
+├─ pdf-zh-TW （翻譯為繁體中文）
+├─ pdf-ja    （翻譯為日文）
+├─ pdf-ko    （翻譯為韓文）
+├─ pdf-de    （翻譯為德文）
+├─ pdf-fr    （翻譯為法文）
+└─ ...
+```
+
+### 環境變數
+
+| 變數                        | 說明                       | 預設值  |
+| --------------------------- | -------------------------- | ------- |
+| `PDFMATHTRANSLATE_SERVICE`  | 翻譯服務提供商             | google  |
+| `PDFMATHTRANSLATE_MODELS_PATH` | 模型路徑                | /models/pdfmathtranslate |
+
+### 注意事項
+
+- 所需模型已在 Docker build 階段預先下載
+- 不會在 runtime 隱式下載任何模型
+- 使用 Google 翻譯為預設服務（免費），可透過環境變數切換
+
+---
+
 ## 檔案傳輸機制
 
 Contents.CN 使用統一的檔案傳輸策略：
 
-| 檔案大小 | 傳輸方式 | 說明 |
-| -------- | -------- | ---- |
-| ≤ 10MB | 直接傳輸 | 單一請求完成上傳/下載 |
-| > 10MB | 分段傳輸 | 使用 5MB chunks 分段傳輸 |
+| 檔案大小 | 傳輸方式 | 說明                     |
+| -------- | -------- | ------------------------ |
+| ≤ 10MB   | 直接傳輸 | 單一請求完成上傳/下載    |
+| > 10MB   | 分段傳輸 | 使用 5MB chunks 分段傳輸 |
 
 ### 多檔輸出封裝
 
