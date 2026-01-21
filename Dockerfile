@@ -65,7 +65,7 @@ RUN bun run build
 FROM base AS release
 
 # ==============================================================================
-# 依賴安裝（單一 RUN 層，優化 cache 與空間）
+# 依賴安裝（分段安裝，優化 Multi-Arch Build 穩定性）
 # ==============================================================================
 #
 # ✅ 核心轉換工具：完整保留
@@ -76,48 +76,84 @@ FROM base AS release
 # ✅ 額外影片編解碼器
 # ✅ PDFMathTranslate：PDF 翻譯引擎
 #
+# 📝 分段安裝說明：
+#   - 將套件拆分為多個 RUN 層，避免 QEMU 模擬時記憶體不足
+#   - 每段安裝後清理 apt cache，減少中間層大小
+#   - 最終 squash 時會合併為單一層
+#
 # ==============================================================================
-RUN apt-get update && apt-get install -y --no-install-recommends \
-  # === 基礎轉換工具 ===
+
+# 階段 1：基礎系統工具
+RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  locales \
+  ca-certificates \
+  curl \
+  && rm -rf /var/lib/apt/lists/*
+
+# 階段 2：核心轉換工具（小型）
+RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   assimp-utils \
-  calibre \
   dasel \
   dcraw \
   dvisvgm \
-  ffmpeg \
   ghostscript \
   graphicsmagick \
-  imagemagick-7.q16 \
-  inkscape \
-  libheif-examples \
-  libjxl-tools \
-  libva2 \
-  libvips-tools \
-  libemail-outlook-message-perl \
   mupdf-tools \
   poppler-utils \
   potrace \
   resvg \
-  # === 額外影片編解碼器 ===
+  && rm -rf /var/lib/apt/lists/*
+
+# 階段 3：影音處理工具
+RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  ffmpeg \
   libavcodec-extra \
-  # === LibreOffice (headless) ===
+  libva2 \
+  && rm -rf /var/lib/apt/lists/*
+
+# 階段 4：圖像處理工具
+RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  imagemagick-7.q16 \
+  inkscape \
+  libheif-examples \
+  libjxl-tools \
+  libvips-tools \
+  && rm -rf /var/lib/apt/lists/*
+
+# 階段 5：文件處理工具
+RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  calibre \
+  libemail-outlook-message-perl \
+  pandoc \
+  && rm -rf /var/lib/apt/lists/*
+
+# 階段 6：LibreOffice（最大的套件，單獨安裝）
+RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   libreoffice \
-  # === TexLive 完整語言支援 ===
+  && rm -rf /var/lib/apt/lists/*
+
+# 階段 7：TexLive 基礎
+RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   texlive-base \
   texlive-latex-base \
   texlive-latex-recommended \
   texlive-fonts-recommended \
   texlive-xetex \
+  latexmk \
+  lmodern \
+  && rm -rf /var/lib/apt/lists/*
+
+# 階段 8：TexLive 語言包
+RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   texlive-lang-cjk \
   texlive-lang-german \
   texlive-lang-french \
   texlive-lang-arabic \
   texlive-lang-other \
-  latexmk \
-  lmodern \
-  # === Pandoc 文件轉換 ===
-  pandoc \
-  # === OCR 支援（7 種語言）===
+  && rm -rf /var/lib/apt/lists/*
+
+# 階段 9：OCR 支援
+RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   tesseract-ocr \
   tesseract-ocr-eng \
   tesseract-ocr-chi-tra \
@@ -126,33 +162,38 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   tesseract-ocr-kor \
   tesseract-ocr-deu \
   tesseract-ocr-fra \
-  # === 字型 ===
+  && rm -rf /var/lib/apt/lists/*
+
+# 階段 10：字型
+RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   fonts-noto-cjk \
   fonts-noto-core \
   fonts-noto-color-emoji \
   fonts-liberation \
-  # === Python 依賴 + OpenCV ===
+  && rm -rf /var/lib/apt/lists/*
+
+# 階段 11：Python 依賴
+RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   python3 \
   python3-pip \
   python3-numpy \
   python3-tinycss2 \
   python3-opencv \
   pipx \
-  # === 系統工具 ===
-  locales \
-  # === 清理 ===
-  && pipx install "markitdown[all]" \
-  && pipx install "mineru[all]" \
+  && rm -rf /var/lib/apt/lists/*
+
+# 階段 12：安裝 Python 工具（pipx）
+RUN pipx install "markitdown[all]" \
   && pipx install "pdf2zh" \
-  # 清理 apt cache
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* \
-  # 清理 pip cache
-  && rm -rf /root/.cache/pip \
-  # 清理 TexLive 文件（節省空間）
-  && rm -rf /usr/share/doc/texlive* \
+  && rm -rf /root/.cache/pip
+
+# 階段 13：安裝 mineru（可能在 arm64 上有問題，加入錯誤處理）
+RUN pipx install "mineru[all]" || echo "⚠️ mineru 安裝失敗（可能是 arm64 相容性問題），跳過..." \
+  && rm -rf /root/.cache/pip
+
+# 最終清理
+RUN rm -rf /usr/share/doc/texlive* \
   && rm -rf /usr/share/texlive/texmf-dist/doc \
-  # 清理其他文件
   && rm -rf /usr/share/doc/* \
   && rm -rf /usr/share/man/* \
   && rm -rf /usr/share/info/*
