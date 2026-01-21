@@ -286,13 +286,13 @@ jobs:
           echo "========================================"
 
       # ========================================
-      # Step 10: Multi-Arch Docker Build & Push
-      # 說明：使用 buildx 同時建構 amd64 和 arm64 並推送
+      # Step 10: Multi-Arch Docker Build
+      # 說明：使用 buildx 同時建構 amd64 和 arm64
       # ========================================
-      - name: 🔨 Multi-Arch Docker Build & Push
+      - name: 🔨 Multi-Arch Docker Build
         run: |
           echo "========================================"
-          echo "🔨 開始 Multi-Arch Docker Build & Push"
+          echo "🔨 開始 Multi-Arch Docker Build"
           echo "========================================"
           echo "映像名稱: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
           echo "目標架構: linux/amd64, linux/arm64"
@@ -319,13 +319,11 @@ jobs:
           # 確保使用正確的 builder
           docker buildx use "${BUILDER_NAME}"
 
-          # Multi-arch build + push
+          # Multi-arch build（只建構，不推送，載入到本地）
           # 使用 --progress=plain 顯示完整 log
-          # 若失敗會顯示詳細錯誤資訊
           if ! docker buildx build \
             --platform linux/amd64,linux/arm64 \
             -t "${IMAGE}" \
-            --push \
             --progress=plain \
             . 2>&1; then
             
@@ -350,7 +348,81 @@ jobs:
           fi
 
           echo ""
-          echo "✅ Multi-Arch Docker build & push 完成！"
+          echo "✅ Multi-Arch Docker Build 完成！"
+          echo ""
+          echo "🏗️ 已建構的架構："
+          echo "   - linux/amd64"
+          echo "   - linux/arm64"
+          REMOTE_EOF
+
+          echo "========================================"
+
+      # ========================================
+      # Step 11: Docker Push 到 Docker Hub
+      # 說明：推送建構好的映像到 Docker Hub
+      # ========================================
+      - name: 📤 Docker Push 到 Docker Hub
+        run: |
+          echo "========================================"
+          echo "📤 推送映像到 Docker Hub"
+          echo "========================================"
+          echo "映像: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
+          echo ""
+
+          # 檢查 Docker Hub 登錄狀態，未登錄則重新登錄
+          echo "🔐 檢查 Docker Hub 登錄狀態..."
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
+          if docker info 2>/dev/null | grep -q "Username:"; then
+            echo "✅ Docker Hub 已登錄"
+          else
+            echo "⚠️ Docker Hub 未登錄，正在重新登錄..."
+            echo '${{ secrets.DOCKERHUB_TOKEN }}' | docker login -u '${{ secrets.DOCKERHUB_USERNAME }}' --password-stdin
+            echo "✅ Docker Hub 重新登錄成功"
+          fi
+          EOF
+
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          set -e
+
+          WORKDIR="${{ env.REMOTE_WORKDIR }}"
+          PROJECT="${{ env.PROJECT_NAME }}"
+          IMAGE="${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
+          BUILDER_NAME="multiarch-builder-${{ github.run_id }}"
+
+          echo "📂 進入專案目錄..."
+          cd "${WORKDIR}/${PROJECT}"
+
+          echo ""
+          echo "📤 執行 Docker Push..."
+          echo "映像標籤: ${IMAGE}"
+          echo ""
+
+          # 確保使用正確的 builder
+          docker buildx use "${BUILDER_NAME}"
+
+          # 使用 buildx build --push 來推送 multi-arch 映像
+          if ! docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            -t "${IMAGE}" \
+            --push \
+            --progress=plain \
+            . 2>&1; then
+            
+            echo ""
+            echo "========================================"
+            echo "❌ Docker Push 失敗！"
+            echo "========================================"
+            echo ""
+            echo "🔧 可能的原因："
+            echo "  1. Docker Hub 登入已過期"
+            echo "  2. 網路連線問題"
+            echo "  3. Docker Hub 配額限制"
+            echo ""
+            exit 1
+          fi
+
+          echo ""
+          echo "✅ Docker Push 完成！"
           echo ""
           echo "📦 映像已推送至 Docker Hub："
           echo "   ${IMAGE}"
@@ -363,7 +435,7 @@ jobs:
           echo "========================================"
 
       # ========================================
-      # Step 11: 驗證 Docker Hub 映像
+      # Step 13: 驗證 Docker Hub 映像
       # 說明：確認映像已成功推送並檢查架構
       # ========================================
       - name: ✅ 驗證 Docker Hub 映像
@@ -391,7 +463,7 @@ jobs:
           echo "========================================"
 
       # ========================================
-      # Step 12: 清理本次 Build 資源
+      # Step 14: 清理本次 Build 資源
       # 說明：只清理本次 build 產生的 builder 和 cache
       # ========================================
       - name: 🧹 清理本次 Build 資源
@@ -435,7 +507,7 @@ jobs:
           echo "========================================"
 
       # ========================================
-      # Step 13: Docker Logout
+      # Step 15: Docker Logout
       # 說明：登出 Docker Hub
       # ========================================
       - name: 🔒 Docker Hub 登出
@@ -451,7 +523,7 @@ jobs:
           echo "========================================"
 
       # ========================================
-      # Step 14: 顯示完成摘要
+      # Step 16: 顯示完成摘要
       # 說明：顯示本次 build 的摘要資訊
       # ========================================
       - name: 📋 Build 完成摘要
