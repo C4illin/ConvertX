@@ -26,7 +26,8 @@
     "logout": "Esci",
     "login": "Accedi",
     "register": "Registrati",
-    "language": "Lingua"
+    "language": "Lingua",
+    "toggleTheme": "Cambia tema"
   },
   "convert": {
     "title": "Converti",

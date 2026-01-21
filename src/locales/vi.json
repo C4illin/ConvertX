@@ -26,7 +26,8 @@
     "logout": "Đăng xuất",
     "login": "Đăng nhập",
     "register": "Đăng ký",
-    "language": "Ngôn ngữ"
+    "language": "Ngôn ngữ",
+    "toggleTheme": "Đổi giao diện"
   },
   "convert": {
     "title": "Chuyển đổi",

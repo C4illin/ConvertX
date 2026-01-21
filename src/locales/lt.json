@@ -26,7 +26,8 @@
     "logout": "Atsijungti",
     "login": "Prisijungti",
     "register": "Registruotis",
-    "language": "Kalba"
+    "language": "Kalba",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Konvertuoti",

@@ -172,6 +172,16 @@ docker compose up -d
 
 ---
 
+## Dark Mode
+
+ConvertX-CN 支援亮色與暗色主題。
+
+- 可手動切換主題（點擊導覽列的太陽/月亮圖示）
+- 偏好設定自動儲存於瀏覽器
+- 預設跟隨系統色彩偏好
+
+---
+
 ## MinerU
 
 ConvertX 內建文件轉換引擎。

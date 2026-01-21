@@ -26,7 +26,8 @@
     "logout": "Odhlásit",
     "login": "Přihlásit",
     "register": "Registrovat",
-    "language": "Jazyk"
+    "language": "Jazyk",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Převést",

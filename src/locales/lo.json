@@ -26,7 +26,8 @@
     "logout": "ອອກຈາກລະບົບ",
     "login": "ເຂົ້າສູ່ລະບົບ",
     "register": "ລົງທະບຽນ",
-    "language": "ພາສາ"
+    "language": "ພາສາ",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "ແປງ",

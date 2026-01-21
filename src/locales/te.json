@@ -26,7 +26,8 @@
     "logout": "లాగ్ అవుట్",
     "login": "లాగిన్",
     "register": "నమోదు",
-    "language": "భాష"
+    "language": "భాష",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "మార్చు",

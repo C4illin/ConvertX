@@ -26,7 +26,8 @@
     "logout": "Oħroġ",
     "login": "Idħol",
     "register": "Irreġistra",
-    "language": "Lingwa"
+    "language": "Lingwa",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Ikkonverti",

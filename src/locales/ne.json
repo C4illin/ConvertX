@@ -26,7 +26,8 @@
     "logout": "लग आउट",
     "login": "लग इन",
     "register": "दर्ता गर्नुहोस्",
-    "language": "भाषा"
+    "language": "भाषा",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "रूपान्तरण गर्नुहोस्",

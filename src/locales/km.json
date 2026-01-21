@@ -26,7 +26,8 @@
     "logout": "ចាកចេញ",
     "login": "ចូល",
     "register": "ចុះឈ្មោះ",
-    "language": "ភាសា"
+    "language": "ភាសា",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "បម្លែង",

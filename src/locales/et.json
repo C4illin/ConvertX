@@ -26,7 +26,8 @@
     "logout": "Logi välja",
     "login": "Logi sisse",
     "register": "Registreeru",
-    "language": "Keel"
+    "language": "Keel",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Teisenda",

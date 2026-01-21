@@ -26,7 +26,8 @@
     "logout": "Teken uit",
     "login": "Teken in",
     "register": "Registreer",
-    "language": "Taal"
+    "language": "Taal",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Omskakel",

@@ -26,7 +26,8 @@
     "logout": "வெளியேறு",
     "login": "உள்நுழை",
     "register": "பதிவு செய்",
-    "language": "மொழி"
+    "language": "மொழி",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "மாற்று",

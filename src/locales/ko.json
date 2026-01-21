@@ -26,7 +26,8 @@
     "logout": "로그아웃",
     "login": "로그인",
     "register": "회원가입",
-    "language": "언어"
+    "language": "언어",
+    "toggleTheme": "테마 전환"
   },
   "convert": {
     "title": "변환",

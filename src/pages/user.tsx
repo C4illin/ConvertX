@@ -4,6 +4,7 @@ import { Elysia, t } from "elysia";
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import { LanguageSelector } from "../components/languageSelector";
+import { ThemeToggle } from "../components/themeToggle";
 import db from "../db/db";
 import { User } from "../db/types";
 import {
@@ -102,7 +103,10 @@ export const user = new Elysia()
               `}
             >
               <strong>ConvertX-CN</strong>
-              <LanguageSelector currentLocale={locale} webroot={WEBROOT} t={t} />
+              <div class="flex items-center gap-4">
+                <ThemeToggle locale={locale} t={t} />
+                <LanguageSelector currentLocale={locale} webroot={WEBROOT} t={t} />
+              </div>
             </nav>
           </header>
           <main

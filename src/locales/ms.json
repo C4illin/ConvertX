@@ -26,7 +26,8 @@
     "logout": "Log keluar",
     "login": "Log masuk",
     "register": "Daftar",
-    "language": "Bahasa"
+    "language": "Bahasa",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Tukar",

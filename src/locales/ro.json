@@ -26,7 +26,8 @@
     "logout": "Deconectare",
     "login": "Autentificare",
     "register": "Înregistrare",
-    "language": "Limbă"
+    "language": "Limbă",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Convertire",

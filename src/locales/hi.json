@@ -26,7 +26,8 @@
     "logout": "लॉग आउट",
     "login": "लॉग इन",
     "register": "पंजीकरण",
-    "language": "भाषा"
+    "language": "भाषा",
+    "toggleTheme": "थीम बदलें"
   },
   "convert": {
     "title": "कन्वर्ट करें",

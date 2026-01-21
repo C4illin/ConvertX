@@ -26,7 +26,8 @@
     "logout": "Sair",
     "login": "Entrar",
     "register": "Registrar",
-    "language": "Idioma"
+    "language": "Idioma",
+    "toggleTheme": "Alternar tema"
   },
   "convert": {
     "title": "Converter",

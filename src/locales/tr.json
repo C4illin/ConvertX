@@ -26,7 +26,8 @@
     "logout": "Çıkış",
     "login": "Giriş",
     "register": "Kayıt Ol",
-    "language": "Dil"
+    "language": "Dil",
+    "toggleTheme": "Tema değiştir"
   },
   "convert": {
     "title": "Dönüştür",

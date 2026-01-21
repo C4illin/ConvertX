@@ -26,7 +26,8 @@
     "logout": "ലോഗൗട്ട്",
     "login": "ലോഗിൻ",
     "register": "രജിസ്റ്റർ",
-    "language": "ഭാഷ"
+    "language": "ഭാഷ",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "പരിവർത്തനം ചെയ്യുക",

@@ -26,7 +26,8 @@
     "logout": "Log ud",
     "login": "Log ind",
     "register": "Registrer",
-    "language": "Sprog"
+    "language": "Sprog",
+    "toggleTheme": "Skift tema"
   },
   "convert": {
     "title": "Konverter",

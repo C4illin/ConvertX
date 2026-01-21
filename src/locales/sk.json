@@ -26,7 +26,8 @@
     "logout": "Odhlásiť sa",
     "login": "Prihlásiť sa",
     "register": "Registrovať",
-    "language": "Jazyk"
+    "language": "Jazyk",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Konvertovať",

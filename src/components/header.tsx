@@ -5,6 +5,7 @@ import {
   defaultLocale,
 } from "../i18n/index";
 import { LanguageSelector } from "./languageSelector";
+import { ThemeToggle } from "./themeToggle";
 
 export const Header = ({
   loggedIn,
@@ -67,6 +68,9 @@ export const Header = ({
           </li>
         ) : null}
         <li>
+          <ThemeToggle locale={locale} t={t} />
+        </li>
+        <li>
           <LanguageSelector currentLocale={locale} webroot={webroot} t={t} />
         </li>
       </ul>
@@ -98,6 +102,9 @@ export const Header = ({
             </a>
           </li>
         ) : null}
+        <li>
+          <ThemeToggle locale={locale} t={t} />
+        </li>
         <li>
           <LanguageSelector currentLocale={locale} webroot={webroot} t={t} />
         </li>

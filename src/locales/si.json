@@ -26,7 +26,8 @@
     "logout": "පිටවන්න",
     "login": "පිවිසෙන්න",
     "register": "ලියාපදිංචි වන්න",
-    "language": "භාෂාව"
+    "language": "භාෂාව",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "පරිවර්තනය",

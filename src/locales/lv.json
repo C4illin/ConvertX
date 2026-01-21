@@ -26,7 +26,8 @@
     "logout": "Izrakstīties",
     "login": "Ierakstīties",
     "register": "Reģistrēties",
-    "language": "Valoda"
+    "language": "Valoda",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Konvertēt",

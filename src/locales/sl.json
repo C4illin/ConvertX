@@ -26,7 +26,8 @@
     "logout": "Odjava",
     "login": "Prijava",
     "register": "Registracija",
-    "language": "Jezik"
+    "language": "Jezik",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Pretvori",

@@ -26,7 +26,8 @@
     "logout": "Dilni",
     "login": "Hyni",
     "register": "Regjistrohu",
-    "language": "Gjuha"
+    "language": "Gjuha",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Konverto",

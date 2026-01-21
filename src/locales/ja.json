@@ -26,7 +26,8 @@
     "logout": "ログアウト",
     "login": "ログイン",
     "register": "登録",
-    "language": "言語"
+    "language": "言語",
+    "toggleTheme": "テーマ切替"
   },
   "convert": {
     "title": "変換",

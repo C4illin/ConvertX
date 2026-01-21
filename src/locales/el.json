@@ -26,7 +26,8 @@
     "logout": "Αποσύνδεση",
     "login": "Σύνδεση",
     "register": "Εγγραφή",
-    "language": "Γλώσσα"
+    "language": "Γλώσσα",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Μετατροπή",

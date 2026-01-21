@@ -26,7 +26,8 @@
     "logout": "Одјава",
     "login": "Најава",
     "register": "Регистрација",
-    "language": "Јазик"
+    "language": "Јазик",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Конвертирај",

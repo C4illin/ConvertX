@@ -26,7 +26,8 @@
     "logout": "התנתק",
     "login": "התחבר",
     "register": "הירשם",
-    "language": "שפה"
+    "language": "שפה",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "המר",

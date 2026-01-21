@@ -26,7 +26,8 @@
     "logout": "Logg ut",
     "login": "Logg inn",
     "register": "Registrer",
-    "language": "Språk"
+    "language": "Språk",
+    "toggleTheme": "Bytt tema"
   },
   "convert": {
     "title": "Konverter",

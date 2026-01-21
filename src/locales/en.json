@@ -26,7 +26,8 @@
     "logout": "Logout",
     "login": "Login",
     "register": "Register",
-    "language": "Language"
+    "language": "Language",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Convert",

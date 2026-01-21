@@ -26,7 +26,8 @@
     "logout": "登出",
     "login": "登入",
     "register": "註冊",
-    "language": "語言"
+    "language": "語言",
+    "toggleTheme": "切換主題"
   },
   "convert": {
     "title": "轉換",

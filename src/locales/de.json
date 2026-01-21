@@ -26,7 +26,8 @@
     "logout": "Abmelden",
     "login": "Anmelden",
     "register": "Registrieren",
-    "language": "Sprache"
+    "language": "Sprache",
+    "toggleTheme": "Thema wechseln"
   },
   "convert": {
     "title": "Konvertieren",

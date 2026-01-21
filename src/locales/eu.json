@@ -26,7 +26,8 @@
     "logout": "Saioa itxi",
     "login": "Saioa hasi",
     "register": "Erregistratu",
-    "language": "Hizkuntza"
+    "language": "Hizkuntza",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Bihurtu",

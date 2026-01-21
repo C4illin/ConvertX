@@ -26,7 +26,8 @@
     "logout": "Allgofnodi",
     "login": "Mewngofnodi",
     "register": "Cofrestru",
-    "language": "Iaith"
+    "language": "Iaith",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Trosi",

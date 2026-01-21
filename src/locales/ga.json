@@ -26,7 +26,8 @@
     "logout": "Logáil amach",
     "login": "Logáil isteach",
     "register": "Cláraigh",
-    "language": "Teanga"
+    "language": "Teanga",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Tiontaigh",

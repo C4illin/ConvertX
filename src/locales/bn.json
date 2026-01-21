@@ -26,7 +26,8 @@
     "logout": "লগআউট",
     "login": "লগইন",
     "register": "নিবন্ধন",
-    "language": "ভাষা"
+    "language": "ভাষা",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "রূপান্তর করুন",

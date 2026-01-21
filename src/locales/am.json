@@ -26,7 +26,8 @@
     "logout": "ውጣ",
     "login": "ግባ",
     "register": "ተመዝገብ",
-    "language": "ቋንቋ"
+    "language": "ቋንቋ",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "ቀይር",

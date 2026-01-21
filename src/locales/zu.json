@@ -26,7 +26,8 @@
     "logout": "Phuma",
     "login": "Ngena",
     "register": "Bhalisa",
-    "language": "Ulimi"
+    "language": "Ulimi",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Guqula",

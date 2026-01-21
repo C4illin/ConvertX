@@ -26,7 +26,8 @@
     "logout": "Kijelentkezés",
     "login": "Bejelentkezés",
     "register": "Regisztráció",
-    "language": "Nyelv"
+    "language": "Nyelv",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Konvertálás",

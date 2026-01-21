@@ -26,7 +26,8 @@
     "logout": "ออกจากระบบ",
     "login": "เข้าสู่ระบบ",
     "register": "ลงทะเบียน",
-    "language": "ภาษา"
+    "language": "ภาษา",
+    "toggleTheme": "เปลี่ยนธีม"
   },
   "convert": {
     "title": "แปลงไฟล์",

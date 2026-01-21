@@ -26,7 +26,8 @@
     "logout": "Déconnexion",
     "login": "Connexion",
     "register": "S'inscrire",
-    "language": "Langue"
+    "language": "Langue",
+    "toggleTheme": "Changer le thème"
   },
   "convert": {
     "title": "Convertir",

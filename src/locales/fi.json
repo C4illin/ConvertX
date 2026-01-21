@@ -26,7 +26,8 @@
     "logout": "Kirjaudu ulos",
     "login": "Kirjaudu sisään",
     "register": "Rekisteröidy",
-    "language": "Kieli"
+    "language": "Kieli",
+    "toggleTheme": "Vaihda teemaa"
   },
   "convert": {
     "title": "Muunna",

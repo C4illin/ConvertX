@@ -26,7 +26,8 @@
     "logout": "ထွက်",
     "login": "ဝင်",
     "register": "စာရင်းသွင်း",
-    "language": "ဘာသာစကား"
+    "language": "ဘာသာစကား",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "ပြောင်း",

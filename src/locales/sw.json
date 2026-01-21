@@ -26,7 +26,8 @@
     "logout": "Toka",
     "login": "Ingia",
     "register": "Jisajili",
-    "language": "Lugha"
+    "language": "Lugha",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "Badilisha",

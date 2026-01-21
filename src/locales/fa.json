@@ -26,7 +26,8 @@
     "logout": "خروج",
     "login": "ورود",
     "register": "ثبت نام",
-    "language": "زبان"
+    "language": "زبان",
+    "toggleTheme": "Toggle theme"
   },
   "convert": {
     "title": "تبدیل",

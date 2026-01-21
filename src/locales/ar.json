@@ -26,7 +26,8 @@
     "logout": "تسجيل الخروج",
     "login": "تسجيل الدخول",
     "register": "التسجيل",
-    "language": "اللغة"
+    "language": "اللغة",
+    "toggleTheme": "تبديل المظهر"
   },
   "convert": {
     "title": "تحويل",
