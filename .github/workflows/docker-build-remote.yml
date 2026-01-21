@@ -42,14 +42,19 @@ jobs:
         uses: actions/checkout@v4
 
       # ========================================
-      # Step 2: 啟動 Tailscale
-      # 說明：使用 Tailscale Auth Key 加入 tailnet
+      # Step 2: 啟動 Tailscale（非互動模式）
+      # 說明：使用 Tailscale Auth Key 加入 tailnet，啟用 SSH
+      # 重要：必須使用 --ssh 參數才能使用 tailscale ssh
       # ========================================
-      - name: 🔗 啟動 Tailscale 連線
+      - name: 🔗 啟動 Tailscale 連線（非互動模式）
         uses: tailscale/github-action@v2
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          args: "--ssh --accept-dns=false --accept-routes=false"
           # 使用 ephemeral key，runner 結束後自動離開 tailnet
+          # --ssh: 啟用 Tailscale SSH 功能
+          # --accept-dns=false: 不使用 Tailscale DNS
+          # --accept-routes=false: 不接受其他節點的路由
 
       # ========================================
       # Step 3: 驗證 Tailscale 連線
@@ -69,7 +74,18 @@ jobs:
           # 顯示本機 Tailscale IP
           echo ""
           echo "🌐 本機 Tailscale IP："
-          tailscale ip -4
+          TAILSCALE_IP=$(tailscale ip -4)
+          echo "${TAILSCALE_IP}"
+
+          # 確認 SSH 功能已啟用
+          echo ""
+          echo "🔐 檢查 SSH 功能狀態："
+          if tailscale status --json | grep -q '"SSH":true'; then
+            echo "✅ Tailscale SSH 功能已啟用"
+          else
+            echo "⚠️ 正在檢查 SSH 狀態..."
+            tailscale status --json | head -50
+          fi
 
           # 等待 Tailscale 完全連線
           echo ""
@@ -92,27 +108,113 @@ jobs:
           echo "========================================"
 
       # ========================================
-      # Step 4: 測試 Tailscale SSH 連線
-      # 說明：使用 tailscale ssh 測試連線（不使用傳統 ssh）
+      # Step 4: 測試 Tailscale SSH 連線（非互動式）
+      # 說明：使用 tailscale ssh 測試連線，確保不需要人工登入
       # ========================================
-      - name: 🔐 測試 Tailscale SSH 連線
+      - name: 🔐 測試 Tailscale SSH 連線（非互動式）
         run: |
           echo "========================================"
-          echo "🔐 測試 Tailscale SSH 連線"
+          echo "🔐 測試 Tailscale SSH 連線（非互動式）"
           echo "========================================"
           echo "使用者: ${{ secrets.SSH_USER }}"
           echo "主機: ${{ secrets.SSH_HOST }}"
           echo ""
 
-          # 使用 tailscale ssh 連線測試
-          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-            "echo '✅ Tailscale SSH 連線成功！' && echo '主機名稱:' && hostname && echo '當前使用者:' && whoami"
+          # 設定超時時間，避免卡住
+          echo "⏳ 嘗試 SSH 連線（超時 30 秒）..."
+          
+          # 使用 timeout 命令確保不會卡住
+          if timeout 30 tailscale ssh -o "StrictHostKeyChecking=no" -o "BatchMode=yes" \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "echo '✅ Tailscale SSH 連線成功！' && echo '主機名稱:' && hostname && echo '當前使用者:' && whoami" 2>&1; then
+            echo ""
+            echo "✅ SSH 非互動式測試成功！"
+          else
+            # 檢查是否出現需要登入的訊息
+            echo ""
+            echo "❌ SSH 連線失敗，嘗試診斷..."
+            echo ""
+            
+            # 嘗試不帶選項的連線
+            RESULT=$(timeout 10 tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "hostname" 2>&1 || true)
+            echo "診斷輸出: ${RESULT}"
+            
+            if echo "${RESULT}" | grep -qi "authenticate\|login.tailscale.com\|additional check"; then
+              echo ""
+              echo "========================================"
+              echo "❌ 錯誤：Tailscale SSH 需要互動式登入！"
+              echo "========================================"
+              echo ""
+              echo "🔧 可能的原因："
+              echo "  1. TAILSCALE_AUTHKEY 沒有啟用 SSH 權限"
+              echo "  2. 遠端主機的 Tailscale SSH policy 需要調整"
+              echo "  3. Auth Key 需要重新產生（勾選 'Pre-authorized'）"
+              echo ""
+              echo "📋 建議修復步驟："
+              echo "  1. 前往 https://login.tailscale.com/admin/settings/keys"
+              echo "  2. 產生新的 Auth Key，確保勾選："
+              echo "     - Reusable"
+              echo "     - Ephemeral"
+              echo "     - Pre-authorized（重要！）"
+              echo "  3. 更新 GitHub Secret: TAILSCALE_AUTHKEY"
+              echo ""
+              exit 1
+            fi
+            
+            echo "⚠️ 連線可能有其他問題，但不是登入問題"
+          fi
 
           echo ""
+          echo "========================================" 
+
+      # ========================================
+      # Step 5: Smoke Test（環境驗證）
+      # 說明：快速驗證遠端環境是否正常
+      # ========================================
+      - name: 🧪 Smoke Test（環境驗證）
+        run: |
+          echo "========================================"
+          echo "🧪 Smoke Test - 驗證遠端環境"
+          echo "========================================"
+          
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          set -e
+          
+          echo "📋 測試項目 1：進入目標目錄"
+          echo "----------------------------------------"
+          WORKDIR="/home/bioailab/miniconda3/lid/app/docker_build"
+          mkdir -p "${WORKDIR}"
+          cd "${WORKDIR}"
+          echo "✅ 目前目錄: $(pwd)"
+          
+          echo ""
+          echo "📋 測試項目 2：Git 版本"
+          echo "----------------------------------------"
+          git --version
+          echo "✅ Git 可用"
+          
+          echo ""
+          echo "📋 測試項目 3：Docker 版本"
+          echo "----------------------------------------"
+          docker version --format '{{.Server.Version}}' || docker --version
+          echo "✅ Docker 可用"
+          
+          echo ""
+          echo "📋 測試項目 4：Docker Buildx 版本"
+          echo "----------------------------------------"
+          docker buildx version
+          echo "✅ Docker Buildx 可用"
+          
+          echo ""
+          echo "========================================"
+          echo "✅ 所有 Smoke Test 通過！"
+          echo "========================================"
+          REMOTE_EOF
+
           echo "========================================"
 
       # ========================================
-      # Step 5: 準備遠端工作目錄
+      # Step 6: 準備遠端工作目錄
       # 說明：確保遠端工作目錄存在
       # ========================================
       - name: 📁 準備遠端工作目錄
@@ -129,7 +231,7 @@ jobs:
           echo "========================================"
 
       # ========================================
-      # Step 6: Clone 或更新專案程式碼
+      # Step 7: Clone 或更新專案程式碼
       # 說明：在遠端主機上 clone 或 pull 最新程式碼
       # ========================================
       - name: 📥 Clone 或更新專案程式碼
@@ -173,7 +275,7 @@ jobs:
           echo "========================================"
 
       # ========================================
-      # Step 7: Docker Login
+      # Step 8: Docker Login
       # 說明：在遠端主機登入 Docker Hub
       # ========================================
       - name: 🔐 Docker Hub 登入
@@ -188,7 +290,7 @@ jobs:
           echo "========================================"
 
       # ========================================
-      # Step 8: 設定 Docker Buildx（Multi-Arch 必要）
+      # Step 9: 設定 Docker Buildx（Multi-Arch 必要）
       # 說明：建立支援多架構的 buildx builder
       # ========================================
       - name: 🔧 設定 Docker Buildx
@@ -223,7 +325,7 @@ jobs:
           echo "========================================"
 
       # ========================================
-      # Step 9: Multi-Arch Docker Build & Push
+      # Step 10: Multi-Arch Docker Build & Push
       # 說明：使用 buildx 同時建構 amd64 和 arm64 並推送
       # ========================================
       - name: 🔨 Multi-Arch Docker Build & Push
@@ -278,7 +380,7 @@ jobs:
           echo "========================================"
 
       # ========================================
-      # Step 10: 驗證 Docker Hub 映像
+      # Step 11: 驗證 Docker Hub 映像
       # 說明：確認映像已成功推送並檢查架構
       # ========================================
       - name: ✅ 驗證 Docker Hub 映像
@@ -306,7 +408,7 @@ jobs:
           echo "========================================"
 
       # ========================================
-      # Step 11: 清理本次 Build 資源
+      # Step 12: 清理本次 Build 資源
       # 說明：只清理本次 build 產生的 builder 和 cache
       # ========================================
       - name: 🧹 清理本次 Build 資源
@@ -350,7 +452,7 @@ jobs:
           echo "========================================"
 
       # ========================================
-      # Step 12: Docker Logout
+      # Step 13: Docker Logout
       # 說明：登出 Docker Hub
       # ========================================
       - name: 🔒 Docker Hub 登出
@@ -366,7 +468,7 @@ jobs:
           echo "========================================"
 
       # ========================================
-      # Step 13: 顯示完成摘要
+      # Step 14: 顯示完成摘要
       # 說明：顯示本次 build 的摘要資訊
       # ========================================
       - name: 📋 Build 完成摘要
