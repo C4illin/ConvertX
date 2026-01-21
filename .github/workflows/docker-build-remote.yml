@@ -613,3 +613,81 @@ jobs:
           echo "========================================"
           echo "🎉 所有步驟已成功完成！"
           echo "========================================"
+
+      # ========================================
+      # Step 17: 生成 Changelog
+      # 說明：從 git log 生成變更記錄
+      # ========================================
+      - name: 📝 Generate Changelog
+        if: ${{ !contains(github.event.inputs.image_tag, 'test') && !contains(github.event.inputs.image_tag, 'dev') && !contains(github.event.inputs.image_tag, 'alpha') && !contains(github.event.inputs.image_tag, 'beta') }}
+        id: changelog
+        run: |
+          echo "========================================"
+          echo "📝 生成 Changelog"
+          echo "========================================"
+
+          # 取得完整 git history
+          git fetch --unshallow 2>/dev/null || git fetch --all
+
+          # 取得前一個 tag
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          if [ -z "$PREVIOUS_TAG" ]; then
+            echo "📋 無前一個 tag，取得所有 commits..."
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" HEAD)
+          else
+            echo "📋 取得 ${PREVIOUS_TAG} 到 HEAD 的 commits..."
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" ${PREVIOUS_TAG}..HEAD)
+          fi
+
+          # 建立 changelog 檔案
+          cat > changelog.txt << EOF
+          ## 📦 Docker Image
+
+          **Image:** \`${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}\`
+
+          ### 🏗️ 支援的架構
+          - \`linux/amd64\`
+          - \`linux/arm64\`
+
+          ### 📥 拉取映像
+          \`\`\`bash
+          # 拉取指定版本
+          docker pull ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}
+
+          # 拉取最新版本
+          docker pull ${{ env.DOCKER_IMAGE_REPO }}:latest
+          \`\`\`
+
+          ### 📋 變更記錄
+          ${CHANGELOG}
+
+          ### 🔗 相關連結
+          - [Docker Hub](https://hub.docker.com/r/${{ env.DOCKER_IMAGE_REPO }}/tags)
+          - [完整文件](https://github.com/${{ github.repository }}/blob/main/README.md)
+
+          ---
+          *此 Release 由 GitHub Actions 自動創建*
+          EOF
+
+          echo ""
+          echo "✅ Changelog 已生成："
+          cat changelog.txt
+          echo "========================================"
+
+      # ========================================
+      # Step 18: 創建 GitHub Release
+      # 說明：為正式版本自動創建 GitHub Release
+      # ========================================
+      - name: 📦 Create GitHub Release
+        if: ${{ !contains(github.event.inputs.image_tag, 'test') && !contains(github.event.inputs.image_tag, 'dev') && !contains(github.event.inputs.image_tag, 'alpha') && !contains(github.event.inputs.image_tag, 'beta') }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.event.inputs.image_tag }}
+          name: v${{ github.event.inputs.image_tag }}
+          body_path: changelog.txt
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
