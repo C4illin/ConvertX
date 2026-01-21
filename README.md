@@ -165,8 +165,20 @@ docker compose up -d
 | Pandoc      | 文件   | 100+   |
 | Calibre     | 電子書 | 40+    |
 | Inkscape    | 向量圖 | 20+    |
+| MinerU      | 文件→MD | 2     |
 
 完整列表 → [docs/converters.md](docs/converters.md)
+
+---
+
+## MinerU
+
+ConvertX 內建 MinerU 轉換引擎，可將文件轉換為 Markdown。
+
+- md-t
+- md-i
+
+輸出格式為 ZIP。
 
 ---
 
@@ -214,10 +226,10 @@ docker compose up -d
 docker compose --profile api up -d
 ```
 
-| 服務       | 端口 | 說明              |
-| ---------- | ---- | ----------------- |
-| Web UI     | 3000 | 網頁介面          |
-| API Server | 3001 | REST & GraphQL    |
+| 服務       | 端口 | 說明           |
+| ---------- | ---- | -------------- |
+| Web UI     | 3000 | 網頁介面       |
+| API Server | 3001 | REST & GraphQL |
 
 ### API 文件
 

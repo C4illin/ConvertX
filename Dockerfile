@@ -139,8 +139,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   pipx \
   # === 系統工具 ===
   locales \
+  zip \
   # === 清理 ===
   && pipx install "markitdown[all]" \
+  && pipx install magic-pdf \
   # 清理 apt cache
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* \
