@@ -108,74 +108,25 @@ jobs:
           echo "========================================"
 
       # ========================================
-      # Step 4: 測試 Tailscale SSH 連線（非互動式）
-      # 說明：使用 tailscale ssh 測試連線，確保不需要人工登入
-      # 重要：需要在 Tailscale ACL 中設定 SSH policy
+      # Step 4: Tailscale SSH 連線（支援互動式驗證）
+      # 說明：使用 tailscale ssh 連線，若需要網頁驗證會等待用戶完成
       # ========================================
-      - name: 🔐 測試 Tailscale SSH 連線（非互動式）
+      - name: 🔐 測試 Tailscale SSH 連線
         run: |
           echo "========================================"
-          echo "🔐 測試 Tailscale SSH 連線（非互動式）"
+          echo "🔐 測試 Tailscale SSH 連線"
           echo "========================================"
           echo "使用者: ${{ secrets.SSH_USER }}"
           echo "主機: ${{ secrets.SSH_HOST }}"
           echo ""
 
-          # 設定超時時間，避免卡住
-          echo "⏳ 嘗試 SSH 連線（超時 30 秒）..."
-          
-          # tailscale ssh 不支援 -o 選項，直接使用
-          # 使用 timeout 命令確保不會卡住
-          RESULT=$(timeout 30 tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-            "echo '✅ Tailscale SSH 連線成功！' && echo '主機名稱:' && hostname && echo '當前使用者:' && whoami" 2>&1) || true
-          
-          echo "${RESULT}"
-          
-          # 檢查是否成功
-          if echo "${RESULT}" | grep -q "Tailscale SSH 連線成功"; then
-            echo ""
-            echo "✅ SSH 非互動式測試成功！"
-          elif echo "${RESULT}" | grep -qi "authenticate\|login.tailscale.com\|additional check"; then
-            echo ""
-            echo "========================================"
-            echo "❌ 錯誤：Tailscale SSH 需要設定 ACL Policy！"
-            echo "========================================"
-            echo ""
-            echo "🔧 這不是 Auth Key 的問題，而是 Tailscale SSH ACL 設定問題"
-            echo ""
-            echo "📋 請在 Tailscale Admin Console 中設定 SSH Policy："
-            echo ""
-            echo "  1. 前往 https://login.tailscale.com/admin/acls"
-            echo ""
-            echo "  2. 在 ACL 中加入以下 SSH policy（放在 acls 之後）："
-            echo ""
-            echo '     "ssh": ['
-            echo '       {'
-            echo '         "action": "accept",'
-            echo '         "src": ["autogroup:member"],'
-            echo '         "dst": ["tag:ci-target"],'
-            echo '         "users": ["autogroup:nonroot"]'
-            echo '       }'
-            echo '     ]'
-            echo ""
-            echo "  3. 在遠端主機上執行："
-            echo "     sudo tailscale up --ssh --advertise-tags=tag:ci-target"
-            echo ""
-            echo "  4. 確保 Auth Key 有 tag:ci-target 的權限"
-            echo ""
-            echo "========================================"
-            echo "🔄 或者：使用傳統 SSH over Tailscale 網路（備選方案）"
-            echo "========================================"
-            exit 1
-          else
-            echo ""
-            echo "⚠️ 連線失敗，錯誤訊息："
-            echo "${RESULT}"
-            exit 1
-          fi
+          # Tailscale SSH 可能需要額外驗證，這是正常的安全流程
+          # 執行 SSH 連線，輸出會包含驗證連結（如果需要的話）
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "echo '✅ Tailscale SSH 連線成功！' && echo '主機名稱:' && hostname && echo '當前使用者:' && whoami"
 
           echo ""
-          echo "========================================" 
+          echo "========================================"
 
       # ========================================
       # Step 5: Smoke Test（環境驗證）
@@ -186,35 +137,35 @@ jobs:
           echo "========================================"
           echo "🧪 Smoke Test - 驗證遠端環境"
           echo "========================================"
-          
+
           tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
           set -e
-          
+
           echo "📋 測試項目 1：進入目標目錄"
           echo "----------------------------------------"
           WORKDIR="/home/bioailab/miniconda3/lid/app/docker_build"
           mkdir -p "${WORKDIR}"
           cd "${WORKDIR}"
           echo "✅ 目前目錄: $(pwd)"
-          
+
           echo ""
           echo "📋 測試項目 2：Git 版本"
           echo "----------------------------------------"
           git --version
           echo "✅ Git 可用"
-          
+
           echo ""
           echo "📋 測試項目 3：Docker 版本"
           echo "----------------------------------------"
           docker version --format '{{.Server.Version}}' || docker --version
           echo "✅ Docker 可用"
-          
+
           echo ""
           echo "📋 測試項目 4：Docker Buildx 版本"
           echo "----------------------------------------"
           docker buildx version
           echo "✅ Docker Buildx 可用"
-          
+
           echo ""
           echo "========================================"
           echo "✅ 所有 Smoke Test 通過！"
@@ -369,12 +320,34 @@ jobs:
           docker buildx use "${BUILDER_NAME}"
 
           # Multi-arch build + push
-          docker buildx build \
+          # 使用 --progress=plain 顯示完整 log
+          # 若失敗會顯示詳細錯誤資訊
+          if ! docker buildx build \
             --platform linux/amd64,linux/arm64 \
             -t "${IMAGE}" \
             --push \
             --progress=plain \
-            .
+            . 2>&1; then
+            
+            echo ""
+            echo "========================================"
+            echo "❌ Docker Build 失敗！"
+            echo "========================================"
+            echo ""
+            echo "🔧 常見問題與解決方案："
+            echo ""
+            echo "1️⃣ apt-get 安裝失敗（arm64 QEMU 問題）"
+            echo "   → 建議：拆分 apt-get install 為多段 RUN"
+            echo "   → 或：對 arm64 跳過不穩定套件"
+            echo ""
+            echo "2️⃣ 網路問題"
+            echo "   → 建議：加入 apt-get update --fix-missing"
+            echo ""
+            echo "3️⃣ 記憶體不足"
+            echo "   → 建議：增加 Docker 記憶體限制"
+            echo ""
+            exit 1
+          fi
 
           echo ""
           echo "✅ Multi-Arch Docker build & push 完成！"
