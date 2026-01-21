@@ -29,18 +29,27 @@ const getTranslation = (category, key, params) => {
   return text;
 };
 
-dropZone.addEventListener("dragover", (e) => {
+// ===== 全頁拖曳上傳支援（UI 零變動版）=====
+// 只監聽 dragover 和 drop，不操作任何 UI class
+// 這樣虛線框不會變粗、不會閃爍
+
+// 防重複機制：記錄最近處理的檔案
+const recentlyProcessedFiles = new Set();
+const getFileKey = (file) => `${file.name}_${file.size}_${file.lastModified}`;
+const clearRecentFiles = () => {
+  setTimeout(() => recentlyProcessedFiles.clear(), 100);
+};
+
+// 全頁 dragover：只做 preventDefault，防止瀏覽器開啟檔案
+document.addEventListener("dragover", (e) => {
   e.preventDefault();
-  dropZone.classList.add("dragover");
+  e.stopPropagation();
 });
 
-dropZone.addEventListener("dragleave", () => {
-  dropZone.classList.remove("dragover");
-});
-
-dropZone.addEventListener("drop", (e) => {
+// 全頁 drop：處理檔案上傳
+document.addEventListener("drop", (e) => {
   e.preventDefault();
-  dropZone.classList.remove("dragover");
+  e.stopPropagation();
 
   const files = e.dataTransfer.files;
 
@@ -54,60 +63,19 @@ dropZone.addEventListener("drop", (e) => {
     handleFile(file);
   }
 });
-
-// ===== 全頁拖曳上傳支援 =====
-// 允許使用者將檔案拖曳到頁面任何位置即可上傳
-// UI 完全不變，只是擴大拖曳的偵測範圍
-
-let dragCounter = 0;
-
-document.addEventListener("dragenter", (e) => {
-  e.preventDefault();
-  dragCounter++;
-  // 當檔案進入頁面時，顯示 dropzone 的 dragover 效果
-  if (e.dataTransfer.types.includes("Files")) {
-    dropZone.classList.add("dragover");
-  }
-});
-
-document.addEventListener("dragleave", (e) => {
-  e.preventDefault();
-  dragCounter--;
-  // 只有當完全離開頁面時才移除效果
-  if (dragCounter === 0) {
-    dropZone.classList.remove("dragover");
-  }
-});
-
-document.addEventListener("dragover", (e) => {
-  e.preventDefault();
-  // 保持 dragover 效果
-  if (e.dataTransfer.types.includes("Files")) {
-    dropZone.classList.add("dragover");
-  }
-});
-
-document.addEventListener("drop", (e) => {
-  e.preventDefault();
-  dragCounter = 0;
-  dropZone.classList.remove("dragover");
-
-  const files = e.dataTransfer.files;
-
-  if (files.length === 0) {
-    console.warn("No files dropped — likely a URL or unsupported source.");
-    return;
-  }
-
-  for (const file of files) {
-    console.log("Handling dropped file (page-level):", file.name);
-    handleFile(file);
-  }
-});
 // ===== 全頁拖曳上傳支援結束 =====
 
 // Extracted handleFile function for reusability in drag-and-drop and file input
 function handleFile(file) {
+  // 防重複檢查：如果這個檔案剛剛已經處理過，直接跳過
+  const fileKey = getFileKey(file);
+  if (recentlyProcessedFiles.has(fileKey)) {
+    console.log("Skipping duplicate file:", file.name);
+    return;
+  }
+  recentlyProcessedFiles.add(fileKey);
+  clearRecentFiles();
+
   const fileList = document.querySelector("#file-list");
   const removeText = getTranslation("common", "remove");
 
