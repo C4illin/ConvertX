@@ -110,9 +110,9 @@ RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 # 階段 2：核心轉換工具（小型）
+# 注意：dasel 和 resvg 在 bookworm 中不存在，後續用二進位檔案安裝
 RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   assimp-utils \
-  dasel \
   dcraw \
   dvisvgm \
   ghostscript \
@@ -120,8 +120,30 @@ RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   mupdf-tools \
   poppler-utils \
   potrace \
-  resvg \
   && rm -rf /var/lib/apt/lists/*
+
+# 階段 2.1：安裝 dasel（從 GitHub 下載二進位檔案）
+RUN ARCH=$(uname -m) && \
+  if [ "$ARCH" = "aarch64" ]; then \
+    DASEL_ARCH="linux_arm64"; \
+  else \
+    DASEL_ARCH="linux_amd64"; \
+  fi && \
+  curl -sSLf "https://github.com/TomWright/dasel/releases/download/v2.8.1/dasel_${DASEL_ARCH}" -o /usr/local/bin/dasel && \
+  chmod +x /usr/local/bin/dasel
+
+# 階段 2.2：安裝 resvg（從 GitHub 下載二進位檔案）
+RUN ARCH=$(uname -m) && \
+  if [ "$ARCH" = "aarch64" ]; then \
+    RESVG_ARCH="aarch64-unknown-linux-gnu"; \
+  else \
+    RESVG_ARCH="x86_64-unknown-linux-gnu"; \
+  fi && \
+  curl -sSLf "https://github.com/RazrFalcon/resvg/releases/download/v0.44.0/resvg-${RESVG_ARCH}.tar.gz" -o /tmp/resvg.tar.gz && \
+  tar -xzf /tmp/resvg.tar.gz -C /tmp/ && \
+  mv /tmp/resvg /usr/local/bin/resvg && \
+  chmod +x /usr/local/bin/resvg && \
+  rm -rf /tmp/resvg.tar.gz /tmp/resvg-*
 
 # 階段 3：影音處理工具
 RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
