@@ -1,6 +1,6 @@
 /**
  * Contents.CN Chunk 下載整合測試
- * 
+ *
  * 測試大檔 chunk 下載的完整流程
  */
 
@@ -13,7 +13,7 @@ import {
   getChunk,
   createChunkDownloadHeaders,
 } from "../../src/transfer/downloadManager";
-import { CHUNK_SIZE_BYTES, CHUNK_THRESHOLD_BYTES } from "../../src/transfer/constants";
+import { CHUNK_SIZE_BYTES } from "../../src/transfer/constants";
 
 const testDir = "./test-output-chunk-download";
 
@@ -32,8 +32,7 @@ describe("Chunk 下載資訊測試", () => {
 
   test("getChunkDownloadInfo 應返回正確的下載資訊", () => {
     const testFile = join(testDir, "large-file.bin");
-    const fileSize = 25 * 1024 * 1024; // 25MB
-    
+
     // 建立一個假檔案（只寫入少量資料模擬）
     const content = Buffer.alloc(1024, "X"); // 1KB
     writeFileSync(testFile, content);
@@ -68,7 +67,7 @@ describe("Chunk 讀取測試", () => {
 
   test("getChunk 應正確讀取指定的 chunk", async () => {
     const testFile = join(testDir, "chunked-file.bin");
-    
+
     // 建立測試檔案：20 bytes，分成 4 個 5-byte chunks
     const content = "AAAAABBBBBCCCCCDDDD"; // 19 bytes
     writeFileSync(testFile, content);
@@ -159,7 +158,7 @@ describe("傳輸模式判斷測試", () => {
   test("小檔（≤10MB）不應使用 chunk 下載", () => {
     const smallFile = join(testDir, "small.txt");
     writeFileSync(smallFile, "Small file content");
-    
+
     expect(shouldUseChunkedDownload(smallFile)).toBe(false);
   });
 

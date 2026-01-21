@@ -1,11 +1,10 @@
-import path from "node:path";
 import { Elysia } from "elysia";
 import sanitize from "sanitize-filename";
 import { outputDir } from "..";
 import db from "../db/db";
 import { WEBROOT } from "../helpers/env";
 import { userService } from "./user";
-import { createJobArchive, shouldUseChunkedDownload } from "../transfer";
+import { createJobArchive } from "../transfer";
 
 export const download = new Elysia()
   .use(userService)
@@ -45,10 +44,10 @@ export const download = new Elysia()
 
       const jobId = decodeURIComponent(params.jobId);
       const outputPath = `${outputDir}${userId}/${jobId}`;
-      
+
       // 使用統一的封裝管理器建立 .tar（不壓縮）
       const outputTar = await createJobArchive(outputPath, jobId);
-      
+
       return Bun.file(outputTar);
     },
     {

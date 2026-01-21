@@ -1,7 +1,11 @@
-import { type SupportedLocale, type Translator, createTranslator, defaultLocale } from "../i18n/index";
+import {
+  type SupportedLocale,
+  type Translator,
+  createTranslator,
+  defaultLocale,
+} from "../i18n/index";
 
 export const ThemeToggle = ({
-  locale = defaultLocale,
   t = createTranslator(defaultLocale),
 }: {
   locale?: SupportedLocale;

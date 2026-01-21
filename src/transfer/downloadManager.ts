@@ -1,6 +1,6 @@
 /**
  * Contents.CN 後端下載管理器
- * 
+ *
  * 統一處理所有檔案下載，包含：
  * - 小檔（≤10MB）：直接回傳
  * - 大檔（>10MB）：chunk 分段下載
@@ -46,9 +46,9 @@ export function getChunkDownloadInfo(filePath: string): ChunkDownloadInfo | null
  * 取得特定 chunk 的資料
  */
 export async function getChunk(
-  filePath: string, 
-  chunkIndex: number, 
-  chunkSize: number = CHUNK_SIZE_BYTES
+  filePath: string,
+  chunkIndex: number,
+  chunkSize: number = CHUNK_SIZE_BYTES,
 ): Promise<Buffer | null> {
   if (!existsSync(filePath)) {
     return null;
@@ -79,22 +79,12 @@ export async function getChunk(
 }
 
 /**
- * 直接取得完整檔案（小檔用）
- */
-export function getFileForDirectDownload(filePath: string): ReturnType<typeof Bun.file> | null {
-  if (!existsSync(filePath)) {
-    return null;
-  }
-  return Bun.file(filePath);
-}
-
-/**
  * 建立 chunk 下載回應的 headers
  */
 export function createChunkDownloadHeaders(
-  info: ChunkDownloadInfo, 
-  chunkIndex: number, 
-  chunkData: Buffer
+  info: ChunkDownloadInfo,
+  chunkIndex: number,
+  chunkData: Buffer,
 ): Record<string, string> {
   const start = chunkIndex * info.chunk_size;
   const end = start + chunkData.length - 1;
@@ -108,16 +98,5 @@ export function createChunkDownloadHeaders(
     "X-Total-Chunks": info.total_chunks.toString(),
     "X-File-Name": encodeURIComponent(info.file_name),
     "X-Total-Size": info.total_size.toString(),
-  };
-}
-
-/**
- * 建立直接下載回應的 headers
- */
-export function createDirectDownloadHeaders(fileName: string, fileSize: number): Record<string, string> {
-  return {
-    "Content-Type": "application/octet-stream",
-    "Content-Length": fileSize.toString(),
-    "Content-Disposition": `attachment; filename="${encodeURIComponent(fileName)}"`,
   };
 }

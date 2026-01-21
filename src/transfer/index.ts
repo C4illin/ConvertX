@@ -1,6 +1,6 @@
 /**
  * Contents.CN 全域檔案傳輸模組
- * 
+ *
  * 統一匯出所有傳輸相關功能
  */
 
@@ -16,7 +16,6 @@ export {
 
 // 類型
 export type {
-  ChunkUploadRequest,
   ChunkUploadResponse,
   DirectUploadResponse,
   ChunkDownloadInfo,
@@ -40,9 +39,7 @@ export {
   shouldUseChunkedDownload,
   getChunkDownloadInfo,
   getChunk,
-  getFileForDirectDownload,
   createChunkDownloadHeaders,
-  createDirectDownloadHeaders,
 } from "./downloadManager";
 
 // 封裝管理
@@ -51,6 +48,4 @@ export {
   getArchiveFileName,
   createTarArchive,
   createJobArchive,
-  createConverterArchive,
-  getArchiveInfo,
 } from "./archiveManager";

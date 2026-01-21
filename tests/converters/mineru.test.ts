@@ -31,7 +31,7 @@ describe("MinerU converter properties", () => {
 
 describe("MinerU converter md-t mode", () => {
   const testDir = "./test-output-mineru-t";
-  
+
   beforeEach(() => {
     if (!existsSync(testDir)) {
       mkdirSync(testDir, { recursive: true });
@@ -46,12 +46,11 @@ describe("MinerU converter md-t mode", () => {
 
   test("should call mineru with markdown table mode for md-t", async () => {
     let mineruArgs: string[] = [];
-    
+
     const mockExecFile: ExecFileFn = (
       cmd: string,
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-      options?: any,
     ) => {
       if (cmd === "mineru") {
         mineruArgs = args;
@@ -64,7 +63,10 @@ describe("MinerU converter md-t mode", () => {
         if (!existsSync(autoDir)) {
           mkdirSync(autoDir, { recursive: true });
         }
-        writeFileSync(join(autoDir, "output.md"), "# Test\n\n| Col1 | Col2 |\n|---|---|\n| A | B |");
+        writeFileSync(
+          join(autoDir, "output.md"),
+          "# Test\n\n| Col1 | Col2 |\n|---|---|\n| A | B |",
+        );
         callback(null, "MinerU conversion complete", "");
       } else if (cmd === "tar") {
         // Simulate .tar creation (no compression)
@@ -83,7 +85,7 @@ describe("MinerU converter md-t mode", () => {
 
 describe("MinerU converter md-i mode", () => {
   const testDir = "./test-output-mineru-i";
-  
+
   beforeEach(() => {
     if (!existsSync(testDir)) {
       mkdirSync(testDir, { recursive: true });
@@ -98,12 +100,11 @@ describe("MinerU converter md-i mode", () => {
 
   test("should call mineru with image table mode for md-i", async () => {
     let capturedArgs: string[] = [];
-    
+
     const mockExecFile: ExecFileFn = (
       cmd: string,
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-      options?: any,
     ) => {
       if (cmd === "mineru") {
         capturedArgs = args;
@@ -135,7 +136,7 @@ describe("MinerU converter md-i mode", () => {
 
 describe("MinerU converter .tar output (no compression)", () => {
   const testDir = "./test-output-mineru-tar";
-  
+
   beforeEach(() => {
     if (!existsSync(testDir)) {
       mkdirSync(testDir, { recursive: true });
@@ -151,12 +152,11 @@ describe("MinerU converter .tar output (no compression)", () => {
   test("should create .tar archive from output (without gzip)", async () => {
     let tarCalled = false;
     let tarArgs: string[] = [];
-    
+
     const mockExecFile: ExecFileFn = (
       cmd: string,
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-      options?: any,
     ) => {
       if (cmd === "mineru") {
         // Simulate MinerU creating output
@@ -194,9 +194,8 @@ describe("MinerU converter .tar output (no compression)", () => {
   test("should reject on mineru error", async () => {
     const mockExecFile: ExecFileFn = (
       cmd: string,
-      args: string[],
+      _args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-      options?: any,
     ) => {
       if (cmd === "mineru") {
         callback(new Error("MinerU failed") as ExecFileException, "", "Error processing file");
@@ -204,18 +203,18 @@ describe("MinerU converter .tar output (no compression)", () => {
     };
 
     const targetPath = join(testDir, "output.tar");
-    expect(convert("test.pdf", "pdf", "md-t", targetPath, undefined, mockExecFile))
-      .rejects.toMatch(/mineru error/);
+    expect(convert("test.pdf", "pdf", "md-t", targetPath, undefined, mockExecFile)).rejects.toMatch(
+      /mineru error/,
+    );
   });
 
   test("should use correct tar arguments without compression", async () => {
     let tarArgs: string[] = [];
-    
+
     const mockExecFile: ExecFileFn = (
       cmd: string,
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-      options?: any,
     ) => {
       if (cmd === "mineru") {
         const outputDir = args[3];
@@ -248,12 +247,11 @@ describe("MinerU converter .tar output (no compression)", () => {
 
   test("should convert .tar.gz target path to .tar", async () => {
     let tarOutputPath = "";
-    
+
     const mockExecFile: ExecFileFn = (
       cmd: string,
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-      options?: any,
     ) => {
       if (cmd === "mineru") {
         const outputDir = args[3];

@@ -26,7 +26,10 @@ import { convert as convertVcf, properties as propertiesVcf } from "./vcf";
 import { convert as convertxelatex, properties as propertiesxelatex } from "./xelatex";
 import { convert as convertMarkitdown, properties as propertiesMarkitdown } from "./markitdown";
 import { convert as convertMineru, properties as propertiesMineru } from "./mineru";
-import { convert as convertPDFMathTranslate, properties as propertiesPDFMathTranslate } from "./pdfmathtranslate";
+import {
+  convert as convertPDFMathTranslate,
+  properties as propertiesPDFMathTranslate,
+} from "./pdfmathtranslate";
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
 

@@ -1,11 +1,10 @@
 /**
  * Contents.CN Chunk 上傳 API
- * 
+ *
  * 處理大檔的分段上傳
  */
 
 import { Elysia, t } from "elysia";
-import { WEBROOT } from "../helpers/env";
 import { uploadsDir } from "../index";
 import { userService } from "./user";
 import sanitize from "sanitize-filename";
@@ -44,7 +43,7 @@ export const uploadChunk = new Elysia().use(userService).post(
       user.id,
       jobId.value,
       `${uploadsDir}${user.id}/`,
-      userUploadsDir
+      userUploadsDir,
     );
 
     return result;
@@ -59,7 +58,7 @@ export const uploadChunk = new Elysia().use(userService).post(
       chunk: t.File(),
     }),
     auth: true,
-  }
+  },
 );
 
 /**
@@ -72,7 +71,7 @@ export const uploadInfo = new Elysia().use(userService).post(
     const size = parseInt(file_size, 10);
 
     const useChunked = shouldUseChunkedUpload(size);
-    
+
     return {
       use_chunked: useChunked,
       chunk_size: CHUNK_SIZE_BYTES,
@@ -84,5 +83,5 @@ export const uploadInfo = new Elysia().use(userService).post(
       file_size: t.String(),
     }),
     auth: true,
-  }
+  },
 );

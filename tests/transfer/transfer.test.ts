@@ -1,6 +1,6 @@
 /**
  * Contents.CN 全域檔案傳輸機制測試
- * 
+ *
  * 測試項目：
  * 1. 小檔直傳測試（≤10MB）
  * 2. 大檔 chunk 上傳測試（>10MB）
@@ -16,7 +16,6 @@ import {
   shouldUseChunkedUpload,
   calculateChunkCount,
   handleDirectUpload,
-  handleChunkUpload,
   uploadSessionManager,
 } from "../../src/transfer/uploadManager";
 import {
@@ -84,13 +83,13 @@ describe("Chunk 數量計算測試", () => {
   test("計算 chunk 數量應正確", () => {
     // 10MB / 5MB = 2 chunks
     expect(calculateChunkCount(10 * 1024 * 1024)).toBe(2);
-    
+
     // 15MB / 5MB = 3 chunks
     expect(calculateChunkCount(15 * 1024 * 1024)).toBe(3);
-    
+
     // 1 byte 也需要 1 chunk
     expect(calculateChunkCount(1)).toBe(1);
-    
+
     // 5MB + 1 byte = 2 chunks
     expect(calculateChunkCount(5 * 1024 * 1024 + 1)).toBe(2);
   });
@@ -101,7 +100,7 @@ describe("封裝格式驗證測試", () => {
     // 允許的格式
     expect(validateArchiveFormat("output.tar")).toBe(true);
     expect(validateArchiveFormat("my_archive.tar")).toBe(true);
-    
+
     // 禁止的格式
     expect(validateArchiveFormat("output.tar.gz")).toBe(false);
     expect(validateArchiveFormat("output.tgz")).toBe(false);
@@ -112,19 +111,19 @@ describe("封裝格式驗證測試", () => {
   test("getArchiveFileName 應強制轉換為 .tar", () => {
     // 已經是 .tar
     expect(getArchiveFileName("output.tar")).toBe("output.tar");
-    
+
     // 轉換 .tar.gz -> .tar
     expect(getArchiveFileName("output.tar.gz")).toBe("output.tar");
-    
+
     // 轉換 .tgz -> .tar
     expect(getArchiveFileName("output.tgz")).toBe("output.tar");
-    
+
     // 無副檔名 -> 加上 .tar
     expect(getArchiveFileName("output")).toBe("output.tar");
-    
+
     // .zip 也是禁止的格式，會被移除並加上 .tar
     expect(getArchiveFileName("output.zip")).toBe("output.tar");
-    
+
     // .gz 也是禁止的格式
     expect(getArchiveFileName("output.gz")).toBe("output.tar");
   });
@@ -148,7 +147,7 @@ describe("上傳管理測試", () => {
     const testContent = "Hello, World!";
     const file = new File([testContent], "test.txt", { type: "text/plain" });
 
-    const result = await handleDirectUpload(file as any, targetDir, "test.txt");
+    const result = await handleDirectUpload(file, targetDir, "test.txt");
 
     expect(result.success).toBe(true);
     expect(existsSync(join(targetDir, "test.txt"))).toBe(true);
@@ -172,7 +171,7 @@ describe("下載管理測試", () => {
   test("小檔不應使用 chunk 下載", () => {
     const smallFile = join(testDir, "small.txt");
     writeFileSync(smallFile, "Small content");
-    
+
     expect(shouldUseChunkedDownload(smallFile)).toBe(false);
   });
 
@@ -196,7 +195,7 @@ describe("下載管理測試", () => {
 
     // 讀取第一個 chunk（整個檔案，因為小於 chunk size）
     const chunk = await getChunk(testFile, 0, 5);
-    
+
     expect(chunk).not.toBeNull();
     expect(chunk!.toString()).toBe("ABCDE");
 
@@ -222,7 +221,7 @@ describe(".tar 封裝測試", () => {
   test("createTarArchive 應建立 .tar 檔案", async () => {
     const sourceDir = join(testDir, "source");
     const outputTar = join(testDir, "output.tar");
-    
+
     mkdirSync(sourceDir, { recursive: true });
     writeFileSync(join(sourceDir, "file1.txt"), "Content 1");
     writeFileSync(join(sourceDir, "file2.txt"), "Content 2");
@@ -238,7 +237,7 @@ describe(".tar 封裝測試", () => {
     const sourceDir = join(testDir, "source2");
     // 即使傳入 .tar.gz，也應該輸出 .tar
     const outputTar = join(testDir, "output.tar.gz");
-    
+
     mkdirSync(sourceDir, { recursive: true });
     writeFileSync(join(sourceDir, "file.txt"), "Content");
 
@@ -309,7 +308,7 @@ describe("上傳會話管理測試", () => {
       "large-file.pdf",
       50 * 1024 * 1024, // 50MB
       10, // 10 chunks
-      testDir
+      testDir,
     );
 
     expect(session.upload_id).toBe(uploadId);
@@ -319,7 +318,7 @@ describe("上傳會話管理測試", () => {
     // 標記已接收 chunks
     uploadSessionManager.markChunkReceived(uploadId, 0);
     uploadSessionManager.markChunkReceived(uploadId, 1);
-    
+
     const updatedSession = uploadSessionManager.getSession(uploadId);
     expect(updatedSession!.received_chunks.size).toBe(2);
     expect(uploadSessionManager.isComplete(uploadId)).toBe(false);

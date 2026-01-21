@@ -2,7 +2,7 @@ import { execFile as execFileOriginal } from "node:child_process";
 import { mkdirSync, existsSync, readdirSync, unlinkSync, rmdirSync } from "node:fs";
 import { join, basename, dirname } from "node:path";
 import { ExecFileFn } from "./types";
-import { createConverterArchive, getArchiveFileName } from "../transfer";
+import { getArchiveFileName } from "../transfer";
 
 export const properties = {
   from: {
@@ -16,7 +16,7 @@ export const properties = {
 
 /**
  * Helper function to create a .tar archive from a directory (no compression)
- * 
+ *
  * ⚠️ 重要：僅使用 .tar 格式，禁止 .tar.gz / .tgz / .zip
  */
 function createTarArchive(
@@ -28,23 +28,19 @@ function createTarArchive(
     // Use tar command to create archive (without gzip compression)
     // tar -cf <output.tar> -C <sourceDir> .
     // 注意：使用 -cf 而非 -czf，避免 gzip 壓縮
-    execFile(
-      "tar",
-      ["-cf", outputTar, "-C", sourceDir, "."],
-      (error, stdout, stderr) => {
-        if (error) {
-          reject(`tar error: ${error}`);
-          return;
-        }
-        if (stdout) {
-          console.log(`tar stdout: ${stdout}`);
-        }
-        if (stderr) {
-          console.error(`tar stderr: ${stderr}`);
-        }
-        resolve();
-      },
-    );
+    execFile("tar", ["-cf", outputTar, "-C", sourceDir, "."], (error, stdout, stderr) => {
+      if (error) {
+        reject(`tar error: ${error}`);
+        return;
+      }
+      if (stdout) {
+        console.log(`tar stdout: ${stdout}`);
+      }
+      if (stderr) {
+        console.error(`tar stderr: ${stderr}`);
+      }
+      resolve();
+    });
   });
 }
 
@@ -75,11 +71,6 @@ export async function convert(
   execFile: ExecFileFn = execFileOriginal,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    // Determine mode based on target format
-    // md-t = table mode (tables as markdown)
-    // md-i = image mode (tables as images)
-    const tableMode = convertTo === "md-t" ? "latex" : "html";
-
     // Create a temporary output directory for MinerU
     const outputDir = dirname(targetPath);
     const inputFileName = basename(filePath, `.${fileType}`);
@@ -92,14 +83,7 @@ export async function convert(
 
     // Build MinerU command arguments
     // MinerU CLI: magic-pdf -p <input> -o <output_dir> -m auto
-    const args = [
-      "-p",
-      filePath,
-      "-o",
-      mineruOutputDir,
-      "-m",
-      "auto",
-    ];
+    const args = ["-p", filePath, "-o", mineruOutputDir, "-m", "auto"];
 
     // Add table mode option if md-i (render tables as images)
     if (convertTo === "md-i") {

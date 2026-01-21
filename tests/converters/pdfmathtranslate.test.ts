@@ -2,7 +2,7 @@ import { test, expect, describe, beforeEach, afterEach } from "bun:test";
 import { convert, properties } from "../../src/converters/pdfmathtranslate";
 import type { ExecFileException } from "node:child_process";
 import { ExecFileFn } from "../../src/converters/types";
-import { mkdirSync, existsSync, writeFileSync, rmSync, readFileSync } from "node:fs";
+import { mkdirSync, existsSync, writeFileSync, rmSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 // Skip common tests as PDFMathTranslate has different behavior (archive output)
@@ -31,7 +31,7 @@ describe("PDFMathTranslate converter properties", () => {
 describe("PDFMathTranslate converter - Chinese translation", () => {
   const testDir = "./test-output-pdfmathtranslate-zh";
   const testInputFile = join(testDir, "input.pdf");
-  
+
   beforeEach(() => {
     if (!existsSync(testDir)) {
       mkdirSync(testDir, { recursive: true });
@@ -49,17 +49,16 @@ describe("PDFMathTranslate converter - Chinese translation", () => {
   test("should call pdf2zh with correct language argument for zh", async () => {
     let pdf2zhArgs: string[] = [];
     let pdf2zhCalled = false;
-    
+
     const mockExecFile: ExecFileFn = (
       cmd: string,
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-      options?: any,
     ) => {
       if (cmd === "pdf2zh") {
         pdf2zhCalled = true;
         pdf2zhArgs = args;
-        
+
         // Simulate pdf2zh creating output files
         const outputDirIndex = args.indexOf("-o");
         if (outputDirIndex !== -1 && args[outputDirIndex + 1]) {
@@ -95,7 +94,7 @@ describe("PDFMathTranslate converter - Chinese translation", () => {
 describe("PDFMathTranslate converter - English translation", () => {
   const testDir = "./test-output-pdfmathtranslate-en";
   const testInputFile = join(testDir, "input.pdf");
-  
+
   beforeEach(() => {
     if (!existsSync(testDir)) {
       mkdirSync(testDir, { recursive: true });
@@ -111,12 +110,11 @@ describe("PDFMathTranslate converter - English translation", () => {
 
   test("should call pdf2zh with correct language argument for en", async () => {
     let pdf2zhArgs: string[] = [];
-    
+
     const mockExecFile: ExecFileFn = (
       cmd: string,
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-      options?: any,
     ) => {
       if (cmd === "pdf2zh") {
         pdf2zhArgs = args;
@@ -145,7 +143,7 @@ describe("PDFMathTranslate converter - English translation", () => {
 describe("PDFMathTranslate converter - Japanese translation", () => {
   const testDir = "./test-output-pdfmathtranslate-ja";
   const testInputFile = join(testDir, "input.pdf");
-  
+
   beforeEach(() => {
     if (!existsSync(testDir)) {
       mkdirSync(testDir, { recursive: true });
@@ -161,12 +159,11 @@ describe("PDFMathTranslate converter - Japanese translation", () => {
 
   test("should call pdf2zh with correct language argument for ja", async () => {
     let pdf2zhArgs: string[] = [];
-    
+
     const mockExecFile: ExecFileFn = (
       cmd: string,
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-      options?: any,
     ) => {
       if (cmd === "pdf2zh") {
         pdf2zhArgs = args;
@@ -195,7 +192,7 @@ describe("PDFMathTranslate converter - Japanese translation", () => {
 describe("PDFMathTranslate converter - Traditional Chinese", () => {
   const testDir = "./test-output-pdfmathtranslate-zhtw";
   const testInputFile = join(testDir, "input.pdf");
-  
+
   beforeEach(() => {
     if (!existsSync(testDir)) {
       mkdirSync(testDir, { recursive: true });
@@ -211,12 +208,11 @@ describe("PDFMathTranslate converter - Traditional Chinese", () => {
 
   test("should call pdf2zh with correct language argument for zh-TW", async () => {
     let pdf2zhArgs: string[] = [];
-    
+
     const mockExecFile: ExecFileFn = (
       cmd: string,
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-      options?: any,
     ) => {
       if (cmd === "pdf2zh") {
         pdf2zhArgs = args;
@@ -245,7 +241,7 @@ describe("PDFMathTranslate converter - Traditional Chinese", () => {
 describe("PDFMathTranslate converter - Output structure", () => {
   const testDir = "./test-output-pdfmathtranslate-structure";
   const testInputFile = join(testDir, "input.pdf");
-  
+
   beforeEach(() => {
     if (!existsSync(testDir)) {
       mkdirSync(testDir, { recursive: true });
@@ -262,12 +258,11 @@ describe("PDFMathTranslate converter - Output structure", () => {
   test("should create archive with original.pdf and translated-<lang>.pdf", async () => {
     let tarSourceDir = "";
     let archiveContents: string[] = [];
-    
+
     const mockExecFile: ExecFileFn = (
       cmd: string,
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-      options?: any,
     ) => {
       if (cmd === "pdf2zh") {
         const outputDirIndex = args.indexOf("-o");
@@ -286,7 +281,6 @@ describe("PDFMathTranslate converter - Output structure", () => {
           tarSourceDir = args[cIndex + 1];
           // Read the files in the archive source directory
           if (existsSync(tarSourceDir)) {
-            const { readdirSync } = require("node:fs");
             archiveContents = readdirSync(tarSourceDir);
           }
         }
@@ -304,12 +298,11 @@ describe("PDFMathTranslate converter - Output structure", () => {
 
   test("should only use .tar format, not .tar.gz", async () => {
     let tarArgs: string[] = [];
-    
+
     const mockExecFile: ExecFileFn = (
       cmd: string,
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-      options?: any,
     ) => {
       if (cmd === "pdf2zh") {
         const outputDirIndex = args.indexOf("-o");
@@ -333,7 +326,7 @@ describe("PDFMathTranslate converter - Output structure", () => {
     // Verify tar is called with -cf (not -czf for gzip compression)
     expect(tarArgs[0]).toBe("-cf");
     expect(tarArgs[0]).not.toBe("-czf");
-    
+
     // Verify output path ends with .tar not .tar.gz
     const outputTar = tarArgs[1];
     expect(outputTar).toMatch(/\.tar$/);
@@ -345,7 +338,7 @@ describe("PDFMathTranslate converter - Output structure", () => {
 describe("PDFMathTranslate converter - Error handling", () => {
   const testDir = "./test-output-pdfmathtranslate-error";
   const testInputFile = join(testDir, "input.pdf");
-  
+
   beforeEach(() => {
     if (!existsSync(testDir)) {
       mkdirSync(testDir, { recursive: true });
@@ -362,9 +355,8 @@ describe("PDFMathTranslate converter - Error handling", () => {
   test("should reject with error when pdf2zh fails", async () => {
     const mockExecFile: ExecFileFn = (
       cmd: string,
-      args: string[],
+      _args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-      options?: any,
     ) => {
       if (cmd === "pdf2zh") {
         const error = new Error("Translation failed") as ExecFileException;
@@ -373,18 +365,17 @@ describe("PDFMathTranslate converter - Error handling", () => {
     };
 
     const targetPath = join(testDir, "output.tar");
-    
+
     await expect(
-      convert(testInputFile, "pdf", "pdf-zh", targetPath, undefined, mockExecFile)
-    ).rejects.toMatch(/pdf2zh error/);
+      convert(testInputFile, "pdf", "pdf-zh", targetPath, undefined, mockExecFile),
+    ).rejects.toThrow(/pdf2zh error|PDFMathTranslate error/);
   });
 
   test("should reject when no output PDF is generated", async () => {
     const mockExecFile: ExecFileFn = (
       cmd: string,
-      args: string[],
+      _args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-      options?: any,
     ) => {
       if (cmd === "pdf2zh") {
         // Don't create any output files
@@ -395,9 +386,9 @@ describe("PDFMathTranslate converter - Error handling", () => {
     };
 
     const targetPath = join(testDir, "output.tar");
-    
+
     await expect(
-      convert(testInputFile, "pdf", "pdf-zh", targetPath, undefined, mockExecFile)
-    ).rejects.toMatch(/No.*PDF.*found/);
+      convert(testInputFile, "pdf", "pdf-zh", targetPath, undefined, mockExecFile),
+    ).rejects.toThrow(/No.*PDF.*found|No translated PDF/);
   });
 });

@@ -1,6 +1,5 @@
 const webroot = document.querySelector("meta[name='webroot']").content;
 const fileInput = document.querySelector('input[type="file"]');
-const dropZone = document.getElementById("dropzone");
 const convertButton = document.querySelector("input[type='submit']");
 const fileNames = [];
 let fileType;

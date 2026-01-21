@@ -1,14 +1,12 @@
 /**
  * Contents.CN Chunk 下載 API
- * 
+ *
  * 處理大檔的分段下載
  */
 
-import { Elysia, t } from "elysia";
-import { join } from "node:path";
+import { Elysia } from "elysia";
 import { outputDir } from "..";
 import db from "../db/db";
-import { WEBROOT } from "../helpers/env";
 import { userService } from "./user";
 import sanitize from "sanitize-filename";
 import {
@@ -16,11 +14,8 @@ import {
   getChunkDownloadInfo,
   getChunk,
   createChunkDownloadHeaders,
-  getFileForDirectDownload,
-  createDirectDownloadHeaders,
-  CHUNK_SIZE_BYTES,
 } from "../transfer";
-import { statSync, existsSync } from "node:fs";
+import { existsSync } from "node:fs";
 
 export const downloadChunk = new Elysia()
   .use(userService)
@@ -44,7 +39,7 @@ export const downloadChunk = new Elysia()
       const filePath = `${outputDir}${userId}/${jobId}/${fileName}`;
 
       const info = getChunkDownloadInfo(filePath);
-      
+
       if (!info) {
         return { error: "File not found" };
       }
@@ -54,7 +49,7 @@ export const downloadChunk = new Elysia()
         use_chunked: shouldUseChunkedDownload(filePath),
       };
     },
-    { auth: true }
+    { auth: true },
   )
   /**
    * 下載特定 chunk
@@ -90,14 +85,14 @@ export const downloadChunk = new Elysia()
       }
 
       const headers = createChunkDownloadHeaders(info, chunkIndex, chunkData);
-      
+
       for (const [key, value] of Object.entries(headers)) {
         set.headers[key] = value;
       }
 
       return new Response(chunkData);
     },
-    { auth: true }
+    { auth: true },
   )
   /**
    * Archive chunk 下載資訊
@@ -122,7 +117,7 @@ export const downloadChunk = new Elysia()
       }
 
       const info = getChunkDownloadInfo(archivePath);
-      
+
       if (!info) {
         return { error: "Archive not found" };
       }
@@ -132,7 +127,7 @@ export const downloadChunk = new Elysia()
         use_chunked: shouldUseChunkedDownload(archivePath),
       };
     },
-    { auth: true }
+    { auth: true },
   )
   /**
    * Archive chunk 下載
@@ -167,12 +162,12 @@ export const downloadChunk = new Elysia()
       }
 
       const headers = createChunkDownloadHeaders(info, chunkIndex, chunkData);
-      
+
       for (const [key, value] of Object.entries(headers)) {
         set.headers[key] = value;
       }
 
       return new Response(chunkData);
     },
-    { auth: true }
+    { auth: true },
   );

@@ -1,6 +1,6 @@
 /**
  * Contents.CN 後端上傳管理器
- * 
+ *
  * 統一處理所有檔案上傳，包含：
  * - 小檔（≤10MB）：直接接收
  * - 大檔（>10MB）：chunk 接收與合併
@@ -8,7 +8,12 @@
 
 import { existsSync, mkdirSync, rmSync, readdirSync, createWriteStream, statSync } from "node:fs";
 import { join } from "node:path";
-import { CHUNK_THRESHOLD_BYTES, CHUNK_SIZE_BYTES, UPLOAD_SESSION_TIMEOUT_MS, CHUNK_TEMP_DIR } from "./constants";
+import {
+  CHUNK_THRESHOLD_BYTES,
+  CHUNK_SIZE_BYTES,
+  UPLOAD_SESSION_TIMEOUT_MS,
+  CHUNK_TEMP_DIR,
+} from "./constants";
 import type { UploadSession, ChunkUploadResponse, DirectUploadResponse } from "./types";
 import { getTransferMode } from "./types";
 
@@ -22,9 +27,12 @@ class UploadSessionManager {
 
   constructor() {
     // 定期清理過期的 sessions
-    this.cleanupInterval = setInterval(() => {
-      this.cleanupExpiredSessions();
-    }, 5 * 60 * 1000); // 每 5 分鐘清理一次
+    this.cleanupInterval = setInterval(
+      () => {
+        this.cleanupExpiredSessions();
+      },
+      5 * 60 * 1000,
+    ); // 每 5 分鐘清理一次
   }
 
   /**
@@ -37,10 +45,10 @@ class UploadSessionManager {
     fileName: string,
     totalSize: number,
     totalChunks: number,
-    baseTempDir: string
+    baseTempDir: string,
   ): UploadSession {
     const tempDir = join(baseTempDir, CHUNK_TEMP_DIR, uploadId);
-    
+
     if (!existsSync(tempDir)) {
       mkdirSync(tempDir, { recursive: true });
     }
@@ -74,7 +82,7 @@ class UploadSessionManager {
   markChunkReceived(uploadId: string, chunkIndex: number): boolean {
     const session = this.sessions.get(uploadId);
     if (!session) return false;
-    
+
     session.received_chunks.add(chunkIndex);
     return true;
   }
@@ -85,7 +93,7 @@ class UploadSessionManager {
   isComplete(uploadId: string): boolean {
     const session = this.sessions.get(uploadId);
     if (!session) return false;
-    
+
     return session.received_chunks.size === session.total_chunks;
   }
 
@@ -140,11 +148,11 @@ export function shouldUseChunkedUpload(fileSize: number): boolean {
 export async function handleDirectUpload(
   file: File,
   targetDir: string,
-  fileName: string
+  fileName: string,
 ): Promise<DirectUploadResponse> {
   try {
     const targetPath = join(targetDir, fileName);
-    
+
     if (!existsSync(targetDir)) {
       mkdirSync(targetDir, { recursive: true });
     }
@@ -178,12 +186,12 @@ export async function handleChunkUpload(
   userId: string,
   jobId: string,
   baseTempDir: string,
-  targetDir: string
+  targetDir: string,
 ): Promise<ChunkUploadResponse> {
   try {
     // 取得或建立會話
     let session = uploadSessionManager.getSession(uploadId);
-    
+
     if (!session) {
       session = uploadSessionManager.createSession(
         uploadId,
@@ -192,7 +200,7 @@ export async function handleChunkUpload(
         fileName,
         totalSize,
         totalChunks,
-        baseTempDir
+        baseTempDir,
       );
     }
 
@@ -224,7 +232,7 @@ export async function handleChunkUpload(
     if (uploadSessionManager.isComplete(uploadId)) {
       // 合併所有 chunks
       const finalPath = await mergeChunks(session, targetDir);
-      
+
       // 清理會話
       uploadSessionManager.removeSession(uploadId);
 
@@ -257,14 +265,14 @@ export async function handleChunkUpload(
  */
 async function mergeChunks(session: UploadSession, targetDir: string): Promise<string> {
   const targetPath = join(targetDir, session.file_name);
-  
+
   if (!existsSync(targetDir)) {
     mkdirSync(targetDir, { recursive: true });
   }
 
   // 讀取並排序所有 chunks
   const chunkFiles = readdirSync(session.temp_dir)
-    .filter(f => f.startsWith("chunk_"))
+    .filter((f) => f.startsWith("chunk_"))
     .sort();
 
   // 建立輸出串流
@@ -298,6 +306,9 @@ async function mergeChunks(session: UploadSession, targetDir: string): Promise<s
 /**
  * 計算需要的 chunk 數量
  */
-export function calculateChunkCount(fileSize: number, chunkSize: number = CHUNK_SIZE_BYTES): number {
+export function calculateChunkCount(
+  fileSize: number,
+  chunkSize: number = CHUNK_SIZE_BYTES,
+): number {
   return Math.ceil(fileSize / chunkSize);
 }

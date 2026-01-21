@@ -3,24 +3,6 @@
  */
 
 /**
- * Chunk 上傳請求結構
- */
-export interface ChunkUploadRequest {
-  /** 上傳會話 ID（UUID） */
-  upload_id: string;
-  /** 當前 chunk 索引（從 0 開始） */
-  chunk_index: number;
-  /** 總 chunk 數量 */
-  total_chunks: number;
-  /** chunk 數據 */
-  data: Blob | ArrayBuffer;
-  /** 原始檔案名稱 */
-  file_name: string;
-  /** 檔案總大小 */
-  total_size: number;
-}
-
-/**
  * Chunk 上傳回應結構
  */
 export interface ChunkUploadResponse {
