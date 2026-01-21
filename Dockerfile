@@ -1,6 +1,6 @@
 # ==============================================================================
 # ConvertX-CN 官方 Docker Image
-# 版本：v0.1.9
+# 版本：v0.1.10
 # ==============================================================================
 #
 # 📦 Image 說明：
@@ -15,12 +15,23 @@
 #
 # 📊 Image 大小：約 5-7 GB
 #
+# ⚠️ Base Image：使用 debian:bookworm（穩定版）
+#    - 確保 Multi-Arch (amd64/arm64) 構建穩定性
+#    - 避免 trixie (testing) 套件同步不穩定問題
+#
 # ==============================================================================
 
-FROM debian:trixie-slim AS base
+FROM debian:bookworm-slim AS base
 LABEL org.opencontainers.image.source="https://github.com/pi-docket/ConvertX-CN"
 LABEL org.opencontainers.image.description="ConvertX-CN - 精簡版檔案轉換服務"
 WORKDIR /app
+
+# 配置 APT 重試機制（解決 Multi-Arch Build 時的網路不穩定問題）
+RUN echo 'Acquire::Retries "5";' > /etc/apt/apt.conf.d/80-retries \
+  && echo 'Acquire::http::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'Acquire::https::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'Acquire::ftp::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'DPkg::Lock::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries
 
 # install bun
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -83,6 +94,14 @@ FROM base AS release
 #
 # ==============================================================================
 
+# 配置 APT 重試機制（解決 Multi-Arch Build 時的網路不穩定問題）
+RUN echo 'Acquire::Retries "5";' > /etc/apt/apt.conf.d/80-retries \
+  && echo 'Acquire::http::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'Acquire::https::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'Acquire::ftp::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'APT::Get::Assume-Yes "true";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'DPkg::Lock::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries
+
 # 階段 1：基礎系統工具
 RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   locales \
@@ -112,8 +131,9 @@ RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 # 階段 4：圖像處理工具
+# 注意：bookworm 使用 imagemagick（版本 6），trixie 才有 imagemagick-7
 RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-  imagemagick-7.q16 \
+  imagemagick \
   inkscape \
   libheif-examples \
   libjxl-tools \

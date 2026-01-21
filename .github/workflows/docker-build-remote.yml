@@ -295,6 +295,7 @@ jobs:
           echo "🔨 開始 Multi-Arch Docker Build"
           echo "========================================"
           echo "映像名稱: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
+          echo "同時標記: ${{ env.DOCKER_IMAGE_REPO }}:latest"
           echo "目標架構: linux/amd64, linux/arm64"
           echo ""
 
@@ -304,6 +305,7 @@ jobs:
           WORKDIR="${{ env.REMOTE_WORKDIR }}"
           PROJECT="${{ env.PROJECT_NAME }}"
           IMAGE="${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
+          IMAGE_LATEST="${{ env.DOCKER_IMAGE_REPO }}:latest"
           BUILDER_NAME="multiarch-builder-${{ github.run_id }}"
 
           echo "📂 進入專案目錄..."
@@ -321,9 +323,11 @@ jobs:
 
           # Multi-arch build（只建構，不推送，載入到本地）
           # 使用 --progress=plain 顯示完整 log
+          # 同時標記版本號和 latest
           if ! docker buildx build \
             --platform linux/amd64,linux/arm64 \
             -t "${IMAGE}" \
+            -t "${IMAGE_LATEST}" \
             --progress=plain \
             . 2>&1; then
             
@@ -387,6 +391,7 @@ jobs:
           WORKDIR="${{ env.REMOTE_WORKDIR }}"
           PROJECT="${{ env.PROJECT_NAME }}"
           IMAGE="${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
+          IMAGE_LATEST="${{ env.DOCKER_IMAGE_REPO }}:latest"
           BUILDER_NAME="multiarch-builder-${{ github.run_id }}"
 
           echo "📂 進入專案目錄..."
@@ -395,15 +400,18 @@ jobs:
           echo ""
           echo "📤 執行 Docker Push..."
           echo "映像標籤: ${IMAGE}"
+          echo "同時標記: ${IMAGE_LATEST}"
           echo ""
 
           # 確保使用正確的 builder
           docker buildx use "${BUILDER_NAME}"
 
           # 使用 buildx build --push 來推送 multi-arch 映像
+          # 同時推送版本號和 latest
           if ! docker buildx build \
             --platform linux/amd64,linux/arm64 \
             -t "${IMAGE}" \
+            -t "${IMAGE_LATEST}" \
             --push \
             --progress=plain \
             . 2>&1; then
@@ -426,6 +434,7 @@ jobs:
           echo ""
           echo "📦 映像已推送至 Docker Hub："
           echo "   ${IMAGE}"
+          echo "   ${IMAGE_LATEST}"
           echo ""
           echo "🏗️ 支援的架構："
           echo "   - linux/amd64"
@@ -533,7 +542,8 @@ jobs:
           echo "========================================"
           echo ""
           echo "📦 映像資訊："
-          echo "  - 映像名稱: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
+          echo "  - 版本標籤: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
+          echo "  - Latest 標籤: ${{ env.DOCKER_IMAGE_REPO }}:latest"
           echo "  - Docker Hub: https://hub.docker.com/r/${{ env.DOCKER_IMAGE_REPO }}/tags"
           echo ""
           echo "🏗️ 支援的架構："
@@ -547,6 +557,7 @@ jobs:
           echo ""
           echo "📝 使用方式："
           echo "  docker pull ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
+          echo "  docker pull ${{ env.DOCKER_IMAGE_REPO }}:latest"
           echo ""
           echo "========================================"
           echo "🎉 所有步驟已成功完成！"
