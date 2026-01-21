@@ -255,7 +255,7 @@ describe("PDFMathTranslate converter - Output structure", () => {
     }
   });
 
-  test("should create archive with original.pdf and translated-<lang>.pdf", async () => {
+  test("should create archive with translated-<lang>.pdf and bilingual-<lang>.pdf (no original)", async () => {
     let tarSourceDir = "";
     let archiveContents: string[] = [];
 
@@ -271,7 +271,9 @@ describe("PDFMathTranslate converter - Output structure", () => {
           if (!existsSync(outputDir)) {
             mkdirSync(outputDir, { recursive: true });
           }
+          // 模擬 pdf2zh 產生 mono（翻譯版）和 dual（對照版）
           writeFileSync(join(outputDir, "input-mono.pdf"), "%PDF-1.4\n%Translated");
+          writeFileSync(join(outputDir, "input-dual.pdf"), "%PDF-1.4\n%Bilingual");
         }
         callback(null, "Translation complete", "");
       } else if (cmd === "tar") {
@@ -291,9 +293,11 @@ describe("PDFMathTranslate converter - Output structure", () => {
     const targetPath = join(testDir, "output.tar");
     await convert(testInputFile, "pdf", "pdf-ko", targetPath, undefined, mockExecFile);
 
-    // Verify archive contains expected files
-    expect(archiveContents).toContain("original.pdf");
+    // Verify archive contains expected files (翻譯版 + 對照版，不包含原始檔)
     expect(archiveContents).toContain("translated-ko.pdf");
+    expect(archiveContents).toContain("bilingual-ko.pdf");
+    // 不應包含原始檔案
+    expect(archiveContents).not.toContain("original.pdf");
   });
 
   test("should only use .tar format, not .tar.gz", async () => {

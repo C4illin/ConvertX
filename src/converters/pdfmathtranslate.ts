@@ -261,48 +261,74 @@ export async function convert(
     // 5. 執行 pdf2zh 翻譯
     const { monoPath, dualPath } = await runPdf2zh(filePath, tempDir, targetLang, execFile);
 
-    // 6. 複製原始檔案到封裝目錄
-    const originalDest = join(archiveDir, "original.pdf");
-    copyFileSync(filePath, originalDest);
-
-    // 7. 複製翻譯後的檔案（優先使用 mono，因為它是純翻譯版本）
+    // 6. 複製翻譯後的檔案到封裝目錄
+    // PDFMathTranslate 輸出：
+    //   - mono: 純翻譯版本（translated-<lang>.pdf）
+    //   - dual: 雙語對照版本（bilingual-<lang>.pdf）
+    // ⚠️ 不包含原始 PDF，只包含翻譯結果
+    
     const translatedDest = join(archiveDir, `translated-${targetLang}.pdf`);
+    const bilingualDest = join(archiveDir, `bilingual-${targetLang}.pdf`);
 
-    // 檢查各種可能的輸出檔案名稱
-    const possibleOutputs = [
+    // 檢查各種可能的 mono 輸出檔案名稱
+    const possibleMonoOutputs = [
       monoPath,
-      dualPath,
       join(tempDir, `${inputFileName}-mono.pdf`),
+    ];
+
+    // 檢查各種可能的 dual 輸出檔案名稱
+    const possibleDualOutputs = [
+      dualPath,
       join(tempDir, `${inputFileName}-dual.pdf`),
     ];
 
-    let foundOutput = false;
-    for (const outputPath of possibleOutputs) {
+    let foundMono = false;
+    let foundDual = false;
+
+    // 複製 mono（翻譯版）
+    for (const outputPath of possibleMonoOutputs) {
       if (existsSync(outputPath)) {
         copyFileSync(outputPath, translatedDest);
-        foundOutput = true;
-        console.log(`[PDFMathTranslate] Using output: ${outputPath}`);
+        foundMono = true;
+        console.log(`[PDFMathTranslate] Copied mono (translated): ${outputPath}`);
+        break;
+      }
+    }
+
+    // 複製 dual（對照版）
+    for (const outputPath of possibleDualOutputs) {
+      if (existsSync(outputPath)) {
+        copyFileSync(outputPath, bilingualDest);
+        foundDual = true;
+        console.log(`[PDFMathTranslate] Copied dual (bilingual): ${outputPath}`);
         break;
       }
     }
 
     // 如果找不到預期的輸出檔案，嘗試找任何 PDF
-    if (!foundOutput) {
+    if (!foundMono && !foundDual) {
       const allFiles = readdirSync(tempDir);
       const pdfFiles = allFiles.filter((f) => f.endsWith(".pdf") && f !== basename(filePath));
-      const firstPdfName = pdfFiles[0];
-
-      if (firstPdfName) {
-        const firstPdf = join(tempDir, firstPdfName);
-        copyFileSync(firstPdf, translatedDest);
-        foundOutput = true;
-        console.log(`[PDFMathTranslate] Using fallback output: ${firstPdf}`);
+      
+      for (const pdfName of pdfFiles) {
+        const pdfPath = join(tempDir, pdfName);
+        if (pdfName.includes("mono") || pdfName.includes("translated")) {
+          copyFileSync(pdfPath, translatedDest);
+          foundMono = true;
+          console.log(`[PDFMathTranslate] Using fallback mono: ${pdfPath}`);
+        } else if (pdfName.includes("dual") || pdfName.includes("bilingual")) {
+          copyFileSync(pdfPath, bilingualDest);
+          foundDual = true;
+          console.log(`[PDFMathTranslate] Using fallback dual: ${pdfPath}`);
+        }
       }
     }
 
-    if (!foundOutput) {
-      throw new Error("No translated PDF output found");
+    if (!foundMono && !foundDual) {
+      throw new Error("No translated PDF output found (neither mono nor dual)");
     }
+
+    console.log(`[PDFMathTranslate] Archive contents: mono=${foundMono}, dual=${foundDual}`);
 
     // 8. 建立 .tar 封裝
     const tarPath = getArchiveFileName(targetPath);

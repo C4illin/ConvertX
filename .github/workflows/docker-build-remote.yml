@@ -691,3 +691,48 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ========================================
+      # Step 19: 更新遠端 ConvertX-CN 服務
+      # 說明：拉取最新映像並重新啟動服務（所有步驟完成後執行）
+      # ========================================
+      - name: 🔄 更新遠端 ConvertX-CN 服務
+        run: |
+          echo "========================================"
+          echo "🔄 更新遠端 ConvertX-CN 服務"
+          echo "========================================"
+
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          set -e
+
+          # 1. 進入專案資料夾
+          cd /home/bioailab/miniconda3/lid/app/convertx-cn
+
+          # 2. 停止服務
+          echo "📋 停止服務..."
+          docker compose down
+
+          # 3. 拉取最新映像檔
+          echo ""
+          echo "📋 拉取最新映像檔..."
+          docker compose pull
+
+          # 4. 重新啟動
+          echo ""
+          echo "📋 重新啟動服務..."
+          docker compose up -d
+
+          # 5. 顯示服務狀態與 log
+          echo ""
+          echo "📋 服務狀態："
+          docker compose ps
+
+          echo ""
+          echo "📋 服務 log（最近 100 行）："
+          docker logs convertx-cn --tail=100
+
+          echo ""
+          echo "✅ ConvertX-CN 服務已更新完成"
+          REMOTE_EOF
+
+          echo "========================================"

@@ -113,6 +113,7 @@ export async function convert(
         // Create .tar archive from the output directory (不使用壓縮)
         // 強制使用 .tar 格式，禁止 .tar.gz
         const tarPath = getArchiveFileName(targetPath);
+        console.log(`[MinerU] Target tar path: ${tarPath}`);
 
         // Ensure the parent directory exists
         const tarDir = dirname(tarPath);
@@ -121,11 +122,21 @@ export async function convert(
         }
 
         // Use the actual MinerU output directory for archiving
+        // MinerU 產生完整資料夾結構，全部封裝進 .tar
         const outputToArchive = existsSync(mineruActualOutput)
           ? mineruActualOutput
           : mineruOutputDir;
 
+        console.log(`[MinerU] Archiving directory: ${outputToArchive}`);
+        
+        // 列出要封裝的內容
+        if (existsSync(outputToArchive)) {
+          const contents = readdirSync(outputToArchive);
+          console.log(`[MinerU] Archive contents: ${contents.join(", ")}`);
+        }
+
         await createTarArchive(outputToArchive, tarPath, execFile);
+        console.log(`[MinerU] Created archive: ${tarPath}`);
 
         // Clean up the temporary directory
         removeDir(mineruOutputDir);

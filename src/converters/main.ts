@@ -39,6 +39,7 @@ const properties: Record<
     properties: {
       from: Record<string, string[]>;
       to: Record<string, string[]>;
+      outputMode?: "archive";
       options?: Record<
         string,
         Record<
@@ -142,7 +143,7 @@ const properties: Record<
     properties: propertiesMarkitdown,
     converter: convertMarkitdown,
   },
-  mineru: {
+  MinerU: {
     properties: propertiesMineru,
     converter: convertMineru,
   },
@@ -173,6 +174,10 @@ export async function handleConvert(
     "INSERT INTO file_names (job_id, file_name, output_file_name, status) VALUES (?1, ?2, ?3, ?4)",
   );
 
+  // Check if the converter outputs an archive (.tar)
+  const converterProps = properties[converterName]?.properties;
+  const isArchiveOutput = converterProps?.outputMode === "archive";
+
   for (const chunk of chunks(fileNames, MAX_CONVERT_PROCESS)) {
     const toProcess: Promise<string>[] = [];
     for (const fileName of chunk) {
@@ -180,11 +185,17 @@ export async function handleConvert(
       const fileTypeOrig = fileName.split(".").pop() ?? "";
       const fileType = normalizeFiletype(fileTypeOrig);
       const newFileExt = normalizeOutputFiletype(convertTo);
-      const newFileName = fileName.replace(
+      let newFileName = fileName.replace(
         new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`),
         newFileExt,
       );
-      const targetPath = `${userOutputDir}${newFileName}`;
+      
+      // For archive output converters, the actual file will have .tar extension
+      if (isArchiveOutput) {
+        newFileName = `${newFileName}.tar`;
+      }
+      
+      const targetPath = `${userOutputDir}${newFileName.replace(/\.tar$/, "")}`;
       toProcess.push(
         new Promise((resolve, reject) => {
           mainConverter(filePath, fileType, convertTo, targetPath, {}, converterName)

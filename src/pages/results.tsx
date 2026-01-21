@@ -97,35 +97,41 @@ function ResultsArticle({
           </tr>
         </thead>
         <tbody>
-          {files.map((file) => (
-            <tr>
-              <td safe class="max-w-[20vw] truncate">
-                {file.output_file_name}
-              </td>
-              <td safe>{file.status}</td>
-              <td class="flex flex-row gap-4">
-                <a
-                  class={`
-                    text-accent-500 underline
-                    hover:text-accent-400
-                  `}
-                  href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
-                >
-                  <EyeIcon />
-                </a>
-                <a
-                  class={`
-                    text-accent-500 underline
-                    hover:text-accent-400
-                  `}
-                  href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
-                  download={file.output_file_name}
-                >
-                  <DownloadIcon />
-                </a>
-              </td>
-            </tr>
-          ))}
+          {files.map((file) => {
+            const isTarFile = file.output_file_name.endsWith(".tar");
+            return (
+              <tr>
+                <td safe class="max-w-[20vw] truncate">
+                  {file.output_file_name}
+                </td>
+                <td safe>{file.status}</td>
+                <td class="flex flex-row gap-4">
+                  {/* Hide preview icon for .tar files */}
+                  {!isTarFile && (
+                    <a
+                      class={`
+                        text-accent-500 underline
+                        hover:text-accent-400
+                      `}
+                      href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
+                    >
+                      <EyeIcon />
+                    </a>
+                  )}
+                  <a
+                    class={`
+                      text-accent-500 underline
+                      hover:text-accent-400
+                    `}
+                    href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
+                    download={file.output_file_name}
+                  >
+                    <DownloadIcon />
+                  </a>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </article>

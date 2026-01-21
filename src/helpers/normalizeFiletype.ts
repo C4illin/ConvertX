@@ -31,10 +31,11 @@ export const normalizeOutputFiletype = (filetype: string): string => {
     case "markdown_mmd":
     case "markdown":
       return "md";
-    // MinerU output formats - output as tar.gz
+    // MinerU output formats - 保持原始格式名稱（.tar 由 main.ts 自動添加）
+    // 因為 MinerU 是 archive-only 引擎，outputMode: "archive"
     case "md-t":
     case "md-i":
-      return "tar.gz";
+      return lowercaseFiletype;
     default:
       return lowercaseFiletype;
   }
