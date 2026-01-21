@@ -1,5 +1,45 @@
 # Changelog
 
+## [0.1.10](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.10) (2026-01-21)
+
+在 0.1.10 版本中，ConvertX-CN 迎來了多項重大功能擴充與架構強化。這是一個里程碑式的版本，為專案帶來了全新的 API 伺服器、兩個強大的文件轉換引擎，以及完整的大檔案傳輸機制。
+
+### ✨ Features
+
+- **Rust API Server（全新）**：新增獨立的 Rust API 伺服器，同時支援 REST API 與 GraphQL API。所有 API 請求皆需 JWT Bearer Token 驗證，整合 20+ 種轉換引擎，並在轉換不支援時自動回傳可用替代方案。這為程式化呼叫 ConvertX 開啟了全新的可能性。
+
+- **MinerU 文件轉換引擎**：整合 MinerU 智慧文件解析引擎，支援將 PDF、PPT、PPTX、DOC、DOCX、XLS、XLSX 等文件轉換為 Markdown 格式。提供兩種輸出模式：`md-t`（表格模式）與 `md-i`（圖片模式），轉換結果以 `.tar` 封裝輸出。
+
+- **PDFMathTranslate 翻譯引擎**：新增 PDF 數學公式保留翻譯功能，支援 15 種目標語言（包含繁體中文、簡體中文、英文、日文、韓文、德文、法文等）。轉換結果包含原始 PDF 與翻譯後 PDF，一同打包為 `.tar` 檔案。
+
+- **分塊傳輸機制（Chunk Transfer）**：針對大檔案傳輸設計的全新機制。超過 10MB 的檔案將自動切割為 5MB 分塊上傳，並支援斷點續傳與亂序上傳合併。下載端同樣支援分塊下載，確保大檔案傳輸穩定可靠。
+
+- **深色模式切換**：Header 新增主題切換按鈕，支援淺色 / 深色模式一鍵切換，偏好設定自動儲存至本地。
+
+### 🐛 Bug Fixes
+
+- **Lint 問題修復**：修復 XSS K601 安全警告、Knip 未使用匯出偵測、以及 ESLint 錯誤，確保程式碼品質符合規範。
+
+### 📦 Infrastructure
+
+- **Docker Compose 擴充**：新增 API Server 的 Docker Compose profiles 整合，可透過 `--profile api` 一併啟動 API 伺服器。包含完整的環境變數範例與健康檢查腳本。
+
+- **Dockerfile 強化**：擴充主 Dockerfile 以支援 PDFMathTranslate 所需的 Python 環境與模型預載。
+
+### 📚 Documentation
+
+- **README 大幅擴充**：新增 API Server 說明、新轉換器介紹、以及更詳細的部署指南。
+- **i18n 文件更新**：新增主題切換相關的國際化字串，覆蓋所有 65 種語言。
+
+### 🧪 Testing
+
+- 新增 MinerU converter 完整測試（11 個測試案例）
+- 新增 PDFMathTranslate converter 完整測試（13 個測試案例）
+- 新增 Chunk Transfer 模組完整測試（上傳 / 下載 / 封裝共 32 個測試案例）
+- 所有 159 個測試案例全數通過
+
+---
+
 ## [0.1.9](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.9) (2026-01-20)
 
 ### ✨ Features
