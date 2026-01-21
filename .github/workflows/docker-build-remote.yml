@@ -300,7 +300,7 @@ jobs:
           echo "🔨 開始 Multi-Arch Docker Build"
           echo "========================================"
           echo "映像名稱: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
-          
+
           # 判斷是否為正式版本（純數字+點號，支援任意段數如 0.1.10 或 0.1.10.1）
           IMAGE_TAG="${{ github.event.inputs.image_tag }}"
           if [[ "$IMAGE_TAG" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
@@ -310,7 +310,7 @@ jobs:
             echo "⚠️ 測試版本，不標記 latest"
             ADD_LATEST="false"
           fi
-          
+
           echo "目標架構: linux/amd64, linux/arm64"
           echo ""
 
@@ -393,7 +393,7 @@ jobs:
           echo "📤 推送映像到 Docker Hub"
           echo "========================================"
           echo "映像: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
-          
+
           # 判斷是否為正式版本（純數字+點號，支援任意段數如 0.1.10 或 0.1.10.1）
           IMAGE_TAG="${{ github.event.inputs.image_tag }}"
           if [[ "$IMAGE_TAG" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
@@ -433,7 +433,7 @@ jobs:
           echo ""
           echo "📤 執行 Docker Push..."
           echo "映像標籤: \${IMAGE}"
-          
+
           # 確保使用正確的 builder
           docker buildx use "\${BUILDER_NAME}"
 
@@ -584,7 +584,7 @@ jobs:
           echo ""
           echo "📦 映像資訊："
           echo "  - 版本標籤: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
-          
+
           # 判斷是否為正式版本（純數字+點號）
           IMAGE_TAG="${{ github.event.inputs.image_tag }}"
           if [[ "$IMAGE_TAG" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
@@ -592,7 +592,7 @@ jobs:
           else
             echo "  - Latest 標籤: （測試版本，未更新）"
           fi
-          
+
           echo "  - Docker Hub: https://hub.docker.com/r/${{ env.DOCKER_IMAGE_REPO }}/tags"
           echo ""
           echo "🏗️ 支援的架構："
