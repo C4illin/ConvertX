@@ -301,9 +301,9 @@ jobs:
           echo "========================================"
           echo "映像名稱: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
           
-          # 判斷是否為正式版本（純數字+點號）
+          # 判斷是否為正式版本（純數字+點號，支援任意段數如 0.1.10 或 0.1.10.1）
           IMAGE_TAG="${{ github.event.inputs.image_tag }}"
-          if [[ "$IMAGE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          if [[ "$IMAGE_TAG" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
             echo "✅ 正式版本，將同時標記 latest"
             ADD_LATEST="true"
           else
@@ -394,9 +394,9 @@ jobs:
           echo "========================================"
           echo "映像: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
           
-          # 判斷是否為正式版本（純數字+點號）
+          # 判斷是否為正式版本（純數字+點號，支援任意段數如 0.1.10 或 0.1.10.1）
           IMAGE_TAG="${{ github.event.inputs.image_tag }}"
-          if [[ "$IMAGE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          if [[ "$IMAGE_TAG" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
             echo "✅ 正式版本，將同時推送 latest"
             ADD_LATEST="true"
           else
@@ -585,9 +585,9 @@ jobs:
           echo "📦 映像資訊："
           echo "  - 版本標籤: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
           
-          # 判斷是否為正式版本
+          # 判斷是否為正式版本（純數字+點號）
           IMAGE_TAG="${{ github.event.inputs.image_tag }}"
-          if [[ "$IMAGE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          if [[ "$IMAGE_TAG" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
             echo "  - Latest 標籤: ${{ env.DOCKER_IMAGE_REPO }}:latest ✅"
           else
             echo "  - Latest 標籤: （測試版本，未更新）"
@@ -606,7 +606,7 @@ jobs:
           echo ""
           echo "📝 使用方式："
           echo "  docker pull ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
-          if [[ "$IMAGE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          if [[ "$IMAGE_TAG" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
             echo "  docker pull ${{ env.DOCKER_IMAGE_REPO }}:latest"
           fi
           echo ""
