@@ -1,4 +1,4 @@
-import { test, expect, describe, beforeEach, afterEach, mock } from "bun:test";
+import { test, expect, describe, beforeEach, afterEach } from "bun:test";
 import { convert, properties } from "../../src/converters/mineru";
 import type { ExecFileException } from "node:child_process";
 import { ExecFileFn } from "../../src/converters/types";
@@ -44,8 +44,8 @@ describe("MinerU converter md-t mode", () => {
     }
   });
 
-  test("should call magic-pdf with markdown table mode for md-t", async () => {
-    let magicPdfArgs: string[] = [];
+  test("should call mineru with markdown table mode for md-t", async () => {
+    let mineruArgs: string[] = [];
     
     const mockExecFile: ExecFileFn = (
       cmd: string,
@@ -53,8 +53,8 @@ describe("MinerU converter md-t mode", () => {
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
       options?: any,
     ) => {
-      if (cmd === "magic-pdf") {
-        magicPdfArgs = args;
+      if (cmd === "mineru") {
+        mineruArgs = args;
         // Simulate MinerU creating output
         const outputDir = args[3]; // -o argument
         if (outputDir && !existsSync(outputDir)) {
@@ -66,17 +66,17 @@ describe("MinerU converter md-t mode", () => {
         }
         writeFileSync(join(autoDir, "output.md"), "# Test\n\n| Col1 | Col2 |\n|---|---|\n| A | B |");
         callback(null, "MinerU conversion complete", "");
-      } else if (cmd === "zip") {
-        // Simulate zip creation
+      } else if (cmd === "tar") {
+        // Simulate tar.gz creation
         callback(null, "Archive created", "");
       }
     };
 
-    const targetPath = join(testDir, "output.zip");
+    const targetPath = join(testDir, "output.tar.gz");
     await convert("test.pdf", "pdf", "md-t", targetPath, undefined, mockExecFile);
 
-    expect(magicPdfArgs).toContain("--table-mode");
-    expect(magicPdfArgs).toContain("markdown");
+    expect(mineruArgs).toContain("--table-mode");
+    expect(mineruArgs).toContain("markdown");
   });
 });
 
@@ -95,7 +95,7 @@ describe("MinerU converter md-i mode", () => {
     }
   });
 
-  test("should call magic-pdf with image table mode for md-i", async () => {
+  test("should call mineru with image table mode for md-i", async () => {
     let capturedArgs: string[] = [];
     
     const mockExecFile: ExecFileFn = (
@@ -104,7 +104,7 @@ describe("MinerU converter md-i mode", () => {
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
       options?: any,
     ) => {
-      if (cmd === "magic-pdf") {
+      if (cmd === "mineru") {
         capturedArgs = args;
         // Simulate MinerU creating output
         const outputDir = args[3]; // -o argument
@@ -117,13 +117,13 @@ describe("MinerU converter md-i mode", () => {
         }
         writeFileSync(join(autoDir, "output.md"), "# Test\n\n![Table](images/table_1.png)");
         callback(null, "MinerU conversion complete", "");
-      } else if (cmd === "zip") {
-        // Simulate zip creation
+      } else if (cmd === "tar") {
+        // Simulate tar.gz creation
         callback(null, "Archive created", "");
       }
     };
 
-    const targetPath = join(testDir, "output.zip");
+    const targetPath = join(testDir, "output.tar.gz");
     await convert("test.pdf", "pdf", "md-i", targetPath, undefined, mockExecFile);
 
     expect(capturedArgs).toContain("--table-mode");
@@ -131,8 +131,8 @@ describe("MinerU converter md-i mode", () => {
   });
 });
 
-describe("MinerU converter ZIP output", () => {
-  const testDir = "./test-output-mineru-zip";
+describe("MinerU converter tar.gz output", () => {
+  const testDir = "./test-output-mineru-targz";
   
   beforeEach(() => {
     if (!existsSync(testDir)) {
@@ -146,9 +146,9 @@ describe("MinerU converter ZIP output", () => {
     }
   });
 
-  test("should create ZIP archive from output", async () => {
-    let zipCalled = false;
-    let zipArgs: string[] = [];
+  test("should create tar.gz archive from output", async () => {
+    let tarCalled = false;
+    let tarArgs: string[] = [];
     
     const mockExecFile: ExecFileFn = (
       cmd: string,
@@ -156,7 +156,7 @@ describe("MinerU converter ZIP output", () => {
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
       options?: any,
     ) => {
-      if (cmd === "magic-pdf") {
+      if (cmd === "mineru") {
         // Simulate MinerU creating output
         const outputDir = args[3]; // -o argument
         if (outputDir && !existsSync(outputDir)) {
@@ -170,35 +170,71 @@ describe("MinerU converter ZIP output", () => {
         mkdirSync(join(autoDir, "images"), { recursive: true });
         writeFileSync(join(autoDir, "images", "img1.png"), "fake image data");
         callback(null, "MinerU conversion complete", "");
-      } else if (cmd === "zip") {
-        zipCalled = true;
-        zipArgs = args;
+      } else if (cmd === "tar") {
+        tarCalled = true;
+        tarArgs = args;
         callback(null, "Archive created", "");
       }
     };
 
-    const targetPath = join(testDir, "output.zip");
+    const targetPath = join(testDir, "output.tar.gz");
     const result = await convert("test.pdf", "pdf", "md-t", targetPath, undefined, mockExecFile);
 
     expect(result).toBe("Done");
-    expect(zipCalled).toBe(true);
-    expect(zipArgs).toContain("-r");
+    expect(tarCalled).toBe(true);
+    expect(tarArgs).toContain("-czf");
   });
 
-  test("should reject on magic-pdf error", async () => {
+  test("should reject on mineru error", async () => {
     const mockExecFile: ExecFileFn = (
       cmd: string,
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
       options?: any,
     ) => {
-      if (cmd === "magic-pdf") {
+      if (cmd === "mineru") {
         callback(new Error("MinerU failed") as ExecFileException, "", "Error processing file");
       }
     };
 
-    const targetPath = join(testDir, "output.zip");
+    const targetPath = join(testDir, "output.tar.gz");
     expect(convert("test.pdf", "pdf", "md-t", targetPath, undefined, mockExecFile))
       .rejects.toMatch(/mineru error/);
+  });
+
+  test("should use correct tar arguments for compression", async () => {
+    let tarArgs: string[] = [];
+    
+    const mockExecFile: ExecFileFn = (
+      cmd: string,
+      args: string[],
+      callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
+      options?: any,
+    ) => {
+      if (cmd === "mineru") {
+        const outputDir = args[3];
+        if (outputDir && !existsSync(outputDir)) {
+          mkdirSync(outputDir, { recursive: true });
+        }
+        const autoDir = join(outputDir, "auto");
+        if (!existsSync(autoDir)) {
+          mkdirSync(autoDir, { recursive: true });
+        }
+        writeFileSync(join(autoDir, "output.md"), "# Test");
+        callback(null, "Done", "");
+      } else if (cmd === "tar") {
+        tarArgs = args;
+        callback(null, "Archive created", "");
+      }
+    };
+
+    const targetPath = join(testDir, "test_MINERU_md-t.tar.gz");
+    await convert("test.pdf", "pdf", "md-t", targetPath, undefined, mockExecFile);
+
+    // Verify tar is called with correct compression flags
+    expect(tarArgs[0]).toBe("-czf");
+    expect(tarArgs[1]).toContain(".tar.gz");
+    expect(tarArgs[2]).toBe("-C");
+    expect(tarArgs[4]).toBe(".");
   });
 });

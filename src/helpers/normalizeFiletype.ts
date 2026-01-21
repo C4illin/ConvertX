@@ -31,10 +31,10 @@ export const normalizeOutputFiletype = (filetype: string): string => {
     case "markdown_mmd":
     case "markdown":
       return "md";
-    // MinerU output formats - output as ZIP
+    // MinerU output formats - output as tar.gz
     case "md-t":
     case "md-i":
-      return "zip";
+      return "tar.gz";
     default:
       return lowercaseFiletype;
   }

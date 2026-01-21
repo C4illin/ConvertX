@@ -173,12 +173,12 @@ docker compose up -d
 
 ## MinerU
 
-ConvertX 內建 MinerU 轉換引擎，可將文件轉換為 Markdown。
+ConvertX 內建文件轉換引擎。
 
 - md-t
 - md-i
 
-輸出格式為 ZIP。
+輸出格式：tar.gz
 
 ---
 

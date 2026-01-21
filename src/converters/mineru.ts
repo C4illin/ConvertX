@@ -14,32 +14,32 @@ export const properties = {
 };
 
 /**
- * Helper function to create a ZIP archive from a directory
+ * Helper function to create a tar.gz archive from a directory
  */
-function createZipArchive(
+function createTarGzArchive(
   sourceDir: string,
-  outputZip: string,
+  outputTarGz: string,
   execFile: ExecFileFn,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    // Use zip command to create archive
+    // Use tar command to create gzipped archive
+    // tar -czf <output.tar.gz> -C <sourceDir> .
     execFile(
-      "zip",
-      ["-r", outputZip, "."],
+      "tar",
+      ["-czf", outputTarGz, "-C", sourceDir, "."],
       (error, stdout, stderr) => {
         if (error) {
-          reject(`zip error: ${error}`);
+          reject(`tar error: ${error}`);
           return;
         }
         if (stdout) {
-          console.log(`zip stdout: ${stdout}`);
+          console.log(`tar stdout: ${stdout}`);
         }
         if (stderr) {
-          console.error(`zip stderr: ${stderr}`);
+          console.error(`tar stderr: ${stderr}`);
         }
         resolve();
       },
-      { cwd: sourceDir },
     );
   });
 }
@@ -104,7 +104,7 @@ export async function convert(
       args.push("--table-mode", "markdown");
     }
 
-    execFile("magic-pdf", args, async (error, stdout, stderr) => {
+    execFile("mineru", args, async (error, stdout, stderr) => {
       if (error) {
         reject(`mineru error: ${error}`);
         return;
@@ -122,30 +122,30 @@ export async function convert(
         // MinerU outputs to a subdirectory, find the actual output
         const mineruActualOutput = join(mineruOutputDir, "auto");
 
-        // Create ZIP archive from the output directory
-        const zipPath = targetPath.endsWith(".zip")
+        // Create tar.gz archive from the output directory
+        const tarGzPath = targetPath.endsWith(".tar.gz")
           ? targetPath
-          : `${targetPath}.zip`;
+          : `${targetPath}.tar.gz`;
 
         // Ensure the parent directory exists
-        const zipDir = dirname(zipPath);
-        if (!existsSync(zipDir)) {
-          mkdirSync(zipDir, { recursive: true });
+        const tarGzDir = dirname(tarGzPath);
+        if (!existsSync(tarGzDir)) {
+          mkdirSync(tarGzDir, { recursive: true });
         }
 
-        // Use the actual MinerU output directory for zipping
-        const outputToZip = existsSync(mineruActualOutput)
+        // Use the actual MinerU output directory for archiving
+        const outputToArchive = existsSync(mineruActualOutput)
           ? mineruActualOutput
           : mineruOutputDir;
 
-        await createZipArchive(outputToZip, zipPath, execFile);
+        await createTarGzArchive(outputToArchive, tarGzPath, execFile);
 
         // Clean up the temporary directory
         removeDir(mineruOutputDir);
 
         resolve("Done");
-      } catch (zipError) {
-        reject(`Failed to create ZIP archive: ${zipError}`);
+      } catch (tarError) {
+        reject(`Failed to create tar.gz archive: ${tarError}`);
       }
     });
   });
