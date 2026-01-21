@@ -108,8 +108,8 @@ jobs:
           echo "========================================"
 
       # ========================================
-      # Step 4: Tailscale SSH 連線（支援互動式驗證）
-      # 說明：使用 tailscale ssh 連線，若需要網頁驗證會等待用戶完成
+      # Step 4: Tailscale SSH 連線（手動網頁驗證）
+      # 說明：首次連線需要點擊驗證 URL 完成授權
       # ========================================
       - name: 🔐 測試 Tailscale SSH 連線
         run: |
@@ -119,11 +119,16 @@ jobs:
           echo "使用者: ${{ secrets.SSH_USER }}"
           echo "主機: ${{ secrets.SSH_HOST }}"
           echo ""
+          echo "⚠️  如果出現驗證 URL，請在瀏覽器中開啟並完成驗證"
+          echo "⏳ 驗證完成後，連線會自動繼續..."
+          echo ""
+          echo "========================================"
 
-          # Tailscale SSH 可能需要額外驗證，這是正常的安全流程
-          # 執行 SSH 連線，輸出會包含驗證連結（如果需要的話）
-          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-            "echo '✅ Tailscale SSH 連線成功！' && echo '主機名稱:' && hostname && echo '當前使用者:' && whoami"
+          # 執行 SSH 連線，輸出會包含驗證連結
+          # 使用 timeout 避免無限等待（10 分鐘）
+          timeout 600 tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "echo '✅ Tailscale SSH 連線成功！' && echo '主機名稱:' && hostname && echo '當前使用者:' && whoami" \
+            || { echo ""; echo "❌ SSH 連線失敗或超時，請確認已完成網頁驗證"; exit 1; }
 
           echo ""
           echo "========================================"
