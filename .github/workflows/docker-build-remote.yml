@@ -1,92 +1,396 @@
-name: Docker Build & Push (Remote Host)
+# ============================================================
+# Docker Build & Push（Remote Host via Tailscale SSH）
+# ============================================================
+# 說明：使用 Tailscale SSH 連線到私有主機執行 Docker build
+# 重要：此 workflow 完全不使用傳統 SSH key，僅使用 Tailscale SSH
+# ============================================================
+
+name: Docker Build & Push (Remote Host via Tailscale)
 
 on:
+  # 手動觸發，支援輸入 image tag
   workflow_dispatch:
-  push:
-    branches:
-      - main
+    inputs:
+      image_tag:
+        description: "Docker Image Tag（例如：0.1.10.test）"
+        required: true
+        default: "0.1.10.test"
+        type: string
 
+# ============================================================
+# 環境變數設定
+# ============================================================
 env:
+  # 遠端主機工作目錄
   REMOTE_WORKDIR: /home/bioailab/miniconda3/lid/app/docker_build
+  # 專案名稱
   PROJECT_NAME: ConvertX-CN
+  # Docker Hub 映像庫
   DOCKER_IMAGE_REPO: convertx/convertx-cn
-  IMAGE_TAG: 0.1.10.test
 
 jobs:
   build-and-push:
+    name: 🚀 遠端 Docker Build & Push
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[remote-build]')
 
     steps:
-      - name: Setup SSH Key
+      # ========================================
+      # Step 1: Checkout repository
+      # 說明：檢出程式碼（雖然 build 在遠端，但需要 workflow 完整性）
+      # ========================================
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      # ========================================
+      # Step 2: 啟動 Tailscale
+      # 說明：使用 Tailscale Auth Key 加入 tailnet
+      # ========================================
+      - name: 🔗 啟動 Tailscale 連線
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          # 使用 ephemeral key，runner 結束後自動離開 tailnet
+
+      # ========================================
+      # Step 3: 驗證 Tailscale 連線
+      # 說明：確認 Tailscale 已成功連線並顯示狀態
+      # ========================================
+      - name: ✅ 驗證 Tailscale 連線狀態
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+          echo "========================================"
+          echo "🔍 檢查 Tailscale 連線狀態"
+          echo "========================================"
 
-      - name: Build and Push Docker Image on Remote Host
-        run: |
-          # Export variables for use in SSH session
-          export REMOTE_WORKDIR="${{ env.REMOTE_WORKDIR }}"
-          export PROJECT_NAME="${{ env.PROJECT_NAME }}"
-          export IMAGE_NAME="${{ env.DOCKER_IMAGE_REPO }}:${{ env.IMAGE_TAG }}"
-          export DOCKERHUB_USERNAME="${{ secrets.DOCKERHUB_USERNAME }}"
-          export DOCKERHUB_TOKEN="${{ secrets.DOCKERHUB_TOKEN }}"
-          export SSH_USER="${{ secrets.SSH_USER }}"
-          export SSH_HOST="${{ secrets.SSH_HOST }}"
+          # 顯示 Tailscale 狀態
+          echo ""
+          echo "📊 Tailscale 狀態："
+          tailscale status
 
-          # Create remote script
-          cat > /tmp/remote_build.sh << 'SCRIPT_EOF'
-          #!/bin/bash
-          set -e
+          # 顯示本機 Tailscale IP
+          echo ""
+          echo "🌐 本機 Tailscale IP："
+          tailscale ip -4
 
-          REMOTE_WORKDIR="$1"
-          PROJECT_NAME="$2"
-          IMAGE_NAME="$3"
-          DOCKERHUB_USERNAME="$4"
-          DOCKERHUB_TOKEN="$5"
+          # 等待 Tailscale 完全連線
+          echo ""
+          echo "⏳ 等待 Tailscale 連線穩定..."
+          sleep 5
 
-          # Step 1: Enter work directory
-          cd "${REMOTE_WORKDIR}"
+          # 測試與目標主機的連通性
+          echo ""
+          echo "📡 測試與遠端主機的連通性..."
+          echo "目標主機: ${{ secrets.SSH_HOST }}"
 
-          # Step 2: Clone or update project
-          if [ ! -d "${PROJECT_NAME}" ]; then
-            git clone https://github.com/pi-docket/ConvertX-CN.git
+          if tailscale ping --c 3 "${{ secrets.SSH_HOST }}"; then
+            echo ""
+            echo "✅ Tailscale 連線測試成功！"
+          else
+            echo ""
+            echo "⚠️ Tailscale ping 失敗，但 SSH 可能仍可運作，繼續執行..."
           fi
 
-          cd "${PROJECT_NAME}"
-          git pull
+          echo "========================================"
 
-          echo "Building image: ${IMAGE_NAME}"
+      # ========================================
+      # Step 4: 測試 Tailscale SSH 連線
+      # 說明：使用 tailscale ssh 測試連線（不使用傳統 ssh）
+      # ========================================
+      - name: 🔐 測試 Tailscale SSH 連線
+        run: |
+          echo "========================================"
+          echo "🔐 測試 Tailscale SSH 連線"
+          echo "========================================"
+          echo "使用者: ${{ secrets.SSH_USER }}"
+          echo "主機: ${{ secrets.SSH_HOST }}"
+          echo ""
 
-          # Step 3: Docker Login (must use Action PAT)
-          echo "${DOCKERHUB_TOKEN}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
+          # 使用 tailscale ssh 連線測試
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "echo '✅ Tailscale SSH 連線成功！' && echo '主機名稱:' && hostname && echo '當前使用者:' && whoami"
 
-          # Step 4: Docker Build & Push
-          docker build -t "${IMAGE_NAME}" .
-          docker push "${IMAGE_NAME}"
+          echo ""
+          echo "========================================"
 
-          echo "Successfully pushed: ${IMAGE_NAME}"
+      # ========================================
+      # Step 5: 準備遠端工作目錄
+      # 說明：確保遠端工作目錄存在
+      # ========================================
+      - name: 📁 準備遠端工作目錄
+        run: |
+          echo "========================================"
+          echo "📁 準備遠端工作目錄"
+          echo "========================================"
+          echo "工作目錄: ${{ env.REMOTE_WORKDIR }}"
+          echo ""
 
-          # Step 5: Safe cleanup (only this build image)
-          docker rmi "${IMAGE_NAME}" || true
-          docker builder prune -f --filter "unused-for=24h"
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "mkdir -p ${{ env.REMOTE_WORKDIR }} && echo '✅ 工作目錄已就緒'"
 
-          # Logout for security
-          docker logout
+          echo "========================================"
 
-          echo "Cleanup completed"
-          SCRIPT_EOF
+      # ========================================
+      # Step 6: Clone 或更新專案程式碼
+      # 說明：在遠端主機上 clone 或 pull 最新程式碼
+      # ========================================
+      - name: 📥 Clone 或更新專案程式碼
+        run: |
+          echo "========================================"
+          echo "📥 Clone 或更新專案程式碼"
+          echo "========================================"
 
-          chmod +x /tmp/remote_build.sh
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          set -e
 
-          # Copy script to remote and execute
-          scp -o StrictHostKeyChecking=no /tmp/remote_build.sh "${SSH_USER}@${SSH_HOST}:/tmp/remote_build.sh"
-          ssh -o StrictHostKeyChecking=no "${SSH_USER}@${SSH_HOST}" "bash /tmp/remote_build.sh '${REMOTE_WORKDIR}' '${PROJECT_NAME}' '${IMAGE_NAME}' '${DOCKERHUB_USERNAME}' '${DOCKERHUB_TOKEN}'"
-          ssh -o StrictHostKeyChecking=no "${SSH_USER}@${SSH_HOST}" "rm -f /tmp/remote_build.sh"
+          WORKDIR="${{ env.REMOTE_WORKDIR }}"
+          PROJECT="${{ env.PROJECT_NAME }}"
+          REPO_URL="https://github.com/pi-docket/ConvertX-CN.git"
 
-      - name: Cleanup SSH Key
+          echo "📂 進入工作目錄: ${WORKDIR}"
+          cd "${WORKDIR}"
+
+          if [ -d "${PROJECT}" ]; then
+            echo "📦 專案已存在，執行 git pull..."
+            cd "${PROJECT}"
+            git fetch origin
+            git reset --hard origin/main
+            git pull origin main
+            echo "✅ 程式碼更新完成"
+          else
+            echo "📦 專案不存在，執行 git clone..."
+            git clone "${REPO_URL}" "${PROJECT}"
+            cd "${PROJECT}"
+            echo "✅ 專案 clone 完成"
+          fi
+
+          echo ""
+          echo "📋 目前 commit："
+          git log -1 --oneline
+
+          echo ""
+          echo "✅ 程式碼準備完成"
+          REMOTE_EOF
+
+          echo "========================================"
+
+      # ========================================
+      # Step 7: Docker Login
+      # 說明：在遠端主機登入 Docker Hub
+      # ========================================
+      - name: 🔐 Docker Hub 登入
+        run: |
+          echo "========================================"
+          echo "🔐 Docker Hub 登入"
+          echo "========================================"
+
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "echo '${{ secrets.DOCKERHUB_TOKEN }}' | docker login -u '${{ secrets.DOCKERHUB_USERNAME }}' --password-stdin && echo '✅ Docker Hub 登入成功'"
+
+          echo "========================================"
+
+      # ========================================
+      # Step 8: 設定 Docker Buildx（Multi-Arch 必要）
+      # 說明：建立支援多架構的 buildx builder
+      # ========================================
+      - name: 🔧 設定 Docker Buildx
+        run: |
+          echo "========================================"
+          echo "🔧 設定 Docker Buildx（Multi-Arch 支援）"
+          echo "========================================"
+
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          set -e
+
+          BUILDER_NAME="multiarch-builder-${{ github.run_id }}"
+
+          echo "📋 檢查現有 buildx builders..."
+          docker buildx ls
+
+          echo ""
+          echo "🔧 建立新的 multi-arch builder: ${BUILDER_NAME}"
+          docker buildx create --name "${BUILDER_NAME}" --driver docker-container --use --bootstrap
+
+          echo ""
+          echo "✅ Buildx builder 已就緒"
+          echo ""
+          echo "📋 目前 builder 狀態："
+          docker buildx inspect --bootstrap
+
+          echo ""
+          echo "🏗️ 支援的平台："
+          docker buildx inspect | grep -i platforms || true
+          REMOTE_EOF
+
+          echo "========================================"
+
+      # ========================================
+      # Step 9: Multi-Arch Docker Build & Push
+      # 說明：使用 buildx 同時建構 amd64 和 arm64 並推送
+      # ========================================
+      - name: 🔨 Multi-Arch Docker Build & Push
+        run: |
+          echo "========================================"
+          echo "🔨 開始 Multi-Arch Docker Build & Push"
+          echo "========================================"
+          echo "映像名稱: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
+          echo "目標架構: linux/amd64, linux/arm64"
+          echo ""
+
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          set -e
+
+          WORKDIR="${{ env.REMOTE_WORKDIR }}"
+          PROJECT="${{ env.PROJECT_NAME }}"
+          IMAGE="${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
+          BUILDER_NAME="multiarch-builder-${{ github.run_id }}"
+
+          echo "📂 進入專案目錄..."
+          cd "${WORKDIR}/${PROJECT}"
+          pwd
+
+          echo ""
+          echo "🔨 執行 Multi-Arch Docker buildx..."
+          echo "映像標籤: ${IMAGE}"
+          echo "目標平台: linux/amd64, linux/arm64"
+          echo ""
+
+          # 確保使用正確的 builder
+          docker buildx use "${BUILDER_NAME}"
+
+          # Multi-arch build + push
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            -t "${IMAGE}" \
+            --push \
+            --progress=plain \
+            .
+
+          echo ""
+          echo "✅ Multi-Arch Docker build & push 完成！"
+          echo ""
+          echo "📦 映像已推送至 Docker Hub："
+          echo "   ${IMAGE}"
+          echo ""
+          echo "🏗️ 支援的架構："
+          echo "   - linux/amd64"
+          echo "   - linux/arm64"
+          REMOTE_EOF
+
+          echo "========================================"
+
+      # ========================================
+      # Step 10: 驗證 Docker Hub 映像
+      # 說明：確認映像已成功推送並檢查架構
+      # ========================================
+      - name: ✅ 驗證 Docker Hub 映像
+        run: |
+          echo "========================================"
+          echo "✅ 驗證 Docker Hub 映像"
+          echo "========================================"
+          echo "映像: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
+          echo ""
+
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          set -e
+
+          IMAGE="${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
+
+          echo "📋 檢查映像 manifest（顯示支援的架構）..."
+          echo ""
+
+          docker buildx imagetools inspect "${IMAGE}"
+
+          echo ""
+          echo "✅ 映像驗證完成"
+          REMOTE_EOF
+
+          echo "========================================"
+
+      # ========================================
+      # Step 11: 清理本次 Build 資源
+      # 說明：只清理本次 build 產生的 builder 和 cache
+      # ========================================
+      - name: 🧹 清理本次 Build 資源
         if: always()
         run: |
-          rm -f ~/.ssh/id_rsa
+          echo "========================================"
+          echo "🧹 清理本次 Build 資源"
+          echo "========================================"
+          echo "Builder 名稱: multiarch-builder-${{ github.run_id }}"
+          echo ""
+
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          set -e
+
+          BUILDER_NAME="multiarch-builder-${{ github.run_id }}"
+
+          echo "🗑️ 移除本次使用的 buildx builder..."
+          if docker buildx rm "${BUILDER_NAME}" 2>/dev/null; then
+            echo "✅ Builder ${BUILDER_NAME} 已移除"
+          else
+            echo "⚠️ Builder 可能已被移除或不存在"
+          fi
+
+          echo ""
+          echo "🗑️ 清理本次 build 產生的 cache..."
+          # 只清理 buildx 的 dangling cache，不影響其他 image
+          docker buildx prune -f --filter "until=1h" 2>/dev/null || true
+          echo "✅ Build cache 已清理"
+
+          echo ""
+          echo "📋 目前剩餘的 builders："
+          docker buildx ls
+
+          echo ""
+          echo "📦 目前剩餘的 convertx 相關映像："
+          docker images | grep convertx || echo "（無本地 convertx 相關映像，因使用 --push 直接推送）"
+          REMOTE_EOF
+
+          echo ""
+          echo "✅ 清理完成（僅清理本次 build 的資源）"
+          echo "========================================"
+
+      # ========================================
+      # Step 12: Docker Logout
+      # 說明：登出 Docker Hub
+      # ========================================
+      - name: 🔒 Docker Hub 登出
+        if: always()
+        run: |
+          echo "========================================"
+          echo "🔒 Docker Hub 登出"
+          echo "========================================"
+
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "docker logout && echo '✅ 已登出 Docker Hub'" || true
+
+          echo "========================================"
+
+      # ========================================
+      # Step 13: 顯示完成摘要
+      # 說明：顯示本次 build 的摘要資訊
+      # ========================================
+      - name: 📋 Build 完成摘要
+        run: |
+          echo "========================================"
+          echo "✅ Multi-Arch Docker Build & Push 完成！"
+          echo "========================================"
+          echo ""
+          echo "📦 映像資訊："
+          echo "  - 映像名稱: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
+          echo "  - Docker Hub: https://hub.docker.com/r/${{ env.DOCKER_IMAGE_REPO }}/tags"
+          echo ""
+          echo "🏗️ 支援的架構："
+          echo "  - linux/amd64"
+          echo "  - linux/arm64"
+          echo ""
+          echo "🔧 Build 設定："
+          echo "  - 遠端主機: ${{ secrets.SSH_HOST }}"
+          echo "  - 工作目錄: ${{ env.REMOTE_WORKDIR }}"
+          echo "  - 專案名稱: ${{ env.PROJECT_NAME }}"
+          echo ""
+          echo "📝 使用方式："
+          echo "  docker pull ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
+          echo ""
+          echo "========================================"
+          echo "🎉 所有步驟已成功完成！"
+          echo "========================================"
