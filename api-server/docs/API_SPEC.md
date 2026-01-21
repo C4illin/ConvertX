@@ -27,22 +27,22 @@ Authorization: Bearer <jwt-token>
 }
 ```
 
-| 欄位 | 必填 | 說明 |
-|------|------|------|
-| `sub` | ✓ | 使用者唯一識別碼 |
-| `exp` | ✓ | Token 過期時間（Unix timestamp） |
-| `iat` | ✓ | Token 簽發時間（Unix timestamp） |
-| `email` | - | 使用者 Email |
-| `roles` | - | 使用者角色列表 |
+| 欄位    | 必填 | 說明                             |
+| ------- | ---- | -------------------------------- |
+| `sub`   | ✓    | 使用者唯一識別碼                 |
+| `exp`   | ✓    | Token 過期時間（Unix timestamp） |
+| `iat`   | ✓    | Token 簽發時間（Unix timestamp） |
+| `email` | -    | 使用者 Email                     |
+| `roles` | -    | 使用者角色列表                   |
 
 ### 認證錯誤回應
 
-| 狀況 | 錯誤碼 | HTTP 狀態 |
-|------|--------|-----------|
-| 缺少 Authorization Header | `MISSING_AUTH_HEADER` | 401 |
-| Token 格式錯誤 | `INVALID_TOKEN` | 401 |
-| Token 簽名無效 | `INVALID_TOKEN` | 401 |
-| Token 已過期 | `TOKEN_EXPIRED` | 401 |
+| 狀況                      | 錯誤碼                | HTTP 狀態 |
+| ------------------------- | --------------------- | --------- |
+| 缺少 Authorization Header | `MISSING_AUTH_HEADER` | 401       |
+| Token 格式錯誤            | `INVALID_TOKEN`       | 401       |
+| Token 簽名無效            | `INVALID_TOKEN`       | 401       |
+| Token 已過期              | `TOKEN_EXPIRED`       | 401       |
 
 ---
 
@@ -80,6 +80,7 @@ Authorization: Bearer <jwt-token>
 列出所有可用的轉換引擎。
 
 **Headers**
+
 ```
 Authorization: Bearer <token>
 ```
@@ -93,8 +94,33 @@ Authorization: Bearer <token>
       "id": "ffmpeg",
       "name": "FFmpeg",
       "description": "Audio and video conversion using FFmpeg",
-      "supported_input_formats": ["mp4", "webm", "avi", "mkv", "mov", "mp3", "wav", "flac", "ogg", "m4a", "gif"],
-      "supported_output_formats": ["webm", "avi", "mkv", "mov", "mp3", "wav", "flac", "ogg", "gif", "m4a", "aac", "mp4"]
+      "supported_input_formats": [
+        "mp4",
+        "webm",
+        "avi",
+        "mkv",
+        "mov",
+        "mp3",
+        "wav",
+        "flac",
+        "ogg",
+        "m4a",
+        "gif"
+      ],
+      "supported_output_formats": [
+        "webm",
+        "avi",
+        "mkv",
+        "mov",
+        "mp3",
+        "wav",
+        "flac",
+        "ogg",
+        "gif",
+        "m4a",
+        "aac",
+        "mp4"
+      ]
     },
     {
       "id": "imagemagick",
@@ -114,6 +140,7 @@ Authorization: Bearer <token>
 取得特定引擎的詳細資訊。
 
 **參數**
+
 - `engine_id`: 引擎識別碼（如 `ffmpeg`, `imagemagick`）
 
 **回應 (200)**
@@ -167,6 +194,7 @@ Authorization: Bearer <token>
 建立新的轉檔任務。
 
 **Headers**
+
 ```
 Authorization: Bearer <token>
 Content-Type: multipart/form-data
@@ -174,12 +202,12 @@ Content-Type: multipart/form-data
 
 **表單欄位**
 
-| 欄位 | 類型 | 必填 | 說明 |
-|------|------|------|------|
-| `file` | File | ✓ | 要轉換的檔案 |
-| `engine` | String | ✓ | 轉換引擎 ID |
-| `target_format` | String | ✓ | 目標格式（不含點） |
-| `options` | String | - | JSON 格式的轉換選項 |
+| 欄位            | 類型   | 必填 | 說明                |
+| --------------- | ------ | ---- | ------------------- |
+| `file`          | File   | ✓    | 要轉換的檔案        |
+| `engine`        | String | ✓    | 轉換引擎 ID         |
+| `target_format` | String | ✓    | 目標格式（不含點）  |
+| `options`       | String | -    | JSON 格式的轉換選項 |
 
 **回應 (201)**
 
@@ -254,12 +282,12 @@ Content-Type: multipart/form-data
 
 **任務狀態**
 
-| 狀態 | 說明 |
-|------|------|
-| `pending` | 等待處理 |
-| `processing` | 處理中 |
-| `completed` | 完成 |
-| `failed` | 失敗 |
+| 狀態         | 說明     |
+| ------------ | -------- |
+| `pending`    | 等待處理 |
+| `processing` | 處理中   |
+| `completed`  | 完成     |
+| `failed`     | 失敗     |
 
 **回應 (200) - 完成**
 
@@ -300,10 +328,12 @@ Content-Type: multipart/form-data
 下載轉換後的檔案。
 
 **前提條件**
+
 - 任務狀態必須是 `completed`
 - 只有任務建立者可以下載
 
 **回應 Headers**
+
 ```
 Content-Type: <mime-type>
 Content-Disposition: attachment; filename="output.webm"
@@ -311,12 +341,12 @@ Content-Disposition: attachment; filename="output.webm"
 
 **錯誤回應**
 
-| 狀況 | 錯誤碼 | HTTP 狀態 |
-|------|--------|-----------|
-| 任務未完成 | `BAD_REQUEST` | 400 |
-| 無權限 | `UNAUTHORIZED` | 401 |
-| 任務不存在 | `JOB_NOT_FOUND` | 404 |
-| 檔案遺失 | `FILE_NOT_FOUND` | 404 |
+| 狀況       | 錯誤碼           | HTTP 狀態 |
+| ---------- | ---------------- | --------- |
+| 任務未完成 | `BAD_REQUEST`    | 400       |
+| 無權限     | `UNAUTHORIZED`   | 401       |
+| 任務不存在 | `JOB_NOT_FOUND`  | 404       |
+| 檔案遺失   | `FILE_NOT_FOUND` | 404       |
 
 ---
 
@@ -351,56 +381,72 @@ GraphQL Playground 可透過 GET 請求訪問同一 URL。
 # ========== Queries ==========
 
 type Query {
-  """健康檢查（不需認證）"""
+  """
+  健康檢查（不需認證）
+  """
   health: Health!
-  
-  """列出所有可用引擎"""
+
+  """
+  列出所有可用引擎
+  """
   engines: [Engine!]!
-  
-  """取得特定引擎"""
+
+  """
+  取得特定引擎
+  """
   engine(id: ID!): Engine
-  
-  """列出當前使用者的所有任務"""
+
+  """
+  列出當前使用者的所有任務
+  """
   jobs: [Job!]!
-  
-  """取得特定任務"""
+
+  """
+  取得特定任務
+  """
   job(id: ID!): Job
-  
-  """驗證轉換是否支援"""
-  validateConversion(
-    engine: String!
-    from: String!
-    to: String!
-  ): CreateJobResult!
-  
-  """取得轉換建議"""
+
+  """
+  驗證轉換是否支援
+  """
+  validateConversion(engine: String!, from: String!, to: String!): CreateJobResult!
+
+  """
+  取得轉換建議
+  """
   suggestions(from: String!, to: String!): [Suggestion!]!
 }
 
 # ========== Mutations ==========
 
 type Mutation {
-  """建立轉檔任務"""
-  createJob(
-    filename: String!
-    fileBase64: String!
-    input: CreateJobInput!
-  ): CreateJobResult!
-  
-  """刪除任務"""
+  """
+  建立轉檔任務
+  """
+  createJob(filename: String!, fileBase64: String!, input: CreateJobInput!): CreateJobResult!
+
+  """
+  刪除任務
+  """
   deleteJob(id: ID!): Boolean!
 }
 
 # ========== Input Types ==========
 
 input CreateJobInput {
-  """轉換引擎 ID"""
+  """
+  轉換引擎 ID
+  """
   engine: String!
-  
-  """目標格式"""
+
+  """
+  目標格式
+  """
   targetFormat: String!
-  
-  """轉換選項（JSON 字串）"""
+
+  """
+  轉換選項（JSON 字串）
+  """
   options: String
 }
 
@@ -520,10 +566,7 @@ mutation CreateConversionJob($filename: String!, $content: String!) {
   createJob(
     filename: $filename
     fileBase64: $content
-    input: {
-      engine: "imagemagick"
-      targetFormat: "jpg"
-    }
+    input: { engine: "imagemagick", targetFormat: "jpg" }
   ) {
     success
     job {
@@ -545,6 +588,7 @@ mutation CreateConversionJob($filename: String!, $content: String!) {
 ```
 
 Variables:
+
 ```json
 {
   "filename": "image.png",
@@ -597,18 +641,18 @@ mutation {
 
 ## 錯誤碼對照表
 
-| 錯誤碼 | HTTP 狀態 | 說明 | 包含建議 |
-|--------|-----------|------|----------|
-| `UNAUTHORIZED` | 401 | 未授權存取 | ✗ |
-| `INVALID_TOKEN` | 401 | Token 無效 | ✗ |
-| `TOKEN_EXPIRED` | 401 | Token 已過期 | ✗ |
-| `MISSING_AUTH_HEADER` | 401 | 缺少認證標頭 | ✗ |
-| `BAD_REQUEST` | 400 | 請求格式錯誤 | ✗ |
-| `INVALID_FILE` | 400 | 無法辨識檔案格式 | ✗ |
-| `FILE_TOO_LARGE` | 400 | 檔案超過大小限制 | ✗ |
-| `ENGINE_NOT_FOUND` | 404 | 引擎不存在 | ✗ |
-| `JOB_NOT_FOUND` | 404 | 任務不存在 | ✗ |
-| `FILE_NOT_FOUND` | 404 | 檔案不存在 | ✗ |
-| `UNSUPPORTED_CONVERSION` | 422 | 不支援的轉換 | ✓ |
-| `CONVERSION_FAILED` | 500 | 轉換失敗 | ✗ |
-| `INTERNAL_ERROR` | 500 | 內部錯誤 | ✗ |
+| 錯誤碼                   | HTTP 狀態 | 說明             | 包含建議 |
+| ------------------------ | --------- | ---------------- | -------- |
+| `UNAUTHORIZED`           | 401       | 未授權存取       | ✗        |
+| `INVALID_TOKEN`          | 401       | Token 無效       | ✗        |
+| `TOKEN_EXPIRED`          | 401       | Token 已過期     | ✗        |
+| `MISSING_AUTH_HEADER`    | 401       | 缺少認證標頭     | ✗        |
+| `BAD_REQUEST`            | 400       | 請求格式錯誤     | ✗        |
+| `INVALID_FILE`           | 400       | 無法辨識檔案格式 | ✗        |
+| `FILE_TOO_LARGE`         | 400       | 檔案超過大小限制 | ✗        |
+| `ENGINE_NOT_FOUND`       | 404       | 引擎不存在       | ✗        |
+| `JOB_NOT_FOUND`          | 404       | 任務不存在       | ✗        |
+| `FILE_NOT_FOUND`         | 404       | 檔案不存在       | ✗        |
+| `UNSUPPORTED_CONVERSION` | 422       | 不支援的轉換     | ✓        |
+| `CONVERSION_FAILED`      | 500       | 轉換失敗         | ✗        |
+| `INTERNAL_ERROR`         | 500       | 內部錯誤         | ✗        |

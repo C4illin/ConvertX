@@ -194,6 +194,41 @@ docker compose up -d
 
 ---
 
+## API Server（選用）
+
+如需以程式整合方式使用 ConvertX 的轉檔功能，可啟用 **API Server**。
+
+> ⚠️ API Server 為**選用功能**，不影響現有 Web UI 的使用。若只使用網頁介面，無需任何額外設定。
+
+### 功能特點
+
+- 🔐 **JWT 認證** — 安全的 API 存取控制
+- 🌐 **REST + GraphQL** — 雙協議支援，滿足不同整合需求
+- 🔍 **智慧建議** — 轉換失敗時自動推薦替代引擎
+- 🛠️ **20+ 轉換引擎** — 與 Web UI 共用完整轉換器套件
+
+### 快速啟用
+
+```bash
+# 同時啟動 Web UI 與 API Server
+docker compose --profile api up -d
+```
+
+| 服務       | 端口 | 說明              |
+| ---------- | ---- | ----------------- |
+| Web UI     | 3000 | 網頁介面          |
+| API Server | 3001 | REST & GraphQL    |
+
+### API 文件
+
+詳細的 API 規格與使用說明：
+
+- 📘 [API Server README](api-server/README.md)
+- 📗 [API 規格文件](api-server/docs/API_SPEC.md)
+- 📙 [架構說明](api-server/docs/ARCHITECTURE.md)
+
+---
+
 ## 進階文件
 
 | 文件                                   | 說明                      |

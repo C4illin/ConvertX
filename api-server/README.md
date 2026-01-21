@@ -1,4 +1,4 @@
-# ConvertX API Server
+# ConvertX-CN API Server
 
 一個使用 Rust 實作的 REST 與 GraphQL 檔案轉換 API 伺服器。
 
@@ -54,14 +54,14 @@ cargo run --release
 
 ### 環境變數
 
-| 變數 | 說明 | 預設值 |
-|------|------|--------|
-| `API_HOST` | 伺服器監聽地址 | `0.0.0.0` |
-| `API_PORT` | 伺服器監聽埠 | `3001` |
-| `JWT_SECRET` | JWT 驗證密鑰 | (預設值，正式環境請更改) |
-| `UPLOAD_DIR` | 上傳檔案目錄 | `./data/uploads` |
-| `OUTPUT_DIR` | 輸出檔案目錄 | `./data/output` |
-| `MAX_FILE_SIZE` | 最大檔案大小（bytes） | `104857600` (100MB) |
+| 變數            | 說明                  | 預設值                   |
+| --------------- | --------------------- | ------------------------ |
+| `API_HOST`      | 伺服器監聽地址        | `0.0.0.0`                |
+| `API_PORT`      | 伺服器監聽埠          | `3001`                   |
+| `JWT_SECRET`    | JWT 驗證密鑰          | (預設值，正式環境請更改) |
+| `UPLOAD_DIR`    | 上傳檔案目錄          | `./data/uploads`         |
+| `OUTPUT_DIR`    | 輸出檔案目錄          | `./data/output`          |
+| `MAX_FILE_SIZE` | 最大檔案大小（bytes） | `104857600` (100MB)      |
 
 ### 範例 .env 檔案
 
@@ -114,6 +114,7 @@ GET /api/v1/health
 ```
 
 回應：
+
 ```json
 {
   "status": "healthy",
@@ -130,6 +131,7 @@ Authorization: Bearer <token>
 ```
 
 回應：
+
 ```json
 {
   "engines": [
@@ -160,12 +162,14 @@ Content-Type: multipart/form-data
 ```
 
 表單欄位：
+
 - `file`: 要轉換的檔案（必填）
 - `engine`: 轉換引擎 ID（必填）
 - `target_format`: 目標格式（必填）
 - `options`: JSON 格式的選項（選填）
 
 回應：
+
 ```json
 {
   "job_id": "550e8400-e29b-41d4-a716-446655440000",
@@ -189,6 +193,7 @@ Authorization: Bearer <token>
 ```
 
 回應：
+
 ```json
 {
   "job_id": "550e8400-e29b-41d4-a716-446655440000",
@@ -262,22 +267,22 @@ GraphQL Playground 可透過瀏覽器訪問 `http://localhost:3001/graphql`
 type Query {
   # 健康檢查（不需認證）
   health: Health!
-  
+
   # 列出所有引擎
   engines: [Engine!]!
-  
+
   # 取得特定引擎
   engine(id: ID!): Engine
-  
+
   # 列出使用者的任務
   jobs: [Job!]!
-  
+
   # 取得特定任務
   job(id: ID!): Job
-  
+
   # 驗證轉換是否支援
   validateConversion(engine: String!, from: String!, to: String!): CreateJobResult!
-  
+
   # 取得轉換建議
   suggestions(from: String!, to: String!): [Suggestion!]!
 }
@@ -288,12 +293,8 @@ type Query {
 ```graphql
 type Mutation {
   # 建立轉檔任務
-  createJob(
-    filename: String!
-    fileBase64: String!
-    input: CreateJobInput!
-  ): CreateJobResult!
-  
+  createJob(filename: String!, fileBase64: String!, input: CreateJobInput!): CreateJobResult!
+
   # 刪除任務
   deleteJob(id: ID!): Boolean!
 }
@@ -390,10 +391,7 @@ mutation {
   createJob(
     filename: "video.mp4"
     fileBase64: "base64-encoded-content"
-    input: {
-      engine: "ffmpeg"
-      targetFormat: "webm"
-    }
+    input: { engine: "ffmpeg", targetFormat: "webm" }
   ) {
     success
     job {
@@ -450,21 +448,21 @@ query {
 
 ### 錯誤碼
 
-| 錯誤碼 | HTTP 狀態 | 說明 |
-|--------|-----------|------|
-| `UNAUTHORIZED` | 401 | 未授權 |
-| `INVALID_TOKEN` | 401 | Token 格式或簽名無效 |
-| `TOKEN_EXPIRED` | 401 | Token 已過期 |
-| `MISSING_AUTH_HEADER` | 401 | 缺少 Authorization 標頭 |
-| `BAD_REQUEST` | 400 | 請求格式錯誤 |
-| `INVALID_FILE` | 400 | 檔案格式無法辨識 |
-| `FILE_TOO_LARGE` | 400 | 檔案超過大小限制 |
-| `ENGINE_NOT_FOUND` | 404 | 指定的引擎不存在 |
-| `JOB_NOT_FOUND` | 404 | 任務不存在 |
-| `FILE_NOT_FOUND` | 404 | 檔案不存在 |
-| `UNSUPPORTED_CONVERSION` | 422 | 不支援的轉換（附帶建議） |
-| `CONVERSION_FAILED` | 500 | 轉換過程失敗 |
-| `INTERNAL_ERROR` | 500 | 內部錯誤 |
+| 錯誤碼                   | HTTP 狀態 | 說明                     |
+| ------------------------ | --------- | ------------------------ |
+| `UNAUTHORIZED`           | 401       | 未授權                   |
+| `INVALID_TOKEN`          | 401       | Token 格式或簽名無效     |
+| `TOKEN_EXPIRED`          | 401       | Token 已過期             |
+| `MISSING_AUTH_HEADER`    | 401       | 缺少 Authorization 標頭  |
+| `BAD_REQUEST`            | 400       | 請求格式錯誤             |
+| `INVALID_FILE`           | 400       | 檔案格式無法辨識         |
+| `FILE_TOO_LARGE`         | 400       | 檔案超過大小限制         |
+| `ENGINE_NOT_FOUND`       | 404       | 指定的引擎不存在         |
+| `JOB_NOT_FOUND`          | 404       | 任務不存在               |
+| `FILE_NOT_FOUND`         | 404       | 檔案不存在               |
+| `UNSUPPORTED_CONVERSION` | 422       | 不支援的轉換（附帶建議） |
+| `CONVERSION_FAILED`      | 500       | 轉換過程失敗             |
+| `INTERNAL_ERROR`         | 500       | 內部錯誤                 |
 
 ## 📦 轉換結果策略
 
@@ -480,6 +478,7 @@ query {
 ### 檔案儲存
 
 內部儲存結構：
+
 ```
 data/
 ├── uploads/
@@ -494,28 +493,28 @@ data/
 
 ## 🔧 支援的轉換引擎
 
-| 引擎 ID | 名稱 | 說明 |
-|---------|------|------|
-| `ffmpeg` | FFmpeg | 音視頻轉換 |
-| `imagemagick` | ImageMagick | 圖片格式轉換 |
+| 引擎 ID          | 名稱           | 說明                     |
+| ---------------- | -------------- | ------------------------ |
+| `ffmpeg`         | FFmpeg         | 音視頻轉換               |
+| `imagemagick`    | ImageMagick    | 圖片格式轉換             |
 | `graphicsmagick` | GraphicsMagick | 圖片格式轉換（替代方案） |
-| `libreoffice` | LibreOffice | 辦公文件轉換 |
-| `pandoc` | Pandoc | 文件/標記語言轉換 |
-| `calibre` | Calibre | 電子書轉換 |
-| `inkscape` | Inkscape | 向量圖轉換 |
-| `resvg` | resvg | SVG 渲染 |
-| `vips` | libvips | 高效能圖片處理 |
-| `libheif` | libheif | HEIF/HEIC 轉換 |
-| `libjxl` | libjxl | JPEG XL 轉換 |
-| `potrace` | Potrace | 點陣圖轉向量 |
-| `vtracer` | VTracer | 進階向量化 |
-| `dasel` | Dasel | 資料格式轉換 |
-| `assimp` | Assimp | 3D 模型轉換 |
-| `xelatex` | XeLaTeX | LaTeX 編譯 |
-| `dvisvgm` | dvisvgm | DVI 轉 SVG |
-| `msgconvert` | msgconvert | Outlook MSG 轉 EML |
-| `vcf` | VCF Converter | vCard 轉換 |
-| `markitdown` | MarkItDown | 文件轉 Markdown |
+| `libreoffice`    | LibreOffice    | 辦公文件轉換             |
+| `pandoc`         | Pandoc         | 文件/標記語言轉換        |
+| `calibre`        | Calibre        | 電子書轉換               |
+| `inkscape`       | Inkscape       | 向量圖轉換               |
+| `resvg`          | resvg          | SVG 渲染                 |
+| `vips`           | libvips        | 高效能圖片處理           |
+| `libheif`        | libheif        | HEIF/HEIC 轉換           |
+| `libjxl`         | libjxl         | JPEG XL 轉換             |
+| `potrace`        | Potrace        | 點陣圖轉向量             |
+| `vtracer`        | VTracer        | 進階向量化               |
+| `dasel`          | Dasel          | 資料格式轉換             |
+| `assimp`         | Assimp         | 3D 模型轉換              |
+| `xelatex`        | XeLaTeX        | LaTeX 編譯               |
+| `dvisvgm`        | dvisvgm        | DVI 轉 SVG               |
+| `msgconvert`     | msgconvert     | Outlook MSG 轉 EML       |
+| `vcf`            | VCF Converter  | vCard 轉換               |
+| `markitdown`     | MarkItDown     | 文件轉 Markdown          |
 
 ## 🧪 測試
 
