@@ -1,0 +1,92 @@
+name: Docker Build & Push (Remote Host)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  REMOTE_WORKDIR: /home/bioailab/miniconda3/lid/app/docker_build
+  PROJECT_NAME: ConvertX-CN
+  DOCKER_IMAGE_REPO: convertx/convertx-cn
+  IMAGE_TAG: 0.1.10.test
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[remote-build]')
+
+    steps:
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Build and Push Docker Image on Remote Host
+        run: |
+          # Export variables for use in SSH session
+          export REMOTE_WORKDIR="${{ env.REMOTE_WORKDIR }}"
+          export PROJECT_NAME="${{ env.PROJECT_NAME }}"
+          export IMAGE_NAME="${{ env.DOCKER_IMAGE_REPO }}:${{ env.IMAGE_TAG }}"
+          export DOCKERHUB_USERNAME="${{ secrets.DOCKERHUB_USERNAME }}"
+          export DOCKERHUB_TOKEN="${{ secrets.DOCKERHUB_TOKEN }}"
+          export SSH_USER="${{ secrets.SSH_USER }}"
+          export SSH_HOST="${{ secrets.SSH_HOST }}"
+
+          # Create remote script
+          cat > /tmp/remote_build.sh << 'SCRIPT_EOF'
+          #!/bin/bash
+          set -e
+
+          REMOTE_WORKDIR="$1"
+          PROJECT_NAME="$2"
+          IMAGE_NAME="$3"
+          DOCKERHUB_USERNAME="$4"
+          DOCKERHUB_TOKEN="$5"
+
+          # Step 1: Enter work directory
+          cd "${REMOTE_WORKDIR}"
+
+          # Step 2: Clone or update project
+          if [ ! -d "${PROJECT_NAME}" ]; then
+            git clone https://github.com/pi-docket/ConvertX-CN.git
+          fi
+
+          cd "${PROJECT_NAME}"
+          git pull
+
+          echo "Building image: ${IMAGE_NAME}"
+
+          # Step 3: Docker Login (must use Action PAT)
+          echo "${DOCKERHUB_TOKEN}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
+
+          # Step 4: Docker Build & Push
+          docker build -t "${IMAGE_NAME}" .
+          docker push "${IMAGE_NAME}"
+
+          echo "Successfully pushed: ${IMAGE_NAME}"
+
+          # Step 5: Safe cleanup (only this build image)
+          docker rmi "${IMAGE_NAME}" || true
+          docker builder prune -f --filter "unused-for=24h"
+
+          # Logout for security
+          docker logout
+
+          echo "Cleanup completed"
+          SCRIPT_EOF
+
+          chmod +x /tmp/remote_build.sh
+
+          # Copy script to remote and execute
+          scp -o StrictHostKeyChecking=no /tmp/remote_build.sh "${SSH_USER}@${SSH_HOST}:/tmp/remote_build.sh"
+          ssh -o StrictHostKeyChecking=no "${SSH_USER}@${SSH_HOST}" "bash /tmp/remote_build.sh '${REMOTE_WORKDIR}' '${PROJECT_NAME}' '${IMAGE_NAME}' '${DOCKERHUB_USERNAME}' '${DOCKERHUB_TOKEN}'"
+          ssh -o StrictHostKeyChecking=no "${SSH_USER}@${SSH_HOST}" "rm -f /tmp/remote_build.sh"
+
+      - name: Cleanup SSH Key
+        if: always()
+        run: |
+          rm -f ~/.ssh/id_rsa
