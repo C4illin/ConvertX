@@ -306,6 +306,7 @@ jobs:
           echo "========================================"
           echo "🔨 開始 Multi-Arch Docker Build"
           echo "========================================"
+          echo "版本: v${{ github.event.inputs.image_tag }}"
           echo "映像名稱: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
 
           # 判斷是否為正式版本（純數字+點號，支援任意段數如 0.1.10 或 0.1.10.1）
@@ -399,6 +400,7 @@ jobs:
           echo "========================================"
           echo "📤 推送映像到 Docker Hub"
           echo "========================================"
+          echo "版本: v${{ github.event.inputs.image_tag }}"
           echo "映像: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
 
           # 判斷是否為正式版本（純數字+點號，支援任意段數如 0.1.10 或 0.1.10.1）
@@ -500,6 +502,7 @@ jobs:
           echo "========================================"
           echo "✅ 驗證 Docker Hub 映像"
           echo "========================================"
+          echo "版本: v${{ github.event.inputs.image_tag }}"
           echo "映像: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
           echo ""
 
@@ -589,6 +592,8 @@ jobs:
           echo "✅ Multi-Arch Docker Build & Push 完成！"
           echo "========================================"
           echo ""
+          echo "🏷️ 版本: v${{ github.event.inputs.image_tag }}"
+          echo ""
           echo "📦 映像資訊："
           echo "  - 版本標籤: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
 
@@ -663,9 +668,11 @@ jobs:
       # Step 18: 創建 GitHub Release
       # 說明：為正式版本自動創建 GitHub Release
       # 注意：不使用 generate_release_notes，改用 body_path 提供完整 changelog
+      # 注意：如果 Release 已存在會失敗，使用 continue-on-error 跳過
       # ========================================
       - name: 📦 Create GitHub Release
         if: ${{ !contains(github.event.inputs.image_tag, 'test') && !contains(github.event.inputs.image_tag, 'dev') && !contains(github.event.inputs.image_tag, 'alpha') && !contains(github.event.inputs.image_tag, 'beta') }}
+        continue-on-error: true
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.event.inputs.image_tag }}
@@ -685,9 +692,13 @@ jobs:
           echo "========================================"
           echo "🔄 更新遠端 ConvertX-CN 服務"
           echo "========================================"
+          echo "版本: v${{ github.event.inputs.image_tag }}"
+          echo ""
 
-          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << REMOTE_EOF
           set -e
+
+          IMAGE_TAG="v${{ github.event.inputs.image_tag }}"
 
           # 1. 進入專案資料夾
           cd /home/bioailab/miniconda3/lid/app/convertx-cn
@@ -698,7 +709,7 @@ jobs:
 
           # 3. 拉取最新映像檔
           echo ""
-          echo "📋 拉取最新映像檔..."
+          echo "📋 拉取最新映像檔（\${IMAGE_TAG}）..."
           docker compose pull
 
           # 4. 重新啟動
@@ -716,7 +727,7 @@ jobs:
           docker logs convertx-cn --tail=100
 
           echo ""
-          echo "✅ ConvertX-CN 服務已更新完成"
+          echo "✅ ConvertX-CN 服務已更新至 \${IMAGE_TAG}"
           REMOTE_EOF
 
           echo "========================================"
