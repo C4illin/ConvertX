@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <!-- Background -->
+  <rect width="200" height="200" fill="#f0f0f0"/>
+  
+  <!-- Main shape -->
+  <rect x="20" y="20" width="160" height="160" fill="#4285f4" rx="20"/>
+  
+  <!-- Inner circle -->
+  <circle cx="100" cy="100" r="50" fill="#ffffff"/>
+  
+  <!-- Cross lines -->
+  <line x1="100" y1="60" x2="100" y2="140" stroke="#4285f4" stroke-width="8"/>
+  <line x1="60" y1="100" x2="140" y2="100" stroke="#4285f4" stroke-width="8"/>
+  
+  <!-- Text label -->
+  <text x="100" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">E2E Test</text>
+</svg>

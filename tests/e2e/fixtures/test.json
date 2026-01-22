@@ -1,0 +1,29 @@
+{
+  "name": "e2e-test-data",
+  "version": "1.0.0",
+  "description": "Test JSON file for E2E testing",
+  "metadata": {
+    "created": "2024-01-01T00:00:00Z",
+    "author": "E2E Test Suite"
+  },
+  "data": {
+    "items": [
+      { "id": 1, "name": "Item One", "value": 100 },
+      { "id": 2, "name": "Item Two", "value": 200 },
+      { "id": 3, "name": "Item Three", "value": 300 }
+    ],
+    "nested": {
+      "level1": {
+        "level2": {
+          "key": "deep-value"
+        }
+      }
+    },
+    "tags": ["test", "e2e", "conversion"]
+  },
+  "settings": {
+    "enabled": true,
+    "threshold": 0.75,
+    "options": ["a", "b", "c"]
+  }
+}
