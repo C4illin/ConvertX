@@ -26,6 +26,12 @@ jobs:
         with:
           bun-version: 1.2.2
 
+      # 安裝 E2E 測試所需的轉換工具
+      - name: Install conversion tools for E2E tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc imagemagick
+
       - name: Install dependencies
         run: bun install
 

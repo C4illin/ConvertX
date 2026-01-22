@@ -400,15 +400,156 @@ jobs:
             fi
           done
 
-          # 清理
-          echo ""
-          echo "🧹 清理測試容器..."
-          docker rm -f verify-test
-
           echo ""
           echo "========================================"
           echo "✅ 基本功能驗證完成！"
           echo "========================================"
+
+      # ========================================
+      # 驗證 4: E2E 測試
+      # ========================================
+      - name: "🧪 E2E Tests in Container"
+        run: |
+          echo "========================================"
+          echo "🧪 E2E 測試"
+          echo "========================================"
+
+          IMAGE="${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}"
+
+          # 啟動容器（掛載測試目錄）
+          echo "🚀 啟動測試容器..."
+          docker run -d --name e2e-test -p 3001:3000 \
+            -e NODE_ENV=test \
+            "${IMAGE}"
+
+          # 等待容器啟動
+          echo "⏳ 等待容器啟動..."
+          for i in {1..60}; do
+            if docker exec e2e-test curl -sf http://localhost:3000/healthcheck > /dev/null 2>&1; then
+              echo "✅ 容器在 ${i} 秒內啟動成功"
+              break
+            fi
+            if [ $i -eq 60 ]; then
+              echo "❌ 容器啟動超時"
+              docker logs e2e-test
+              docker rm -f e2e-test
+              exit 1
+            fi
+            sleep 1
+          done
+
+          # 執行 E2E 轉換測試
+          echo ""
+          echo "📋 執行 E2E 轉換測試..."
+          FAILED=0
+
+          # 測試 1: Inkscape SVG → PNG
+          echo ""
+          echo "🔄 測試 Inkscape: SVG → PNG"
+          docker exec e2e-test sh -c '
+            echo "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100\" height=\"100\"><circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/></svg>" > /tmp/test.svg
+            inkscape --export-type=png --export-filename=/tmp/test.png /tmp/test.svg 2>/dev/null
+            if [ -f /tmp/test.png ]; then
+              echo "✅ Inkscape SVG → PNG 成功"
+              ls -la /tmp/test.png
+            else
+              echo "❌ Inkscape SVG → PNG 失敗"
+              exit 1
+            fi
+          ' || FAILED=1
+
+          # 測試 2: Pandoc Markdown → HTML
+          echo ""
+          echo "🔄 測試 Pandoc: Markdown → HTML"
+          docker exec e2e-test sh -c '
+            echo "# Test\n\nHello **world**" > /tmp/test.md
+            pandoc /tmp/test.md -o /tmp/test.html
+            if [ -f /tmp/test.html ]; then
+              echo "✅ Pandoc Markdown → HTML 成功"
+              cat /tmp/test.html
+            else
+              echo "❌ Pandoc Markdown → HTML 失敗"
+              exit 1
+            fi
+          ' || FAILED=1
+
+          # 測試 3: LibreOffice DOCX → PDF
+          echo ""
+          echo "🔄 測試 LibreOffice: TXT → PDF"
+          docker exec e2e-test sh -c '
+            echo "Test document content" > /tmp/test.txt
+            libreoffice --headless --convert-to pdf --outdir /tmp /tmp/test.txt
+            if [ -f /tmp/test.pdf ]; then
+              echo "✅ LibreOffice TXT → PDF 成功"
+              ls -la /tmp/test.pdf
+            else
+              echo "❌ LibreOffice TXT → PDF 失敗"
+              exit 1
+            fi
+          ' || FAILED=1
+
+          # 測試 4: FFmpeg 音頻轉換
+          echo ""
+          echo "🔄 測試 FFmpeg: 生成測試音頻"
+          docker exec e2e-test sh -c '
+            ffmpeg -f lavfi -i "sine=frequency=440:duration=1" -y /tmp/test.wav 2>/dev/null
+            if [ -f /tmp/test.wav ]; then
+              echo "✅ FFmpeg 音頻生成成功"
+              ls -la /tmp/test.wav
+            else
+              echo "❌ FFmpeg 音頻生成失敗"
+              exit 1
+            fi
+          ' || FAILED=1
+
+          # 測試 5: ImageMagick 圖片轉換
+          echo ""
+          echo "🔄 測試 ImageMagick: PNG → JPEG"
+          docker exec e2e-test sh -c '
+            convert -size 100x100 xc:blue /tmp/blue.png
+            convert /tmp/blue.png /tmp/blue.jpg
+            if [ -f /tmp/blue.jpg ]; then
+              echo "✅ ImageMagick PNG → JPEG 成功"
+              ls -la /tmp/blue.jpg
+            else
+              echo "❌ ImageMagick PNG → JPEG 失敗"
+              exit 1
+            fi
+          ' || FAILED=1
+
+          # 測試 6: API 健康檢查
+          echo ""
+          echo "🔄 測試 API 端點"
+          if docker exec e2e-test curl -sf http://localhost:3000/healthcheck | grep -q "OK"; then
+            echo "✅ Healthcheck API 正常"
+          else
+            echo "❌ Healthcheck API 失敗"
+            FAILED=1
+          fi
+
+          # 清理
+          echo ""
+          echo "🧹 清理測試容器..."
+          docker rm -f e2e-test
+
+          echo ""
+          echo "========================================"
+          if [ $FAILED -eq 0 ]; then
+            echo "✅ E2E 測試全部通過！"
+          else
+            echo "❌ E2E 測試有失敗項目"
+            exit 1
+          fi
+          echo "========================================"
+
+      # ========================================
+      # 清理驗證容器
+      # ========================================
+      - name: "🧹 Cleanup Verification Containers"
+        if: always()
+        run: |
+          docker rm -f verify-test 2>/dev/null || true
+          docker rm -f e2e-test 2>/dev/null || true
 
       - name: Verification Summary
         run: |
@@ -421,6 +562,7 @@ jobs:
           echo "- 🖥️ Headless Environment: Verified" >> $GITHUB_STEP_SUMMARY
           echo "- 🤖 Model Download: Checked" >> $GITHUB_STEP_SUMMARY
           echo "- ⚙️ Basic Functionality: Verified" >> $GITHUB_STEP_SUMMARY
+          echo "- 🧪 E2E Tests: Passed" >> $GITHUB_STEP_SUMMARY
 
   # ==============================================================================
   # �📦 Create GitHub Release
