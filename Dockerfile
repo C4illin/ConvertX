@@ -232,9 +232,10 @@ RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 # 階段 12：安裝 Python 工具（pipx）+ huggingface_hub（用於模型下載）
+# 注意：Debian bookworm 使用 PEP 668，需要 --break-system-packages 來安裝系統級套件
 RUN pipx install "markitdown[all]" \
   && pipx install "pdf2zh" \
-  && pip3 install --no-cache-dir huggingface_hub
+  && pip3 install --no-cache-dir --break-system-packages huggingface_hub
 
 # 階段 13：安裝 mineru（可能在 arm64 上有問題，加入錯誤處理）
 RUN pipx install "mineru[all]" || echo "⚠️ mineru 安裝失敗（可能是 arm64 相容性問題），跳過..."
