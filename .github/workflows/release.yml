@@ -389,7 +389,7 @@ jobs:
           echo ""
           echo "📋 檢查關鍵轉檔工具..."
           TOOLS=("libreoffice --version" "pandoc --version" "ffmpeg -version" "tesseract --version" "pdf2zh --help" "mineru --help" "babeldoc --help")
-          
+
           for tool_cmd in "${TOOLS[@]}"; do
             TOOL_NAME=$(echo "$tool_cmd" | cut -d' ' -f1)
             echo -n "  ${TOOL_NAME}: "

@@ -167,12 +167,14 @@ RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
 
 # 階段 4：圖像處理工具
 # 注意：bookworm 使用 imagemagick（版本 6），trixie 才有 imagemagick-7
+# 注意：xvfb 用於 Inkscape 在 headless 環境運行（需要虛擬 X11 顯示器）
 RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   imagemagick \
   inkscape \
   libheif-examples \
   libjxl-tools \
   libvips-tools \
+  xvfb \
   && rm -rf /var/lib/apt/lists/*
 
 # 階段 5：文件處理工具
