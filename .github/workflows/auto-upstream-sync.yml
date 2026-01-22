@@ -152,8 +152,8 @@ jobs:
         run: |
           echo "🔄 Merging upstream/${{ env.UPSTREAM_BRANCH }} into ${{ env.TARGET_BRANCH }}..."
 
-          # 嘗試自動 merge
-          if git merge upstream/${{ env.UPSTREAM_BRANCH }} --no-edit -m "🔄 Auto-merge upstream changes ($(date +'%Y-%m-%d'))"; then
+          # 嘗試自動 merge（使用 --no-ff 確保創建 merge commit，保留完整歷史）
+          if git merge upstream/${{ env.UPSTREAM_BRANCH }} --no-ff --no-edit -m "🔄 Merge upstream/${{ env.UPSTREAM_BRANCH }} ($(date +'%Y-%m-%d'))"; then
             echo "✅ Merge successful!"
             echo "merge_success=true" >> $GITHUB_OUTPUT
           else

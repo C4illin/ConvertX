@@ -185,11 +185,249 @@ jobs:
           echo "**Platforms:** linux/amd64, linux/arm64" >> $GITHUB_STEP_SUMMARY
 
   # ==============================================================================
-  # 📦 Create GitHub Release
+  # � Verify Docker Image（模型驗證 + Headless 驗證）
+  # ==============================================================================
+  verify-image:
+    name: Verify Docker Image
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    timeout-minutes: 15
+
+    steps:
+      - name: Get tag name
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Pull Docker image
+        run: |
+          echo "📥 Pulling Docker image..."
+          docker pull ${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}
+
+      # ========================================
+      # 驗證 1: Headless 環境驗證
+      # ========================================
+      - name: "🖥️ Headless Environment Verification"
+        run: |
+          echo "========================================"
+          echo "🖥️ Headless 環境驗證"
+          echo "========================================"
+
+          IMAGE="${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}"
+          FAILED=0
+
+          # 檢查 DISPLAY 環境變數（應為空或不存在）
+          echo ""
+          echo "📋 檢查 DISPLAY 環境變數..."
+          DISPLAY_VAR=$(docker run --rm "${IMAGE}" printenv DISPLAY 2>/dev/null || echo "")
+          if [ -z "$DISPLAY_VAR" ]; then
+            echo "✅ DISPLAY 未設定（headless 模式正確）"
+          else
+            echo "⚠️ DISPLAY 已設定: ${DISPLAY_VAR}（可能影響 headless 模式）"
+          fi
+
+          # 檢查 Xvfb（應不存在或不需要）
+          echo ""
+          echo "📋 檢查 Xvfb..."
+          if docker run --rm "${IMAGE}" which Xvfb 2>/dev/null; then
+            echo "⚠️ Xvfb 存在（但應不需要）"
+          else
+            echo "✅ Xvfb 不存在（headless 模式正確）"
+          fi
+
+          # 驗證 LibreOffice headless 模式
+          echo ""
+          echo "📋 驗證 LibreOffice headless..."
+          if docker run --rm "${IMAGE}" libreoffice --headless --version 2>/dev/null | head -1; then
+            echo "✅ LibreOffice headless 模式可用"
+          else
+            echo "❌ LibreOffice headless 模式失敗"
+            FAILED=1
+          fi
+
+          # 驗證 Inkscape headless 模式
+          echo ""
+          echo "📋 驗證 Inkscape headless..."
+          if docker run --rm "${IMAGE}" inkscape --version 2>/dev/null; then
+            echo "✅ Inkscape 可用"
+          else
+            echo "❌ Inkscape 不可用"
+            FAILED=1
+          fi
+
+          # 驗證 Calibre headless 模式（使用 ebook-convert）
+          echo ""
+          echo "📋 驗證 Calibre headless..."
+          if docker run --rm -e QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox" "${IMAGE}" ebook-convert --version 2>/dev/null | head -1; then
+            echo "✅ Calibre headless 模式可用"
+          else
+            echo "❌ Calibre headless 模式失敗"
+            FAILED=1
+          fi
+
+          echo ""
+          echo "========================================"
+          if [ $FAILED -eq 0 ]; then
+            echo "✅ Headless 環境驗證通過！"
+          else
+            echo "❌ Headless 環境驗證失敗！"
+            exit 1
+          fi
+          echo "========================================"
+
+      # ========================================
+      # 驗證 2: 模型下載驗證
+      # ========================================
+      - name: "🤖 Model Download Verification"
+        run: |
+          echo "========================================"
+          echo "🤖 模型下載驗證"
+          echo "========================================"
+
+          IMAGE="${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}"
+          FAILED=0
+
+          # 檢查 HuggingFace cache 目錄
+          echo ""
+          echo "📋 檢查 HuggingFace cache..."
+          HF_CACHE=$(docker run --rm "${IMAGE}" ls -la /root/.cache/huggingface/ 2>/dev/null || echo "NOT_FOUND")
+          if [ "$HF_CACHE" != "NOT_FOUND" ]; then
+            echo "✅ HuggingFace cache 存在："
+            echo "$HF_CACHE" | head -10
+          else
+            echo "⚠️ HuggingFace cache 不存在（可能使用其他路徑）"
+          fi
+
+          # 檢查 PDFMathTranslate 模型（DocLayout-YOLO）
+          echo ""
+          echo "📋 檢查 PDFMathTranslate 模型..."
+          ONNX_MODEL=$(docker run --rm "${IMAGE}" find /root -name "*.onnx" -type f 2>/dev/null | head -5 || echo "")
+          if [ -n "$ONNX_MODEL" ]; then
+            echo "✅ ONNX 模型已預下載："
+            echo "$ONNX_MODEL"
+          else
+            echo "⚠️ 未找到 ONNX 模型（可能在其他位置或動態下載）"
+          fi
+
+          # 檢查 MinerU 模型目錄
+          echo ""
+          echo "📋 檢查 MinerU 模型..."
+          MINERU_MODELS=$(docker run --rm "${IMAGE}" ls -la /root/.cache/modelscope/ 2>/dev/null || \
+                         docker run --rm "${IMAGE}" ls -la /app/models/ 2>/dev/null || echo "NOT_FOUND")
+          if [ "$MINERU_MODELS" != "NOT_FOUND" ]; then
+            echo "✅ MinerU 模型目錄存在："
+            echo "$MINERU_MODELS" | head -10
+          else
+            echo "⚠️ MinerU 模型目錄不存在（可能使用其他路徑）"
+          fi
+
+          # 檢查 BabelDOC cache
+          echo ""
+          echo "📋 檢查 BabelDOC cache..."
+          BABEL_CACHE=$(docker run --rm "${IMAGE}" ls -la /root/.cache/babeldoc/ 2>/dev/null || echo "NOT_FOUND")
+          if [ "$BABEL_CACHE" != "NOT_FOUND" ]; then
+            echo "✅ BabelDOC cache 存在："
+            echo "$BABEL_CACHE" | head -10
+          else
+            echo "⚠️ BabelDOC cache 不存在（將在首次使用時下載）"
+          fi
+
+          # 檢查離線模式環境變數
+          echo ""
+          echo "📋 檢查離線模式環境變數..."
+          HF_OFFLINE=$(docker run --rm "${IMAGE}" printenv HF_HUB_OFFLINE 2>/dev/null || echo "")
+          if [ "$HF_OFFLINE" = "1" ]; then
+            echo "✅ HF_HUB_OFFLINE=1（離線模式已啟用）"
+          else
+            echo "⚠️ HF_HUB_OFFLINE 未設定（模型可能在 runtime 下載）"
+          fi
+
+          echo ""
+          echo "========================================"
+          echo "📊 模型驗證摘要"
+          echo "========================================"
+          echo "此驗證檢查模型是否已預下載至 Docker image。"
+          echo "若模型未預下載，轉檔功能仍可運作（首次使用時下載）。"
+          echo "========================================"
+
+      # ========================================
+      # 驗證 3: 基本功能驗證
+      # ========================================
+      - name: "⚙️ Basic Functionality Verification"
+        run: |
+          echo "========================================"
+          echo "⚙️ 基本功能驗證"
+          echo "========================================"
+
+          IMAGE="${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}"
+
+          # 啟動容器
+          echo "🚀 啟動容器..."
+          docker run -d --name verify-test -p 3000:3000 "${IMAGE}"
+
+          # 等待啟動
+          echo "⏳ 等待容器啟動..."
+          for i in {1..60}; do
+            if docker exec verify-test curl -sf http://localhost:3000/healthcheck > /dev/null 2>&1; then
+              echo "✅ 容器在 ${i} 秒內啟動成功"
+              break
+            fi
+            if [ $i -eq 60 ]; then
+              echo "❌ 容器啟動超時"
+              docker logs verify-test
+              docker rm -f verify-test
+              exit 1
+            fi
+            sleep 1
+          done
+
+          # 檢查關鍵工具
+          echo ""
+          echo "📋 檢查關鍵轉檔工具..."
+          TOOLS=("libreoffice --version" "pandoc --version" "ffmpeg -version" "tesseract --version" "pdf2zh --help" "mineru --help" "babeldoc --help")
+          
+          for tool_cmd in "${TOOLS[@]}"; do
+            TOOL_NAME=$(echo "$tool_cmd" | cut -d' ' -f1)
+            echo -n "  ${TOOL_NAME}: "
+            if docker exec verify-test $tool_cmd >/dev/null 2>&1; then
+              echo "✅"
+            else
+              echo "⚠️ 不可用或未安裝"
+            fi
+          done
+
+          # 清理
+          echo ""
+          echo "🧹 清理測試容器..."
+          docker rm -f verify-test
+
+          echo ""
+          echo "========================================"
+          echo "✅ 基本功能驗證完成！"
+          echo "========================================"
+
+      - name: Verification Summary
+        run: |
+          echo "## 🔍 Image Verification Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Verification Passed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- 🖥️ Headless Environment: Verified" >> $GITHUB_STEP_SUMMARY
+          echo "- 🤖 Model Download: Checked" >> $GITHUB_STEP_SUMMARY
+          echo "- ⚙️ Basic Functionality: Verified" >> $GITHUB_STEP_SUMMARY
+
+  # ==============================================================================
+  # �📦 Create GitHub Release
   # ==============================================================================
   create-release:
     runs-on: ubuntu-latest
-    needs: build-and-push
+    needs: [build-and-push, verify-image]
     permissions:
       contents: write
 

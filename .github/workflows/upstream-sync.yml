@@ -233,9 +233,88 @@ jobs:
           echo "✅ All critical tools available"
 
       # ========================================
-      # Test 3: 最小轉換測試 (txt → pdf)
+      # Test 3: Headless 環境驗證
       # ========================================
-      - name: "Test 3: Minimal conversion test"
+      - name: "Test 3: Headless environment verification"
+        run: |
+          echo "🖥️ Verifying headless environment..."
+
+          # 檢查 DISPLAY 環境變數
+          echo ""
+          echo "📋 檢查 DISPLAY 環境變數..."
+          DISPLAY_VAR=$(docker exec convertx-test printenv DISPLAY 2>/dev/null || echo "")
+          if [ -z "$DISPLAY_VAR" ]; then
+            echo "✅ DISPLAY 未設定（headless 模式正確）"
+          else
+            echo "⚠️ DISPLAY 已設定: ${DISPLAY_VAR}"
+          fi
+
+          # 檢查 Xvfb
+          echo ""
+          echo "📋 檢查 Xvfb..."
+          if docker exec convertx-test which Xvfb 2>/dev/null; then
+            echo "⚠️ Xvfb 存在（但應不需要）"
+          else
+            echo "✅ Xvfb 不存在（headless 模式正確）"
+          fi
+
+          # 驗證 LibreOffice headless
+          echo ""
+          echo "📋 驗證 LibreOffice headless..."
+          if docker exec convertx-test libreoffice --headless --version 2>/dev/null | head -1; then
+            echo "✅ LibreOffice headless 模式可用"
+          else
+            echo "❌ LibreOffice headless 模式失敗"
+            exit 1
+          fi
+
+          echo ""
+          echo "✅ Headless environment verification passed"
+
+      # ========================================
+      # Test 4: 模型下載驗證
+      # ========================================
+      - name: "Test 4: Model download verification"
+        run: |
+          echo "🤖 Verifying model downloads..."
+
+          # 檢查 HuggingFace cache
+          echo ""
+          echo "📋 檢查 HuggingFace cache..."
+          HF_CACHE=$(docker exec convertx-test ls -la /root/.cache/huggingface/ 2>/dev/null || echo "NOT_FOUND")
+          if [ "$HF_CACHE" != "NOT_FOUND" ]; then
+            echo "✅ HuggingFace cache 存在"
+          else
+            echo "⚠️ HuggingFace cache 不存在（模型可能在其他位置）"
+          fi
+
+          # 檢查 ONNX 模型
+          echo ""
+          echo "📋 檢查 ONNX 模型..."
+          ONNX_COUNT=$(docker exec convertx-test find /root -name "*.onnx" -type f 2>/dev/null | wc -l || echo "0")
+          if [ "$ONNX_COUNT" -gt 0 ]; then
+            echo "✅ 找到 ${ONNX_COUNT} 個 ONNX 模型"
+          else
+            echo "⚠️ 未找到 ONNX 模型（可能動態下載）"
+          fi
+
+          # 檢查離線模式環境變數
+          echo ""
+          echo "📋 檢查離線模式環境變數..."
+          HF_OFFLINE=$(docker exec convertx-test printenv HF_HUB_OFFLINE 2>/dev/null || echo "")
+          if [ "$HF_OFFLINE" = "1" ]; then
+            echo "✅ HF_HUB_OFFLINE=1（離線模式已啟用）"
+          else
+            echo "⚠️ HF_HUB_OFFLINE 未設定"
+          fi
+
+          echo ""
+          echo "✅ Model verification completed"
+
+      # ========================================
+      # Test 5: 最小轉換測試 (txt → pdf)
+      # ========================================
+      - name: "Test 5: Minimal conversion test"
         id: test_conversion
         run: |
           echo "📄 Testing minimal conversion (txt → pdf)..."
@@ -271,9 +350,9 @@ jobs:
           }
 
       # ========================================
-      # Test 4: API 端點檢查
+      # Test 6: API 端點檢查
       # ========================================
-      - name: "Test 4: API endpoints check"
+      - name: "Test 6: API endpoints check"
         run: |
           echo "🌐 Checking API endpoints..."
 
@@ -321,6 +400,8 @@ jobs:
           echo "|----------|------|" >> $GITHUB_STEP_SUMMARY
           echo "| Container 啟動 | ✅ 通過 (${startup_time:-N/A}s) |" >> $GITHUB_STEP_SUMMARY
           echo "| 工具檢查 (libreoffice, pandoc, ffmpeg, tesseract) | ✅ 通過 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Headless 環境驗證 | ✅ 通過 |" >> $GITHUB_STEP_SUMMARY
+          echo "| 模型下載驗證 | ✅ 通過 |" >> $GITHUB_STEP_SUMMARY
           echo "| 最小轉換測試 | ✅ 通過 |" >> $GITHUB_STEP_SUMMARY
           echo "| API 端點檢查 | ✅ 通過 |" >> $GITHUB_STEP_SUMMARY
 
@@ -403,6 +484,8 @@ jobs:
           echo "|----------|------|" >> $GITHUB_STEP_SUMMARY
           echo "| Container 啟動 | ✅ |" >> $GITHUB_STEP_SUMMARY
           echo "| 工具存在性檢查 | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Headless 環境驗證 | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| 模型下載驗證 | ✅ |" >> $GITHUB_STEP_SUMMARY
           echo "| 最小轉換測試 | ✅ |" >> $GITHUB_STEP_SUMMARY
           echo "| API 端點檢查 | ✅ |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
