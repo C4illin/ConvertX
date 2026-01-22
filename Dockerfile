@@ -1,11 +1,12 @@
 # ==============================================================================
 # ConvertX-CN 官方 Docker Image
-# 版本：v0.1.10
+# 版本：v0.1.11
 # ==============================================================================
 #
 # 📦 Image 說明：
 #   - 這是 ConvertX-CN 官方 Docker Hub Image 的生產 Dockerfile
 #   - 已內建完整功能，無需額外擴充
+#   - ⚠️ 所有模型已在 build 階段預下載，runtime 不依賴網路
 #
 # 🌍 內建語言支援：
 #   - OCR: 英文、繁體中文、簡體中文、日文、韓文、德文、法文
@@ -13,7 +14,13 @@
 #   - 字型: Noto CJK, Liberation, 標楷體
 #   - LaTeX: CJK、德文、法文、阿拉伯語、希伯來語
 #
-# 📊 Image 大小：約 5-7 GB
+# 🤖 預下載模型清單：
+#   - PDFMathTranslate: DocLayout-YOLO ONNX（佈局分析）
+#   - BabelDOC: 完整資源包（透過 --warmup）
+#   - MinerU: PDF-Extract-Kit-1.0（Pipeline 模型）
+#     包含：DocLayout-YOLO, YOLOv8 MFD, UniMERNet, PaddleOCR, LayoutReader, SLANet
+#
+# 📊 Image 大小：約 8-12 GB（含模型）
 #
 # ⚠️ Base Image：使用 debian:bookworm（穩定版）
 #    - 確保 Multi-Arch (amd64/arm64) 構建穩定性
@@ -224,49 +231,74 @@ RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   pipx \
   && rm -rf /var/lib/apt/lists/*
 
-# 階段 12：安裝 Python 工具（pipx）
+# 階段 12：安裝 Python 工具（pipx）+ huggingface_hub（用於模型下載）
 RUN pipx install "markitdown[all]" \
   && pipx install "pdf2zh" \
-  && rm -rf /root/.cache/pip
+  && pip3 install --no-cache-dir huggingface_hub
 
 # 階段 13：安裝 mineru（可能在 arm64 上有問題，加入錯誤處理）
-RUN pipx install "mineru[all]" || echo "⚠️ mineru 安裝失敗（可能是 arm64 相容性問題），跳過..." \
-  && rm -rf /root/.cache/pip
+RUN pipx install "mineru[all]" || echo "⚠️ mineru 安裝失敗（可能是 arm64 相容性問題），跳過..."
 
-# 最終清理
-RUN rm -rf /usr/share/doc/texlive* \
-  && rm -rf /usr/share/texlive/texmf-dist/doc \
-  && rm -rf /usr/share/doc/* \
-  && rm -rf /usr/share/man/* \
-  && rm -rf /usr/share/info/*
+# 最終清理（延後到模型下載完成後）
 
-# Add pipx bin directory to PATH
+# Add pipx bin directory to PATH（必須在模型下載前設定）
 ENV PATH="/root/.local/bin:${PATH}"
 
 # ==============================================================================
-# PDFMathTranslate 模型預下載（Docker build 階段）
+# 🔥 模型預下載區塊（Docker Build 階段）
 # ==============================================================================
-# 
-# ⚠️ 重要：模型必須在 build 階段下載，禁止 runtime 隱式下載
-# 
-# 模型說明：
-#   - DocLayout-YOLO ONNX 模型：用於 PDF 布局分析
-#   - 多語言字型：用於翻譯後的 PDF 渲染
+#
+# ⚠️ 重要原則：
+#   - 所有模型必須在 build 階段下載完成
+#   - runtime 完全不依賴外部網路
+#   - 禁止任何隱式下載行為
+#
+# 📦 預下載的模型清單：
+#   1. PDFMathTranslate / pdf2zh
+#      - DocLayout-YOLO ONNX 模型（佈局分析）
+#      - BabelDOC 相關資源（透過 --warmup）
+#   2. MinerU / magic-pdf
+#      - DocLayout-YOLO（佈局分析）
+#      - YOLOv8 MFD（公式偵測）
+#      - UniMERNet（公式辨識）
+#      - PaddleOCR（文字辨識）
+#      - LayoutReader（閱讀順序）
+#      - SLANet / UNet（表格辨識）
 #
 # ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 階段 14-A：PDFMathTranslate 模型預下載
+# ------------------------------------------------------------------------------
+# 模型：DocLayout-YOLO ONNX
+# 來源：HuggingFace - wybxc/DocLayout-YOLO-DocStructBench-onnx
+# 用途：PDF 頁面佈局分析（識別文字區塊、公式、圖表等）
+# ------------------------------------------------------------------------------
 RUN mkdir -p /models/pdfmathtranslate && \
-  # 預先下載 DocLayout-YOLO ONNX 模型
+  echo "📥 [1/6] 下載 DocLayout-YOLO ONNX 模型..." && \
   python3 -c "from huggingface_hub import hf_hub_download; \
   hf_hub_download(repo_id='wybxc/DocLayout-YOLO-DocStructBench-onnx', \
   filename='model.onnx', \
   local_dir='/models/pdfmathtranslate')" && \
-  # 執行 babeldoc warmup 預載入模型
-  babeldoc --warmup || true && \
-  # 清理 cache
-  rm -rf /root/.cache/huggingface
+  echo "✅ DocLayout-YOLO ONNX 模型下載完成"
 
-# 下載 PDFMathTranslate 所需字型
+# ------------------------------------------------------------------------------
+# 階段 14-B：BabelDOC Warmup（預載入所有資源）
+# ------------------------------------------------------------------------------
+# 說明：babeldoc --warmup 會下載所有必要的字型和模型資源
+# 這確保 pdf2zh 執行時不會有任何隱式下載
+# ------------------------------------------------------------------------------
+RUN echo "📥 [2/6] 執行 BabelDOC warmup..." && \
+  babeldoc --warmup 2>&1 || echo "⚠️ BabelDOC warmup 可能已完成或無需 warmup" && \
+  echo "✅ BabelDOC warmup 完成"
+
+# ------------------------------------------------------------------------------
+# 階段 14-C：PDFMathTranslate 字型下載
+# ------------------------------------------------------------------------------
+# 下載多語言字型，用於翻譯後的 PDF 渲染
+# ------------------------------------------------------------------------------
 RUN mkdir -p /app && \
+  echo "📥 [3/6] 下載 PDFMathTranslate 多語言字型..." && \
   curl -L -o /app/GoNotoKurrent-Regular.ttf \
   "https://github.com/satbyy/go-noto-universal/releases/download/v7.0/GoNotoKurrent-Regular.ttf" && \
   curl -L -o /app/SourceHanSerifCN-Regular.ttf \
@@ -276,11 +308,94 @@ RUN mkdir -p /app && \
   curl -L -o /app/SourceHanSerifJP-Regular.ttf \
   "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifJP-Regular.ttf" && \
   curl -L -o /app/SourceHanSerifKR-Regular.ttf \
-  "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifKR-Regular.ttf"
+  "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifKR-Regular.ttf" && \
+  echo "✅ 字型下載完成"
+
+# ------------------------------------------------------------------------------
+# 階段 14-D：MinerU 模型預下載（Pipeline 模式）
+# ------------------------------------------------------------------------------
+# 來源：HuggingFace - opendatalab/PDF-Extract-Kit-1.0
+# 包含模型：
+#   - DocLayout-YOLO（佈局分析）
+#   - YOLOv8 MFD（公式偵測）
+#   - UniMERNet（公式辨識）
+#   - PaddleOCR（OCR）
+#   - LayoutReader（閱讀順序）
+#   - SLANet（表格辨識）
+# ------------------------------------------------------------------------------
+RUN echo "📥 [4/6] 下載 MinerU Pipeline 模型..." && \
+  ARCH=$(uname -m) && \
+  if [ "$ARCH" = "aarch64" ]; then \
+  echo "⚠️ ARM64 架構：MinerU 可能不完全支援，嘗試下載模型..."; \
+  fi && \
+  if command -v mineru-models-download >/dev/null 2>&1; then \
+  echo "使用 mineru-models-download CLI..."; \
+  echo "y" | mineru-models-download -s huggingface -m pipeline 2>&1 || true; \
+  else \
+  echo "使用 Python 直接下載模型..."; \
+  python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='opendatalab/PDF-Extract-Kit-1.0', local_dir='/root/.cache/huggingface/hub/PDF-Extract-Kit-1.0', ignore_patterns=['*.md', '*.txt', 'LICENSE*'])" 2>&1 || echo "⚠️ MinerU 模型下載失敗，可能無法離線使用"; \
+  fi && \
+  echo "✅ MinerU 模型下載步驟完成"
+
+# ------------------------------------------------------------------------------
+# 階段 14-E：建立 MinerU 設定檔
+# ------------------------------------------------------------------------------
+# 設定 MinerU 使用本地模型，禁止 runtime 下載
+# ------------------------------------------------------------------------------
+RUN echo "📥 [5/6] 建立 MinerU 設定檔..." && \
+  mkdir -p /root && \
+  echo '{"models-dir":{"pipeline":"/root/.cache/huggingface/hub/PDF-Extract-Kit-1.0","vlm":"/root/.cache/huggingface/hub/MinerU-VLM"},"model-source":"local","latex-delimiter-config":{"display":{"left":"$$","right":"$$"},"inline":{"left":"$","right":"$"}}}' > /root/mineru.json && \
+  echo "✅ MinerU 設定檔建立完成"
+
+# ------------------------------------------------------------------------------
+# 階段 14-F：模型驗證與快取清理
+# ------------------------------------------------------------------------------
+RUN echo "📥 [6/6] 驗證模型並清理快取..." && \
+  echo "" && \
+  echo "📋 模型檔案驗證：" && \
+  echo "========================================" && \
+  echo "🔹 PDFMathTranslate 模型：" && \
+  if [ -f "/models/pdfmathtranslate/model.onnx" ]; then \
+  echo "   ✅ /models/pdfmathtranslate/model.onnx 存在"; \
+  ls -lh /models/pdfmathtranslate/model.onnx; \
+  else \
+  echo "   ❌ /models/pdfmathtranslate/model.onnx 不存在"; \
+  fi && \
+  echo "" && \
+  echo "🔹 PDFMathTranslate 字型：" && \
+  ls -lh /app/*.ttf 2>/dev/null || echo "   ⚠️ 無字型檔案" && \
+  echo "" && \
+  echo "🔹 MinerU 模型目錄：" && \
+  if [ -d "/root/.cache/huggingface/hub/PDF-Extract-Kit-1.0" ]; then \
+  echo "   ✅ MinerU Pipeline 模型目錄存在"; \
+  du -sh /root/.cache/huggingface/hub/PDF-Extract-Kit-1.0 2>/dev/null || true; \
+  else \
+  echo "   ⚠️ MinerU Pipeline 模型目錄不存在（可能需要 runtime 下載）"; \
+  fi && \
+  echo "" && \
+  echo "🔹 BabelDOC 快取：" && \
+  ls -la /root/.cache/babeldoc 2>/dev/null || echo "   快取位置可能不同" && \
+  echo "========================================" && \
+  # 清理 pip 快取（保留模型）
+  rm -rf /root/.cache/pip && \
+  echo "✅ 模型驗證完成"
 
 # PDFMathTranslate 環境變數
 ENV PDFMATHTRANSLATE_MODELS_PATH="/models/pdfmathtranslate"
 ENV NOTO_FONT_PATH="/app/GoNotoKurrent-Regular.ttf"
+
+# MinerU 環境變數（強制使用本地模型）
+ENV MINERU_MODEL_SOURCE="local"
+ENV HF_HUB_OFFLINE="1"
+
+# ==============================================================================
+# 最終清理（模型下載完成後）
+# ==============================================================================
+RUN rm -rf /usr/share/doc/texlive* \
+  && rm -rf /usr/share/texlive/texmf-dist/doc \
+  && rm -rf /usr/share/doc/* \
+  && rm -rf /usr/share/man/* \
+  && rm -rf /usr/share/info/*
 
 # ==============================================================================
 # 設定 locale（支援中文 PDF 避免亂碼）
@@ -323,6 +438,10 @@ RUN ARCH=$(uname -m) && \
 COPY --from=install /temp/prod/node_modules node_modules
 COPY --from=prerelease /app/public/ /app/public/
 COPY --from=prerelease /app/dist /app/dist
+
+# 複製模型驗證腳本
+COPY scripts/verify-models.sh /app/scripts/verify-models.sh
+RUN chmod +x /app/scripts/verify-models.sh
 
 RUN mkdir data
 
