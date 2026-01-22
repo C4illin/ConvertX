@@ -12,9 +12,9 @@ on:
   workflow_dispatch:
     inputs:
       image_tag:
-        description: "Docker Image Tag（例如：0.1.10.test）"
+        description: "Docker Image Tag（例如：0.1.12.test）"
         required: true
-        default: "0.1.11.test"
+        default: "0.1.12.test"
         type: string
 
 # ============================================================

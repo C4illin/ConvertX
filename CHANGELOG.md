@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.1.12](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.12) (2026-01-23)
+
+測試與品質強化版本，大幅提升 CI/CD 可靠性與測試覆蓋率。
+
+### 🧪 Testing
+
+- **E2E 測試套件**：新增完整的 End-to-End 測試架構，覆蓋 21 項轉換流程
+- **CI/CD E2E 整合**：在 Release 工作流程中加入 E2E 測試驗證
+- **Mock 測試優化**：重構 E2E 測試架構，移除殘留檔案
+
+### 🐛 Bug Fixes
+
+- **帳戶頁面 XSS 修復**：使用 `<span safe>` 包裹翻譯文字，修復 HTML 標籤顯示為純文字的問題
+- **Inkscape Headless 模式**：使用 `xvfb-run` 執行 Inkscape，解決 Docker 容器內無顯示器的問題
+- **Inkscape Export 語法**：改用 `--export-type` 與 `--export-filename` 參數，確保跨版本相容性
+- **bun.lock 同步**：修復套件管理器寫入權限問題
+
+### 📦 CI/CD
+
+- **模型驗證**：新增模型完整性驗證步驟
+- **Headless 驗證**：新增無頭模式環境檢查
+- **Merge 策略**：採用 `--no-ff` 合併策略，保留完整分支歷史
+
+### 📚 Documentation
+
+- **README 更新**：新增測試功能說明與注意事項
+
+---
+
 ## [0.1.11](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.11) (2026-01-22)
 
 穩定性與品質維護版本。
