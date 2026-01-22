@@ -274,14 +274,21 @@ ENV PATH="/root/.local/bin:${PATH}"
 # 模型：DocLayout-YOLO ONNX
 # 來源：HuggingFace - wybxc/DocLayout-YOLO-DocStructBench-onnx
 # 用途：PDF 頁面佈局分析（識別文字區塊、公式、圖表等）
+# 注意：使用 snapshot_download + allow_patterns 避免硬編碼檔名
+#       這樣即使上游改檔名（只要是 .onnx）也不會 build 失敗
 # ------------------------------------------------------------------------------
 RUN mkdir -p /models/pdfmathtranslate && \
   echo "📥 [1/6] 下載 DocLayout-YOLO ONNX 模型..." && \
-  python3 -c "from huggingface_hub import hf_hub_download; \
-  hf_hub_download(repo_id='wybxc/DocLayout-YOLO-DocStructBench-onnx', \
-  filename='model.onnx', \
-  local_dir='/models/pdfmathtranslate')" && \
-  echo "✅ DocLayout-YOLO ONNX 模型下載完成"
+  python3 -c "from huggingface_hub import snapshot_download; \
+  snapshot_download( \
+  repo_id='wybxc/DocLayout-YOLO-DocStructBench-onnx', \
+  local_dir='/models/pdfmathtranslate', \
+  allow_patterns=['*.onnx'], \
+  local_dir_use_symlinks=False \
+  )" && \
+  echo "✅ DocLayout-YOLO ONNX 模型下載完成" && \
+  echo "📋 下載的模型檔案：" && \
+  ls -lh /models/pdfmathtranslate/*.onnx 2>/dev/null || ls -lh /models/pdfmathtranslate/
 
 # ------------------------------------------------------------------------------
 # 階段 14-B：BabelDOC Warmup（預載入所有資源）
@@ -356,11 +363,12 @@ RUN echo "📥 [6/6] 驗證模型並清理快取..." && \
   echo "📋 模型檔案驗證：" && \
   echo "========================================" && \
   echo "🔹 PDFMathTranslate 模型：" && \
-  if [ -f "/models/pdfmathtranslate/model.onnx" ]; then \
-  echo "   ✅ /models/pdfmathtranslate/model.onnx 存在"; \
-  ls -lh /models/pdfmathtranslate/model.onnx; \
+  ONNX_COUNT=$(find /models/pdfmathtranslate -name "*.onnx" 2>/dev/null | wc -l) && \
+  if [ "$ONNX_COUNT" -gt 0 ]; then \
+  echo "   ✅ 找到 $ONNX_COUNT 個 ONNX 模型："; \
+  ls -lh /models/pdfmathtranslate/*.onnx 2>/dev/null || find /models/pdfmathtranslate -name "*.onnx" -exec ls -lh {} \;; \
   else \
-  echo "   ❌ /models/pdfmathtranslate/model.onnx 不存在"; \
+  echo "   ❌ /models/pdfmathtranslate 中沒有 ONNX 模型"; \
   fi && \
   echo "" && \
   echo "🔹 PDFMathTranslate 字型：" && \
