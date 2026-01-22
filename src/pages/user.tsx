@@ -124,8 +124,8 @@ export const user = new Elysia()
               </header>
               <form method="post" action={`${WEBROOT}/register`} class="p-4">
                 <fieldset class="mb-4 flex flex-col gap-4">
-                  <label class="flex flex-col gap-1" safe>
-                    {t("auth", "email")}
+                  <label class="flex flex-col gap-1">
+                    <span safe>{t("auth", "email")}</span>
                     <input
                       type="email"
                       name="email"
@@ -135,8 +135,8 @@ export const user = new Elysia()
                       required
                     />
                   </label>
-                  <label class="flex flex-col gap-1" safe>
-                    {t("auth", "password")}
+                  <label class="flex flex-col gap-1">
+                    <span safe>{t("auth", "password")}</span>
                     <input
                       type="password"
                       name="password"
@@ -191,8 +191,8 @@ export const user = new Elysia()
             <article class="article">
               <form method="post" class="flex flex-col gap-4">
                 <fieldset class="mb-4 flex flex-col gap-4">
-                  <label class="flex flex-col gap-1" safe>
-                    {t("auth", "email")}
+                  <label class="flex flex-col gap-1">
+                    <span safe>{t("auth", "email")}</span>
                     <input
                       type="email"
                       name="email"
@@ -202,8 +202,8 @@ export const user = new Elysia()
                       required
                     />
                   </label>
-                  <label class="flex flex-col gap-1" safe>
-                    {t("auth", "password")}
+                  <label class="flex flex-col gap-1">
+                    <span safe>{t("auth", "password")}</span>
                     <input
                       type="password"
                       name="password"
@@ -313,8 +313,8 @@ export const user = new Elysia()
               <article class="article">
                 <form method="post" class="flex flex-col gap-4">
                   <fieldset class="mb-4 flex flex-col gap-4">
-                    <label class="flex flex-col gap-1" safe>
-                      {t("auth", "email")}
+                    <label class="flex flex-col gap-1">
+                      <span safe>{t("auth", "email")}</span>
                       <input
                         type="email"
                         name="email"
@@ -324,8 +324,8 @@ export const user = new Elysia()
                         required
                       />
                     </label>
-                    <label class="flex flex-col gap-1" safe>
-                      {t("auth", "password")}
+                    <label class="flex flex-col gap-1">
+                      <span safe>{t("auth", "password")}</span>
                       <input
                         type="password"
                         name="password"

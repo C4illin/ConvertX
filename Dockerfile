@@ -234,8 +234,14 @@ RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
 # 階段 12：安裝 Python 工具（pipx）+ huggingface_hub（用於模型下載）
 # 注意：Debian bookworm 使用 PEP 668，需要 --break-system-packages 來安裝系統級套件
 RUN pipx install "markitdown[all]" \
-  && pipx install "pdf2zh" \
   && pip3 install --no-cache-dir --break-system-packages huggingface_hub
+
+# 階段 12-A：安裝 pdf2zh（PDFMathTranslate 引擎）
+RUN pipx install "pdf2zh"
+
+# 階段 12-B：安裝 babeldoc（BabelDOC 引擎）
+# BabelDOC 是一個 PDF 翻譯工具，與 pdf2zh 類似但使用不同的翻譯方式
+RUN pipx install "babeldoc" || echo "⚠️ babeldoc 安裝失敗，跳過..."
 
 # 階段 13：安裝 mineru（可能在 arm64 上有問題，加入錯誤處理）
 RUN pipx install "mineru[all]" || echo "⚠️ mineru 安裝失敗（可能是 arm64 相容性問題），跳過..."
@@ -294,11 +300,16 @@ RUN mkdir -p /models/pdfmathtranslate && \
 # 階段 14-B：BabelDOC Warmup（預載入所有資源）
 # ------------------------------------------------------------------------------
 # 說明：babeldoc --warmup 會下載所有必要的字型和模型資源
-# 這確保 pdf2zh 執行時不會有任何隱式下載
+# 這確保 BabelDOC 執行時不會有任何隱式下載
+# 注意：分開執行以避免記憶體壓力
 # ------------------------------------------------------------------------------
 RUN echo "📥 [2/6] 執行 BabelDOC warmup..." && \
-  babeldoc --warmup 2>&1 || echo "⚠️ BabelDOC warmup 可能已完成或無需 warmup" && \
-  echo "✅ BabelDOC warmup 完成"
+  if command -v babeldoc >/dev/null 2>&1; then \
+  babeldoc --warmup 2>&1 || echo "⚠️ BabelDOC warmup 失敗或無需 warmup"; \
+  else \
+  echo "⚠️ babeldoc 命令不存在，跳過 warmup"; \
+  fi && \
+  echo "✅ BabelDOC warmup 步驟完成"
 
 # ------------------------------------------------------------------------------
 # 階段 14-C：PDFMathTranslate 字型下載
@@ -374,6 +385,14 @@ RUN echo "📥 [6/6] 驗證模型並清理快取..." && \
   echo "🔹 PDFMathTranslate 字型：" && \
   ls -lh /app/*.ttf 2>/dev/null || echo "   ⚠️ 無字型檔案" && \
   echo "" && \
+  echo "🔹 BabelDOC 快取：" && \
+  if [ -d "/root/.cache/babeldoc" ]; then \
+  echo "   ✅ BabelDOC 快取目錄存在"; \
+  du -sh /root/.cache/babeldoc 2>/dev/null || true; \
+  else \
+  echo "   ⚠️ BabelDOC 快取目錄不存在（可能需要 runtime 下載）"; \
+  fi && \
+  echo "" && \
   echo "🔹 MinerU 模型目錄：" && \
   if [ -d "/root/.cache/huggingface/hub/PDF-Extract-Kit-1.0" ]; then \
   echo "   ✅ MinerU Pipeline 模型目錄存在"; \
@@ -381,9 +400,6 @@ RUN echo "📥 [6/6] 驗證模型並清理快取..." && \
   else \
   echo "   ⚠️ MinerU Pipeline 模型目錄不存在（可能需要 runtime 下載）"; \
   fi && \
-  echo "" && \
-  echo "🔹 BabelDOC 快取：" && \
-  ls -la /root/.cache/babeldoc 2>/dev/null || echo "   快取位置可能不同" && \
   echo "========================================" && \
   # 清理 pip 快取（保留模型）
   rm -rf /root/.cache/pip && \
@@ -392,6 +408,10 @@ RUN echo "📥 [6/6] 驗證模型並清理快取..." && \
 # PDFMathTranslate 環境變數
 ENV PDFMATHTRANSLATE_MODELS_PATH="/models/pdfmathtranslate"
 ENV NOTO_FONT_PATH="/app/GoNotoKurrent-Regular.ttf"
+
+# BabelDOC 環境變數
+ENV BABELDOC_CACHE_PATH="/root/.cache/babeldoc"
+ENV BABELDOC_SERVICE="google"
 
 # MinerU 環境變數（強制使用本地模型）
 ENV MINERU_MODEL_SOURCE="local"
