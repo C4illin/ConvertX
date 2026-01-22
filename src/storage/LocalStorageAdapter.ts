@@ -3,7 +3,7 @@ import { promises as fs } from "fs";
 import path from "path";
 
 export class LocalStorageAdapter implements IStorageAdapter {
-    baseDir: string;
+    private baseDir: string;
 
     constructor(baseDir: string) {
         this.baseDir = baseDir;
@@ -25,8 +25,14 @@ export class LocalStorageAdapter implements IStorageAdapter {
         const fullPath = path.join(this.baseDir, key);
         try {
             await fs.unlink(fullPath);
-        } catch {
-            //ignore error if file does not exist
+        } catch (error) {
+            const err = error as NodeJS.ErrnoException;
+            if (err?.code === "ENOENT" || err?.code === "ENOTDIR") {
+                return;
+            }
+
+            console.error(`Failed to delete file at ${fullPath}: `, error);
+            throw error
         }
     }
 
