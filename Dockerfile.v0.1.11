@@ -42,29 +42,29 @@ WORKDIR /app
 
 # 配置 APT 重試機制（解決 Multi-Arch Build 時的網路不穩定問題）
 RUN echo 'Acquire::Retries "5";' > /etc/apt/apt.conf.d/80-retries \
-  && echo 'Acquire::http::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
-  && echo 'Acquire::https::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
-  && echo 'Acquire::ftp::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
-  && echo 'DPkg::Lock::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries
+    && echo 'Acquire::http::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+    && echo 'Acquire::https::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+    && echo 'Acquire::ftp::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+    && echo 'DPkg::Lock::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries
 
 # install bun
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  curl \
-  unzip \
-  ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
+    curl \
+    unzip \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 # if architecture is arm64, use the arm64 version of bun
 RUN ARCH=$(uname -m) && \
-  if [ "$ARCH" = "aarch64" ]; then \
-  curl -fsSL -o bun-linux-aarch64.zip https://github.com/oven-sh/bun/releases/download/bun-v1.3.6/bun-linux-aarch64.zip; \
-  else \
-  curl -fsSL -o bun-linux-x64-baseline.zip https://github.com/oven-sh/bun/releases/download/bun-v1.3.6/bun-linux-x64-baseline.zip; \
-  fi
+    if [ "$ARCH" = "aarch64" ]; then \
+    curl -fsSL -o bun-linux-aarch64.zip https://github.com/oven-sh/bun/releases/download/bun-v1.3.6/bun-linux-aarch64.zip; \
+    else \
+    curl -fsSL -o bun-linux-x64-baseline.zip https://github.com/oven-sh/bun/releases/download/bun-v1.3.6/bun-linux-x64-baseline.zip; \
+    fi
 
 RUN unzip -j bun-linux-*.zip -d /usr/local/bin && \
-  rm bun-linux-*.zip && \
-  chmod +x /usr/local/bin/bun
+    rm bun-linux-*.zip && \
+    chmod +x /usr/local/bin/bun
 
 # install dependencies into temp directory
 # this will cache them and speed up future builds
@@ -110,135 +110,135 @@ FROM base AS release
 
 # 配置 APT 重試機制（解決 Multi-Arch Build 時的網路不穩定問題）
 RUN echo 'Acquire::Retries "5";' > /etc/apt/apt.conf.d/80-retries \
-  && echo 'Acquire::http::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
-  && echo 'Acquire::https::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
-  && echo 'Acquire::ftp::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
-  && echo 'APT::Get::Assume-Yes "true";' >> /etc/apt/apt.conf.d/80-retries \
-  && echo 'DPkg::Lock::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries
+    && echo 'Acquire::http::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+    && echo 'Acquire::https::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+    && echo 'Acquire::ftp::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+    && echo 'APT::Get::Assume-Yes "true";' >> /etc/apt/apt.conf.d/80-retries \
+    && echo 'DPkg::Lock::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries
 
 # 階段 1：基礎系統工具
 RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-  locales \
-  ca-certificates \
-  curl \
-  && rm -rf /var/lib/apt/lists/*
+    locales \
+    ca-certificates \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 # 階段 2：核心轉換工具（小型）
 # 注意：dasel 和 resvg 在 bookworm 中不存在，後續用二進位檔案安裝
 RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-  assimp-utils \
-  dcraw \
-  dvisvgm \
-  ghostscript \
-  graphicsmagick \
-  mupdf-tools \
-  poppler-utils \
-  potrace \
-  && rm -rf /var/lib/apt/lists/*
+    assimp-utils \
+    dcraw \
+    dvisvgm \
+    ghostscript \
+    graphicsmagick \
+    mupdf-tools \
+    poppler-utils \
+    potrace \
+    && rm -rf /var/lib/apt/lists/*
 
 # 階段 2.1：安裝 dasel（從 GitHub 下載二進位檔案）
 # ⬇️ Docker build 階段下載，runtime 不會再下載
 RUN ARCH=$(uname -m) && \
-  if [ "$ARCH" = "aarch64" ]; then \
-  DASEL_ARCH="linux_arm64"; \
-  else \
-  DASEL_ARCH="linux_amd64"; \
-  fi && \
-  curl -sSLf "https://github.com/TomWright/dasel/releases/download/v2.8.1/dasel_${DASEL_ARCH}" -o /usr/local/bin/dasel && \
-  chmod +x /usr/local/bin/dasel
+    if [ "$ARCH" = "aarch64" ]; then \
+    DASEL_ARCH="linux_arm64"; \
+    else \
+    DASEL_ARCH="linux_amd64"; \
+    fi && \
+    curl -sSLf "https://github.com/TomWright/dasel/releases/download/v2.8.1/dasel_${DASEL_ARCH}" -o /usr/local/bin/dasel && \
+    chmod +x /usr/local/bin/dasel
 
 # 階段 2.2：安裝 resvg（從 GitHub 下載二進位檔案）
 # 注意：resvg 官方只提供 x86_64 版本，ARM64 需從源碼編譯或跳過
 # ⬇️ Docker build 階段下載，runtime 不會再下載
 RUN ARCH=$(uname -m) && \
-  if [ "$ARCH" = "aarch64" ]; then \
-  echo "⚠️ resvg 沒有 ARM64 預編譯版本，跳過安裝（可改用 ImageMagick 或 Inkscape 替代）"; \
-  else \
-  curl -sSLf "https://github.com/linebender/resvg/releases/download/v0.44.0/resvg-linux-x86_64.tar.gz" -o /tmp/resvg.tar.gz && \
-  tar -xzf /tmp/resvg.tar.gz -C /tmp/ && \
-  mv /tmp/resvg /usr/local/bin/resvg && \
-  chmod +x /usr/local/bin/resvg && \
-  rm -rf /tmp/resvg.tar.gz; \
-  fi
+    if [ "$ARCH" = "aarch64" ]; then \
+    echo "⚠️ resvg 沒有 ARM64 預編譯版本，跳過安裝（可改用 ImageMagick 或 Inkscape 替代）"; \
+    else \
+    curl -sSLf "https://github.com/linebender/resvg/releases/download/v0.44.0/resvg-linux-x86_64.tar.gz" -o /tmp/resvg.tar.gz && \
+    tar -xzf /tmp/resvg.tar.gz -C /tmp/ && \
+    mv /tmp/resvg /usr/local/bin/resvg && \
+    chmod +x /usr/local/bin/resvg && \
+    rm -rf /tmp/resvg.tar.gz; \
+    fi
 
 # 階段 3：影音處理工具
 RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-  ffmpeg \
-  libavcodec-extra \
-  libva2 \
-  && rm -rf /var/lib/apt/lists/*
+    ffmpeg \
+    libavcodec-extra \
+    libva2 \
+    && rm -rf /var/lib/apt/lists/*
 
 # 階段 4：圖像處理工具
 # 注意：bookworm 使用 imagemagick（版本 6），trixie 才有 imagemagick-7
 RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-  imagemagick \
-  inkscape \
-  libheif-examples \
-  libjxl-tools \
-  libvips-tools \
-  && rm -rf /var/lib/apt/lists/*
+    imagemagick \
+    inkscape \
+    libheif-examples \
+    libjxl-tools \
+    libvips-tools \
+    && rm -rf /var/lib/apt/lists/*
 
 # 階段 5：文件處理工具
 RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-  calibre \
-  libemail-outlook-message-perl \
-  pandoc \
-  && rm -rf /var/lib/apt/lists/*
+    calibre \
+    libemail-outlook-message-perl \
+    pandoc \
+    && rm -rf /var/lib/apt/lists/*
 
 # 階段 6：LibreOffice（最大的套件，單獨安裝）
 RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-  libreoffice \
-  && rm -rf /var/lib/apt/lists/*
+    libreoffice \
+    && rm -rf /var/lib/apt/lists/*
 
 # 階段 7：TexLive 基礎
 RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-  texlive-base \
-  texlive-latex-base \
-  texlive-latex-recommended \
-  texlive-fonts-recommended \
-  texlive-xetex \
-  latexmk \
-  lmodern \
-  && rm -rf /var/lib/apt/lists/*
+    texlive-base \
+    texlive-latex-base \
+    texlive-latex-recommended \
+    texlive-fonts-recommended \
+    texlive-xetex \
+    latexmk \
+    lmodern \
+    && rm -rf /var/lib/apt/lists/*
 
 # 階段 8：TexLive 語言包
 RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-  texlive-lang-cjk \
-  texlive-lang-german \
-  texlive-lang-french \
-  texlive-lang-arabic \
-  texlive-lang-other \
-  && rm -rf /var/lib/apt/lists/*
+    texlive-lang-cjk \
+    texlive-lang-german \
+    texlive-lang-french \
+    texlive-lang-arabic \
+    texlive-lang-other \
+    && rm -rf /var/lib/apt/lists/*
 
 # 階段 9：OCR 支援
 RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-  tesseract-ocr \
-  tesseract-ocr-eng \
-  tesseract-ocr-chi-tra \
-  tesseract-ocr-chi-sim \
-  tesseract-ocr-jpn \
-  tesseract-ocr-kor \
-  tesseract-ocr-deu \
-  tesseract-ocr-fra \
-  && rm -rf /var/lib/apt/lists/*
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    tesseract-ocr-chi-tra \
+    tesseract-ocr-chi-sim \
+    tesseract-ocr-jpn \
+    tesseract-ocr-kor \
+    tesseract-ocr-deu \
+    tesseract-ocr-fra \
+    && rm -rf /var/lib/apt/lists/*
 
 # 階段 10：字型
 RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-  fonts-noto-cjk \
-  fonts-noto-core \
-  fonts-noto-color-emoji \
-  fonts-liberation \
-  && rm -rf /var/lib/apt/lists/*
+    fonts-noto-cjk \
+    fonts-noto-core \
+    fonts-noto-color-emoji \
+    fonts-liberation \
+    && rm -rf /var/lib/apt/lists/*
 
 # 階段 11：Python 依賴
 RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-  python3 \
-  python3-pip \
-  python3-numpy \
-  python3-tinycss2 \
-  python3-opencv \
-  pipx \
-  && rm -rf /var/lib/apt/lists/*
+    python3 \
+    python3-pip \
+    python3-numpy \
+    python3-tinycss2 \
+    python3-opencv \
+    pipx \
+    && rm -rf /var/lib/apt/lists/*
 
 # ==============================================================================
 # 🔧 Python 工具安裝策略
@@ -256,32 +256,32 @@ RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
 # ⬇️ 此步驟只安裝 huggingface_hub 用於後續模型下載
 #    runtime 不會再使用此套件下載任何資源
 RUN pip3 install --no-cache-dir --break-system-packages huggingface_hub \
-  && rm -rf /root/.cache/pip /tmp/*
+    && rm -rf /root/.cache/pip /tmp/*
 
 # 階段 12-A：安裝 markitdown（文件轉換工具）
 # 注意：markitdown[all] 可能依賴 transformers，但不會在 import 時下載模型
 # ⬇️ 此步驟為 Docker build 階段安裝，runtime 不會再下載
 RUN pipx install "markitdown[all]" \
-  && rm -rf /root/.cache/pip /root/.local/pipx/.cache /tmp/*
+    && rm -rf /root/.cache/pip /root/.local/pipx/.cache /tmp/*
 
 # 階段 12-B：安裝 pdf2zh（PDFMathTranslate 引擎）
 # 注意：pdf2zh 的模型將在後續階段顯式下載
 # ⬇️ 此步驟為 Docker build 階段安裝，runtime 不會再下載
 RUN pipx install "pdf2zh" \
-  && rm -rf /root/.cache/huggingface /root/.cache/pip /root/.local/pipx/.cache /tmp/*
+    && rm -rf /root/.cache/huggingface /root/.cache/pip /root/.local/pipx/.cache /tmp/*
 
 # 階段 12-C：安裝 babeldoc（BabelDOC 引擎）
 # ⚠️ 注意：不使用 --warmup，資源將在後續階段顯式下載
 # ⬇️ 此步驟為 Docker build 階段安裝，runtime 不會再下載
 RUN (pipx install "babeldoc" || echo "⚠️ babeldoc 安裝失敗，跳過...") \
-  && rm -rf /root/.cache/huggingface /root/.cache/pip /root/.local/pipx/.cache /tmp/*
+    && rm -rf /root/.cache/huggingface /root/.cache/pip /root/.local/pipx/.cache /tmp/*
 
 # 階段 12-D：安裝 mineru（MinerU PDF 解析引擎）
 # ⚠️ 注意：mineru[all] 依賴大量 HuggingFace 套件，但安裝時不應下載模型
 #    模型下載將在後續階段顯式執行
 # ⬇️ 此步驟為 Docker build 階段安裝，runtime 不會再下載
 RUN (pipx install "mineru[all]" || echo "⚠️ mineru 安裝失敗（可能是 arm64 相容性問題），跳過...") \
-  && rm -rf /root/.cache/huggingface /root/.cache/pip /root/.cache/torch /root/.local/pipx/.cache /tmp/*
+    && rm -rf /root/.cache/huggingface /root/.cache/pip /root/.cache/torch /root/.local/pipx/.cache /tmp/*
 
 # Add pipx bin directory to PATH（必須在模型下載前設定）
 ENV PATH="/root/.local/bin:${PATH}"
@@ -347,215 +347,215 @@ ENV PATH="/root/.local/bin:${PATH}"
 #    runtime 不會再下載任何資源
 # ------------------------------------------------------------------------------
 RUN set -eux && \
-  echo "===========================================================" && \
-  echo "🚀 開始統一模型下載（單一 RUN 優化 BuildKit layer）" && \
-  echo "===========================================================" && \
-  \
-  # ========================================
-  # [1/5] PDFMathTranslate DocLayout-YOLO ONNX 模型
-  # ========================================
-  # ⬇️ Docker build 階段下載 DocLayout-YOLO ONNX 模型
-  #    這是 pdf2zh 用於 PDF 版面分析的核心模型
-  #    runtime 不會再下載此資源
-  echo "" && \
-  echo "📥 [1/5] 下載 DocLayout-YOLO ONNX 模型..." && \
-  mkdir -p /models/pdfmathtranslate && \
-  python3 -c " \
-import os; \
-os.environ['HF_HUB_DISABLE_PROGRESS_BARS'] = '0'; \
-from huggingface_hub import snapshot_download; \
-snapshot_download( \
+    echo "===========================================================" && \
+    echo "🚀 開始統一模型下載（單一 RUN 優化 BuildKit layer）" && \
+    echo "===========================================================" && \
+    \
+    # ========================================
+    # [1/5] PDFMathTranslate DocLayout-YOLO ONNX 模型
+    # ========================================
+    # ⬇️ Docker build 階段下載 DocLayout-YOLO ONNX 模型
+    #    這是 pdf2zh 用於 PDF 版面分析的核心模型
+    #    runtime 不會再下載此資源
+    echo "" && \
+    echo "📥 [1/5] 下載 DocLayout-YOLO ONNX 模型..." && \
+    mkdir -p /models/pdfmathtranslate && \
+    python3 -c " \
+    import os; \
+    os.environ['HF_HUB_DISABLE_PROGRESS_BARS'] = '0'; \
+    from huggingface_hub import snapshot_download; \
+    snapshot_download( \
     repo_id='wybxc/DocLayout-YOLO-DocStructBench-onnx', \
     local_dir='/models/pdfmathtranslate', \
     allow_patterns=['*.onnx'], \
     local_dir_use_symlinks=False \
-)" && \
-  echo "✅ DocLayout-YOLO ONNX 下載完成" && \
-  ls -lh /models/pdfmathtranslate/*.onnx 2>/dev/null || ls -lh /models/pdfmathtranslate/ && \
-  \
-  # 🔥 立即清理 HuggingFace cache（關鍵！避免 blob 重複進入 layer）
-  rm -rf /root/.cache/huggingface && \
-  \
-  # ========================================
-  # [2/5] BabelDOC 資源（顯式下載，禁止 warmup）
-  # ========================================
-  # ⚠️ 重要：不使用 babeldoc --warmup，因為：
-  #    1. --warmup 內部使用 async HTTP，在 QEMU 下不穩定
-  #    2. --warmup 可能失敗但不報錯
-  #    3. 我們需要完全可控的下載流程
-  #
-  # BabelDOC 翻譯服務使用外部 API（Google/DeepL/OpenAI）
-  # 本地只需要字型和基礎資源，這些已透過 apt 安裝
-  # ⬇️ Docker build 階段準備 BabelDOC 快取目錄
-  #    runtime 使用 API 翻譯，不需要本地模型
-  echo "" && \
-  echo "📥 [2/5] 準備 BabelDOC 資源..." && \
-  mkdir -p /root/.cache/babeldoc && \
-  if command -v babeldoc >/dev/null 2>&1; then \
+    )" && \
+    echo "✅ DocLayout-YOLO ONNX 下載完成" && \
+    ls -lh /models/pdfmathtranslate/*.onnx 2>/dev/null || ls -lh /models/pdfmathtranslate/ && \
+    \
+    # 🔥 立即清理 HuggingFace cache（關鍵！避免 blob 重複進入 layer）
+    rm -rf /root/.cache/huggingface && \
+    \
+    # ========================================
+    # [2/5] BabelDOC 資源（顯式下載，禁止 warmup）
+    # ========================================
+    # ⚠️ 重要：不使用 babeldoc --warmup，因為：
+    #    1. --warmup 內部使用 async HTTP，在 QEMU 下不穩定
+    #    2. --warmup 可能失敗但不報錯
+    #    3. 我們需要完全可控的下載流程
+    #
+    # BabelDOC 翻譯服務使用外部 API（Google/DeepL/OpenAI）
+    # 本地只需要字型和基礎資源，這些已透過 apt 安裝
+    # ⬇️ Docker build 階段準備 BabelDOC 快取目錄
+    #    runtime 使用 API 翻譯，不需要本地模型
+    echo "" && \
+    echo "📥 [2/5] 準備 BabelDOC 資源..." && \
+    mkdir -p /root/.cache/babeldoc && \
+    if command -v babeldoc >/dev/null 2>&1; then \
     echo "✅ BabelDOC 已安裝，翻譯將使用外部 API（Google/DeepL/OpenAI）"; \
     echo "   本地不需要下載翻譯模型"; \
-  else \
+    else \
     echo "⚠️ BabelDOC 未安裝，跳過"; \
-  fi && \
-  echo "✅ BabelDOC 步驟完成" && \
-  \
-  # ========================================
-  # [3/5] PDFMathTranslate 多語言字型
-  # ========================================
-  # ⬇️ Docker build 階段下載 PDFMathTranslate 所需字型
-  #    這些字型用於 PDF 翻譯時保持正確的文字渲染
-  #    runtime 不會再下載此資源
-  echo "" && \
-  echo "📥 [3/5] 下載 PDFMathTranslate 多語言字型..." && \
-  mkdir -p /app && \
-  curl -fSL --retry 3 --retry-delay 5 -o /app/GoNotoKurrent-Regular.ttf \
+    fi && \
+    echo "✅ BabelDOC 步驟完成" && \
+    \
+    # ========================================
+    # [3/5] PDFMathTranslate 多語言字型
+    # ========================================
+    # ⬇️ Docker build 階段下載 PDFMathTranslate 所需字型
+    #    這些字型用於 PDF 翻譯時保持正確的文字渲染
+    #    runtime 不會再下載此資源
+    echo "" && \
+    echo "📥 [3/5] 下載 PDFMathTranslate 多語言字型..." && \
+    mkdir -p /app && \
+    curl -fSL --retry 3 --retry-delay 5 -o /app/GoNotoKurrent-Regular.ttf \
     "https://github.com/satbyy/go-noto-universal/releases/download/v7.0/GoNotoKurrent-Regular.ttf" && \
-  curl -fSL --retry 3 --retry-delay 5 -o /app/SourceHanSerifCN-Regular.ttf \
+    curl -fSL --retry 3 --retry-delay 5 -o /app/SourceHanSerifCN-Regular.ttf \
     "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifCN-Regular.ttf" && \
-  curl -fSL --retry 3 --retry-delay 5 -o /app/SourceHanSerifTW-Regular.ttf \
+    curl -fSL --retry 3 --retry-delay 5 -o /app/SourceHanSerifTW-Regular.ttf \
     "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifTW-Regular.ttf" && \
-  curl -fSL --retry 3 --retry-delay 5 -o /app/SourceHanSerifJP-Regular.ttf \
+    curl -fSL --retry 3 --retry-delay 5 -o /app/SourceHanSerifJP-Regular.ttf \
     "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifJP-Regular.ttf" && \
-  curl -fSL --retry 3 --retry-delay 5 -o /app/SourceHanSerifKR-Regular.ttf \
+    curl -fSL --retry 3 --retry-delay 5 -o /app/SourceHanSerifKR-Regular.ttf \
     "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifKR-Regular.ttf" && \
-  echo "✅ 字型下載完成" && \
-  \
-  # ========================================
-  # [4/5] MinerU Pipeline 模型（顯式下載）
-  # ========================================
-  # ⬇️ Docker build 階段下載 MinerU Pipeline 模型
-  #    包含：DocLayout-YOLO, YOLOv8 MFD, UniMERNet, PaddleOCR, LayoutReader, SLANet
-  #    runtime 不會再下載任何資源
-  echo "" && \
-  echo "📥 [4/5] 下載 MinerU Pipeline 模型..." && \
-  ARCH=$(uname -m) && \
-  MINERU_MODELS_DIR="/models/mineru" && \
-  mkdir -p "$MINERU_MODELS_DIR" && \
-  if [ "$ARCH" = "aarch64" ]; then \
+    echo "✅ 字型下載完成" && \
+    \
+    # ========================================
+    # [4/5] MinerU Pipeline 模型（顯式下載）
+    # ========================================
+    # ⬇️ Docker build 階段下載 MinerU Pipeline 模型
+    #    包含：DocLayout-YOLO, YOLOv8 MFD, UniMERNet, PaddleOCR, LayoutReader, SLANet
+    #    runtime 不會再下載任何資源
+    echo "" && \
+    echo "📥 [4/5] 下載 MinerU Pipeline 模型..." && \
+    ARCH=$(uname -m) && \
+    MINERU_MODELS_DIR="/models/mineru" && \
+    mkdir -p "$MINERU_MODELS_DIR" && \
+    if [ "$ARCH" = "aarch64" ]; then \
     echo "⚠️ ARM64 架構：MinerU 可能不完全支援，嘗試下載模型..."; \
-  fi && \
-  if command -v mineru >/dev/null 2>&1; then \
+    fi && \
+    if command -v mineru >/dev/null 2>&1; then \
     echo "使用顯式 Python 腳本下載 MinerU 模型..."; \
     python3 -c " \
-import os, json; \
-os.environ['HF_HUB_DISABLE_PROGRESS_BARS'] = '0'; \
-from huggingface_hub import snapshot_download; \
-# PDF-Extract-Kit-1.0 Pipeline 模型
-models_dir = '/models/mineru'; \
-print('下載 PDF-Extract-Kit-1.0 模型...'); \
-try: \
+    import os, json; \
+    os.environ['HF_HUB_DISABLE_PROGRESS_BARS'] = '0'; \
+    from huggingface_hub import snapshot_download; \
+    # PDF-Extract-Kit-1.0 Pipeline 模型
+    models_dir = '/models/mineru'; \
+    print('下載 PDF-Extract-Kit-1.0 模型...'); \
+    try: \
     snapshot_download( \
-        repo_id='opendatalab/PDF-Extract-Kit-1.0', \
-        local_dir=os.path.join(models_dir, 'PDF-Extract-Kit-1.0'), \
-        local_dir_use_symlinks=False \
+    repo_id='opendatalab/PDF-Extract-Kit-1.0', \
+    local_dir=os.path.join(models_dir, 'PDF-Extract-Kit-1.0'), \
+    local_dir_use_symlinks=False \
     ); \
     print('✅ PDF-Extract-Kit-1.0 下載完成'); \
-except Exception as e: \
+    except Exception as e: \
     print(f'⚠️ PDF-Extract-Kit-1.0 下載失敗: {e}'); \
-# 建立 mineru.json 設定檔
-config = { \
+    # 建立 mineru.json 設定檔
+    config = { \
     'models-dir': { \
-        'pipeline': os.path.join(models_dir, 'PDF-Extract-Kit-1.0'), \
-        'vlm': '' \
+    'pipeline': os.path.join(models_dir, 'PDF-Extract-Kit-1.0'), \
+    'vlm': '' \
     }, \
     'model-source': 'local', \
     'latex-delimiter-config': { \
-        'display': {'left': '\$\$', 'right': '\$\$'}, \
-        'inline': {'left': '\$', 'right': '\$'} \
+    'display': {'left': '\$\$', 'right': '\$\$'}, \
+    'inline': {'left': '\$', 'right': '\$'} \
     } \
-}; \
-with open('/root/mineru.json', 'w') as f: \
+    }; \
+    with open('/root/mineru.json', 'w') as f: \
     json.dump(config, f, indent=2); \
-print('✅ mineru.json 已建立'); \
-" || echo "⚠️ MinerU 模型下載失敗，將在 runtime 時嘗試下載"; \
-  else \
+    print('✅ mineru.json 已建立'); \
+    " || echo "⚠️ MinerU 模型下載失敗，將在 runtime 時嘗試下載"; \
+    else \
     echo "⚠️ mineru 命令不可用，跳過模型下載"; \
     echo '{"models-dir":{"pipeline":"","vlm":""},"model-source":"huggingface","latex-delimiter-config":{"display":{"left":"$$","right":"$$"},"inline":{"left":"$","right":"$"}}}' > /root/mineru.json; \
-  fi && \
-  echo "✅ MinerU 模型下載步驟完成" && \
-  \
-  # 🔥 再次清理 HuggingFace cache（MinerU 也會產生）
-  rm -rf /root/.cache/huggingface && \
-  \
-  # ========================================
-  # [5/5] 最終驗證
-  # ========================================
-  echo "" && \
-  echo "📥 [5/5] 驗證模型完整性..." && \
-  echo "" && \
-  \
-  # ========================================
-  # 🔥 最終 Cache 清理（關鍵！避免 overlayfs diff 爆炸）
-  # ========================================
-  echo "===========================================================" && \
-  echo "🧹 清理所有下載快取（降低 layer diff 大小）" && \
-  echo "===========================================================" && \
-  # HuggingFace Hub cache（最大宗！包含所有 blob）
-  rm -rf /root/.cache/huggingface && \
-  # pip / Python build cache
-  rm -rf /root/.cache/pip && \
-  rm -rf /root/.cache/uv && \
-  # pipx cache
-  rm -rf /root/.local/pipx/.cache && \
-  # torch cache（可能由 MinerU 產生）
-  rm -rf /root/.cache/torch && \
-  # 通用 cache 目錄
-  rm -rf /tmp/* && \
-  rm -rf /var/tmp/* && \
-  # Python bytecode cache（可選，節省少量空間）
-  find /root/.local -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true && \
-  find /usr -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true && \
-  \
-  echo "" && \
-  echo "===========================================================" && \
-  echo "📋 模型檔案驗證" && \
-  echo "===========================================================" && \
-  echo "" && \
-  echo "🔹 PDFMathTranslate 模型：" && \
-  ONNX_COUNT=$(find /models/pdfmathtranslate -name "*.onnx" 2>/dev/null | wc -l) && \
-  if [ "$ONNX_COUNT" -gt 0 ]; then \
+    fi && \
+    echo "✅ MinerU 模型下載步驟完成" && \
+    \
+    # 🔥 再次清理 HuggingFace cache（MinerU 也會產生）
+    rm -rf /root/.cache/huggingface && \
+    \
+    # ========================================
+    # [5/5] 最終驗證
+    # ========================================
+    echo "" && \
+    echo "📥 [5/5] 驗證模型完整性..." && \
+    echo "" && \
+    \
+    # ========================================
+    # 🔥 最終 Cache 清理（關鍵！避免 overlayfs diff 爆炸）
+    # ========================================
+    echo "===========================================================" && \
+    echo "🧹 清理所有下載快取（降低 layer diff 大小）" && \
+    echo "===========================================================" && \
+    # HuggingFace Hub cache（最大宗！包含所有 blob）
+    rm -rf /root/.cache/huggingface && \
+    # pip / Python build cache
+    rm -rf /root/.cache/pip && \
+    rm -rf /root/.cache/uv && \
+    # pipx cache
+    rm -rf /root/.local/pipx/.cache && \
+    # torch cache（可能由 MinerU 產生）
+    rm -rf /root/.cache/torch && \
+    # 通用 cache 目錄
+    rm -rf /tmp/* && \
+    rm -rf /var/tmp/* && \
+    # Python bytecode cache（可選，節省少量空間）
+    find /root/.local -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true && \
+    find /usr -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true && \
+    \
+    echo "" && \
+    echo "===========================================================" && \
+    echo "📋 模型檔案驗證" && \
+    echo "===========================================================" && \
+    echo "" && \
+    echo "🔹 PDFMathTranslate 模型：" && \
+    ONNX_COUNT=$(find /models/pdfmathtranslate -name "*.onnx" 2>/dev/null | wc -l) && \
+    if [ "$ONNX_COUNT" -gt 0 ]; then \
     echo "   ✅ 找到 $ONNX_COUNT 個 ONNX 模型："; \
     ls -lh /models/pdfmathtranslate/*.onnx 2>/dev/null || find /models/pdfmathtranslate -name "*.onnx" -exec ls -lh {} \;; \
-  else \
+    else \
     echo "   ❌ /models/pdfmathtranslate 中沒有 ONNX 模型"; \
-  fi && \
-  echo "" && \
-  echo "🔹 PDFMathTranslate 字型：" && \
-  ls -lh /app/*.ttf 2>/dev/null || echo "   ⚠️ 無字型檔案" && \
-  echo "" && \
-  echo "🔹 BabelDOC 狀態：" && \
-  if command -v babeldoc >/dev/null 2>&1; then \
+    fi && \
+    echo "" && \
+    echo "🔹 PDFMathTranslate 字型：" && \
+    ls -lh /app/*.ttf 2>/dev/null || echo "   ⚠️ 無字型檔案" && \
+    echo "" && \
+    echo "🔹 BabelDOC 狀態：" && \
+    if command -v babeldoc >/dev/null 2>&1; then \
     echo "   ✅ BabelDOC 已安裝（使用外部 API 翻譯）"; \
-  else \
+    else \
     echo "   ⚠️ BabelDOC 未安裝"; \
-  fi && \
-  echo "" && \
-  echo "🔹 MinerU 模型目錄：" && \
-  if [ -d "/models/mineru/PDF-Extract-Kit-1.0" ]; then \
+    fi && \
+    echo "" && \
+    echo "🔹 MinerU 模型目錄：" && \
+    if [ -d "/models/mineru/PDF-Extract-Kit-1.0" ]; then \
     echo "   ✅ MinerU Pipeline 模型已下載"; \
     du -sh /models/mineru/PDF-Extract-Kit-1.0 2>/dev/null || true; \
-  else \
+    else \
     echo "   ⚠️ MinerU 模型目錄不存在（可能需要 runtime 下載）"; \
-  fi && \
-  echo "" && \
-  echo "🔹 mineru.json 設定：" && \
-  if [ -f /root/mineru.json ]; then \
+    fi && \
+    echo "" && \
+    echo "🔹 mineru.json 設定：" && \
+    if [ -f /root/mineru.json ]; then \
     cat /root/mineru.json; \
-  else \
+    else \
     echo "   ⚠️ mineru.json 不存在"; \
-  fi && \
-  echo "" && \
-  echo "🔹 確認 HuggingFace cache 已清除：" && \
-  if [ -d "/root/.cache/huggingface" ]; then \
+    fi && \
+    echo "" && \
+    echo "🔹 確認 HuggingFace cache 已清除：" && \
+    if [ -d "/root/.cache/huggingface" ]; then \
     echo "   ❌ 警告：HuggingFace cache 仍存在！"; \
     du -sh /root/.cache/huggingface 2>/dev/null || true; \
-  else \
+    else \
     echo "   ✅ HuggingFace cache 已清除"; \
-  fi && \
-  echo "" && \
-  echo "===========================================================" && \
-  echo "✅ 模型下載完成，所有快取已清理" && \
-  echo "==========================================================="
+    fi && \
+    echo "" && \
+    echo "===========================================================" && \
+    echo "✅ 模型下載完成，所有快取已清理" && \
+    echo "==========================================================="
 
 # ==============================================================================
 # 環境變數設定
@@ -582,22 +582,22 @@ ENV TRANSFORMERS_OFFLINE="1"
 # 最終清理（模型下載完成後）
 # ==============================================================================
 RUN rm -rf /usr/share/doc/texlive* \
-  && rm -rf /usr/share/texlive/texmf-dist/doc \
-  && rm -rf /usr/share/doc/* \
-  && rm -rf /usr/share/man/* \
-  && rm -rf /usr/share/info/*
+    && rm -rf /usr/share/texlive/texmf-dist/doc \
+    && rm -rf /usr/share/doc/* \
+    && rm -rf /usr/share/man/* \
+    && rm -rf /usr/share/info/*
 
 # ==============================================================================
 # 設定 locale（支援中文 PDF 避免亂碼）
 # ==============================================================================
 RUN sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
-  sed -i 's/# zh_TW.UTF-8 UTF-8/zh_TW.UTF-8 UTF-8/' /etc/locale.gen && \
-  sed -i 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/' /etc/locale.gen && \
-  sed -i 's/# ja_JP.UTF-8 UTF-8/ja_JP.UTF-8 UTF-8/' /etc/locale.gen && \
-  sed -i 's/# ko_KR.UTF-8 UTF-8/ko_KR.UTF-8 UTF-8/' /etc/locale.gen && \
-  sed -i 's/# de_DE.UTF-8 UTF-8/de_DE.UTF-8 UTF-8/' /etc/locale.gen && \
-  sed -i 's/# fr_FR.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen && \
-  locale-gen
+    sed -i 's/# zh_TW.UTF-8 UTF-8/zh_TW.UTF-8 UTF-8/' /etc/locale.gen && \
+    sed -i 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/' /etc/locale.gen && \
+    sed -i 's/# ja_JP.UTF-8 UTF-8/ja_JP.UTF-8 UTF-8/' /etc/locale.gen && \
+    sed -i 's/# ko_KR.UTF-8 UTF-8/ko_KR.UTF-8 UTF-8/' /etc/locale.gen && \
+    sed -i 's/# de_DE.UTF-8 UTF-8/de_DE.UTF-8 UTF-8/' /etc/locale.gen && \
+    sed -i 's/# fr_FR.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen && \
+    locale-gen
 
 # 預設使用 zh_TW.UTF-8 確保中文 PDF 正確顯示
 ENV LANG=zh_TW.UTF-8
@@ -615,16 +615,16 @@ RUN fc-cache -fv
 # ⬇️ Docker build 階段下載，runtime 不會再下載
 # ==============================================================================
 RUN ARCH=$(uname -m) && \
-  if [ "$ARCH" = "aarch64" ]; then \
-  VTRACER_ASSET="vtracer-aarch64-unknown-linux-musl.tar.gz"; \
-  else \
-  VTRACER_ASSET="vtracer-x86_64-unknown-linux-musl.tar.gz"; \
-  fi && \
-  curl -L --retry 3 --retry-delay 5 -o /tmp/vtracer.tar.gz "https://github.com/visioncortex/vtracer/releases/download/0.6.4/${VTRACER_ASSET}" && \
-  tar -xzf /tmp/vtracer.tar.gz -C /tmp/ && \
-  mv /tmp/vtracer /usr/local/bin/vtracer && \
-  chmod +x /usr/local/bin/vtracer && \
-  rm /tmp/vtracer.tar.gz
+    if [ "$ARCH" = "aarch64" ]; then \
+    VTRACER_ASSET="vtracer-aarch64-unknown-linux-musl.tar.gz"; \
+    else \
+    VTRACER_ASSET="vtracer-x86_64-unknown-linux-musl.tar.gz"; \
+    fi && \
+    curl -L --retry 3 --retry-delay 5 -o /tmp/vtracer.tar.gz "https://github.com/visioncortex/vtracer/releases/download/0.6.4/${VTRACER_ASSET}" && \
+    tar -xzf /tmp/vtracer.tar.gz -C /tmp/ && \
+    mv /tmp/vtracer /usr/local/bin/vtracer && \
+    chmod +x /usr/local/bin/vtracer && \
+    rm /tmp/vtracer.tar.gz
 
 COPY --from=install /temp/prod/node_modules node_modules
 COPY --from=prerelease /app/public/ /app/public/
