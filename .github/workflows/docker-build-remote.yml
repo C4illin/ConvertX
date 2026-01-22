@@ -28,6 +28,13 @@ env:
   # Docker Hub 映像庫
   DOCKER_IMAGE_REPO: convertx/convertx-cn
 
+# ============================================================
+# 權限設定（GITHUB_TOKEN）
+# ============================================================
+permissions:
+  contents: write # 必要：創建 Release、上傳 assets、創建/推送 tag
+  actions: read # 可選：讀取 workflow 資訊（用於 generate release notes）
+
 jobs:
   build-and-push:
     name: 🚀 遠端 Docker Build & Push
@@ -616,7 +623,7 @@ jobs:
 
       # ========================================
       # Step 17: 生成 Changelog
-      # 說明：從 git log 生成變更記錄
+      # 說明：從 git log 生成變更記錄（與 release.yml 邏輯一致）
       # ========================================
       - name: 📝 Generate Changelog
         if: ${{ !contains(github.event.inputs.image_tag, 'test') && !contains(github.event.inputs.image_tag, 'dev') && !contains(github.event.inputs.image_tag, 'alpha') && !contains(github.event.inputs.image_tag, 'beta') }}
@@ -640,35 +647,12 @@ jobs:
             CHANGELOG=$(git log --pretty=format:"- %s (%h)" ${PREVIOUS_TAG}..HEAD)
           fi
 
-          # 建立 changelog 檔案
-          cat > changelog.txt << EOF
-          ## 📦 Docker Image
+          # 建立 changelog 檔案（與 release.yml 風格一致）
+          echo "$CHANGELOG" > changelog.txt
 
-          **Image:** \`${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}\`
-
-          ### 🏗️ 支援的架構
-          - \`linux/amd64\`
-          - \`linux/arm64\`
-
-          ### 📥 拉取映像
-          \`\`\`bash
-          # 拉取指定版本
-          docker pull ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}
-
-          # 拉取最新版本
-          docker pull ${{ env.DOCKER_IMAGE_REPO }}:latest
-          \`\`\`
-
-          ### 📋 變更記錄
-          ${CHANGELOG}
-
-          ### 🔗 相關連結
-          - [Docker Hub](https://hub.docker.com/r/${{ env.DOCKER_IMAGE_REPO }}/tags)
-          - [完整文件](https://github.com/${{ github.repository }}/blob/main/README.md)
-
-          ---
-          *此 Release 由 GitHub Actions 自動創建*
-          EOF
+          # 加入 Full Changelog 連結
+          echo "" >> changelog.txt
+          echo "Full Changelog: https://github.com/${{ github.repository }}/compare/${PREVIOUS_TAG}...v${{ github.event.inputs.image_tag }}" >> changelog.txt
 
           echo ""
           echo "✅ Changelog 已生成："
@@ -678,6 +662,7 @@ jobs:
       # ========================================
       # Step 18: 創建 GitHub Release
       # 說明：為正式版本自動創建 GitHub Release
+      # 注意：不使用 generate_release_notes，改用 body_path 提供完整 changelog
       # ========================================
       - name: 📦 Create GitHub Release
         if: ${{ !contains(github.event.inputs.image_tag, 'test') && !contains(github.event.inputs.image_tag, 'dev') && !contains(github.event.inputs.image_tag, 'alpha') && !contains(github.event.inputs.image_tag, 'beta') }}
@@ -688,7 +673,6 @@ jobs:
           body_path: changelog.txt
           draft: false
           prerelease: false
-          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

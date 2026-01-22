@@ -1,0 +1,346 @@
+# ============================================================
+# 遠端服務更新（Remote Service Update via Tailscale SSH）
+# ============================================================
+# 說明：透過 Tailscale SSH 連線到遠端主機，更新 Docker 服務
+# 功能：停止服務 → 拉取最新映像 → 刪除舊映像 → 重新啟動
+# ============================================================
+
+name: 🔄 Update Remote Service
+
+on:
+  # 手動觸發
+  workflow_dispatch:
+    inputs:
+      prune_images:
+        description: "是否清理 ConvertX-CN 舊映像？"
+        required: false
+        default: true
+        type: boolean
+
+# ============================================================
+# 環境變數設定
+# ============================================================
+env:
+  # 遠端主機專案目錄
+  REMOTE_PROJECT_DIR: /home/bioailab/miniconda3/lid/app/convertx-cn
+  # 容器名稱（用於顯示 log）
+  CONTAINER_NAME: convertx-cn
+
+jobs:
+  update-service:
+    name: 🔄 更新遠端服務
+    runs-on: ubuntu-latest
+
+    steps:
+      # ========================================
+      # Step 1: 啟動 Tailscale（非互動模式）
+      # ========================================
+      - name: 🔗 啟動 Tailscale 連線
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          args: "--ssh --accept-dns=false --accept-routes=false"
+
+      # ========================================
+      # Step 2: 驗證 Tailscale 連線
+      # ========================================
+      - name: ✅ 驗證 Tailscale 連線狀態
+        run: |
+          echo "========================================"
+          echo "🔍 檢查 Tailscale 連線狀態"
+          echo "========================================"
+
+          echo ""
+          echo "📊 Tailscale 狀態："
+          tailscale status
+
+          echo ""
+          echo "🌐 本機 Tailscale IP："
+          TAILSCALE_IP=$(tailscale ip -4)
+          echo "${TAILSCALE_IP}"
+
+          echo ""
+          echo "🔐 檢查 SSH 功能狀態："
+          if tailscale status --json | grep -q '"SSH":true'; then
+            echo "✅ Tailscale SSH 功能已啟用"
+          else
+            echo "⚠️ 正在檢查 SSH 狀態..."
+            tailscale status --json | head -50
+          fi
+
+          echo ""
+          echo "⏳ 等待 Tailscale 連線穩定..."
+          sleep 5
+
+          echo ""
+          echo "📡 測試與遠端主機的連通性..."
+          echo "目標主機: ${{ secrets.SSH_HOST }}"
+
+          if tailscale ping --c 3 "${{ secrets.SSH_HOST }}"; then
+            echo ""
+            echo "✅ Tailscale 連線測試成功！"
+          else
+            echo ""
+            echo "⚠️ Tailscale ping 失敗，但 SSH 可能仍可運作，繼續執行..."
+          fi
+
+          echo "========================================"
+
+      # ========================================
+      # Step 3: Tailscale SSH 連線（手動網頁驗證）
+      # 說明：首次連線需要點擊驗證 URL 完成授權
+      # ========================================
+      - name: 🔐 測試 Tailscale SSH 連線
+        run: |
+          echo "========================================"
+          echo "🔐 測試 Tailscale SSH 連線"
+          echo "========================================"
+          echo "使用者: ${{ secrets.SSH_USER }}"
+          echo "主機: ${{ secrets.SSH_HOST }}"
+          echo ""
+          echo "⚠️  如果出現驗證 URL，請在瀏覽器中開啟並完成驗證"
+          echo "⏳ 驗證完成後，連線會自動繼續..."
+          echo ""
+          echo "========================================"
+
+          timeout 600 tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "echo '✅ Tailscale SSH 連線成功！' && echo '主機名稱:' && hostname && echo '當前使用者:' && whoami" \
+            || { echo ""; echo "❌ SSH 連線失敗或超時，請確認已完成網頁驗證"; exit 1; }
+
+          echo ""
+          echo "========================================"
+
+      # ========================================
+      # Step 4: 顯示更新前服務狀態
+      # ========================================
+      - name: 📋 更新前服務狀態
+        run: |
+          echo "========================================"
+          echo "📋 更新前服務狀態"
+          echo "========================================"
+
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          set -e
+
+          cd /home/bioailab/miniconda3/lid/app/convertx-cn
+
+          echo "📦 目前運行的容器（docker compose ps）："
+          docker compose ps
+
+          echo ""
+          echo "🏷️ 目前使用的映像版本："
+          docker compose images
+
+          echo ""
+          echo "🐳 ConvertX-CN 容器狀態（docker ps）："
+          docker ps --filter "name=convertx" --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"
+
+          echo ""
+          echo "💾 磁碟空間使用情況："
+          df -h / | head -2
+          REMOTE_EOF
+
+          echo "========================================"
+
+      # ========================================
+      # Step 5: 停止服務
+      # ========================================
+      - name: ⏹️ 停止服務
+        run: |
+          echo "========================================"
+          echo "⏹️ 停止服務"
+          echo "========================================"
+
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          set -e
+
+          cd /home/bioailab/miniconda3/lid/app/convertx-cn
+
+          echo "📋 停止 Docker Compose 服務..."
+          docker compose down
+
+          echo ""
+          echo "✅ 服務已停止"
+          REMOTE_EOF
+
+          echo "========================================"
+
+      # ========================================
+      # Step 6: 拉取最新映像
+      # ========================================
+      - name: 📥 拉取最新映像
+        run: |
+          echo "========================================"
+          echo "📥 拉取最新映像"
+          echo "========================================"
+
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          set -e
+
+          cd /home/bioailab/miniconda3/lid/app/convertx-cn
+
+          echo "📋 拉取最新 Docker 映像..."
+          docker compose pull
+
+          echo ""
+          echo "✅ 映像拉取完成"
+          REMOTE_EOF
+
+          echo "========================================"
+
+      # ========================================
+      # Step 7: 清理 ConvertX-CN 舊映像（可選）
+      # ========================================
+      - name: 🧹 清理 ConvertX-CN 舊映像
+        if: ${{ github.event.inputs.prune_images == 'true' }}
+        run: |
+          echo "========================================"
+          echo "🧹 清理 ConvertX-CN 舊映像"
+          echo "========================================"
+
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          set -e
+
+          echo "📋 清理前的 ConvertX-CN 映像："
+          docker images | grep -E "convertx/convertx-cn|REPOSITORY" | head -10
+
+          echo ""
+          echo "🗑️ 移除 ConvertX-CN 舊版映像（保留 latest）..."
+          docker images --format "{{.Repository}}:{{.Tag}} {{.ID}}" | \
+            grep "convertx/convertx-cn" | \
+            grep -v ":latest" | \
+            awk '{print $2}' | \
+            xargs -r docker rmi 2>/dev/null || true
+
+          echo ""
+          echo "📋 清理後的 ConvertX-CN 映像："
+          docker images | grep -E "convertx/convertx-cn|REPOSITORY" | head -10
+
+          echo ""
+          echo "💾 磁碟空間："
+          df -h / | head -2
+
+          echo ""
+          echo "✅ ConvertX-CN 舊映像清理完成"
+          REMOTE_EOF
+
+          echo "========================================"
+
+      # ========================================
+      # Step 8: 重新啟動服務
+      # ========================================
+      - name: ▶️ 重新啟動服務
+        run: |
+          echo "========================================"
+          echo "▶️ 重新啟動服務"
+          echo "========================================"
+
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          set -e
+
+          cd /home/bioailab/miniconda3/lid/app/convertx-cn
+
+          echo "📋 啟動 Docker Compose 服務..."
+          docker compose up -d
+
+          echo ""
+          echo "⏳ 等待服務啟動..."
+          sleep 10
+
+          echo ""
+          echo "📦 服務狀態（docker compose ps）："
+          docker compose ps
+
+          echo ""
+          echo "🐳 ConvertX-CN 容器狀態（docker ps）："
+          docker ps --filter "name=convertx" --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"
+
+          echo ""
+          echo "✅ 服務已重新啟動"
+          REMOTE_EOF
+
+          echo "========================================"
+
+      # ========================================
+      # Step 9: 顯示服務 Log
+      # ========================================
+      - name: 📜 顯示服務 Log
+        run: |
+          echo "========================================"
+          echo "📜 服務啟動 Log（全部）"
+          echo "========================================"
+
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          set -e
+
+          echo "📋 ConvertX-CN 容器 Log："
+          docker logs convertx-cn 2>&1 || echo "⚠️ 無法取得 log，容器可能尚未完全啟動"
+          REMOTE_EOF
+
+          echo "========================================"
+
+      # ========================================
+      # Step 10: 健康檢查
+      # ========================================
+      - name: 🏥 健康檢查
+        run: |
+          echo "========================================"
+          echo "🏥 服務健康檢查"
+          echo "========================================"
+
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          set -e
+
+          cd /home/bioailab/miniconda3/lid/app/convertx-cn
+
+          echo "📋 容器運行狀態（docker compose ps）："
+          docker compose ps
+
+          echo ""
+          echo "🏷️ 目前使用的映像版本："
+          docker compose images
+
+          echo ""
+          echo "🐳 ConvertX-CN 容器狀態（docker ps）："
+          docker ps --filter "name=convertx" --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"
+
+          # 檢查容器是否正常運行
+          if docker ps --filter "name=convertx-cn" --format "{{.Names}}" | grep -q "convertx-cn"; then
+            echo ""
+            echo "✅ ConvertX-CN 服務運行正常！"
+          else
+            echo ""
+            echo "❌ 警告：ConvertX-CN 容器未運行！"
+            exit 1
+          fi
+          REMOTE_EOF
+
+          echo "========================================"
+
+      # ========================================
+      # Step 11: 完成摘要
+      # ========================================
+      - name: 📋 更新完成摘要
+        run: |
+          echo "========================================"
+          echo "✅ 遠端服務更新完成！"
+          echo "========================================"
+          echo ""
+          echo "📦 更新資訊："
+          echo "  - 專案目錄: /home/bioailab/miniconda3/lid/app/convertx-cn"
+          echo "  - 遠端主機: ${{ secrets.SSH_HOST }}"
+          echo "  - 清理舊映像: ${{ github.event.inputs.prune_images }}"
+          echo ""
+          echo "🔧 執行的操作："
+          echo "  1. ⏹️ 停止服務"
+          echo "  2. 📥 拉取最新映像"
+          if [ "${{ github.event.inputs.prune_images }}" == "true" ]; then
+            echo "  3. 🧹 清理 ConvertX-CN 舊映像"
+          fi
+          echo "  4. ▶️ 重新啟動服務"
+          echo "  5. 📜 顯示服務 Log"
+          echo "  6. 🏥 健康檢查"
+          echo ""
+          echo "========================================"
+          echo "🎉 所有步驟已成功完成！"
+          echo "========================================"
