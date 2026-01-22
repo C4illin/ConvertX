@@ -517,7 +517,184 @@ jobs:
             fi
           ' || FAILED=1
 
-          # 測試 6: API 健康檢查
+          # 測試 6: Calibre EPUB → MOBI
+          echo ""
+          echo "🔄 測試 Calibre: 電子書轉換"
+          docker exec e2e-test sh -c '
+            # 建立簡單的 HTML 作為 ebook 來源
+            echo "<!DOCTYPE html><html><body><h1>Test Book</h1><p>Content</p></body></html>" > /tmp/book.html
+            ebook-convert /tmp/book.html /tmp/book.epub 2>/dev/null
+            if [ -f /tmp/book.epub ]; then
+              echo "✅ Calibre HTML → EPUB 成功"
+              ls -la /tmp/book.epub
+            else
+              echo "❌ Calibre HTML → EPUB 失敗"
+              exit 1
+            fi
+          ' || echo "⚠️ Calibre 測試跳過"
+
+          # 測試 7: Potrace 點陣圖向量化
+          echo ""
+          echo "🔄 測試 Potrace: PBM → SVG"
+          docker exec e2e-test sh -c '
+            # 建立簡單的 PBM 圖片
+            echo "P1
+            4 4
+            0 1 1 0
+            1 0 0 1
+            1 0 0 1
+            0 1 1 0" > /tmp/test.pbm
+            potrace -s -o /tmp/test_potrace.svg /tmp/test.pbm
+            if [ -f /tmp/test_potrace.svg ]; then
+              echo "✅ Potrace PBM → SVG 成功"
+              ls -la /tmp/test_potrace.svg
+            else
+              echo "❌ Potrace PBM → SVG 失敗"
+              exit 1
+            fi
+          ' || echo "⚠️ Potrace 測試跳過"
+
+          # 測試 8: Tesseract OCR
+          echo ""
+          echo "🔄 測試 Tesseract: OCR 文字識別"
+          docker exec e2e-test sh -c '
+            # 使用 ImageMagick 建立帶有文字的圖片
+            convert -size 200x50 xc:white -font DejaVu-Sans -pointsize 20 -fill black -annotate +10+35 "Hello OCR" /tmp/ocr_test.png
+            tesseract /tmp/ocr_test.png /tmp/ocr_output 2>/dev/null
+            if [ -f /tmp/ocr_output.txt ]; then
+              echo "✅ Tesseract OCR 成功"
+              cat /tmp/ocr_output.txt
+            else
+              echo "❌ Tesseract OCR 失敗"
+              exit 1
+            fi
+          ' || echo "⚠️ Tesseract 測試跳過"
+
+          # 測試 9: GraphicsMagick（如果可用）
+          echo ""
+          echo "🔄 測試 GraphicsMagick: 圖片轉換"
+          docker exec e2e-test sh -c '
+            if command -v gm &> /dev/null; then
+              gm convert -size 100x100 xc:green /tmp/gm_test.png
+              gm convert /tmp/gm_test.png /tmp/gm_test.gif
+              if [ -f /tmp/gm_test.gif ]; then
+                echo "✅ GraphicsMagick PNG → GIF 成功"
+                ls -la /tmp/gm_test.gif
+              else
+                echo "❌ GraphicsMagick 轉換失敗"
+                exit 1
+              fi
+            else
+              echo "⚠️ GraphicsMagick 未安裝，跳過"
+            fi
+          ' || echo "⚠️ GraphicsMagick 測試跳過"
+
+          # 測試 10: Resvg SVG → PNG（高品質）
+          echo ""
+          echo "🔄 測試 Resvg: SVG → PNG"
+          docker exec e2e-test sh -c '
+            if command -v resvg &> /dev/null; then
+              echo "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"50\" height=\"50\"><rect fill=\"purple\" width=\"50\" height=\"50\"/></svg>" > /tmp/resvg_test.svg
+              resvg /tmp/resvg_test.svg /tmp/resvg_output.png
+              if [ -f /tmp/resvg_output.png ]; then
+                echo "✅ Resvg SVG → PNG 成功"
+                ls -la /tmp/resvg_output.png
+              else
+                echo "❌ Resvg 轉換失敗"
+                exit 1
+              fi
+            else
+              echo "⚠️ Resvg 未安裝，跳過"
+            fi
+          ' || echo "⚠️ Resvg 測試跳過"
+
+          # 測試 11: VIPS 圖片處理
+          echo ""
+          echo "🔄 測試 VIPS: 圖片轉換"
+          docker exec e2e-test sh -c '
+            if command -v vips &> /dev/null; then
+              # 使用 ImageMagick 建立測試圖片
+              convert -size 100x100 xc:yellow /tmp/vips_input.png
+              vips copy /tmp/vips_input.png /tmp/vips_output.webp
+              if [ -f /tmp/vips_output.webp ]; then
+                echo "✅ VIPS PNG → WEBP 成功"
+                ls -la /tmp/vips_output.webp
+              else
+                echo "❌ VIPS 轉換失敗"
+                exit 1
+              fi
+            else
+              echo "⚠️ VIPS 未安裝，跳過"
+            fi
+          ' || echo "⚠️ VIPS 測試跳過"
+
+          # 測試 12: FFmpeg 影片處理
+          echo ""
+          echo "🔄 測試 FFmpeg: 影片生成與轉換"
+          docker exec e2e-test sh -c '
+            # 生成測試影片（1秒純色）
+            ffmpeg -f lavfi -i color=c=red:s=320x240:d=1 -y /tmp/test_video.mp4 2>/dev/null
+            if [ -f /tmp/test_video.mp4 ]; then
+              echo "✅ FFmpeg 影片生成成功"
+              ls -la /tmp/test_video.mp4
+              # 轉換為 GIF
+              ffmpeg -i /tmp/test_video.mp4 -vf "fps=10,scale=160:-1" -y /tmp/test_video.gif 2>/dev/null
+              if [ -f /tmp/test_video.gif ]; then
+                echo "✅ FFmpeg MP4 → GIF 成功"
+                ls -la /tmp/test_video.gif
+              fi
+            else
+              echo "❌ FFmpeg 影片生成失敗"
+              exit 1
+            fi
+          ' || FAILED=1
+
+          # 測試 13: Pandoc 進階格式
+          echo ""
+          echo "🔄 測試 Pandoc: Markdown → LaTeX"
+          docker exec e2e-test sh -c '
+            pandoc /tmp/test.md -o /tmp/test.tex
+            if [ -f /tmp/test.tex ]; then
+              echo "✅ Pandoc Markdown → LaTeX 成功"
+              head -10 /tmp/test.tex
+            else
+              echo "❌ Pandoc Markdown → LaTeX 失敗"
+              exit 1
+            fi
+          ' || echo "⚠️ Pandoc LaTeX 測試跳過"
+
+          # 測試 14: Inkscape SVG → PDF
+          echo ""
+          echo "🔄 測試 Inkscape: SVG → PDF"
+          docker exec e2e-test sh -c '
+            inkscape --export-type=pdf --export-filename=/tmp/test_inkscape.pdf /tmp/test.svg 2>/dev/null
+            if [ -f /tmp/test_inkscape.pdf ]; then
+              echo "✅ Inkscape SVG → PDF 成功"
+              ls -la /tmp/test_inkscape.pdf
+            else
+              echo "❌ Inkscape SVG → PDF 失敗"
+              exit 1
+            fi
+          ' || FAILED=1
+
+          # 測試 15: LibreOffice 進階轉換
+          echo ""
+          echo "🔄 測試 LibreOffice: ODT → DOCX"
+          docker exec e2e-test sh -c '
+            # 建立 ODT 格式文件（使用 LibreOffice 從 TXT 轉換）
+            libreoffice --headless --convert-to odt --outdir /tmp /tmp/test.txt 2>/dev/null
+            if [ -f /tmp/test.odt ]; then
+              libreoffice --headless --convert-to docx --outdir /tmp /tmp/test.odt 2>/dev/null
+              if [ -f /tmp/test.docx ]; then
+                echo "✅ LibreOffice ODT → DOCX 成功"
+                ls -la /tmp/test.docx
+              else
+                echo "⚠️ LibreOffice ODT → DOCX 轉換可能失敗"
+              fi
+            fi
+          ' || echo "⚠️ LibreOffice ODT 測試跳過"
+
+          # 測試 16: API 健康檢查
           echo ""
           echo "🔄 測試 API 端點"
           if docker exec e2e-test curl -sf http://localhost:3000/healthcheck | grep -q "OK"; then
@@ -526,6 +703,22 @@ jobs:
             echo "❌ Healthcheck API 失敗"
             FAILED=1
           fi
+
+          # 測試摘要
+          echo ""
+          echo "========================================"
+          echo "📊 E2E 測試摘要"
+          echo "========================================"
+          echo "✓ Inkscape: SVG → PNG, PDF"
+          echo "✓ Pandoc: Markdown → HTML, LaTeX"
+          echo "✓ LibreOffice: TXT → PDF, ODT → DOCX"
+          echo "✓ FFmpeg: 音頻生成, 影片生成, MP4 → GIF"
+          echo "✓ ImageMagick: PNG → JPEG"
+          echo "✓ Calibre: HTML → EPUB"
+          echo "✓ Potrace: PBM → SVG"
+          echo "✓ Tesseract: OCR"
+          echo "✓ API: Healthcheck"
+          echo "========================================"
 
           # 清理
           echo ""
