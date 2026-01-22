@@ -349,22 +349,29 @@ RUN echo "📥 [4/6] 下載 MinerU Pipeline 模型..." && \
   fi && \
   if command -v mineru-models-download >/dev/null 2>&1; then \
   echo "使用 mineru-models-download CLI..."; \
-  echo "y" | mineru-models-download -s huggingface -m pipeline 2>&1 || true; \
+  mineru-models-download -s huggingface -m pipeline 2>&1 || true; \
+  echo "mineru.json 內容："; \
+  cat /root/mineru.json 2>/dev/null || echo "(未生成)"; \
   else \
-  echo "使用 Python 直接下載模型..."; \
-  python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='opendatalab/PDF-Extract-Kit-1.0', local_dir='/root/.cache/huggingface/hub/PDF-Extract-Kit-1.0', ignore_patterns=['*.md', '*.txt', 'LICENSE*'])" 2>&1 || echo "⚠️ MinerU 模型下載失敗，可能無法離線使用"; \
+  echo "mineru-models-download 不可用，跳過 MinerU 模型下載"; \
   fi && \
   echo "✅ MinerU 模型下載步驟完成"
 
 # ------------------------------------------------------------------------------
-# 階段 14-E：建立 MinerU 設定檔
+# 階段 14-E：驗證/補充 MinerU 設定檔
 # ------------------------------------------------------------------------------
-# 設定 MinerU 使用本地模型，禁止 runtime 下載
+# mineru-models-download 會自動生成 mineru.json，這裡只做驗證和補充
 # ------------------------------------------------------------------------------
-RUN echo "📥 [5/6] 建立 MinerU 設定檔..." && \
+RUN echo "📥 [5/6] 驗證 MinerU 設定檔..." && \
   mkdir -p /root && \
-  echo '{"models-dir":{"pipeline":"/root/.cache/huggingface/hub/PDF-Extract-Kit-1.0","vlm":"/root/.cache/huggingface/hub/MinerU-VLM"},"model-source":"local","latex-delimiter-config":{"display":{"left":"$$","right":"$$"},"inline":{"left":"$","right":"$"}}}' > /root/mineru.json && \
-  echo "✅ MinerU 設定檔建立完成"
+  if [ -f /root/mineru.json ]; then \
+  echo "✅ mineru.json 已由 mineru-models-download 生成"; \
+  cat /root/mineru.json; \
+  else \
+  echo "⚠️ mineru.json 不存在，建立預設設定..."; \
+  echo '{"models-dir":{"pipeline":"","vlm":""},"model-source":"huggingface","latex-delimiter-config":{"display":{"left":"$$","right":"$$"},"inline":{"left":"$","right":"$"}}}' > /root/mineru.json; \
+  fi && \
+  echo "✅ MinerU 設定檔驗證完成"
 
 # ------------------------------------------------------------------------------
 # 階段 14-F：模型驗證與快取清理
@@ -394,11 +401,17 @@ RUN echo "📥 [6/6] 驗證模型並清理快取..." && \
   fi && \
   echo "" && \
   echo "🔹 MinerU 模型目錄：" && \
-  if [ -d "/root/.cache/huggingface/hub/PDF-Extract-Kit-1.0" ]; then \
-  echo "   ✅ MinerU Pipeline 模型目錄存在"; \
-  du -sh /root/.cache/huggingface/hub/PDF-Extract-Kit-1.0 2>/dev/null || true; \
+  if [ -f /root/mineru.json ]; then \
+  MINERU_PIPELINE_DIR=$(python3 -c "import json; f=open('/root/mineru.json'); d=json.load(f); print(d.get('models-dir',{}).get('pipeline',''))" 2>/dev/null || echo ""); \
+  if [ -n "$MINERU_PIPELINE_DIR" ] && [ -d "$MINERU_PIPELINE_DIR" ]; then \
+  echo "   ✅ MinerU Pipeline 模型目錄存在: $MINERU_PIPELINE_DIR"; \
+  du -sh "$MINERU_PIPELINE_DIR" 2>/dev/null || true; \
   else \
-  echo "   ⚠️ MinerU Pipeline 模型目錄不存在（可能需要 runtime 下載）"; \
+  echo "   ⚠️ MinerU Pipeline 模型目錄不存在或未設定（將在 runtime 下載）"; \
+  echo "   設定路徑: ${MINERU_PIPELINE_DIR:-'(未設定)'}"; \
+  fi; \
+  else \
+  echo "   ⚠️ mineru.json 不存在（MinerU 未正確安裝）"; \
   fi && \
   echo "========================================" && \
   # 清理 pip 快取（保留模型）
@@ -413,9 +426,11 @@ ENV NOTO_FONT_PATH="/app/GoNotoKurrent-Regular.ttf"
 ENV BABELDOC_CACHE_PATH="/root/.cache/babeldoc"
 ENV BABELDOC_SERVICE="google"
 
-# MinerU 環境變數（強制使用本地模型）
-ENV MINERU_MODEL_SOURCE="local"
-ENV HF_HUB_OFFLINE="1"
+# MinerU 環境變數
+# 注意：如果 build 時模型下載成功，mineru.json 會設定為 local
+# 如果下載失敗，允許 runtime 從 huggingface 下載
+# ENV MINERU_MODEL_SOURCE="local"  # 由 mineru.json 控制
+# ENV HF_HUB_OFFLINE="1"           # 不強制離線，允許 fallback
 
 # ==============================================================================
 # 最終清理（模型下載完成後）
