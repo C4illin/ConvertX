@@ -351,38 +351,38 @@ RUN set -eux && \
   BABELDOC_SUCCESS=false; \
   mkdir -p /tmp/babeldoc-offline && \
   while [ $BABELDOC_RETRY_COUNT -lt $BABELDOC_MAX_RETRIES ]; do \
-    BABELDOC_RETRY_COUNT=$((BABELDOC_RETRY_COUNT + 1)); \
-    echo "🔄 BabelDOC 資源下載嘗試 $BABELDOC_RETRY_COUNT/$BABELDOC_MAX_RETRIES..."; \
-    if timeout 600 babeldoc --generate-offline-assets /tmp/babeldoc-offline 2>&1; then \
-      echo "✅ BabelDOC 離線資源包生成成功"; \
-      OFFLINE_PKG=$(ls /tmp/babeldoc-offline/offline_assets_*.zip 2>/dev/null | head -1); \
-      if [ -n "$OFFLINE_PKG" ] && [ -f "$OFFLINE_PKG" ]; then \
-        echo "📦 找到離線包: $OFFLINE_PKG"; \
-        if babeldoc --restore-offline-assets "$OFFLINE_PKG" 2>&1; then \
-          echo "✅ BabelDOC 資源已成功恢復到快取"; \
-          BABELDOC_SUCCESS=true; \
-          break; \
-        else \
-          echo "⚠️ 資源恢復失敗，重試..."; \
-        fi; \
-      else \
-        echo "⚠️ 未找到離線包，嘗試 warmup 模式..."; \
-        if timeout 600 babeldoc --warmup 2>&1; then \
-          BABELDOC_SUCCESS=true; \
-          break; \
-        fi; \
-      fi; \
-    else \
-      echo "⚠️ BabelDOC 資源下載失敗或超時（10分鐘），等待 30 秒後重試..."; \
-      sleep 30; \
-    fi; \
+  BABELDOC_RETRY_COUNT=$((BABELDOC_RETRY_COUNT + 1)); \
+  echo "🔄 BabelDOC 資源下載嘗試 $BABELDOC_RETRY_COUNT/$BABELDOC_MAX_RETRIES..."; \
+  if timeout 600 babeldoc --generate-offline-assets /tmp/babeldoc-offline 2>&1; then \
+  echo "✅ BabelDOC 離線資源包生成成功"; \
+  OFFLINE_PKG=$(ls /tmp/babeldoc-offline/offline_assets_*.zip 2>/dev/null | head -1); \
+  if [ -n "$OFFLINE_PKG" ] && [ -f "$OFFLINE_PKG" ]; then \
+  echo "📦 找到離線包: $OFFLINE_PKG"; \
+  if babeldoc --restore-offline-assets "$OFFLINE_PKG" 2>&1; then \
+  echo "✅ BabelDOC 資源已成功恢復到快取"; \
+  BABELDOC_SUCCESS=true; \
+  break; \
+  else \
+  echo "⚠️ 資源恢復失敗，重試..."; \
+  fi; \
+  else \
+  echo "⚠️ 未找到離線包，嘗試 warmup 模式..."; \
+  if timeout 600 babeldoc --warmup 2>&1; then \
+  BABELDOC_SUCCESS=true; \
+  break; \
+  fi; \
+  fi; \
+  else \
+  echo "⚠️ BabelDOC 資源下載失敗或超時（10分鐘），等待 30 秒後重試..."; \
+  sleep 30; \
+  fi; \
   done; \
   rm -rf /tmp/babeldoc-offline; \
   if [ "$BABELDOC_SUCCESS" = "true" ]; then \
-    echo "✅ BabelDOC 資源預下載完成"; \
+  echo "✅ BabelDOC 資源預下載完成"; \
   else \
-    echo "⚠️ BabelDOC 資源下載在 $BABELDOC_MAX_RETRIES 次嘗試後仍失敗"; \
-    echo "   BabelDOC 功能將在 runtime 時按需下載資源"; \
+  echo "⚠️ BabelDOC 資源下載在 $BABELDOC_MAX_RETRIES 次嘗試後仍失敗"; \
+  echo "   BabelDOC 功能將在 runtime 時按需下載資源"; \
   fi; \
   else \
   echo "⚠️ babeldoc 命令不存在，跳過資源預下載"; \
