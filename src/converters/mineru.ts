@@ -159,9 +159,7 @@ export async function convert(
 
     // Use the actual MinerU output directory for archiving
     // MinerU 產生完整資料夾結構，全部封裝進 .tar
-    const outputToArchive = existsSync(mineruActualOutput)
-      ? mineruActualOutput
-      : mineruOutputDir;
+    const outputToArchive = existsSync(mineruActualOutput) ? mineruActualOutput : mineruOutputDir;
 
     console.log(`[MinerU] Archiving directory: ${outputToArchive}`);
 

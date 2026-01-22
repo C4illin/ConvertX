@@ -203,9 +203,9 @@ describe("MinerU converter .tar output (no compression)", () => {
     };
 
     const targetPath = join(testDir, "output.tar");
-    expect(convert("test.pdf", "pdf", "md-t", targetPath, undefined, mockExecFile)).rejects.toMatch(
-      /mineru error/,
-    );
+    await expect(
+      convert("test.pdf", "pdf", "md-t", targetPath, undefined, mockExecFile),
+    ).rejects.toThrow(/mineru error/);
   });
 
   test("should use correct tar arguments without compression", async () => {

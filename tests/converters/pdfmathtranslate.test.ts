@@ -85,7 +85,7 @@ describe("PDFMathTranslate converter - Chinese translation", () => {
 
     expect(pdf2zhCalled).toBe(true);
     expect(pdf2zhArgs).toContain("-lo");
-    expect(pdf2zhArgs).toContain("zh");
+    expect(pdf2zhArgs).toContain("zh-CN"); // zh is normalized to zh-CN
     expect(pdf2zhArgs).toContain("-o");
     expect(pdf2zhArgs).toContain("-s"); // Translation service
   });
