@@ -450,8 +450,8 @@ export const user = new Elysia()
               <article class="article">
                 <form method="post" class="flex flex-col gap-4">
                   <fieldset class="mb-4 flex flex-col gap-4">
-                    <label class="flex flex-col gap-1" safe>
-                      {t("auth", "email")}
+                    <label class="flex flex-col gap-1">
+                      <span safe>{t("auth", "email")}</span>
                       <input
                         type="email"
                         name="email"
@@ -462,8 +462,8 @@ export const user = new Elysia()
                         required
                       />
                     </label>
-                    <label class="flex flex-col gap-1" safe>
-                      {t("auth", "newPassword")}
+                    <label class="flex flex-col gap-1">
+                      <span safe>{t("auth", "newPassword")}</span>
                       <input
                         type="password"
                         name="newPassword"
@@ -472,8 +472,8 @@ export const user = new Elysia()
                         autocomplete="new-password"
                       />
                     </label>
-                    <label class="flex flex-col gap-1" safe>
-                      {t("auth", "currentPassword")}
+                    <label class="flex flex-col gap-1">
+                      <span safe>{t("auth", "currentPassword")}</span>
                       <input
                         type="password"
                         name="password"
