@@ -5,7 +5,7 @@
   "tailwind": {
     "entry": ["src/main.css"]
   },
-  "ignore": ["src/i18n/**"],
+  "ignore": ["src/i18n/**", "tests/e2e/helpers.ts"],
   "ignoreDependencies": [],
   "ignoreExportsUsedInFile": true
 }

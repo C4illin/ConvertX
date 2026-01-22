@@ -203,18 +203,16 @@ describe("i18n Module", () => {
 
 describe("Transfer Module", () => {
   test("Transfer 常數應該正確定義", async () => {
-    const { CHUNK_THRESHOLD_BYTES, CHUNK_SIZE_BYTES } = await import(
-      "../../src/transfer/constants"
-    );
+    const { CHUNK_THRESHOLD_BYTES, CHUNK_SIZE_BYTES } =
+      await import("../../src/transfer/constants");
 
     expect(CHUNK_THRESHOLD_BYTES).toBe(10 * 1024 * 1024); // 10MB
     expect(CHUNK_SIZE_BYTES).toBe(5 * 1024 * 1024); // 5MB
   });
 
   test("允許的封裝格式應該是 .tar", async () => {
-    const { ALLOWED_ARCHIVE_FORMAT, FORBIDDEN_ARCHIVE_FORMATS } = await import(
-      "../../src/transfer/constants"
-    );
+    const { ALLOWED_ARCHIVE_FORMAT, FORBIDDEN_ARCHIVE_FORMATS } =
+      await import("../../src/transfer/constants");
 
     expect(ALLOWED_ARCHIVE_FORMAT).toBe(".tar");
     expect(FORBIDDEN_ARCHIVE_FORMATS).toContain(".tar.gz");

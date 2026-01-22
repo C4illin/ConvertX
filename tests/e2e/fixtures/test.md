@@ -23,12 +23,12 @@ def hello_world():
 
 ## Table Example
 
-| Format | Type | Converter |
-|--------|------|-----------|
-| SVG | Image | Inkscape |
-| PDF | Document | LibreOffice |
-| MP4 | Video | FFmpeg |
-| DOCX | Document | Pandoc |
+| Format | Type     | Converter   |
+| ------ | -------- | ----------- |
+| SVG    | Image    | Inkscape    |
+| PDF    | Document | LibreOffice |
+| MP4    | Video    | FFmpeg      |
+| DOCX   | Document | Pandoc      |
 
 ## List Example
 
@@ -43,4 +43,4 @@ Thank you for using ConvertX!
 
 ---
 
-*This document is used for E2E testing purposes.*
+_This document is used for E2E testing purposes._
