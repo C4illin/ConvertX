@@ -523,261 +523,6 @@ jobs:
           echo "========================================"
 
       # ========================================
-      # Step 13.5: Docker 容器 E2E 測試
-      # 說明：在遠端主機拉取映像並執行完整 E2E 測試
-      # ========================================
-      - name: 🧪 Docker 容器 E2E 測試
-        run: |
-          echo "========================================"
-          echo "🧪 Docker 容器 E2E 測試"
-          echo "========================================"
-          echo "版本: v${{ github.event.inputs.image_tag }}"
-          echo ""
-
-          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
-          set -e
-
-          IMAGE="${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
-          CONTAINER_NAME="e2e-test-${{ github.run_id }}"
-
-          echo "📥 拉取測試映像..."
-          docker pull "${IMAGE}"
-
-          echo ""
-          echo "🚀 啟動測試容器..."
-          docker run -d --name "${CONTAINER_NAME}" -p 3099:3000 \
-            -e NODE_ENV=test \
-            "${IMAGE}"
-
-          echo "⏳ 等待容器啟動..."
-          for i in {1..60}; do
-            if docker exec "${CONTAINER_NAME}" curl -sf http://localhost:3000/healthcheck > /dev/null 2>&1; then
-              echo "✅ 容器在 ${i} 秒內啟動成功"
-              break
-            fi
-            if [ $i -eq 60 ]; then
-              echo "❌ 容器啟動超時"
-              docker logs "${CONTAINER_NAME}"
-              docker rm -f "${CONTAINER_NAME}"
-              exit 1
-            fi
-            sleep 1
-          done
-
-          echo ""
-          echo "========================================"
-          echo "📋 執行 E2E 轉換測試..."
-          echo "========================================"
-          FAILED=0
-          PASSED=0
-
-          # 函數：執行測試並記錄結果
-          run_test() {
-            local name="$1"
-            local cmd="$2"
-            echo ""
-            echo "🔄 測試: ${name}"
-            if docker exec "${CONTAINER_NAME}" sh -c "${cmd}" 2>/dev/null; then
-              echo "✅ ${name} 成功"
-              PASSED=$((PASSED + 1))
-              return 0
-            else
-              echo "⚠️ ${name} 跳過或失敗"
-              return 1
-            fi
-          }
-
-          # 測試 1: Inkscape SVG → PNG
-          docker exec "${CONTAINER_NAME}" sh -c '
-            echo "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100\" height=\"100\"><circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/></svg>" > /tmp/test.svg
-            inkscape --export-type=png --export-filename=/tmp/test.png /tmp/test.svg 2>/dev/null
-            [ -f /tmp/test.png ] && echo "✅ Inkscape SVG → PNG" || exit 1
-          ' && PASSED=$((PASSED + 1)) || FAILED=$((FAILED + 1))
-
-          # 測試 2: Inkscape SVG → PDF
-          docker exec "${CONTAINER_NAME}" sh -c '
-            inkscape --export-type=pdf --export-filename=/tmp/test.pdf /tmp/test.svg 2>/dev/null
-            [ -f /tmp/test.pdf ] && echo "✅ Inkscape SVG → PDF" || exit 1
-          ' && PASSED=$((PASSED + 1)) || echo "⚠️ Inkscape SVG → PDF 跳過"
-
-          # 測試 3: Pandoc Markdown → HTML
-          docker exec "${CONTAINER_NAME}" sh -c '
-            echo "# Test\n\nHello **world**" > /tmp/test.md
-            pandoc /tmp/test.md -o /tmp/test.html
-            [ -f /tmp/test.html ] && echo "✅ Pandoc Markdown → HTML" || exit 1
-          ' && PASSED=$((PASSED + 1)) || FAILED=$((FAILED + 1))
-
-          # 測試 4: Pandoc Markdown → DOCX
-          docker exec "${CONTAINER_NAME}" sh -c '
-            pandoc /tmp/test.md -o /tmp/test_pandoc.docx
-            [ -f /tmp/test_pandoc.docx ] && echo "✅ Pandoc Markdown → DOCX" || exit 1
-          ' && PASSED=$((PASSED + 1)) || echo "⚠️ Pandoc DOCX 跳過"
-
-          # 測試 5: Pandoc Markdown → LaTeX
-          docker exec "${CONTAINER_NAME}" sh -c '
-            pandoc /tmp/test.md -o /tmp/test.tex
-            [ -f /tmp/test.tex ] && echo "✅ Pandoc Markdown → LaTeX" || exit 1
-          ' && PASSED=$((PASSED + 1)) || echo "⚠️ Pandoc LaTeX 跳過"
-
-          # 測試 6: LibreOffice TXT → PDF
-          docker exec "${CONTAINER_NAME}" sh -c '
-            echo "Test document content" > /tmp/test.txt
-            libreoffice --headless --convert-to pdf --outdir /tmp /tmp/test.txt 2>/dev/null
-            [ -f /tmp/test.pdf ] && echo "✅ LibreOffice TXT → PDF" || exit 1
-          ' && PASSED=$((PASSED + 1)) || FAILED=$((FAILED + 1))
-
-          # 測試 7: LibreOffice TXT → ODT → DOCX
-          docker exec "${CONTAINER_NAME}" sh -c '
-            libreoffice --headless --convert-to odt --outdir /tmp /tmp/test.txt 2>/dev/null
-            if [ -f /tmp/test.odt ]; then
-              libreoffice --headless --convert-to docx --outdir /tmp /tmp/test.odt 2>/dev/null
-              [ -f /tmp/test.docx ] && echo "✅ LibreOffice ODT → DOCX" || exit 1
-            fi
-          ' && PASSED=$((PASSED + 1)) || echo "⚠️ LibreOffice ODT 跳過"
-
-          # 測試 8: FFmpeg 音頻生成
-          docker exec "${CONTAINER_NAME}" sh -c '
-            ffmpeg -f lavfi -i "sine=frequency=440:duration=1" -y /tmp/test.wav 2>/dev/null
-            [ -f /tmp/test.wav ] && echo "✅ FFmpeg 音頻生成" || exit 1
-          ' && PASSED=$((PASSED + 1)) || FAILED=$((FAILED + 1))
-
-          # 測試 9: FFmpeg WAV → MP3
-          docker exec "${CONTAINER_NAME}" sh -c '
-            ffmpeg -i /tmp/test.wav -y /tmp/test.mp3 2>/dev/null
-            [ -f /tmp/test.mp3 ] && echo "✅ FFmpeg WAV → MP3" || exit 1
-          ' && PASSED=$((PASSED + 1)) || echo "⚠️ FFmpeg MP3 跳過"
-
-          # 測試 10: FFmpeg 影片生成
-          docker exec "${CONTAINER_NAME}" sh -c '
-            ffmpeg -f lavfi -i color=c=red:s=320x240:d=1 -y /tmp/test_video.mp4 2>/dev/null
-            [ -f /tmp/test_video.mp4 ] && echo "✅ FFmpeg 影片生成" || exit 1
-          ' && PASSED=$((PASSED + 1)) || echo "⚠️ FFmpeg 影片 跳過"
-
-          # 測試 11: FFmpeg MP4 → GIF
-          docker exec "${CONTAINER_NAME}" sh -c '
-            if [ -f /tmp/test_video.mp4 ]; then
-              ffmpeg -i /tmp/test_video.mp4 -vf "fps=10,scale=160:-1" -y /tmp/test_video.gif 2>/dev/null
-              [ -f /tmp/test_video.gif ] && echo "✅ FFmpeg MP4 → GIF" || exit 1
-            fi
-          ' && PASSED=$((PASSED + 1)) || echo "⚠️ FFmpeg GIF 跳過"
-
-          # 測試 12: ImageMagick 圖片生成
-          docker exec "${CONTAINER_NAME}" sh -c '
-            convert -size 100x100 xc:blue /tmp/blue.png
-            [ -f /tmp/blue.png ] && echo "✅ ImageMagick 圖片生成" || exit 1
-          ' && PASSED=$((PASSED + 1)) || FAILED=$((FAILED + 1))
-
-          # 測試 13: ImageMagick PNG → JPEG
-          docker exec "${CONTAINER_NAME}" sh -c '
-            convert /tmp/blue.png /tmp/blue.jpg
-            [ -f /tmp/blue.jpg ] && echo "✅ ImageMagick PNG → JPEG" || exit 1
-          ' && PASSED=$((PASSED + 1)) || echo "⚠️ ImageMagick JPEG 跳過"
-
-          # 測試 14: ImageMagick PNG → WEBP
-          docker exec "${CONTAINER_NAME}" sh -c '
-            convert /tmp/blue.png /tmp/blue.webp
-            [ -f /tmp/blue.webp ] && echo "✅ ImageMagick PNG → WEBP" || exit 1
-          ' && PASSED=$((PASSED + 1)) || echo "⚠️ ImageMagick WEBP 跳過"
-
-          # 測試 15: Calibre HTML → EPUB
-          docker exec "${CONTAINER_NAME}" sh -c '
-            if command -v ebook-convert &> /dev/null; then
-              echo "<!DOCTYPE html><html><body><h1>Test</h1></body></html>" > /tmp/book.html
-              ebook-convert /tmp/book.html /tmp/book.epub 2>/dev/null
-              [ -f /tmp/book.epub ] && echo "✅ Calibre HTML → EPUB" || exit 1
-            else
-              exit 1
-            fi
-          ' && PASSED=$((PASSED + 1)) || echo "⚠️ Calibre 跳過"
-
-          # 測試 16: Potrace PBM → SVG
-          docker exec "${CONTAINER_NAME}" sh -c '
-            if command -v potrace &> /dev/null; then
-              echo "P1 4 4 0 1 1 0 1 0 0 1 1 0 0 1 0 1 1 0" > /tmp/test.pbm
-              potrace -s -o /tmp/potrace.svg /tmp/test.pbm
-              [ -f /tmp/potrace.svg ] && echo "✅ Potrace PBM → SVG" || exit 1
-            else
-              exit 1
-            fi
-          ' && PASSED=$((PASSED + 1)) || echo "⚠️ Potrace 跳過"
-
-          # 測試 17: Tesseract OCR
-          docker exec "${CONTAINER_NAME}" sh -c '
-            if command -v tesseract &> /dev/null; then
-              convert -size 200x50 xc:white -font DejaVu-Sans -pointsize 20 -fill black -annotate +10+35 "Test" /tmp/ocr.png 2>/dev/null
-              tesseract /tmp/ocr.png /tmp/ocr 2>/dev/null
-              [ -f /tmp/ocr.txt ] && echo "✅ Tesseract OCR" || exit 1
-            else
-              exit 1
-            fi
-          ' && PASSED=$((PASSED + 1)) || echo "⚠️ Tesseract 跳過"
-
-          # 測試 18: GraphicsMagick
-          docker exec "${CONTAINER_NAME}" sh -c '
-            if command -v gm &> /dev/null; then
-              gm convert -size 100x100 xc:green /tmp/gm.png
-              gm convert /tmp/gm.png /tmp/gm.gif
-              [ -f /tmp/gm.gif ] && echo "✅ GraphicsMagick PNG → GIF" || exit 1
-            else
-              exit 1
-            fi
-          ' && PASSED=$((PASSED + 1)) || echo "⚠️ GraphicsMagick 跳過"
-
-          # 測試 19: Resvg
-          docker exec "${CONTAINER_NAME}" sh -c '
-            if command -v resvg &> /dev/null; then
-              resvg /tmp/test.svg /tmp/resvg.png
-              [ -f /tmp/resvg.png ] && echo "✅ Resvg SVG → PNG" || exit 1
-            else
-              exit 1
-            fi
-          ' && PASSED=$((PASSED + 1)) || echo "⚠️ Resvg 跳過"
-
-          # 測試 20: VIPS
-          docker exec "${CONTAINER_NAME}" sh -c '
-            if command -v vips &> /dev/null; then
-              vips copy /tmp/blue.png /tmp/vips.webp
-              [ -f /tmp/vips.webp ] && echo "✅ VIPS PNG → WEBP" || exit 1
-            else
-              exit 1
-            fi
-          ' && PASSED=$((PASSED + 1)) || echo "⚠️ VIPS 跳過"
-
-          # 測試 21: API Healthcheck
-          if docker exec "${CONTAINER_NAME}" curl -sf http://localhost:3000/healthcheck | grep -q "OK"; then
-            echo "✅ API Healthcheck"
-            PASSED=$((PASSED + 1))
-          else
-            echo "❌ API Healthcheck 失敗"
-            FAILED=$((FAILED + 1))
-          fi
-
-          # 清理
-          echo ""
-          echo "🧹 清理測試容器..."
-          docker rm -f "${CONTAINER_NAME}"
-
-          # 結果摘要
-          echo ""
-          echo "========================================"
-          echo "📊 E2E 測試結果"
-          echo "========================================"
-          echo "✅ 通過: ${PASSED} 項"
-          echo "⚠️ 跳過/失敗: 部分可選測試"
-          echo ""
-
-          if [ $FAILED -gt 3 ]; then
-            echo "❌ 關鍵測試失敗過多！"
-            exit 1
-          else
-            echo "✅ E2E 測試通過！"
-          fi
-          echo "========================================"
-          REMOTE_EOF
-
-          echo "========================================"
-
-      # ========================================
       # Step 14: 清理本次 Build 資源
       # 說明：只清理本次 build 產生的 builder 和 cache
       # ========================================
@@ -983,6 +728,229 @@ jobs:
 
           echo ""
           echo "✅ ConvertX-CN 服務已更新至 \${IMAGE_TAG}"
+          REMOTE_EOF
+
+          echo "========================================"
+
+      # ========================================
+      # Step 20: Docker 容器 E2E 測試
+      # 說明：在已更新的遠端服務上執行完整 E2E 測試
+      # ========================================
+      - name: 🧪 Docker 容器 E2E 測試
+        run: |
+          echo "========================================"
+          echo "🧪 Docker 容器 E2E 測試（已部署服務）"
+          echo "========================================"
+          echo "版本: v${{ github.event.inputs.image_tag }}"
+          echo ""
+
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          set -e
+
+          CONTAINER_NAME="convertx-cn"
+
+          echo "⏳ 等待服務就緒..."
+          for i in {1..60}; do
+            if docker exec "${CONTAINER_NAME}" curl -sf http://localhost:3000/healthcheck > /dev/null 2>&1; then
+              echo "✅ 服務在 ${i} 秒內就緒"
+              break
+            fi
+            if [ $i -eq 60 ]; then
+              echo "❌ 服務啟動超時"
+              docker logs "${CONTAINER_NAME}" --tail=50
+              exit 1
+            fi
+            sleep 1
+          done
+
+          echo ""
+          echo "========================================"
+          echo "📋 執行 E2E 轉換測試..."
+          echo "========================================"
+          FAILED=0
+          PASSED=0
+
+          # 測試 1: Inkscape SVG → PNG
+          docker exec "${CONTAINER_NAME}" sh -c '
+            echo "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100\" height=\"100\"><circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/></svg>" > /tmp/test.svg
+            inkscape --export-type=png --export-filename=/tmp/test.png /tmp/test.svg 2>/dev/null
+            [ -f /tmp/test.png ] && echo "✅ Inkscape SVG → PNG" || exit 1
+          ' && PASSED=$((PASSED + 1)) || FAILED=$((FAILED + 1))
+
+          # 測試 2: Inkscape SVG → PDF
+          docker exec "${CONTAINER_NAME}" sh -c '
+            inkscape --export-type=pdf --export-filename=/tmp/test.pdf /tmp/test.svg 2>/dev/null
+            [ -f /tmp/test.pdf ] && echo "✅ Inkscape SVG → PDF" || exit 1
+          ' && PASSED=$((PASSED + 1)) || echo "⚠️ Inkscape SVG → PDF 跳過"
+
+          # 測試 3: Pandoc Markdown → HTML
+          docker exec "${CONTAINER_NAME}" sh -c '
+            echo "# Test\n\nHello **world**" > /tmp/test.md
+            pandoc /tmp/test.md -o /tmp/test.html
+            [ -f /tmp/test.html ] && echo "✅ Pandoc Markdown → HTML" || exit 1
+          ' && PASSED=$((PASSED + 1)) || FAILED=$((FAILED + 1))
+
+          # 測試 4: Pandoc Markdown → DOCX
+          docker exec "${CONTAINER_NAME}" sh -c '
+            pandoc /tmp/test.md -o /tmp/test_pandoc.docx
+            [ -f /tmp/test_pandoc.docx ] && echo "✅ Pandoc Markdown → DOCX" || exit 1
+          ' && PASSED=$((PASSED + 1)) || echo "⚠️ Pandoc DOCX 跳過"
+
+          # 測試 5: Pandoc Markdown → LaTeX
+          docker exec "${CONTAINER_NAME}" sh -c '
+            pandoc /tmp/test.md -o /tmp/test.tex
+            [ -f /tmp/test.tex ] && echo "✅ Pandoc Markdown → LaTeX" || exit 1
+          ' && PASSED=$((PASSED + 1)) || echo "⚠️ Pandoc LaTeX 跳過"
+
+          # 測試 6: LibreOffice TXT → PDF
+          docker exec "${CONTAINER_NAME}" sh -c '
+            echo "Test document content" > /tmp/test.txt
+            libreoffice --headless --convert-to pdf --outdir /tmp /tmp/test.txt 2>/dev/null
+            [ -f /tmp/test.pdf ] && echo "✅ LibreOffice TXT → PDF" || exit 1
+          ' && PASSED=$((PASSED + 1)) || FAILED=$((FAILED + 1))
+
+          # 測試 7: LibreOffice TXT → ODT → DOCX
+          docker exec "${CONTAINER_NAME}" sh -c '
+            libreoffice --headless --convert-to odt --outdir /tmp /tmp/test.txt 2>/dev/null
+            if [ -f /tmp/test.odt ]; then
+              libreoffice --headless --convert-to docx --outdir /tmp /tmp/test.odt 2>/dev/null
+              [ -f /tmp/test.docx ] && echo "✅ LibreOffice ODT → DOCX" || exit 1
+            fi
+          ' && PASSED=$((PASSED + 1)) || echo "⚠️ LibreOffice ODT 跳過"
+
+          # 測試 8: FFmpeg 音頻生成
+          docker exec "${CONTAINER_NAME}" sh -c '
+            ffmpeg -f lavfi -i "sine=frequency=440:duration=1" -y /tmp/test.wav 2>/dev/null
+            [ -f /tmp/test.wav ] && echo "✅ FFmpeg 音頻生成" || exit 1
+          ' && PASSED=$((PASSED + 1)) || FAILED=$((FAILED + 1))
+
+          # 測試 9: FFmpeg WAV → MP3
+          docker exec "${CONTAINER_NAME}" sh -c '
+            ffmpeg -i /tmp/test.wav -y /tmp/test.mp3 2>/dev/null
+            [ -f /tmp/test.mp3 ] && echo "✅ FFmpeg WAV → MP3" || exit 1
+          ' && PASSED=$((PASSED + 1)) || echo "⚠️ FFmpeg MP3 跳過"
+
+          # 測試 10: FFmpeg 影片生成
+          docker exec "${CONTAINER_NAME}" sh -c '
+            ffmpeg -f lavfi -i color=c=red:s=320x240:d=1 -y /tmp/test_video.mp4 2>/dev/null
+            [ -f /tmp/test_video.mp4 ] && echo "✅ FFmpeg 影片生成" || exit 1
+          ' && PASSED=$((PASSED + 1)) || echo "⚠️ FFmpeg 影片 跳過"
+
+          # 測試 11: FFmpeg MP4 → GIF
+          docker exec "${CONTAINER_NAME}" sh -c '
+            if [ -f /tmp/test_video.mp4 ]; then
+              ffmpeg -i /tmp/test_video.mp4 -vf "fps=10,scale=160:-1" -y /tmp/test_video.gif 2>/dev/null
+              [ -f /tmp/test_video.gif ] && echo "✅ FFmpeg MP4 → GIF" || exit 1
+            fi
+          ' && PASSED=$((PASSED + 1)) || echo "⚠️ FFmpeg GIF 跳過"
+
+          # 測試 12: ImageMagick 圖片生成
+          docker exec "${CONTAINER_NAME}" sh -c '
+            convert -size 100x100 xc:blue /tmp/blue.png
+            [ -f /tmp/blue.png ] && echo "✅ ImageMagick 圖片生成" || exit 1
+          ' && PASSED=$((PASSED + 1)) || FAILED=$((FAILED + 1))
+
+          # 測試 13: ImageMagick PNG → JPEG
+          docker exec "${CONTAINER_NAME}" sh -c '
+            convert /tmp/blue.png /tmp/blue.jpg
+            [ -f /tmp/blue.jpg ] && echo "✅ ImageMagick PNG → JPEG" || exit 1
+          ' && PASSED=$((PASSED + 1)) || echo "⚠️ ImageMagick JPEG 跳過"
+
+          # 測試 14: ImageMagick PNG → WEBP
+          docker exec "${CONTAINER_NAME}" sh -c '
+            convert /tmp/blue.png /tmp/blue.webp
+            [ -f /tmp/blue.webp ] && echo "✅ ImageMagick PNG → WEBP" || exit 1
+          ' && PASSED=$((PASSED + 1)) || echo "⚠️ ImageMagick WEBP 跳過"
+
+          # 測試 15: Calibre HTML → EPUB
+          docker exec "${CONTAINER_NAME}" sh -c '
+            if command -v ebook-convert &> /dev/null; then
+              echo "<!DOCTYPE html><html><body><h1>Test</h1></body></html>" > /tmp/book.html
+              ebook-convert /tmp/book.html /tmp/book.epub 2>/dev/null
+              [ -f /tmp/book.epub ] && echo "✅ Calibre HTML → EPUB" || exit 1
+            else
+              exit 1
+            fi
+          ' && PASSED=$((PASSED + 1)) || echo "⚠️ Calibre 跳過"
+
+          # 測試 16: Potrace PBM → SVG
+          docker exec "${CONTAINER_NAME}" sh -c '
+            if command -v potrace &> /dev/null; then
+              echo "P1 4 4 0 1 1 0 1 0 0 1 1 0 0 1 0 1 1 0" > /tmp/test.pbm
+              potrace -s -o /tmp/potrace.svg /tmp/test.pbm
+              [ -f /tmp/potrace.svg ] && echo "✅ Potrace PBM → SVG" || exit 1
+            else
+              exit 1
+            fi
+          ' && PASSED=$((PASSED + 1)) || echo "⚠️ Potrace 跳過"
+
+          # 測試 17: Tesseract OCR
+          docker exec "${CONTAINER_NAME}" sh -c '
+            if command -v tesseract &> /dev/null; then
+              convert -size 200x50 xc:white -font DejaVu-Sans -pointsize 20 -fill black -annotate +10+35 "Test" /tmp/ocr.png 2>/dev/null
+              tesseract /tmp/ocr.png /tmp/ocr 2>/dev/null
+              [ -f /tmp/ocr.txt ] && echo "✅ Tesseract OCR" || exit 1
+            else
+              exit 1
+            fi
+          ' && PASSED=$((PASSED + 1)) || echo "⚠️ Tesseract 跳過"
+
+          # 測試 18: GraphicsMagick
+          docker exec "${CONTAINER_NAME}" sh -c '
+            if command -v gm &> /dev/null; then
+              gm convert -size 100x100 xc:green /tmp/gm.png
+              gm convert /tmp/gm.png /tmp/gm.gif
+              [ -f /tmp/gm.gif ] && echo "✅ GraphicsMagick PNG → GIF" || exit 1
+            else
+              exit 1
+            fi
+          ' && PASSED=$((PASSED + 1)) || echo "⚠️ GraphicsMagick 跳過"
+
+          # 測試 19: Resvg
+          docker exec "${CONTAINER_NAME}" sh -c '
+            if command -v resvg &> /dev/null; then
+              resvg /tmp/test.svg /tmp/resvg.png
+              [ -f /tmp/resvg.png ] && echo "✅ Resvg SVG → PNG" || exit 1
+            else
+              exit 1
+            fi
+          ' && PASSED=$((PASSED + 1)) || echo "⚠️ Resvg 跳過"
+
+          # 測試 20: VIPS
+          docker exec "${CONTAINER_NAME}" sh -c '
+            if command -v vips &> /dev/null; then
+              vips copy /tmp/blue.png /tmp/vips.webp
+              [ -f /tmp/vips.webp ] && echo "✅ VIPS PNG → WEBP" || exit 1
+            else
+              exit 1
+            fi
+          ' && PASSED=$((PASSED + 1)) || echo "⚠️ VIPS 跳過"
+
+          # 測試 21: API Healthcheck
+          if docker exec "${CONTAINER_NAME}" curl -sf http://localhost:3000/healthcheck | grep -q "OK"; then
+            echo "✅ API Healthcheck"
+            PASSED=$((PASSED + 1))
+          else
+            echo "❌ API Healthcheck 失敗"
+            FAILED=$((FAILED + 1))
+          fi
+
+          # 結果摘要
+          echo ""
+          echo "========================================"
+          echo "📊 E2E 測試結果"
+          echo "========================================"
+          echo "✅ 通過: ${PASSED} 項"
+          echo "⚠️ 跳過/失敗: 部分可選測試"
+          echo ""
+
+          if [ $FAILED -gt 3 ]; then
+            echo "❌ 關鍵測試失敗過多！"
+            exit 1
+          else
+            echo "✅ E2E 測試通過！"
+          fi
+          echo "========================================"
           REMOTE_EOF
 
           echo "========================================"
