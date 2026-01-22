@@ -3,17 +3,37 @@ import { convert } from "../../src/converters/inkscape";
 import type { ExecFileException } from "node:child_process";
 import { ExecFileFn } from "../../src/converters/types";
 
-// Inkscape 使用 xvfb-run 包裝，需要自訂測試
-// 模擬 xvfb-run 成功執行的情況
+// Inkscape 測試
+// 使用 Inkscape 1.0+ 的 headless-safe 命令列語法：
+// inkscape input.png --export-type=svg --export-filename=output.svg
 
-test("convert resolves when xvfb-run succeeds", async () => {
+test("convert uses correct headless-safe arguments", async () => {
+  let capturedCmd = "";
+  let capturedArgs: string[] = [];
+
+  const mockExecFile: ExecFileFn = (
+    cmd: string,
+    args: string[],
+    callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
+  ) => {
+    capturedCmd = cmd;
+    capturedArgs = args;
+    callback(null, "Conversion complete", "");
+  };
+
+  await convert("input.svg", "svg", "png", "output.png", undefined, mockExecFile);
+
+  expect(capturedCmd).toBe("inkscape");
+  expect(capturedArgs).toEqual(["input.svg", "--export-type=png", "--export-filename=output.png"]);
+});
+
+test("convert resolves when inkscape succeeds", async () => {
   const mockExecFile: ExecFileFn = (
     cmd: string,
     _args: string[],
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
-    // xvfb-run 成功
-    if (cmd === "xvfb-run") {
+    if (cmd === "inkscape") {
       callback(null, "Conversion complete", "");
     }
   };
@@ -22,38 +42,13 @@ test("convert resolves when xvfb-run succeeds", async () => {
   expect(result).toBe("Done");
 });
 
-test("convert falls back to direct inkscape when xvfb-run fails", async () => {
-  let callCount = 0;
-
+test("convert rejects when inkscape fails", async () => {
   const mockExecFile: ExecFileFn = (
     cmd: string,
     _args: string[],
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
-    callCount++;
-    if (cmd === "xvfb-run") {
-      // xvfb-run 失敗
-      callback(new Error("xvfb-run not found"), "", "");
-    } else if (cmd === "inkscape") {
-      // 直接呼叫 inkscape 成功
-      callback(null, "Direct inkscape success", "");
-    }
-  };
-
-  const result = await convert("input.svg", "svg", "png", "output.png", undefined, mockExecFile);
-  expect(result).toBe("Done");
-  expect(callCount).toBe(2); // 應該呼叫兩次（xvfb-run + inkscape）
-});
-
-test("convert rejects when both xvfb-run and inkscape fail", async () => {
-  const mockExecFile: ExecFileFn = (
-    cmd: string,
-    _args: string[],
-    callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-  ) => {
-    if (cmd === "xvfb-run") {
-      callback(new Error("xvfb-run failed"), "", "");
-    } else if (cmd === "inkscape") {
+    if (cmd === "inkscape") {
       callback(new Error("inkscape failed"), "", "");
     }
   };
@@ -77,7 +72,7 @@ test("convert logs stdout when present", async () => {
     _args: string[],
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
-    if (cmd === "xvfb-run") {
+    if (cmd === "inkscape") {
       callback(null, "Fake stdout", "");
     }
   };
@@ -102,16 +97,16 @@ test("convert logs stderr when present (non-fatal warning)", async () => {
     _args: string[],
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
-    if (cmd === "xvfb-run") {
+    if (cmd === "inkscape") {
       // Inkscape 經常輸出警告到 stderr，但轉換仍成功
-      callback(null, "", "Gtk-WARNING: some warning");
+      callback(null, "", "Some warning message");
     }
   };
 
   await convert("input.svg", "svg", "png", "output.png", undefined, mockExecFile);
   console.log = originalConsoleLog;
 
-  expect(loggedMessage).toBe("stderr: Gtk-WARNING: some warning");
+  expect(loggedMessage).toBe("stderr: Some warning message");
 });
 
 test.skip("dummy - required to trigger test detection", () => {});
