@@ -1,8 +1,11 @@
 import { execFile as execFileOriginal } from "node:child_process";
 import { mkdirSync, existsSync, readdirSync, unlinkSync, rmdirSync, copyFileSync } from "node:fs";
 import { join, basename, dirname } from "node:path";
-import { ExecFileFn } from "./types";
 import { getArchiveFileName } from "../transfer";
+
+// 翻譯服務優先順序（自動 fallback）
+const TRANSLATION_SERVICES = ["google", "bing"] as const;
+type TranslationService = (typeof TRANSLATION_SERVICES)[number];
 
 /**
  * PDFMathTranslate Content Engine
@@ -77,6 +80,31 @@ function extractTargetLanguage(convertTo: string): string {
 }
 
 /**
+ * 標準化語言代碼為 pdf2zh 支援的格式
+ * pdf2zh 使用 Google Translate 的語言代碼
+ * @param lang 輸入語言代碼
+ * @returns 標準化後的語言代碼
+ */
+function normalizeLanguageCode(lang: string): string {
+  // pdf2zh / Google Translate 語言代碼映射
+  const langMap: Record<string, string> = {
+    // 繁體中文：pdf2zh 使用 "zh-TW" 或 "zh-Hant"
+    "zh-tw": "zh-TW",
+    "zh-hant": "zh-TW",
+    "zht": "zh-TW",
+    // 簡體中文
+    "zh-cn": "zh-CN",
+    "zh-hans": "zh-CN",
+    "zhs": "zh-CN",
+    "zh": "zh-CN",
+    // 其他語言保持原樣
+  };
+
+  const lowerLang = lang.toLowerCase();
+  return langMap[lowerLang] || lang;
+}
+
+/**
  * 檢查模型是否已預先下載
  * @returns 模型是否存在
  */
@@ -98,13 +126,12 @@ function checkModelsExist(): boolean {
 function createTarArchive(
   sourceDir: string,
   outputTar: string,
-  execFile: ExecFileFn,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     // Use tar command to create archive (without gzip compression)
     // tar -cf <output.tar> -C <sourceDir> .
     // 注意：使用 -cf 而非 -czf，避免 gzip 壓縮
-    execFile("tar", ["-cf", outputTar, "-C", sourceDir, "."], (error, stdout, stderr) => {
+    execFileOriginal("tar", ["-cf", outputTar, "-C", sourceDir, "."], (error, stdout, stderr) => {
       if (error) {
         reject(`tar error: ${error}`);
         return;
@@ -139,24 +166,24 @@ function removeDir(dirPath: string): void {
 }
 
 /**
- * 執行 pdf2zh 命令進行 PDF 翻譯
+ * 執行 pdf2zh 命令進行 PDF 翻譯（單一服務）
  *
  * @param inputPath 輸入 PDF 路徑
  * @param outputDir 輸出目錄
  * @param targetLang 目標語言
- * @param execFile 執行函數
+ * @param service 翻譯服務（google, bing）
  */
-function runPdf2zh(
+function runPdf2zhWithService(
   inputPath: string,
   outputDir: string,
   targetLang: string,
-  execFile: ExecFileFn,
+  service: TranslationService,
 ): Promise<{ monoPath: string; dualPath: string }> {
   return new Promise((resolve, reject) => {
     // pdf2zh CLI 參數：
     // -lo <lang>: 目標語言
     // -o <dir>: 輸出目錄
-    // -s google: 使用 Google 翻譯（預設，免費）
+    // -s <service>: 翻譯服務（google, bing, deepl, ollama 等）
     //
     // 輸出檔案：
     // - <filename>-mono.pdf: 純翻譯版本
@@ -169,7 +196,7 @@ function runPdf2zh(
       "-o",
       outputDir,
       "-s",
-      process.env.PDFMATHTRANSLATE_SERVICE || "google",
+      service,
     ];
 
     // 如果設定了自訂模型路徑，使用 --onnx 參數
@@ -180,11 +207,12 @@ function runPdf2zh(
       }
     }
 
-    console.log(`[PDFMathTranslate] Running: pdf2zh ${args.join(" ")}`);
+    console.log(`[PDFMathTranslate] Running: pdf2zh ${args.join(" ")} (service: ${service})`);
 
-    execFile("pdf2zh", args, (error, stdout, stderr) => {
+    // 使用原生 execFileOriginal 以支援 timeout 選項
+    execFileOriginal("pdf2zh", args, { timeout: 300000, maxBuffer: 50 * 1024 * 1024 }, (error, stdout, stderr) => {
       if (error) {
-        reject(`pdf2zh error: ${error}\nstderr: ${stderr}`);
+        reject(new Error(`pdf2zh error (${service}): ${error}\nstderr: ${stderr}`));
         return;
       }
 
@@ -209,7 +237,7 @@ function runPdf2zh(
         console.log(`[PDFMathTranslate] Found PDF files: ${pdfFiles.join(", ")}`);
 
         if (pdfFiles.length === 0) {
-          reject(`No output PDF files found in ${outputDir}`);
+          reject(new Error(`No output PDF files found in ${outputDir} (service: ${service})`));
           return;
         }
       }
@@ -220,6 +248,62 @@ function runPdf2zh(
 }
 
 /**
+ * 執行 pdf2zh 命令進行 PDF 翻譯（自動 fallback）
+ *
+ * 嘗試順序：
+ * 1. 環境變數 PDFMATHTRANSLATE_SERVICE（如果設定）
+ * 2. Google Translate（免費，需要網路）
+ * 3. Bing Translate（免費備援）
+ *
+ * @param inputPath 輸入 PDF 路徑
+ * @param outputDir 輸出目錄
+ * @param targetLang 目標語言
+ */
+async function runPdf2zh(
+  inputPath: string,
+  outputDir: string,
+  targetLang: string,
+): Promise<{ monoPath: string; dualPath: string }> {
+  // 如果使用者指定了服務，只用那個服務
+  const envService = process.env.PDFMATHTRANSLATE_SERVICE;
+  if (envService) {
+    console.log(`[PDFMathTranslate] Using user-specified service: ${envService}`);
+    return runPdf2zhWithService(inputPath, outputDir, targetLang, envService as TranslationService);
+  }
+
+  // 自動 fallback：依序嘗試各個服務
+  const errors: string[] = [];
+
+  for (const service of TRANSLATION_SERVICES) {
+    try {
+      console.log(`[PDFMathTranslate] Trying translation service: ${service}`);
+      const result = await runPdf2zhWithService(inputPath, outputDir, targetLang, service);
+      console.log(`[PDFMathTranslate] ✅ Success with service: ${service}`);
+      return result;
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.warn(`[PDFMathTranslate] ⚠️ Service ${service} failed: ${errorMsg}`);
+      errors.push(`${service}: ${errorMsg}`);
+
+      // 清理失敗的輸出檔案，準備下一次嘗試
+      try {
+        const files = readdirSync(outputDir);
+        for (const file of files) {
+          if (file.endsWith(".pdf") && file !== basename(inputPath)) {
+            unlinkSync(join(outputDir, file));
+          }
+        }
+      } catch {
+        // 忽略清理錯誤
+      }
+    }
+  }
+
+  // 所有服務都失敗
+  throw new Error(`All translation services failed:\n${errors.join("\n")}`);
+}
+
+/**
  * 主要轉換函數
  *
  * @param filePath 輸入 PDF 檔案路徑
@@ -227,7 +311,6 @@ function runPdf2zh(
  * @param convertTo 目標格式（如 "pdf-zh"）
  * @param targetPath 輸出路徑
  * @param options 額外選項
- * @param execFile 執行函數覆寫
  */
 export async function convert(
   filePath: string,
@@ -235,15 +318,15 @@ export async function convert(
   convertTo: string,
   targetPath: string,
   _options?: unknown,
-  execFile: ExecFileFn = execFileOriginal,
 ): Promise<string> {
   try {
     // 1. 檢查模型（警告但不阻止，因為 pdf2zh 可能會自動下載）
     checkModelsExist();
 
-    // 2. 提取目標語言
-    const targetLang = extractTargetLanguage(convertTo);
-    console.log(`[PDFMathTranslate] Translating to: ${targetLang}`);
+    // 2. 提取並標準化目標語言
+    const rawLang = extractTargetLanguage(convertTo);
+    const targetLang = normalizeLanguageCode(rawLang);
+    console.log(`[PDFMathTranslate] Translating to: ${targetLang} (raw: ${rawLang})`);
 
     // 3. 建立臨時輸出目錄
     const outputDir = dirname(targetPath);
@@ -259,7 +342,7 @@ export async function convert(
     mkdirSync(archiveDir, { recursive: true });
 
     // 5. 執行 pdf2zh 翻譯
-    const { monoPath, dualPath } = await runPdf2zh(filePath, tempDir, targetLang, execFile);
+    const { monoPath, dualPath } = await runPdf2zh(filePath, tempDir, targetLang);
 
     // 6. 複製翻譯後的檔案到封裝目錄
     // PDFMathTranslate 輸出：
@@ -331,7 +414,7 @@ export async function convert(
       mkdirSync(tarDir, { recursive: true });
     }
 
-    await createTarArchive(archiveDir, tarPath, execFile);
+    await createTarArchive(archiveDir, tarPath);
     console.log(`[PDFMathTranslate] Created archive: ${tarPath}`);
 
     // 9. 清理臨時目錄

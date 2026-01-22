@@ -70,81 +70,115 @@ export async function convert(
   options?: unknown,
   execFile: ExecFileFn = execFileOriginal,
 ): Promise<string> {
-  return new Promise((resolve, reject) => {
-    // Create a temporary output directory for MinerU
-    const outputDir = dirname(targetPath);
-    const inputFileName = basename(filePath, `.${fileType}`);
-    const mineruOutputDir = join(outputDir, `${inputFileName}_mineru_${convertTo}`);
+  // Create a temporary output directory for MinerU
+  const outputDir = dirname(targetPath);
+  const inputFileName = basename(filePath, `.${fileType}`);
+  const mineruOutputDir = join(outputDir, `${inputFileName}_mineru_${convertTo}`);
 
-    // Ensure output directory exists
-    if (!existsSync(mineruOutputDir)) {
-      mkdirSync(mineruOutputDir, { recursive: true });
-    }
+  // Ensure output directory exists
+  if (!existsSync(mineruOutputDir)) {
+    mkdirSync(mineruOutputDir, { recursive: true });
+  }
 
-    // Build MinerU command arguments
-    // MinerU CLI: magic-pdf -p <input> -o <output_dir> -m auto
-    const args = ["-p", filePath, "-o", mineruOutputDir, "-m", "auto"];
+  /**
+   * 執行 MinerU 並處理 vLLM 相容性問題
+   * 如果 --table-mode 參數導致 vLLM 錯誤，會自動重試不帶此參數
+   */
+  const runMinerU = (useTableMode: boolean): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      // Build MinerU command arguments
+      // MinerU CLI: mineru -p <input> -o <output_dir> -m auto
+      const args = ["-p", filePath, "-o", mineruOutputDir, "-m", "auto"];
 
-    // Add table mode option if md-i (render tables as images)
-    if (convertTo === "md-i") {
-      args.push("--table-mode", "image");
-    } else {
-      args.push("--table-mode", "markdown");
-    }
-
-    execFile("mineru", args, async (error, stdout, stderr) => {
-      if (error) {
-        reject(`mineru error: ${error}`);
-        return;
+      // 表格模式支援（可能與某些 vLLM 版本不相容）
+      if (useTableMode) {
+        if (convertTo === "md-i") {
+          args.push("--table-mode", "image");
+        } else {
+          args.push("--table-mode", "markdown");
+        }
       }
 
-      if (stdout) {
-        console.log(`mineru stdout: ${stdout}`);
-      }
+      console.log(`[MinerU] Running: mineru ${args.join(" ")}`);
 
-      if (stderr) {
-        console.error(`mineru stderr: ${stderr}`);
-      }
-
-      try {
-        // MinerU outputs to a subdirectory, find the actual output
-        const mineruActualOutput = join(mineruOutputDir, "auto");
-
-        // Create .tar archive from the output directory (不使用壓縮)
-        // 強制使用 .tar 格式，禁止 .tar.gz
-        const tarPath = getArchiveFileName(targetPath);
-        console.log(`[MinerU] Target tar path: ${tarPath}`);
-
-        // Ensure the parent directory exists
-        const tarDir = dirname(tarPath);
-        if (!existsSync(tarDir)) {
-          mkdirSync(tarDir, { recursive: true });
+      execFile("mineru", args, (error, stdout, stderr) => {
+        if (stdout) {
+          console.log(`mineru stdout: ${stdout}`);
         }
 
-        // Use the actual MinerU output directory for archiving
-        // MinerU 產生完整資料夾結構，全部封裝進 .tar
-        const outputToArchive = existsSync(mineruActualOutput)
-          ? mineruActualOutput
-          : mineruOutputDir;
-
-        console.log(`[MinerU] Archiving directory: ${outputToArchive}`);
-
-        // 列出要封裝的內容
-        if (existsSync(outputToArchive)) {
-          const contents = readdirSync(outputToArchive);
-          console.log(`[MinerU] Archive contents: ${contents.join(", ")}`);
+        if (stderr) {
+          console.error(`mineru stderr: ${stderr}`);
         }
 
-        await createTarArchive(outputToArchive, tarPath, execFile);
-        console.log(`[MinerU] Created archive: ${tarPath}`);
+        if (error) {
+          // 檢查是否為 vLLM table_mode 相容性錯誤
+          const errorStr = String(error) + String(stderr);
+          if (useTableMode && errorStr.includes("table_mode")) {
+            console.warn(`[MinerU] ⚠️ table_mode 與 vLLM 不相容，重試不帶此參數...`);
+            reject(new Error("RETRY_WITHOUT_TABLE_MODE"));
+          } else {
+            reject(new Error(`mineru error: ${error}`));
+          }
+          return;
+        }
 
-        // Clean up the temporary directory
-        removeDir(mineruOutputDir);
-
-        resolve("Done");
-      } catch (tarError) {
-        reject(`Failed to create .tar archive: ${tarError}`);
-      }
+        resolve();
+      });
     });
-  });
+  };
+
+  // 嘗試執行 MinerU（自動處理 vLLM 相容性）
+  try {
+    await runMinerU(true);
+  } catch (error) {
+    if (error instanceof Error && error.message === "RETRY_WITHOUT_TABLE_MODE") {
+      // 清理輸出目錄並重試
+      removeDir(mineruOutputDir);
+      mkdirSync(mineruOutputDir, { recursive: true });
+      await runMinerU(false);
+    } else {
+      throw error;
+    }
+  }
+
+  // 建立 .tar 封裝
+  try {
+    // MinerU outputs to a subdirectory, find the actual output
+    const mineruActualOutput = join(mineruOutputDir, "auto");
+
+    // Create .tar archive from the output directory (不使用壓縮)
+    // 強制使用 .tar 格式，禁止 .tar.gz
+    const tarPath = getArchiveFileName(targetPath);
+    console.log(`[MinerU] Target tar path: ${tarPath}`);
+
+    // Ensure the parent directory exists
+    const tarDir = dirname(tarPath);
+    if (!existsSync(tarDir)) {
+      mkdirSync(tarDir, { recursive: true });
+    }
+
+    // Use the actual MinerU output directory for archiving
+    // MinerU 產生完整資料夾結構，全部封裝進 .tar
+    const outputToArchive = existsSync(mineruActualOutput)
+      ? mineruActualOutput
+      : mineruOutputDir;
+
+    console.log(`[MinerU] Archiving directory: ${outputToArchive}`);
+
+    // 列出要封裝的內容
+    if (existsSync(outputToArchive)) {
+      const contents = readdirSync(outputToArchive);
+      console.log(`[MinerU] Archive contents: ${contents.join(", ")}`);
+    }
+
+    await createTarArchive(outputToArchive, tarPath, execFile);
+    console.log(`[MinerU] Created archive: ${tarPath}`);
+
+    // Clean up the temporary directory
+    removeDir(mineruOutputDir);
+
+    return "Done";
+  } catch (tarError) {
+    throw new Error(`Failed to create .tar archive: ${tarError}`);
+  }
 }

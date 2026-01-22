@@ -468,9 +468,13 @@ export function convert(
     outputArgs.push("-background", "white", "-alpha", "remove");
   }
 
+  // 使用 convert（ImageMagick 6.x，Debian bookworm）
+  // ImageMagick 7.x 使用 magick，但 Debian bookworm 只有 6.x
+  const imCommand = process.env.IMAGEMAGICK_COMMAND || "convert";
+
   return new Promise((resolve, reject) => {
     execFile(
-      "magick",
+      imCommand,
       [...inputArgs, filePath, ...outputArgs, targetPath],
       (error, stdout, stderr) => {
         if (error) {

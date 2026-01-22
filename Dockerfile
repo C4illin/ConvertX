@@ -16,7 +16,7 @@
 #
 # 🤖 預下載模型清單：
 #   - PDFMathTranslate: DocLayout-YOLO ONNX（佈局分析）
-#   - BabelDOC: 完整資源包（透過 --warmup）
+#   - BabelDOC: DocLayout-YOLO + 字型資源（顯式下載，無 warmup）
 #   - MinerU: PDF-Extract-Kit-1.0（Pipeline 模型）
 #     包含：DocLayout-YOLO, YOLOv8 MFD, UniMERNet, PaddleOCR, LayoutReader, SLANet
 #
@@ -25,6 +25,12 @@
 # ⚠️ Base Image：使用 debian:bookworm（穩定版）
 #    - 確保 Multi-Arch (amd64/arm64) 構建穩定性
 #    - 避免 trixie (testing) 套件同步不穩定問題
+#
+# 🔒 Offline-first 設計原則：
+#    - 所有下載行為僅發生在 Docker build 階段
+#    - Runtime 完全離線運行，不依賴任何網路請求
+#    - 禁止任何 CLI warmup / 隱性下載行為
+#    - 所有 cache 在同一 RUN 內清除，避免 layer diff 膨脹
 #
 # ==============================================================================
 
@@ -231,169 +237,99 @@ RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   pipx \
   && rm -rf /var/lib/apt/lists/*
 
-# 階段 12：安裝 Python 工具（pipx）+ huggingface_hub（用於模型下載）
-# 注意：Debian bookworm 使用 PEP 668，需要 --break-system-packages 來安裝系統級套件
-# 注意：markitdown[all] 可能依賴 transformers 或其他 HuggingFace 套件，需清理 cache
-RUN pipx install "markitdown[all]" \
-  && pip3 install --no-cache-dir --break-system-packages huggingface_hub \
-  && rm -rf /root/.cache/huggingface /root/.cache/pip /tmp/*
-
-# 階段 12-A：安裝 pdf2zh（PDFMathTranslate 引擎）
-# 注意：pipx install 可能觸發依賴套件的隱式下載，結尾必須清理 cache
-RUN pipx install "pdf2zh" \
-  && rm -rf /root/.cache/huggingface /root/.cache/pip /tmp/*
-
-# 階段 12-B：安裝 babeldoc（BabelDOC 引擎）
-# BabelDOC 是一個 PDF 翻譯工具，與 pdf2zh 類似但使用不同的翻譯方式
-# 注意：babeldoc 依賴 transformers，安裝時可能觸發模型 cache
-RUN (pipx install "babeldoc" || echo "⚠️ babeldoc 安裝失敗，跳過...") \
-  && rm -rf /root/.cache/huggingface /root/.cache/pip /tmp/*
-
-# 階段 13：安裝 mineru（可能在 arm64 上有問題，加入錯誤處理）
-# 🔴 關鍵：mineru[all] 依賴大量 HuggingFace 套件，安裝過程可能觸發模型下載
-#    必須在同一 RUN 內清理 cache，否則會在 layer diff 中產生數 GB 的重複資料
-RUN (pipx install "mineru[all]" || echo "⚠️ mineru 安裝失敗（可能是 arm64 相容性問題），跳過...") \
-  && rm -rf /root/.cache/huggingface /root/.cache/pip /root/.cache/torch /tmp/*
-
-# 最終清理（延後到模型下載完成後）
-
-# Add pipx bin directory to PATH（必須在模型下載前設定）
+# ==============================================================================
+# 🔥 階段 12-UNIFIED：Python 工具安裝 + 模型下載（單一 RUN 原則）
+# ==============================================================================
+#
+# ⚠️ 關鍵設計原則：
+#   1. 所有 pipx install 和模型下載必須在同一個 RUN 中完成
+#   2. 所有 cache 在同一個 RUN 結尾清除
+#   3. 禁止任何 CLI warmup / 隱性下載行為
+#   4. 僅使用顯式 HuggingFace snapshot_download 下載模型
+#
+# ⬇️ 此 RUN 包含所有 Docker build 階段下載：
+#   - Python 工具：markitdown, pdf2zh, babeldoc, mineru
+#   - 模型：DocLayout-YOLO ONNX, MinerU Pipeline 模型
+#   - 字型：GoNotoKurrent, Source Han Serif
+#   - Runtime 不會再下載任何資源
+#
+# ==============================================================================
 ENV PATH="/root/.local/bin:${PATH}"
+ENV PIPX_HOME="/root/.local/pipx"
+ENV PIPX_BIN_DIR="/root/.local/bin"
+# 禁止 pip 隱性下載（強制離線模式在安裝完成後啟用）
+ENV PIP_NO_CACHE_DIR=1
+# HuggingFace 環境變數（安裝時允許下載，安裝完成後設為離線）
+ENV HF_HOME="/root/.cache/huggingface"
 
-# ==============================================================================
-# 🔥 模型預下載區塊（Docker Build 階段）
-# ==============================================================================
-#
-# ⚠️ 重要原則：
-#   - 所有模型必須在 build 階段下載完成
-#   - runtime 完全不依賴外部網路
-#   - 禁止任何隱式下載行為
-#
-# 📦 預下載的模型清單：
-#   1. PDFMathTranslate / pdf2zh
-#      - DocLayout-YOLO ONNX 模型（佈局分析）
-#      - BabelDOC 相關資源（透過 --warmup）
-#   2. MinerU / magic-pdf
-#      - DocLayout-YOLO（佈局分析）
-#      - YOLOv8 MFD（公式偵測）
-#      - UniMERNet（公式辨識）
-#      - PaddleOCR（文字辨識）
-#      - LayoutReader（閱讀順序）
-#      - SLANet / UNet（表格辨識）
-#
-# ==============================================================================
-# 🔧 BuildKit 優化說明：
-# ==============================================================================
-# 解決 "no space left on device" 的核心策略：
-#
-# 1. 【單一 RUN 原則】
-#    所有模型下載 + cache 清理必須在同一個 RUN 中完成
-#    這樣 BuildKit 在計算 layer diff 時，只會看到「最終狀態」
-#    而不是「下載的 blob cache + 複製的模型」兩份資料
-#
-# 2. 【HuggingFace cache 必須刪除】
-#    snapshot_download 會在 ~/.cache/huggingface/hub 下建立：
-#    - blobs/：實際的模型檔案（用 SHA256 命名）
-#    - snapshots/：指向 blobs 的 symlink 或複製
-#    當 local_dir_use_symlinks=False 時，檔案會被「複製」到目標目錄
-#    如果不刪除 cache，同一份模型會以兩份大小進入 layer diff
-#
-# 3. 【避免 overlayfs 重複壓縮】
-#    exporting layers 時，BuildKit 會：
-#    - 計算每層的 diff（新增/修改的檔案）
-#    - 壓縮 diff 並寫入 /var/lib/buildkit/runc-overlayfs/
-#    如果 cache 沒刪，diff 會包含 cache + 目標目錄，壓縮時空間翻倍
-#
-# ==============================================================================
-
-# ------------------------------------------------------------------------------
-# 階段 14-UNIFIED：所有模型下載 + 快取清理（單一 RUN 避免 layer 爆炸）
-# ------------------------------------------------------------------------------
-# 🔑 關鍵：這個 RUN 必須包含所有下載操作，並在結尾清理所有 cache
-#         這樣 overlayfs 的 diff 只包含「最終需要的模型檔案」
-#         而不是「cache 結構 + 模型副本」
-# ------------------------------------------------------------------------------
 RUN set -eux && \
   echo "===========================================================" && \
-  echo "🚀 開始統一模型下載（單一 RUN 優化 BuildKit layer）" && \
+  echo "🚀 階段 12-UNIFIED：Python 工具 + 模型統一安裝" && \
+  echo "===========================================================" && \
+  echo "⬇️ 此 RUN 包含所有 Docker build 階段下載" && \
+  echo "   Runtime 不會再下載任何資源" && \
   echo "===========================================================" && \
   \
   # ========================================
-  # [1/5] PDFMathTranslate DocLayout-YOLO ONNX 模型
+  # [1/8] 安裝 huggingface_hub（用於顯式模型下載）
   # ========================================
   echo "" && \
-  echo "📥 [1/5] 下載 DocLayout-YOLO ONNX 模型..." && \
+  echo "📦 [1/8] 安裝 huggingface_hub..." && \
+  pip3 install --no-cache-dir --break-system-packages huggingface_hub && \
+  \
+  # ========================================
+  # [2/8] 安裝 markitdown（文件轉換工具）
+  # ⬇️ Docker build 階段安裝，無隱性下載
+  # ========================================
+  echo "" && \
+  echo "📦 [2/8] 安裝 markitdown[all]..." && \
+  pipx install "markitdown[all]" && \
+  \
+  # ========================================
+  # [3/8] 安裝 pdf2zh（PDFMathTranslate 引擎）
+  # ⬇️ Docker build 階段安裝
+  # ⚠️ 模型將在後續步驟顯式下載，此處僅安裝程式
+  # ========================================
+  echo "" && \
+  echo "📦 [3/8] 安裝 pdf2zh..." && \
+  pipx install "pdf2zh" && \
+  \
+  # ========================================
+  # [4/8] 安裝 babeldoc（BabelDOC 引擎）
+  # ⬇️ Docker build 階段安裝
+  # ⚠️ 資源將在後續步驟顯式下載，禁止使用 --warmup
+  # ========================================
+  echo "" && \
+  echo "📦 [4/8] 安裝 babeldoc..." && \
+  (pipx install "babeldoc" || echo "⚠️ babeldoc 安裝失敗，跳過...") && \
+  \
+  # ========================================
+  # [5/8] 安裝 mineru（MinerU 引擎）
+  # ⬇️ Docker build 階段安裝
+  # ⚠️ 模型將在後續步驟顯式下載，此處僅安裝程式
+  # ========================================
+  echo "" && \
+  echo "📦 [5/8] 安裝 mineru[all]..." && \
+  (pipx install "mineru[all]" || echo "⚠️ mineru 安裝失敗（可能是 arm64 相容性問題），跳過...") && \
+  \
+  # ========================================
+  # [6/8] 顯式下載 PDFMathTranslate 模型
+  # ⬇️ Docker build 階段下載 DocLayout-YOLO ONNX 模型
+  #    Runtime 不會再下載任何資源
+  # ========================================
+  echo "" && \
+  echo "📥 [6/8] 下載 PDFMathTranslate DocLayout-YOLO ONNX 模型..." && \
   mkdir -p /models/pdfmathtranslate && \
-  python3 -c " \
-  from huggingface_hub import snapshot_download; \
-  snapshot_download( \
-  repo_id='wybxc/DocLayout-YOLO-DocStructBench-onnx', \
-  local_dir='/models/pdfmathtranslate', \
-  allow_patterns=['*.onnx'], \
-  local_dir_use_symlinks=False \
-  )" && \
-  echo "✅ DocLayout-YOLO ONNX 下載完成" && \
+  python3 -c "from huggingface_hub import snapshot_download; import os; os.environ['HF_HOME']='/root/.cache/huggingface'; snapshot_download(repo_id='wybxc/DocLayout-YOLO-DocStructBench-onnx', local_dir='/models/pdfmathtranslate', allow_patterns=['*.onnx'], local_dir_use_symlinks=False); print('DocLayout-YOLO ONNX downloaded')" && \
   ls -lh /models/pdfmathtranslate/*.onnx 2>/dev/null || ls -lh /models/pdfmathtranslate/ && \
   \
-  # 🔥 立即清理 HuggingFace cache（關鍵！避免 blob 重複）
-  rm -rf /root/.cache/huggingface && \
-  \
   # ========================================
-  # [2/5] BabelDOC 資源預下載
-  # ========================================
-  # 策略：使用 --generate-offline-assets 生成離線包
-  # 這比 --warmup 更穩定，因為可以完整驗證所有資源
-  echo "" && \
-  echo "📥 [2/5] 執行 BabelDOC 資源預下載..." && \
-  if command -v babeldoc >/dev/null 2>&1; then \
-  BABELDOC_MAX_RETRIES=3; \
-  BABELDOC_RETRY_COUNT=0; \
-  BABELDOC_SUCCESS=false; \
-  mkdir -p /tmp/babeldoc-offline && \
-  while [ $BABELDOC_RETRY_COUNT -lt $BABELDOC_MAX_RETRIES ]; do \
-  BABELDOC_RETRY_COUNT=$((BABELDOC_RETRY_COUNT + 1)); \
-  echo "🔄 BabelDOC 資源下載嘗試 $BABELDOC_RETRY_COUNT/$BABELDOC_MAX_RETRIES..."; \
-  if timeout 600 babeldoc --generate-offline-assets /tmp/babeldoc-offline 2>&1; then \
-  echo "✅ BabelDOC 離線資源包生成成功"; \
-  OFFLINE_PKG=$(ls /tmp/babeldoc-offline/offline_assets_*.zip 2>/dev/null | head -1); \
-  if [ -n "$OFFLINE_PKG" ] && [ -f "$OFFLINE_PKG" ]; then \
-  echo "📦 找到離線包: $OFFLINE_PKG"; \
-  if babeldoc --restore-offline-assets "$OFFLINE_PKG" 2>&1; then \
-  echo "✅ BabelDOC 資源已成功恢復到快取"; \
-  BABELDOC_SUCCESS=true; \
-  break; \
-  else \
-  echo "⚠️ 資源恢復失敗，重試..."; \
-  fi; \
-  else \
-  echo "⚠️ 未找到離線包，嘗試 warmup 模式..."; \
-  if timeout 600 babeldoc --warmup 2>&1; then \
-  BABELDOC_SUCCESS=true; \
-  break; \
-  fi; \
-  fi; \
-  else \
-  echo "⚠️ BabelDOC 資源下載失敗或超時（10分鐘），等待 30 秒後重試..."; \
-  sleep 30; \
-  fi; \
-  done; \
-  rm -rf /tmp/babeldoc-offline; \
-  if [ "$BABELDOC_SUCCESS" = "true" ]; then \
-  echo "✅ BabelDOC 資源預下載完成"; \
-  else \
-  echo "⚠️ BabelDOC 資源下載在 $BABELDOC_MAX_RETRIES 次嘗試後仍失敗"; \
-  echo "   BabelDOC 功能將在 runtime 時按需下載資源"; \
-  fi; \
-  else \
-  echo "⚠️ babeldoc 命令不存在，跳過資源預下載"; \
-  fi && \
-  echo "✅ BabelDOC 步驟完成" && \
-  \
-  # ========================================
-  # [3/5] PDFMathTranslate 多語言字型
+  # [6.1/8] 下載 PDFMathTranslate 多語言字型
+  # ⬇️ Docker build 階段下載字型檔案
+  #    Runtime 不會再下載任何資源
   # ========================================
   echo "" && \
-  echo "📥 [3/5] 下載 PDFMathTranslate 多語言字型..." && \
+  echo "📥 [6.1/8] 下載 PDFMathTranslate 多語言字型..." && \
   mkdir -p /app && \
   curl -fSL -o /app/GoNotoKurrent-Regular.ttf \
   "https://github.com/satbyy/go-noto-universal/releases/download/v7.0/GoNotoKurrent-Regular.ttf" && \
@@ -406,69 +342,100 @@ RUN set -eux && \
   curl -fSL -o /app/SourceHanSerifKR-Regular.ttf \
   "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifKR-Regular.ttf" && \
   echo "✅ 字型下載完成" && \
+  ls -lh /app/*.ttf && \
   \
   # ========================================
-  # [4/5] MinerU Pipeline 模型
+  # [7/8] 顯式下載 BabelDOC 資源
+  # ⬇️ Docker build 階段顯式下載 BabelDOC 所需資源
+  #    ❌ 禁止使用 --warmup（不可控的隱性下載）
+  #    ✅ 使用 HuggingFace 顯式下載模型
+  #    Runtime 不會再下載任何資源
   # ========================================
   echo "" && \
-  echo "📥 [4/5] 下載 MinerU Pipeline 模型..." && \
+  echo "📥 [7/8] 顯式下載 BabelDOC 資源..." && \
+  mkdir -p /root/.cache/babeldoc/models && \
+  mkdir -p /root/.cache/babeldoc/fonts && \
+  \
+  # 下載 BabelDOC 使用的 DocLayout-YOLO 模型（與 pdf2zh 共用）
+  echo "   下載 BabelDOC DocLayout-YOLO 模型..." && \
+  (python3 -c "from huggingface_hub import snapshot_download; import os; os.environ['HF_HOME']='/root/.cache/huggingface'; snapshot_download(repo_id='wybxc/DocLayout-YOLO-DocStructBench-onnx', local_dir='/root/.cache/babeldoc/models/doclayout-yolo', allow_patterns=['*.onnx'], local_dir_use_symlinks=False); print('BabelDOC DocLayout-YOLO downloaded')" || echo "BabelDOC DocLayout-YOLO skipped") && \
+  (python3 -c "from huggingface_hub import snapshot_download; import os; os.environ['HF_HOME']='/root/.cache/huggingface'; snapshot_download(repo_id='funstory-ai/babeldoc-assets', local_dir='/root/.cache/babeldoc/assets', local_dir_use_symlinks=False); print('BabelDOC assets downloaded')" || echo "BabelDOC assets not available") && \
+  \
+  # 複製字型到 BabelDOC 目錄（避免 runtime 下載）
+  echo "   複製字型到 BabelDOC 目錄..." && \
+  cp /app/GoNotoKurrent-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
+  cp /app/SourceHanSerifCN-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
+  cp /app/SourceHanSerifTW-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
+  cp /app/SourceHanSerifJP-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
+  cp /app/SourceHanSerifKR-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
+  echo "✅ BabelDOC 資源準備完成" && \
+  \
+  # ========================================
+  # [8/8] 顯式下載 MinerU Pipeline 模型
+  # ⬇️ Docker build 階段顯式下載 MinerU 所需模型
+  #    使用 mineru-models-download CLI（如果可用）
+  #    或使用 HuggingFace 顯式下載
+  #    Runtime 不會再下載任何資源
+  # ========================================
+  echo "" && \
+  echo "📥 [8/8] 下載 MinerU Pipeline 模型..." && \
   ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
   echo "⚠️ ARM64 架構：MinerU 可能不完全支援，嘗試下載模型..."; \
   fi && \
+  \
+  # 方法 1：使用官方 CLI（如果可用）
   if command -v mineru-models-download >/dev/null 2>&1; then \
-  echo "使用 mineru-models-download CLI..."; \
-  mineru-models-download -s huggingface -m pipeline 2>&1 || true; \
-  echo "mineru.json 內容："; \
+  echo "使用 mineru-models-download CLI..." && \
+  mineru-models-download -s huggingface -m pipeline 2>&1 || true && \
+  echo "mineru.json 內容：" && \
   cat /root/mineru.json 2>/dev/null || echo "(未生成)"; \
   else \
-  echo "mineru-models-download 不可用，跳過 MinerU 模型下載"; \
+  echo "mineru-models-download 不可用，使用顯式 HuggingFace 下載..." && \
+  mkdir -p /root/.cache/mineru/models && \
+  (python3 -c "from huggingface_hub import snapshot_download; import os; os.environ['HF_HOME']='/root/.cache/huggingface'; snapshot_download(repo_id='opendatalab/PDF-Extract-Kit-1.0', local_dir='/root/.cache/mineru/models/PDF-Extract-Kit-1.0', local_dir_use_symlinks=False); print('PDF-Extract-Kit-1.0 downloaded')" || echo "MinerU model download failed") && \
+  python3 -c "import json; config={'models-dir':{'pipeline':'/root/.cache/mineru/models/PDF-Extract-Kit-1.0','vlm':''},'model-source':'local','latex-delimiter-config':{'display':{'left':'@@','right':'@@'},'inline':{'left':'@','right':'@'}}}; f=open('/root/mineru.json','w'); json.dump(config,f,indent=2); f.close(); print('mineru.json generated')"; \
   fi && \
   echo "✅ MinerU 模型下載步驟完成" && \
-  \
-  # 🔥 再次清理 HuggingFace cache（MinerU 也會產生）
-  rm -rf /root/.cache/huggingface && \
-  \
-  # ========================================
-  # [5/5] 驗證 + mineru.json 補充
-  # ========================================
-  echo "" && \
-  echo "📥 [5/5] 驗證 MinerU 設定檔..." && \
-  mkdir -p /root && \
-  if [ -f /root/mineru.json ]; then \
-  echo "✅ mineru.json 已由 mineru-models-download 生成"; \
-  cat /root/mineru.json; \
-  else \
-  echo "⚠️ mineru.json 不存在，建立預設設定..."; \
-  echo '{"models-dir":{"pipeline":"","vlm":""},"model-source":"huggingface","latex-delimiter-config":{"display":{"left":"$$","right":"$$"},"inline":{"left":"$","right":"$"}}}' > /root/mineru.json; \
-  fi && \
-  echo "" && \
   \
   # ========================================
   # 🔥 最終 Cache 清理（關鍵！避免 overlayfs diff 爆炸）
   # ========================================
+  # ⚠️ 此清理必須在同一個 RUN 內執行
+  #    否則 cache 會進入 layer diff，導致 image 膨脹
+  # ========================================
+  echo "" && \
   echo "===========================================================" && \
   echo "🧹 清理所有下載快取（降低 layer diff 大小）" && \
   echo "===========================================================" && \
+  \
   # HuggingFace Hub cache（最大宗！包含所有 blob）
   rm -rf /root/.cache/huggingface && \
+  \
   # pip / Python build cache
   rm -rf /root/.cache/pip && \
   rm -rf /root/.cache/uv && \
+  \
   # pipx cache
   rm -rf /root/.local/pipx/.cache && \
+  \
   # 通用 cache 目錄
   rm -rf /tmp/* && \
   rm -rf /var/tmp/* && \
+  \
   # Python bytecode cache（可選，節省少量空間）
   find /root/.local -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true && \
   find /usr -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true && \
   \
+  # ========================================
+  # 📋 模型檔案驗證
+  # ========================================
   echo "" && \
   echo "===========================================================" && \
   echo "📋 模型檔案驗證" && \
   echo "===========================================================" && \
   echo "" && \
+  \
   echo "🔹 PDFMathTranslate 模型：" && \
   ONNX_COUNT=$(find /models/pdfmathtranslate -name "*.onnx" 2>/dev/null | wc -l) && \
   if [ "$ONNX_COUNT" -gt 0 ]; then \
@@ -478,31 +445,37 @@ RUN set -eux && \
   echo "   ❌ /models/pdfmathtranslate 中沒有 ONNX 模型"; \
   fi && \
   echo "" && \
+  \
   echo "🔹 PDFMathTranslate 字型：" && \
   ls -lh /app/*.ttf 2>/dev/null || echo "   ⚠️ 無字型檔案" && \
   echo "" && \
-  echo "🔹 BabelDOC 快取：" && \
+  \
+  echo "🔹 BabelDOC 資源：" && \
   if [ -d "/root/.cache/babeldoc" ]; then \
-  echo "   ✅ BabelDOC 快取目錄存在"; \
+  echo "   ✅ BabelDOC 資源目錄存在"; \
   du -sh /root/.cache/babeldoc 2>/dev/null || true; \
+  ls -la /root/.cache/babeldoc/ 2>/dev/null || true; \
   else \
-  echo "   ⚠️ BabelDOC 快取目錄不存在（可能需要 runtime 下載）"; \
+  echo "   ⚠️ BabelDOC 資源目錄不存在"; \
   fi && \
   echo "" && \
+  \
   echo "🔹 MinerU 模型目錄：" && \
   if [ -f /root/mineru.json ]; then \
+  echo "   ✅ mineru.json 存在"; \
+  cat /root/mineru.json; \
   MINERU_PIPELINE_DIR=$(python3 -c "import json; f=open('/root/mineru.json'); d=json.load(f); print(d.get('models-dir',{}).get('pipeline',''))" 2>/dev/null || echo ""); \
   if [ -n "$MINERU_PIPELINE_DIR" ] && [ -d "$MINERU_PIPELINE_DIR" ]; then \
   echo "   ✅ MinerU Pipeline 模型目錄存在: $MINERU_PIPELINE_DIR"; \
   du -sh "$MINERU_PIPELINE_DIR" 2>/dev/null || true; \
   else \
   echo "   ⚠️ MinerU Pipeline 模型目錄不存在或未設定"; \
-  echo "   設定路徑: ${MINERU_PIPELINE_DIR:-'(未設定)'}"; \
   fi; \
   else \
-  echo "   ⚠️ mineru.json 不存在（MinerU 未正確安裝）"; \
+  echo "   ⚠️ mineru.json 不存在"; \
   fi && \
   echo "" && \
+  \
   echo "🔹 確認 HuggingFace cache 已清除：" && \
   if [ -d "/root/.cache/huggingface" ]; then \
   echo "   ❌ 警告：HuggingFace cache 仍存在！"; \
@@ -511,8 +484,11 @@ RUN set -eux && \
   echo "   ✅ HuggingFace cache 已清除"; \
   fi && \
   echo "" && \
+  \
   echo "===========================================================" && \
-  echo "✅ 模型下載完成，所有快取已清理" && \
+  echo "✅ 階段 12-UNIFIED 完成：所有 Python 工具 + 模型已安裝" && \
+  echo "   所有 cache 已清理，layer diff 最小化" && \
+  echo "   Runtime 不會再下載任何資源" && \
   echo "==========================================================="
 
 # PDFMathTranslate 環境變數
@@ -522,15 +498,23 @@ ENV NOTO_FONT_PATH="/app/GoNotoKurrent-Regular.ttf"
 # BabelDOC 環境變數
 ENV BABELDOC_CACHE_PATH="/root/.cache/babeldoc"
 ENV BABELDOC_SERVICE="google"
+# 禁止 BabelDOC 自動下載（強制使用預下載資源）
+ENV BABELDOC_OFFLINE="1"
 
 # MinerU 環境變數
-# 注意：如果 build 時模型下載成功，mineru.json 會設定為 local
-# 如果下載失敗，允許 runtime 從 huggingface 下載
-# ENV MINERU_MODEL_SOURCE="local"  # 由 mineru.json 控制
-# ENV HF_HUB_OFFLINE="1"           # 不強制離線，允許 fallback
+# 強制使用本地模型，禁止 runtime 下載
+ENV MINERU_MODEL_SOURCE="local"
+
+# HuggingFace 離線模式（禁止 runtime 下載）
+# ⚠️ 此變數在所有模型下載完成後設定
+ENV HF_HUB_OFFLINE="1"
+ENV TRANSFORMERS_OFFLINE="1"
 
 # ==============================================================================
 # 最終清理（模型下載完成後）
+# ==============================================================================
+# ⚠️ 此清理步驟獨立於模型下載 RUN，僅清理文件檔案
+#    模型相關 cache 已在上一個 RUN 中清除
 # ==============================================================================
 RUN rm -rf /usr/share/doc/texlive* \
   && rm -rf /usr/share/texlive/texmf-dist/doc \
@@ -597,7 +581,43 @@ ENV QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox"
 ENV PANDOC_PDF_ENGINE=pdflatex
 # Node 環境
 ENV NODE_ENV=production
-# PDFMathTranslate 預設翻譯服務（可透過環境變數覆寫）
+
+# ==============================================================================
+# 🌐 PDFMathTranslate 翻譯服務設定
+# ==============================================================================
+# ⚠️ 重要：PDFMathTranslate 的翻譯功能需要網路連接！
+#    - DocLayout-YOLO ONNX 模型（已離線預下載）：用於佈局分析
+#    - 翻譯服務（需要網路）：將文字翻譯成目標語言
+#
+# 支援的翻譯服務：
+#   - google: Google Translate（免費，需網路）
+#   - bing: Microsoft Bing Translator（免費，需網路）
+#   - deepl: DeepL（需 API Key，需網路）
+#   - ollama: 本地 Ollama LLM（可離線，需額外設定）
+#
+# 若要完全離線翻譯，請使用 ollama 並設定 OLLAMA_HOST
+# ==============================================================================
 ENV PDFMATHTRANSLATE_SERVICE="google"
+
+# ==============================================================================
+# 🔒 Runtime 模型離線模式設定
+# ==============================================================================
+# ⚠️ 這些設定禁止 runtime 下載「模型」，但不影響翻譯 API 調用
+#    PDFMathTranslate 使用的 Google/Bing 翻譯是線上 API，不是模型下載
+# ==============================================================================
+
+# HuggingFace 模型離線（禁止下載新模型）
+ENV HF_HUB_OFFLINE="1"
+ENV TRANSFORMERS_OFFLINE="1"
+ENV HF_DATASETS_OFFLINE="1"
+
+# 禁止 pip 安裝新套件
+ENV PIP_NO_INDEX="1"
+
+# MinerU 強制使用本地模型
+ENV MINERU_MODEL_SOURCE="local"
+
+# BabelDOC 模型離線模式
+ENV BABELDOC_OFFLINE="1"
 
 ENTRYPOINT [ "bun", "run", "dist/src/index.js" ]
