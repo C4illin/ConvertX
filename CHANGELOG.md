@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.1.11](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.11) (2026-01-22)
+
+穩定性與品質維護版本。
+
+### 🛡️ Stability & Quality
+
+- **模型驗證腳本**：新增 `verify-models.sh` 腳本，可在容器內驗證預下載模型完整性
+- **Dockerfile 版本標示**：明確標註 v0.1.11 版本資訊
+
+### 🔧 Maintenance
+
+- 更新工作流程中的 Node.js 和 Bun 版本
+- 調整 CI/CD 依賴項版本
+- 修正工作流程名稱格式
+- 新增遠端服務更新工作流程（透過 Tailscale SSH 更新 Docker 服務）
+
+### ✅ Quality Assurance
+
+- 159 個測試全數通過
+- TypeScript / ESLint / Prettier / Knip 檢查全數通過
+- Build 流程驗證完成
+
+---
+
 ## [0.1.10](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.10) (2026-01-21)
 
 在 0.1.10 版本中，ConvertX-CN 迎來了多項重大功能擴充與架構強化。這是一個里程碑式的版本，為專案帶來了全新的 API 伺服器、兩個強大的文件轉換引擎，以及完整的大檔案傳輸機制。
