@@ -59,29 +59,86 @@ jobs:
       # ========================================
       # 清理磁碟空間（解決 no space left on device）
       # ========================================
-      - name: Free disk space
+      # 🔥 GitHub Actions Runner 只有約 14GB 可用空間
+      #    大型模型 build 需要清理更多預裝軟體
+      # ========================================
+      - name: Free disk space (aggressive)
         run: |
-          echo "🧹 Cleaning up disk space..."
-          df -h
+          echo "🧹 Aggressive disk cleanup for large model builds..."
+          echo "========================================"
+          echo "📊 初始磁碟空間："
+          df -h /
+          echo "========================================"
 
-          # 移除不需要的預裝軟體
+          # ========================================
+          # 移除大型預裝軟體（約可釋放 30-40GB）
+          # ========================================
+          echo "🗑️ 移除預裝開發工具..."
+
+          # .NET SDK（約 2-3GB）
           sudo rm -rf /usr/share/dotnet || true
+
+          # Android SDK（約 10-15GB）- 最大宗！
           sudo rm -rf /usr/local/lib/android || true
+
+          # Haskell/GHC（約 1GB）
           sudo rm -rf /opt/ghc || true
+
+          # CodeQL（約 1GB）
           sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+
+          # Boost（約 500MB）
           sudo rm -rf /usr/local/share/boost || true
+
+          # Swift（約 1.5GB）
           sudo rm -rf /usr/share/swift || true
+
+          # Hosted Tool Cache（約 5-8GB）
           sudo rm -rf /opt/hostedtoolcache || true
 
-          # 清理 apt cache
+          # Azure CLI（約 500MB）
+          sudo rm -rf /usr/share/az_* || true
+          sudo rm -rf /opt/az || true
+
+          # Google Cloud SDK（約 500MB）
+          sudo rm -rf /usr/lib/google-cloud-sdk || true
+
+          # PowerShell（約 200MB）
+          sudo rm -rf /usr/local/share/powershell || true
+
+          # Miniconda（約 500MB）
+          sudo rm -rf /usr/share/miniconda || true
+
+          # ========================================
+          # 清理系統 cache
+          # ========================================
+          echo "🗑️ 清理系統 cache..."
+
+          # apt cache
           sudo apt-get clean || true
           sudo apt-get autoremove -y || true
+          sudo rm -rf /var/lib/apt/lists/* || true
 
+          # npm/yarn global cache
+          sudo rm -rf /usr/local/share/.cache || true
+
+          # ========================================
           # 清理 Docker 舊資料
+          # ========================================
+          echo "🗑️ 清理 Docker cache..."
           docker system prune -af --volumes || true
 
-          echo "After cleanup:"
-          df -h
+          # ========================================
+          # 清理 BuildKit cache（關鍵！解決 overlayfs 爆空間）
+          # ========================================
+          echo "🗑️ 清理 BuildKit cache..."
+          # BuildKit 的 blob 和 layer cache 可能佔用大量空間
+          sudo rm -rf /var/lib/docker/buildkit || true
+
+          echo "========================================"
+          echo "📊 清理後磁碟空間："
+          df -h /
+          echo "========================================"
 
       - name: downcase REPO
         run: |
@@ -93,10 +150,17 @@ jobs:
         with:
           images: ghcr.io/${{ env.REPO }}
 
+      # ========================================
+      # 設定 Docker Buildx（針對大型模型優化）
+      # ========================================
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
           platforms: ${{ matrix.platform }}
+          # 🔥 使用 docker-container driver 以獲得更好的 cache 控制
+          driver-opts: |
+            image=moby/buildkit:latest
+            network=host
 
       - name: Login to GitHub Container Registry
         # here we only login to ghcr.io since the this only pushes internal images
@@ -106,6 +170,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # ========================================
+      # Build and Push（針對大型模型優化）
+      # ========================================
+      # 🔥 注意事項：
+      #   - 使用 registry cache 而非 GHA cache（避免 10GB 限制）
+      #   - 啟用 compression 減少傳輸量
+      #   - 使用 inline cache 確保 layer 可重用
+      # ========================================
       - name: Build and push by digest
         id: build
         uses: docker/build-push-action@v6
@@ -116,10 +188,15 @@ jobs:
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
-          outputs: type=image,name=ghcr.io/${{ env.REPO }},push-by-digest=true,name-canonical=true,oci-mediatypes=true
+          outputs: type=image,name=ghcr.io/${{ env.REPO }},push-by-digest=true,name-canonical=true,oci-mediatypes=true,compression=zstd,compression-level=3
           push: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && contains(fromJSON('["COLLABORATOR","MEMBER","OWNER"]'), github.event.pull_request.author_association)) }}
-          cache-from: type=gha,scope=${{ matrix.platform }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
+          # 🔥 使用 registry cache 取代 GHA cache
+          # registry cache 沒有 10GB 限制，更適合大型模型
+          cache-from: type=registry,ref=ghcr.io/${{ env.REPO }}:buildcache-${{ env.PLATFORM_PAIR }}
+          cache-to: type=registry,ref=ghcr.io/${{ env.REPO }}:buildcache-${{ env.PLATFORM_PAIR }},mode=max,compression=zstd
+          # 設定 build 參數
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
 
       - name: Export digest
         run: |
