@@ -5,16 +5,23 @@ export interface IStorageAdapter {
     save(key: string, data: Buffer): Promise<string>;
     get(key: string): Promise<Buffer>;
     delete(key: string): Promise<void>;
+    getStream(key: string): ReadableStream<Uint8Array>;
+}
+
+export function getStorageType(): "local" | "s3" {
+    return process.env.STORAGE_TYPE === "s3" ? "s3" : "local";
 }
 
 export function getStorage(): IStorageAdapter {
-    if (process.env.STORAGE_BACKEND === "s3") {
-        if (!process.env.S3_BUCKET) {
-            throw new Error("S3_BUCKET must be set when STORAGE_BACKEND=s3");
+    if (getStorageType() === "s3") {
+        const bucket = process.env.S3_BUCKET_NAME;
+        if (!bucket) {
+            throw new Error("S3_BUCKET_NAME must be set when STORAGE_TYPE=s3");
         }
 
-        return new S3StorageAdapter(process.env.S3_BUCKET);
+        return new S3StorageAdapter(bucket);
     }
     
-    return new LocalStorageAdapter("./data");
+    const baseDir = process.env.LOCAL_STORAGE_PATH || "./data/storage";
+    return new LocalStorageAdapter(baseDir);
 }

@@ -23,6 +23,16 @@ export class LocalStorageAdapter implements IStorageAdapter {
 
     async delete(key: string): Promise<void> {
         const fullPath = path.join(this.baseDir, key);
-        await fs.unlink(fullPath);
+        try {
+            await fs.unlink(fullPath);
+        } catch {
+            //ignore error if file does not exist
+        }
+    }
+
+    getStream(key: string): ReadableStream<Uint8Array> {
+        const fullPath = path.join(this.baseDir, key);
+        const file = Bun.file(fullPath);
+        return file.stream();
     }
 }

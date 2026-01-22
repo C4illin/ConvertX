@@ -23,7 +23,8 @@ export class S3StorageAdapter implements IStorageAdapter {
             bucket: this.bucket,
         });
 
-        return Buffer.from(await file.bytes());
+        const buf = await file.bytes();
+        return Buffer.from(buf);
     }
 
     async delete(key: string): Promise<void> {
@@ -32,5 +33,12 @@ export class S3StorageAdapter implements IStorageAdapter {
         })
 
         await file.delete();
+    }
+
+    getStream(key: string): ReadableStream<Uint8Array> {
+        const file: S3File = s3.file(key, {
+            bucket: this.bucket 
+        });
+        return file.stream();
     }
 }
