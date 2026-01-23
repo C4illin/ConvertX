@@ -1,0 +1,87 @@
+# ==============================================================================
+# ConvertX-CN 生產環境 Docker Compose
+#
+# 適用情境：
+#   - 透過 Reverse Proxy（Nginx / Traefik / Caddy）存取
+#   - 已設定 HTTPS
+#   - 需要限制註冊與存取
+#
+# ⚠️ 使用前請確認：
+#    1. 已建立 data 資料夾
+#    2. 已將 JWT_SECRET 改成你自己的值
+#    3. 已設定好 Reverse Proxy
+# ==============================================================================
+
+services:
+  convertx:
+    image: convertx/convertx-cn:latest
+    container_name: convertx-cn
+    restart: unless-stopped
+
+    # 生產環境通常只監聽 localhost，由 Reverse Proxy 轉發
+    # 若需要直接對外，改為 "3000:3000"
+    ports:
+      - "127.0.0.1:3000:3000"
+
+    volumes:
+      - ./data:/app/data
+
+    environment:
+      # === 必填設定 ===
+      # 🔐 JWT 密鑰：請務必改成你自己的隨機字串（至少 32 字元）
+      # 可用 openssl rand -hex 32 產生
+      - JWT_SECRET=change-me-to-a-very-long-random-string-at-least-32-characters
+
+      # === 安全設定 ===
+      # 關閉註冊（首次帳號仍可建立）
+      - ACCOUNT_REGISTRATION=false
+
+      # 不允許 HTTP（要求 HTTPS）
+      - HTTP_ALLOWED=false
+
+      # 信任 Reverse Proxy 的 X-Forwarded-* headers
+      - TRUST_PROXY=true
+
+      # 必須登入才能使用
+      - ALLOW_UNAUTHENTICATED=false
+
+      # === 時區與清理 ===
+      - TZ=Asia/Taipei
+      - AUTO_DELETE_EVERY_N_HOURS=24
+
+      # === 可選：子路徑部署 ===
+      # 若透過 https://example.com/convertx/ 存取，取消下行註解
+      # - WEBROOT=/convertx
+
+# ==============================================================================
+# Reverse Proxy 設定範例
+# ==============================================================================
+#
+# Nginx 範例：
+# -------------
+# server {
+#     listen 443 ssl http2;
+#     server_name example.com;
+#
+#     location / {
+#         proxy_pass http://127.0.0.1:3000;
+#         proxy_set_header Host $host;
+#         proxy_set_header X-Real-IP $remote_addr;
+#         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#         proxy_set_header X-Forwarded-Proto $scheme;
+#
+#         # 檔案上傳大小限制
+#         client_max_body_size 500M;
+#     }
+# }
+#
+# Traefik 範例（labels）：
+# ------------------------
+# labels:
+#   - "traefik.enable=true"
+#   - "traefik.http.routers.convertx.rule=Host(`convertx.example.com`)"
+#   - "traefik.http.routers.convertx.tls=true"
+#   - "traefik.http.routers.convertx.tls.certresolver=letsencrypt"
+#   - "traefik.http.services.convertx.loadbalancer.server.port=3000"
+#
+# ==============================================================================
