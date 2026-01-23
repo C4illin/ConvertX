@@ -2,6 +2,9 @@ name: Check Tests
 permissions:
   contents: read
 
+# 基本測試 - 在 Ubuntu runner 上運行（有限的工具集）
+# 完整 Docker E2E 測試請參見: docker-e2e-tests.yml
+
 on:
   push:
     branches: ["main"]
@@ -35,5 +38,17 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Run tests
-        run: bun test
+      - name: Run unit and mock tests
+        run: bun test tests/e2e/converters.mock.test.ts tests/e2e/api.e2e.test.ts
+
+      - name: Run available E2E tests
+        run: bun test tests/e2e/converters.e2e.test.ts --timeout 120000
+        continue-on-error: true
+
+      - name: Test summary
+        run: |
+          echo "## 🧪 Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Basic tests completed. For comprehensive E2E tests with all converters," >> $GITHUB_STEP_SUMMARY
+          echo "see the [Docker E2E Tests](${{ github.server_url }}/${{ github.repository }}/actions/workflows/docker-e2e-tests.yml) workflow." >> $GITHUB_STEP_SUMMARY
+

@@ -1,0 +1,22 @@
+{
+  "name": "E2E Test Configuration",
+  "fixtures": {
+    "pdf": "sample.pdf (需要手動創建或從其他地方複製)",
+    "svg": "test.svg",
+    "markdown": "test.md",
+    "json": "test.json"
+  },
+  "notes": [
+    "sample.pdf 需要是一個包含英文文字的有效 PDF 檔案",
+    "翻譯測試需要網路連接和有效的翻譯 API 金鑰",
+    "某些測試需要 Docker 環境或完整安裝的轉換工具"
+  ],
+  "translationApiKeys": {
+    "required": [
+      "OPENAI_API_KEY (for OpenAI translation)",
+      "GOOGLE_API_KEY (for Google translation)",
+      "DEEPL_API_KEY (for DeepL translation)"
+    ],
+    "setVia": "Environment variables or .env file"
+  }
+}

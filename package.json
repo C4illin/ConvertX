@@ -13,7 +13,13 @@
     "lint:tsc": "tsc --noEmit",
     "lint:knip": "knip",
     "lint:eslint": "eslint .",
-    "lint:prettier": "prettier --check ."
+    "lint:prettier": "prettier --check .",
+    "test": "bun test",
+    "test:e2e": "bun test tests/e2e/",
+    "test:e2e:quick": "bun test tests/e2e/converters.e2e.test.ts",
+    "test:e2e:matrix": "bun test tests/e2e/format-matrix.e2e.test.ts --timeout 300000",
+    "test:e2e:translation": "bun test tests/e2e/translation.e2e.test.ts --timeout 600000",
+    "test:e2e:comprehensive": "bun test tests/e2e/comprehensive.e2e.test.ts --timeout 600000"
   },
   "dependencies": {
     "@elysiajs/html": "^1.4.0",
