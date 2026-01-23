@@ -1,5 +1,16 @@
 # URL ID 與儲存機制
 
+> ⚠️ **此文件已遷移**
+>
+> 本文件內容已整合至新的文件結構，請參閱：
+>
+> - 🛠️ [專案結構](development/project-structure.md)
+> - 🐳 [Docker 部署](deployment/docker.md)
+>
+> 此文件將在未來版本中移除。
+
+---
+
 ## 檔案儲存結構
 
 ConvertX-CN 使用以下目錄結構儲存檔案：

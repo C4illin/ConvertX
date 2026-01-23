@@ -1,0 +1,128 @@
+# API 總覽
+
+ConvertX-CN 提供選用的 API Server，支援 REST 和 GraphQL 兩種 API 介面。
+
+---
+
+## 功能特色
+
+- 🔐 **JWT 認證**：安全的 API 存取控制
+- 🌐 **REST + GraphQL**：雙協議支援
+- 🔍 **智慧建議**：轉換失敗時推薦替代引擎
+- 🛠️ **20+ 轉換引擎**：與 Web UI 共用完整轉換器
+
+---
+
+## 快速啟用
+
+API Server 是**選用功能**，不影響 Web UI 使用。
+
+### 啟用方式
+
+```bash
+docker compose --profile api up -d
+```
+
+### 服務端口
+
+| 服務       | 端口 | 說明           |
+| ---------- | ---- | -------------- |
+| Web UI     | 3000 | 網頁介面       |
+| API Server | 3001 | REST & GraphQL |
+
+---
+
+## API 端點
+
+### REST API
+
+- **Base URL**: `http://localhost:3001/api/v1`
+- **Content-Type**: `application/json` 或 `multipart/form-data`
+
+### GraphQL API
+
+- **Endpoint**: `http://localhost:3001/graphql`
+- **Playground**: `http://localhost:3001/graphql`（開發模式）
+
+---
+
+## 認證
+
+所有 API 請求（除健康檢查外）都需要 JWT Bearer Token：
+
+```http
+Authorization: Bearer <your-jwt-token>
+```
+
+### Token 結構
+
+```json
+{
+  "sub": "user-id",
+  "exp": 1234567890,
+  "iat": 1234567890,
+  "email": "user@example.com",
+  "roles": ["user"]
+}
+```
+
+> API Server 只負責驗證 JWT，不負責產生 JWT。Token 應由獨立的認證服務產生。
+
+---
+
+## 環境變數
+
+| 變數            | 說明         | 預設值           |
+| --------------- | ------------ | ---------------- |
+| `API_HOST`      | 監聽地址     | `0.0.0.0`        |
+| `API_PORT`      | 監聽埠       | `3001`           |
+| `JWT_SECRET`    | JWT 驗證密鑰 | （需自行設定）   |
+| `UPLOAD_DIR`    | 上傳目錄     | `./data/uploads` |
+| `OUTPUT_DIR`    | 輸出目錄     | `./data/output`  |
+| `MAX_FILE_SIZE` | 最大檔案大小 | `104857600`      |
+
+---
+
+## 快速範例
+
+### 健康檢查
+
+```bash
+curl http://localhost:3001/health
+```
+
+回應：
+
+```json
+{
+  "status": "healthy",
+  "version": "0.1.0",
+  "timestamp": "2026-01-23T10:30:00Z"
+}
+```
+
+### 列出引擎
+
+```bash
+curl -H "Authorization: Bearer <token>" \
+  http://localhost:3001/api/v1/engines
+```
+
+### 轉換檔案
+
+```bash
+curl -X POST \
+  -H "Authorization: Bearer <token>" \
+  -F "file=@document.docx" \
+  -F "engine=libreoffice" \
+  -F "output_format=pdf" \
+  http://localhost:3001/api/v1/convert
+```
+
+---
+
+## 相關文件
+
+- [API 端點詳細說明](endpoints.md)
+- [API 規格文件](../../api-server/docs/API_SPEC.md)
+- [架構說明](../../api-server/docs/ARCHITECTURE.md)

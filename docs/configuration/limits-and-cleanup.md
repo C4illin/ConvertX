@@ -1,0 +1,196 @@
+# 清理與限制設定
+
+本文件說明如何設定檔案自動清理與資源限制。
+
+---
+
+## 檔案自動清理
+
+### AUTO_DELETE_EVERY_N_HOURS
+
+自動刪除超過指定時間的檔案。
+
+| 項目   | 值   |
+| ------ | ---- |
+| 預設值 | `24` |
+| 停用   | `0`  |
+| 單位   | 小時 |
+
+```yaml
+environment:
+  # 每 24 小時清理一次
+  - AUTO_DELETE_EVERY_N_HOURS=24
+
+  # 每 1 小時清理一次（公開服務建議）
+  - AUTO_DELETE_EVERY_N_HOURS=1
+
+  # 停用自動清理
+  - AUTO_DELETE_EVERY_N_HOURS=0
+```
+
+### 清理範圍
+
+自動清理會刪除以下檔案：
+
+- `uploads/` 目錄中的上傳檔案
+- `output/` 目錄中的轉換結果
+
+> 不會刪除資料庫 (`convertx.db`) 或使用者帳號
+
+---
+
+## 轉換限制
+
+### MAX_CONVERT_PROCESS
+
+限制同時進行的轉換任務數量。
+
+| 項目   | 值            |
+| ------ | ------------- |
+| 預設值 | `0`（無限制） |
+
+```yaml
+environment:
+  # 最多同時 2 個轉換任務
+  - MAX_CONVERT_PROCESS=2
+
+  # 無限制
+  - MAX_CONVERT_PROCESS=0
+```
+
+#### 使用建議
+
+| 情境         | 建議值 |
+| ------------ | ------ |
+| 個人使用     | 無限制 |
+| 小型團隊     | 4-8    |
+| 公開服務     | 2-4    |
+| 資源受限環境 | 1-2    |
+
+---
+
+## 記憶體限制
+
+### Docker 記憶體限制
+
+```yaml
+services:
+  convertx:
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+```
+
+### 建議配置
+
+| 記憶體 | 適用情境      |
+| ------ | ------------- |
+| 2 GB   | 基本轉換      |
+| 4 GB   | 一般使用      |
+| 8 GB   | 大檔案轉換    |
+| 16 GB  | 影片轉換、OCR |
+
+---
+
+## CPU 限制
+
+### Docker CPU 限制
+
+```yaml
+services:
+  convertx:
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+```
+
+### 建議配置
+
+| CPU 核心 | 適用情境     |
+| -------- | ------------ |
+| 1        | 最小需求     |
+| 2        | 一般使用     |
+| 4+       | 多人同時使用 |
+
+---
+
+## 磁碟空間管理
+
+### 監控磁碟使用
+
+```bash
+# 檢查 data 目錄大小
+du -sh ./data
+
+# 檢查各子目錄
+du -sh ./data/*
+```
+
+### 手動清理
+
+```bash
+# 清理舊檔案（超過 7 天）
+find ./data/uploads -mtime +7 -delete
+find ./data/output -mtime +7 -delete
+```
+
+### 設定清理排程
+
+```bash
+# 每天凌晨 3 點清理超過 7 天的檔案
+0 3 * * * find /path/to/data/uploads -mtime +7 -delete
+0 3 * * * find /path/to/data/output -mtime +7 -delete
+```
+
+---
+
+## 情境範例
+
+### 個人使用
+
+```yaml
+environment:
+  - AUTO_DELETE_EVERY_N_HOURS=168 # 一週
+  - MAX_CONVERT_PROCESS=0 # 無限制
+```
+
+### 小型團隊
+
+```yaml
+environment:
+  - AUTO_DELETE_EVERY_N_HOURS=24 # 一天
+  - MAX_CONVERT_PROCESS=4
+
+deploy:
+  resources:
+    limits:
+      memory: 4G
+```
+
+### 公開服務
+
+```yaml
+environment:
+  - AUTO_DELETE_EVERY_N_HOURS=1 # 一小時
+  - MAX_CONVERT_PROCESS=2
+  - ALLOW_UNAUTHENTICATED=true
+  - HIDE_HISTORY=true
+
+deploy:
+  resources:
+    limits:
+      memory: 4G
+      cpus: "2"
+```
+
+---
+
+## 相關文件
+
+- [環境變數設定](environment-variables.md)
+- [安全性設定](security.md)
+- [Docker 部署](../deployment/docker.md)

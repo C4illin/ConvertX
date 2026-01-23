@@ -1,0 +1,46 @@
+# ConvertX-CN 生產環境配置
+# 適用於：正式部署
+
+services:
+  convertx:
+    image: convertx/convertx-cn:latest
+    container_name: convertx-cn
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"  # 只允許本機存取，透過反向代理對外
+    volumes:
+      - ./data:/app/data
+    environment:
+      # 必填：登入驗證金鑰（至少 32 字元）
+      - JWT_SECRET=${JWT_SECRET:?請設定 JWT_SECRET}
+
+      # 時區
+      - TZ=Asia/Taipei
+
+      # 安全性設定
+      - HTTP_ALLOWED=false        # 禁止 HTTP（使用 HTTPS）
+      - TRUST_PROXY=true          # 信任反向代理
+      - ACCOUNT_REGISTRATION=false # 關閉公開註冊
+
+      # 清理設定
+      - AUTO_DELETE_EVERY_N_HOURS=24
+
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

@@ -1,0 +1,144 @@
+# 快速開始
+
+5 分鐘內完成 ConvertX-CN 部署。
+
+---
+
+## 前置需求
+
+- Docker 20.10+（[安裝指南](https://docs.docker.com/get-docker/)）
+- 4GB+ 記憶體
+- 10GB+ 磁碟空間
+
+---
+
+## 方法一：Docker Run（最快）
+
+### 1. 建立資料夾
+
+```bash
+# Linux / macOS
+mkdir -p ~/convertx-cn/data && cd ~/convertx-cn
+
+# Windows PowerShell
+mkdir C:\convertx-cn\data; cd C:\convertx-cn
+
+# Windows CMD
+mkdir C:\convertx-cn\data
+cd C:\convertx-cn
+```
+
+### 2. 啟動容器
+
+```bash
+docker run -d \
+  --name convertx-cn \
+  --restart unless-stopped \
+  -p 3000:3000 \
+  -v ./data:/app/data \
+  -e TZ=Asia/Taipei \
+  -e JWT_SECRET=你的隨機字串至少32字元 \
+  convertx/convertx-cn:latest
+```
+
+### 3. 開始使用
+
+開啟瀏覽器訪問：`http://localhost:3000`
+
+1. 點擊右上角 **Register** 註冊帳號
+2. 輸入 Email 和密碼
+3. 完成！開始轉換檔案
+
+---
+
+## 方法二：Docker Compose（推薦）
+
+### 1. 建立專案資料夾
+
+```bash
+mkdir -p ~/convertx-cn && cd ~/convertx-cn
+```
+
+### 2. 建立配置檔
+
+建立 `docker-compose.yml`：
+
+```yaml
+services:
+  convertx:
+    image: convertx/convertx-cn:latest
+    container_name: convertx-cn
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - TZ=Asia/Taipei
+      - JWT_SECRET=請更換為一個長且隨機的字串
+```
+
+### 3. 啟動服務
+
+```bash
+docker compose up -d
+```
+
+---
+
+## 驗證安裝
+
+### 檢查容器狀態
+
+```bash
+docker ps
+# 應該看到 convertx-cn 容器正在運行
+
+docker logs convertx-cn
+# 應該看到 "🦊 Elysia is running at http://localhost:3000"
+```
+
+### 健康檢查
+
+```bash
+curl http://localhost:3000/healthcheck
+# 應該返回 "OK"
+```
+
+---
+
+## 首次設定
+
+### 建立帳號
+
+首次訪問時，系統會顯示註冊頁面。第一個註冊的帳號即為管理員。
+
+### 關閉公開註冊
+
+如果只有您使用，建議關閉公開註冊：
+
+```yaml
+environment:
+  - ACCOUNT_REGISTRATION=false
+```
+
+---
+
+## 常見啟動問題
+
+| 問題               | 解決方法                                       |
+| ------------------ | ---------------------------------------------- |
+| Port 被占用        | 改用其他 port，如 `-p 8080:3000`               |
+| 登入後被踢回登入頁 | 加上 `HTTP_ALLOWED=true` 或 `TRUST_PROXY=true` |
+| 重啟後被登出       | 設定固定的 `JWT_SECRET`                        |
+| 重啟後資料消失     | 確認 `./data:/app/data` 且資料夾存在           |
+| 權限錯誤           | 執行 `chmod -R 777 ./data`                     |
+
+---
+
+## 下一步
+
+- 📖 [Docker 詳細配置](../deployment/docker.md)
+- ⚙️ [環境變數設定](../configuration/environment-variables.md)
+- 🔒 [安全性設定](../configuration/security.md)
+- 🔧 [反向代理設定](../deployment/reverse-proxy.md)

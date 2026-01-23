@@ -1,5 +1,17 @@
 # 快速開始
 
+> ⚠️ **此文件已遷移**
+>
+> 本文件內容已整合至新的文件結構，請參閱：
+>
+> - 📖 [概覽](getting-started/overview.md)
+> - 🚀 [快速開始](getting-started/quick-start.md)
+> - ❓ [常見問題](getting-started/faq.md)
+>
+> 此文件將在未來版本中移除。
+
+---
+
 > 本文件提供完整部署步驟。若只需最快啟動，請參考 [README](../README.md)。
 
 ---

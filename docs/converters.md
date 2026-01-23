@@ -1,5 +1,17 @@
 # 支援的轉換器
 
+> ⚠️ **此文件已遷移**
+>
+> 本文件內容已整合至新的文件結構，請參閱：
+>
+> - 🔌 [轉換器完整說明](features/converters.md)
+> - 📊 [OCR 功能](features/ocr.md)
+> - 🌐 [翻譯功能](features/translation.md)
+>
+> 此文件將在未來版本中移除。
+
+---
+
 ConvertX-CN 完整版已內建以下所有轉換器，開箱即用。
 
 ## 轉換器列表

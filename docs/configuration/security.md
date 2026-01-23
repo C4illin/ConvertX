@@ -1,16 +1,6 @@
 # 安全性設定
 
-> ⚠️ **此文件已遷移**
->
-> 本文件內容已整合至新的文件結構，請參閱：
->
-> - 🔒 [安全性設定](../configuration/security.md)
->
-> 此文件將在未來版本中移除。
-
----
-
-本文件說明 ConvertX-CN 的安全性相關設定與最佳實踐。
+本文件說明 ConvertX-CN 的安全性設定與最佳實踐。
 
 ---
 
@@ -71,9 +61,7 @@
 | 透過 Nginx / Traefik / Caddy | `true`  |
 | 透過 Cloudflare Tunnel       | `true`  |
 
-#### 安全注意
-
-只在確實有反向代理時才設為 `true`。若直接暴露容器且設為 `true`，攻擊者可偽造 headers。
+> ⚠️ **安全注意**：只在確實有反向代理時才設為 `true`。若直接暴露容器且設為 `true`，攻擊者可偽造 headers。
 
 ---
 
@@ -88,12 +76,10 @@
 
 #### 建議流程
 
-1. 首次部署設為 `true`
+1. 首次部署設為 `true`（或不設定）
 2. 註冊管理員帳號
 3. 改為 `false`
 4. 重啟容器
-
-首次註冊的帳號不受此限制。
 
 ### JWT_SECRET
 
@@ -113,8 +99,7 @@
 # Linux / macOS
 openssl rand -hex 32
 
-# 輸出範例
-# a1b2c3d4e5f6789...（64 字元）
+# 輸出範例：a1b2c3d4e5f6789...（64 字元）
 ```
 
 ---
@@ -157,62 +142,78 @@ environment:
 只開放必要的埠：
 
 ```bash
-# 僅允許特定 IP 存取
-ufw allow from 192.168.1.0/24 to any port 3000
+# UFW (Ubuntu)
+sudo ufw allow 3000/tcp
+
+# 或只允許特定 IP
+sudo ufw allow from 192.168.1.0/24 to any port 3000
 ```
 
-### 只允許本地存取
-
-若透過反向代理，可限制容器只監聽 localhost：
+### 只允許本機存取
 
 ```yaml
 ports:
-  - "127.0.0.1:3000:3000"
+  - "127.0.0.1:3000:3000" # 只有本機可存取
 ```
 
-這樣只有本機的反向代理可以存取，外部無法直接連線。
+搭配反向代理提供對外服務。
+
+### 限制上傳大小
+
+在反向代理層限制：
+
+```nginx
+# Nginx
+client_max_body_size 100M;
+```
 
 ---
 
-## 設定範例
+## 資料安全
 
-### 最小安全配置（本地測試）
-
-```yaml
-environment:
-  - HTTP_ALLOWED=true
-```
-
-### 標準安全配置（生產環境）
+### 定期清理
 
 ```yaml
-environment:
-  - JWT_SECRET=your-production-secret
-  - HTTP_ALLOWED=false
-  - TRUST_PROXY=true
-  - ACCOUNT_REGISTRATION=false
+- AUTO_DELETE_EVERY_N_HOURS=24 # 每 24 小時清理
 ```
 
-### 高安全配置（敏感環境）
+### 備份
 
-```yaml
-services:
-  convertx:
-    ports:
-      - "127.0.0.1:3000:3000" # 只允許本地
-    environment:
-      - JWT_SECRET=your-very-long-random-secret
-      - HTTP_ALLOWED=false
-      - TRUST_PROXY=true
-      - ACCOUNT_REGISTRATION=false
-      - ALLOW_UNAUTHENTICATED=false
-      - AUTO_DELETE_EVERY_N_HOURS=1
+```bash
+# 定期備份資料
+0 2 * * * tar -czvf /backup/convertx-$(date +\%Y\%m\%d).tar.gz /path/to/data
 ```
+
+### 權限設定
+
+```bash
+# 限制資料夾權限
+chmod 700 ./data
+```
+
+---
+
+## 安全檢查清單
+
+### 部署前
+
+- [ ] 設定固定的 `JWT_SECRET`
+- [ ] 關閉 `ACCOUNT_REGISTRATION`（如果不需要公開註冊）
+- [ ] 設定 `TRUST_PROXY=true`（如果使用反向代理）
+- [ ] 設定 `HTTP_ALLOWED=false`（如果有 HTTPS）
+
+### 部署後
+
+- [ ] 確認只有必要的埠對外開放
+- [ ] 確認反向代理有正確設定
+- [ ] 確認 HTTPS 憑證有效
+- [ ] 設定定期備份
+- [ ] 設定定期清理
 
 ---
 
 ## 相關文件
 
-- [環境變數完整說明](environment.md)
-- [反向代理設定](../deployment.md)
-- [Docker Compose 詳解](../deployment/docker-compose.md)
+- [環境變數設定](environment-variables.md)
+- [反向代理設定](../deployment/reverse-proxy.md)
+- [Docker 部署](../deployment/docker.md)

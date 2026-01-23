@@ -1,0 +1,192 @@
+# 貢獻指南
+
+感謝您有興趣貢獻 ConvertX-CN！本文件說明如何參與專案開發。
+
+---
+
+## 貢獻方式
+
+### 🐛 回報問題
+
+1. 前往 [GitHub Issues](https://github.com/pi-docket/ConvertX-CN/issues)
+2. 點擊 "New Issue"
+3. 選擇適當的 Issue 模板
+4. 填寫詳細資訊
+
+### 💡 功能建議
+
+1. 先搜尋是否已有類似提議
+2. 開一個新的 Issue 說明您的想法
+3. 等待討論與回饋
+
+### 🔧 提交程式碼
+
+1. Fork 專案
+2. 建立功能分支
+3. 進行修改
+4. 提交 Pull Request
+
+---
+
+## 開發流程
+
+### 1. Fork 與 Clone
+
+```bash
+# Fork 專案後
+git clone https://github.com/YOUR_USERNAME/ConvertX-CN.git
+cd ConvertX-CN
+```
+
+### 2. 建立分支
+
+```bash
+# 功能分支
+git checkout -b feature/my-feature
+
+# 修復分支
+git checkout -b fix/bug-description
+```
+
+### 3. 安裝依賴
+
+```bash
+bun install
+```
+
+### 4. 進行修改
+
+遵循現有的程式碼風格與結構。
+
+### 5. 測試
+
+```bash
+# 執行測試
+bun run test
+
+# 檢查格式
+bun run lint
+bun run format:check
+```
+
+### 6. 提交
+
+```bash
+git add .
+git commit -m "feat: add new feature"
+```
+
+### 7. 推送與 PR
+
+```bash
+git push origin feature/my-feature
+```
+
+然後在 GitHub 上建立 Pull Request。
+
+---
+
+## Commit 訊息規範
+
+使用 [Conventional Commits](https://www.conventionalcommits.org/) 格式：
+
+| 類型     | 說明               |
+| -------- | ------------------ |
+| feat     | 新功能             |
+| fix      | 修復 Bug           |
+| docs     | 文件修改           |
+| style    | 格式調整           |
+| refactor | 重構               |
+| test     | 測試相關           |
+| chore    | 雜項（建構、工具） |
+
+**範例：**
+
+```
+feat: add Japanese OCR support
+fix: resolve login redirect issue
+docs: update deployment guide
+```
+
+---
+
+## 程式碼規範
+
+### TypeScript
+
+- 使用 ESLint 與 Prettier
+- 類型定義盡量明確
+- 避免 `any`
+
+### Rust（API Server）
+
+- 使用 `rustfmt` 格式化
+- 使用 `clippy` 檢查
+
+### 文件
+
+- 使用 Markdown
+- 繁體中文為主
+
+---
+
+## Pull Request 指南
+
+### PR 標題
+
+使用 Conventional Commits 格式。
+
+### PR 描述
+
+- 說明修改的目的
+- 列出主要變更
+- 附上相關 Issue 連結
+
+### 檢查清單
+
+- [ ] 已測試功能正常
+- [ ] 已通過 lint 檢查
+- [ ] 已更新相關文件（如需要）
+- [ ] Commit 訊息符合規範
+
+---
+
+## 貢獻領域
+
+### 歡迎的貢獻
+
+- 🐛 Bug 修復
+- 🌐 翻譯改進
+- 📖 文件完善
+- ✨ 新功能
+- ⚡ 效能優化
+- 🧪 測試覆蓋
+
+### 貢獻翻譯
+
+1. 複製 `src/locales/en.json`
+2. 重命名為語言代碼 `xx.json`
+3. 翻譯所有文字
+4. 在 `src/i18n/index.ts` 註冊
+5. 提交 PR
+
+---
+
+## 社群
+
+- 📝 [GitHub Issues](https://github.com/pi-docket/ConvertX-CN/issues)
+- 💬 [GitHub Discussions](https://github.com/pi-docket/ConvertX-CN/discussions)
+
+---
+
+## 行為準則
+
+請遵守 [Contributor Covenant](https://www.contributor-covenant.org/) 行為準則。
+
+---
+
+## 相關文件
+
+- [專案結構](project-structure.md)
+- [本地開發](local-development.md)
+- [測試策略](../testing/test-strategy.md)

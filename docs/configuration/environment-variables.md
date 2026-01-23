@@ -1,18 +1,6 @@
-# 環境變數完整說明
+# 環境變數設定
 
-> ⚠️ **此文件已遷移**
->
-> 本文件內容已整合至新的文件結構，請參閱：
->
-> - ⚙️ [環境變數設定](../configuration/environment-variables.md)
-> - 🔒 [安全性設定](../configuration/security.md)
-> - 🧹 [清理與限制](../configuration/limits-and-cleanup.md)
->
-> 此文件將在未來版本中移除。
-
----
-
-本文件列出 ConvertX-CN 所有可用的環境變數設定。
+本文件列出 ConvertX-CN 所有可用的環境變數。
 
 ---
 
@@ -24,7 +12,6 @@
 | 建議   | `TZ`           | 時區         | `UTC`              |
 | 建議   | `HTTP_ALLOWED` | 允許 HTTP    | `false`            |
 | 可選   | `TRUST_PROXY`  | 信任反向代理 | `false`            |
-| 可選   | 其他           | 依需求設定   | -                  |
 
 ---
 
@@ -32,7 +19,7 @@
 
 ### JWT_SECRET
 
-用於簽署登入驗證的密鑰。
+用於簽署登入驗證的密鑰。**強烈建議設定**。
 
 | 項目   | 值                     |
 | ------ | ---------------------- |
@@ -41,10 +28,14 @@
 
 不設定的話，每次容器重啟後所有使用者都需要重新登入。
 
-產生方式：
+**產生方式：**
 
 ```bash
+# Linux / macOS
 openssl rand -hex 32
+
+# Windows PowerShell
+-join ((1..32) | ForEach-Object { '{0:x2}' -f (Get-Random -Max 256) })
 ```
 
 ---
@@ -65,11 +56,11 @@ openssl rand -hex 32
 | 有 HTTPS              | `false` |
 | 無 HTTPS 但需遠端存取 | `true`  |
 
-設為 `false` 但用 HTTP 存取會導致「登入後又被導回登入頁」。
+> ⚠️ 設為 `false` 但用 HTTP 存取會導致「登入後又被導回登入頁」
 
 ### TRUST_PROXY
 
-信任反向代理的 headers（`X-Forwarded-Proto` 等）。
+信任反向代理的 headers。
 
 | 項目   | 值      |
 | ------ | ------- |
@@ -79,8 +70,7 @@ openssl rand -hex 32
 | ---------------------------- | ------- |
 | 直接存取容器                 | `false` |
 | 透過 Nginx / Traefik / Caddy | `true`  |
-
-詳見 [安全性設定](security.md)。
+| 透過 Cloudflare Tunnel       | `true`  |
 
 ### ACCOUNT_REGISTRATION
 
@@ -90,7 +80,7 @@ openssl rand -hex 32
 | ------ | ------ |
 | 預設值 | `true` |
 
-首次註冊不受此限制。建議建立管理員帳號後改為 `false`。
+建議建立管理員帳號後改為 `false`。
 
 ### ALLOW_UNAUTHENTICATED
 
@@ -100,7 +90,7 @@ openssl rand -hex 32
 | ------ | ------- |
 | 預設值 | `false` |
 
-設為 `true` 有安全風險：任何人都可使用伺服器資源。
+> ⚠️ 設為 `true` 有安全風險：任何人都可使用伺服器資源
 
 ---
 
@@ -160,11 +150,13 @@ openssl rand -hex 32
 
 ### LANGUAGE
 
-日期格式語言（BCP 47 格式）。
+介面語言。
 
-| 項目   | 值   |
-| ------ | ---- |
-| 預設值 | `en` |
+| 項目   | 值     |
+| ------ | ------ |
+| 預設值 | `auto` |
+
+設為特定語言代碼（如 `zh-TW`）可強制使用該語言。
 
 ---
 
@@ -172,19 +164,17 @@ openssl rand -hex 32
 
 ### MAX_CONVERT_PROCESS
 
-最大同時轉換任務數。
+最大同時轉換數。
 
 | 項目   | 值            |
 | ------ | ------------- |
 | 預設值 | `0`（無限制） |
 
+限制同時進行的轉換任務數量，避免伺服器過載。
+
 ### FFMPEG_ARGS
 
-FFmpeg 輸入參數（硬體加速等）。
-
-| 項目   | 值  |
-| ------ | --- |
-| 預設值 | 空  |
+FFmpeg 輸入參數，用於硬體加速。
 
 ```yaml
 # NVIDIA GPU
@@ -192,19 +182,41 @@ FFmpeg 輸入參數（硬體加速等）。
 
 # Intel QSV
 - FFMPEG_ARGS=-hwaccel qsv
+
+# AMD VAAPI
+- FFMPEG_ARGS=-hwaccel vaapi
 ```
 
 ### FFMPEG_OUTPUT_ARGS
 
 FFmpeg 輸出參數。
 
-| 項目   | 值  |
-| ------ | --- |
-| 預設值 | 空  |
-
 ```yaml
-- FFMPEG_OUTPUT_ARGS=-preset veryfast
+# 使用 NVIDIA 編碼器
+- FFMPEG_OUTPUT_ARGS=-c:v h264_nvenc -preset fast
 ```
+
+---
+
+## PDFMathTranslate 設定
+
+### PDFMATHTRANSLATE_SERVICE
+
+翻譯服務提供商。
+
+| 項目   | 值       |
+| ------ | -------- |
+| 預設值 | `google` |
+
+可選值：`google`, `deepl`, `openai` 等
+
+### PDFMATHTRANSLATE_MODELS_PATH
+
+模型路徑。
+
+| 項目   | 值                         |
+| ------ | -------------------------- |
+| 預設值 | `/models/pdfmathtranslate` |
 
 ---
 
@@ -223,21 +235,31 @@ environment:
 
 ```yaml
 environment:
+  - JWT_SECRET=your-very-long-and-random-secret-key-change-me
   - TZ=Asia/Taipei
-  - JWT_SECRET=your-production-secret-at-least-32-chars
   - HTTP_ALLOWED=false
   - TRUST_PROXY=true
   - ACCOUNT_REGISTRATION=false
   - AUTO_DELETE_EVERY_N_HOURS=24
 ```
 
-### 公開服務
+### 公開服務（允許匿名）
 
 ```yaml
 environment:
   - ALLOW_UNAUTHENTICATED=true
   - HIDE_HISTORY=true
   - AUTO_DELETE_EVERY_N_HOURS=1
+  - MAX_CONVERT_PROCESS=2
+```
+
+### 硬體加速
+
+```yaml
+environment:
+  - JWT_SECRET=your-secret-key
+  - FFMPEG_ARGS=-hwaccel cuda
+  - FFMPEG_OUTPUT_ARGS=-c:v h264_nvenc -preset fast
 ```
 
 ---
@@ -245,5 +267,5 @@ environment:
 ## 相關文件
 
 - [安全性設定](security.md)
-- [進階部署](../deployment.md)
-- [Docker Compose 詳解](../deployment/docker-compose.md)
+- [Docker 部署](../deployment/docker.md)
+- [反向代理設定](../deployment/reverse-proxy.md)

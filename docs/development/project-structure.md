@@ -1,0 +1,179 @@
+# 專案結構
+
+本文件說明 ConvertX-CN 的程式碼結構與架構。
+
+---
+
+## 目錄結構
+
+```
+ConvertX-CN/
+├── src/                    # 前端原始碼
+│   ├── index.tsx           # 主入口
+│   ├── main.css            # 主樣式
+│   ├── components/         # React 元件
+│   ├── converters/         # 轉換器定義
+│   ├── db/                  # 資料庫相關
+│   ├── helpers/             # 工具函數
+│   ├── i18n/                # 國際化
+│   ├── icons/               # 圖示元件
+│   ├── locales/             # 翻譯檔案
+│   ├── pages/               # 頁面元件
+│   ├── theme/               # 主題相關
+│   └── transfer/            # 檔案傳輸
+├── public/                 # 靜態資源
+├── api-server/             # Rust API Server（選用）
+│   ├── src/                 # Rust 原始碼
+│   ├── docs/                # API 文件
+│   └── tests/               # 測試
+├── docs/                   # 文件
+├── tests/                  # 測試
+├── scripts/                # 腳本
+├── data/                   # 資料目錄（runtime）
+├── Dockerfile              # Docker 建構檔
+├── compose.yaml            # Docker Compose
+└── package.json            # Node.js 依賴
+```
+
+---
+
+## 技術棧
+
+### 前端
+
+| 技術        | 用途     |
+| ----------- | -------- |
+| Bun         | Runtime  |
+| Elysia      | Web 框架 |
+| React       | UI 元件  |
+| TailwindCSS | 樣式     |
+| TypeScript  | 類型安全 |
+
+### 後端 (Web UI)
+
+| 技術   | 用途     |
+| ------ | -------- |
+| Bun    | Runtime  |
+| Elysia | Web 框架 |
+| SQLite | 資料庫   |
+
+### API Server（選用）
+
+| 技術          | 用途     |
+| ------------- | -------- |
+| Rust          | 語言     |
+| Axum          | Web 框架 |
+| async-graphql | GraphQL  |
+
+---
+
+## 核心模組
+
+### src/converters/
+
+定義所有轉換器的設定與格式支援。
+
+```
+converters/
+├── main.ts          # 轉換器主邏輯
+├── types.ts         # 類型定義
+├── ffmpeg.ts        # FFmpeg 設定
+├── imagemagick.ts   # ImageMagick 設定
+├── libreoffice.ts   # LibreOffice 設定
+├── pandoc.ts        # Pandoc 設定
+├── calibre.ts       # Calibre 設定
+└── ...
+```
+
+### src/i18n/
+
+國際化模組，支援 65 種語言。
+
+```
+i18n/
+├── index.ts         # i18n 初始化
+└── service.ts       # 語言服務
+```
+
+### src/locales/
+
+翻譯檔案，每個語言一個 JSON 檔案。
+
+```
+locales/
+├── en.json          # 英文
+├── zh-TW.json       # 繁體中文
+├── zh-CN.json       # 簡體中文
+├── ja.json          # 日文
+└── ...
+```
+
+### src/transfer/
+
+檔案傳輸模組，處理上傳與下載。
+
+```
+transfer/
+├── upload.ts        # 上傳邏輯
+├── download.ts      # 下載邏輯
+└── chunked.ts       # 分段傳輸
+```
+
+---
+
+## API Server 結構
+
+```
+api-server/
+├── src/
+│   ├── main.rs      # 入口
+│   ├── lib.rs       # 模組定義
+│   ├── config.rs    # 設定
+│   ├── auth.rs      # JWT 認證
+│   ├── engine.rs    # 引擎管理
+│   ├── conversion.rs# 轉換邏輯
+│   ├── rest.rs      # REST API
+│   ├── graphql.rs   # GraphQL API
+│   ├── models.rs    # 資料模型
+│   └── error.rs     # 錯誤處理
+├── tests/
+│   ├── api_tests.rs
+│   ├── graphql_tests.rs
+│   └── integration_tests.rs
+└── docs/
+    ├── API_SPEC.md
+    └── ARCHITECTURE.md
+```
+
+---
+
+## 資料流
+
+### 檔案轉換流程
+
+```
+1. 使用者上傳檔案
+   ↓
+2. 儲存到 data/uploads/
+   ↓
+3. 呼叫對應轉換器
+   ↓
+4. 輸出到 data/output/
+   ↓
+5. 使用者下載結果
+```
+
+### 檔案傳輸策略
+
+| 檔案大小 | 傳輸方式 | 說明         |
+| -------- | -------- | ------------ |
+| ≤ 10MB   | 直接傳輸 | 單一請求完成 |
+| > 10MB   | 分段傳輸 | 5MB chunks   |
+
+---
+
+## 相關文件
+
+- [本地開發](local-development.md)
+- [貢獻指南](contribution.md)
+- [測試策略](../testing/test-strategy.md)

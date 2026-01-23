@@ -1,0 +1,211 @@
+# 測試策略
+
+本文件說明 ConvertX-CN 的測試策略與方法。
+
+---
+
+## 測試類型
+
+### 單元測試
+
+測試獨立的函數與模組。
+
+**涵蓋範圍：**
+
+- 轉換器邏輯
+- 工具函數
+- 資料處理
+
+### 整合測試
+
+測試模組之間的協作。
+
+**涵蓋範圍：**
+
+- API 端點
+- 資料庫操作
+- 檔案處理
+
+### E2E 測試
+
+模擬使用者操作的完整流程測試。
+
+**涵蓋範圍：**
+
+- 上傳檔案
+- 轉換流程
+- 下載結果
+
+---
+
+## 執行測試
+
+### 前端測試
+
+```bash
+# 執行所有測試
+bun run test
+
+# 監視模式
+bun run test:watch
+
+# 覆蓋率報告
+bun run test:coverage
+```
+
+### API Server 測試（Rust）
+
+```bash
+cd api-server
+
+# 執行所有測試
+cargo test
+
+# 詳細輸出
+cargo test -- --nocapture
+```
+
+### E2E 測試
+
+```bash
+# 執行 E2E 測試
+bun run test:e2e
+
+# 或使用腳本
+./scripts/run-e2e-tests.sh
+```
+
+---
+
+## 測試結構
+
+```
+tests/
+├── converters/      # 轉換器測試
+├── e2e/             # 端對端測試
+└── transfer/        # 傳輸模組測試
+
+api-server/tests/
+├── api_tests.rs     # REST API 測試
+├── graphql_tests.rs # GraphQL 測試
+└── integration_tests.rs # 整合測試
+```
+
+---
+
+## 測試範例
+
+### 前端單元測試
+
+```typescript
+// tests/converters/ffmpeg.test.ts
+import { describe, it, expect } from "bun:test";
+import { ffmpegConverter } from "../../src/converters/ffmpeg";
+
+describe("FFmpeg Converter", () => {
+  it("should support mp4 input", () => {
+    expect(ffmpegConverter.inputFormats).toContain("mp4");
+  });
+
+  it("should support webm output", () => {
+    expect(ffmpegConverter.outputFormats).toContain("webm");
+  });
+});
+```
+
+### API 整合測試
+
+```rust
+// api-server/tests/api_tests.rs
+#[tokio::test]
+async fn test_health_endpoint() {
+    let response = client.get("/health").send().await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+}
+```
+
+### E2E 測試
+
+```typescript
+// tests/e2e/upload.test.ts
+import { test, expect } from "@playwright/test";
+
+test("should upload and convert file", async ({ page }) => {
+  await page.goto("/");
+
+  // 上傳檔案
+  await page.setInputFiles("#file-input", "test.docx");
+
+  // 選擇格式
+  await page.selectOption("#format", "pdf");
+
+  // 點擊轉換
+  await page.click("#convert-button");
+
+  // 驗證結果
+  await expect(page.locator(".download-link")).toBeVisible();
+});
+```
+
+---
+
+## 測試資料
+
+### 測試檔案
+
+放置在 `tests/fixtures/` 目錄：
+
+```
+tests/fixtures/
+├── documents/
+│   ├── sample.docx
+│   ├── sample.pdf
+│   └── sample.txt
+├── images/
+│   ├── sample.png
+│   └── sample.jpg
+└── audio/
+    └── sample.mp3
+```
+
+### Mock 資料
+
+使用 Mock 避免依賴外部服務：
+
+```typescript
+import { mock } from "bun:test";
+
+const mockConverter = mock(() => ({
+  convert: async () => "output.pdf",
+}));
+```
+
+---
+
+## 持續整合
+
+### GitHub Actions
+
+```yaml
+# .github/workflows/test.yml
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+      - run: bun install
+      - run: bun run test
+```
+
+---
+
+## 相關文件
+
+- [CI/CD](ci-cd.md)
+- [E2E 測試](e2e-tests.md)
+- [本地開發](../development/local-development.md)

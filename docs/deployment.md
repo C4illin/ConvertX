@@ -1,5 +1,17 @@
 # 進階部署指南
 
+> ⚠️ **此文件已遷移**
+>
+> 本文件內容已整合至新的文件結構，請參閱：
+>
+> - 🐳 [Docker 部署](deployment/docker.md)
+> - 🔧 [反向代理設定](deployment/reverse-proxy.md)
+> - 🔒 [安全性設定](configuration/security.md)
+>
+> 此文件將在未來版本中移除。
+
+---
+
 本文件說明如何在生產環境中部署 ConvertX-CN，包括 Reverse Proxy、HTTPS、安全性設定等。
 
 ---

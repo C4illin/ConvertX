@@ -1,0 +1,37 @@
+# ConvertX-CN + Traefik 配置
+# 適用於：使用 Traefik 作為反向代理
+
+services:
+  convertx:
+    image: convertx/convertx-cn:latest
+    container_name: convertx-cn
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data
+    environment:
+      - JWT_SECRET=${JWT_SECRET:?請設定 JWT_SECRET}
+      - TZ=Asia/Taipei
+      - HTTP_ALLOWED=false
+      - TRUST_PROXY=true
+      - ACCOUNT_REGISTRATION=false
+    labels:
+      - "traefik.enable=true"
+      # HTTP 路由
+      - "traefik.http.routers.convertx.rule=Host(`convertx.example.com`)"
+      - "traefik.http.routers.convertx.entrypoints=web"
+      - "traefik.http.routers.convertx.middlewares=https-redirect"
+      # HTTPS 路由
+      - "traefik.http.routers.convertx-secure.rule=Host(`convertx.example.com`)"
+      - "traefik.http.routers.convertx-secure.entrypoints=websecure"
+      - "traefik.http.routers.convertx-secure.tls=true"
+      - "traefik.http.routers.convertx-secure.tls.certresolver=letsencrypt"
+      # 服務
+      - "traefik.http.services.convertx.loadbalancer.server.port=3000"
+      # 中間件
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+    networks:
+      - traefik-network
+
+networks:
+  traefik-network:
+    external: true

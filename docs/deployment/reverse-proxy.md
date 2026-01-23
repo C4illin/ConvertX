@@ -1,0 +1,287 @@
+# 反向代理設定
+
+本文件說明如何在 Nginx、Traefik、Caddy 等反向代理後部署 ConvertX-CN。
+
+---
+
+## 必要環境變數
+
+透過反向代理存取時，請設定：
+
+```yaml
+environment:
+  - TRUST_PROXY=true # 信任 X-Forwarded-* headers
+  - HTTP_ALLOWED=false # Proxy 已處理 HTTPS
+```
+
+---
+
+## Nginx
+
+### 基本配置
+
+```nginx
+# /etc/nginx/sites-available/convertx
+server {
+    listen 80;
+    server_name convertx.example.com;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name convertx.example.com;
+
+    # SSL 憑證（Let's Encrypt）
+    ssl_certificate /etc/letsencrypt/live/convertx.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/convertx.example.com/privkey.pem;
+
+    # SSL 安全設定
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256;
+
+    # 檔案上傳大小限制
+    client_max_body_size 500M;
+
+    # 超時設定（大檔案轉換需要）
+    proxy_read_timeout 3600s;
+    proxy_send_timeout 3600s;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+
+        # 必要的 headers
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # WebSocket 支援
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+```
+
+### 啟用設定
+
+```bash
+sudo ln -s /etc/nginx/sites-available/convertx /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+---
+
+## Traefik
+
+### Docker Labels 方式
+
+```yaml
+# docker-compose.yml
+services:
+  convertx:
+    image: convertx/convertx-cn:latest
+    container_name: convertx-cn
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - TRUST_PROXY=true
+      - HTTP_ALLOWED=false
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.convertx.rule=Host(`convertx.example.com`)"
+      - "traefik.http.routers.convertx.entrypoints=websecure"
+      - "traefik.http.routers.convertx.tls=true"
+      - "traefik.http.routers.convertx.tls.certresolver=letsencrypt"
+      - "traefik.http.services.convertx.loadbalancer.server.port=3000"
+    networks:
+      - traefik-network
+
+networks:
+  traefik-network:
+    external: true
+```
+
+### 動態配置檔
+
+```yaml
+# traefik/dynamic/convertx.yml
+http:
+  routers:
+    convertx:
+      rule: "Host(`convertx.example.com`)"
+      service: convertx
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    convertx:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:3000"
+```
+
+---
+
+## Caddy
+
+### 基本配置
+
+```
+convertx.example.com {
+    reverse_proxy localhost:3000 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    request_body {
+        max_size 500MB
+    }
+}
+```
+
+### 子路徑部署
+
+```
+example.com {
+    handle_path /convertx/* {
+        reverse_proxy localhost:3000
+    }
+}
+```
+
+記得設定環境變數：
+
+```yaml
+environment:
+  - WEBROOT=/convertx
+```
+
+---
+
+## Cloudflare Tunnel
+
+### 1. 建立 Tunnel
+
+```bash
+cloudflared tunnel create convertx
+```
+
+### 2. 配置
+
+```yaml
+# ~/.cloudflared/config.yml
+tunnel: <tunnel-id>
+credentials-file: ~/.cloudflared/<tunnel-id>.json
+
+ingress:
+  - hostname: convertx.example.com
+    service: http://localhost:3000
+  - service: http_status:404
+```
+
+### 3. 啟動
+
+```bash
+cloudflared tunnel run convertx
+```
+
+### 4. 環境變數
+
+```yaml
+environment:
+  - TRUST_PROXY=true
+  - HTTP_ALLOWED=false
+```
+
+---
+
+## 子路徑部署
+
+如需在子路徑部署（如 `https://example.com/convertx`）：
+
+### 1. 設定環境變數
+
+```yaml
+environment:
+  - WEBROOT=/convertx
+```
+
+### 2. Nginx 配置
+
+```nginx
+location /convertx/ {
+    proxy_pass http://localhost:3000/;
+    # ... 其他 proxy 設定
+}
+```
+
+### 3. Caddy 配置
+
+```
+example.com {
+    handle_path /convertx/* {
+        reverse_proxy localhost:3000
+    }
+}
+```
+
+---
+
+## HTTPS 憑證
+
+### Let's Encrypt（推薦）
+
+使用 Certbot 自動取得憑證：
+
+```bash
+sudo apt install certbot python3-certbot-nginx
+sudo certbot --nginx -d convertx.example.com
+```
+
+### 自簽憑證（測試用）
+
+```bash
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /etc/nginx/ssl/convertx.key \
+  -out /etc/nginx/ssl/convertx.crt
+```
+
+---
+
+## 疑難排解
+
+### 登入後被踢回登入頁
+
+1. 確認 `TRUST_PROXY=true`
+2. 確認反向代理正確傳送 `X-Forwarded-Proto` header
+
+### 上傳檔案失敗
+
+1. 調高 `client_max_body_size`（Nginx）
+2. 調高 `request_body max_size`（Caddy）
+3. 調高超時設定
+
+### WebSocket 連線失敗
+
+確認反向代理正確處理 WebSocket：
+
+```nginx
+proxy_set_header Upgrade $http_upgrade;
+proxy_set_header Connection "upgrade";
+```
+
+---
+
+## 相關文件
+
+- [Docker 部署](docker.md)
+- [安全性設定](../configuration/security.md)
+- [環境變數](../configuration/environment-variables.md)
