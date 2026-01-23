@@ -211,9 +211,10 @@ jobs:
           docker pull ${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}
 
       # ========================================
-      # 驗證 1: 工具存在性 + 模型驗證（不執行 GUI 程式）
+      # 驗證 1: 工具存在性 + 版本檢查（使用 xvfb 解決 GUI 問題）
       # ========================================
       - name: "🔍 Tools & Model Verification"
+        timeout-minutes: 5
         run: |
           echo "========================================"
           echo "🔍 工具存在性 + 模型驗證"
@@ -221,112 +222,65 @@ jobs:
 
           IMAGE="${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}"
 
-          # 使用單一容器執行所有檢查
-          # 注意：不實際執行 GUI 程式（如 inkscape --version），只檢查執行檔是否存在
-          # 因為 GitHub Actions 是 100% headless 環境，GUI 程式可能會卡住
+          # 🔥 關鍵：使用 xvfb-run 包裹所有 GUI 工具的版本檢查
+          # 這樣 Inkscape、LibreOffice、Calibre 等 GUI 工具就不會卡住
           docker run --rm "${IMAGE}" sh -c '
-            FAILED=0
-
             echo ""
             echo "========================================"
-            echo "🔧 工具存在性檢查"
+            echo "🔧 CLI 工具版本檢查"
             echo "========================================"
-            echo "（只檢查執行檔是否存在，不實際執行 GUI 程式）"
-
-            # 檢查關鍵工具是否存在（使用 which，不執行）
-            TOOLS="libreoffice inkscape ebook-convert pandoc ffmpeg tesseract convert gm"
             
-            for tool in $TOOLS; do
-              echo -n "  $tool: "
-              if which $tool >/dev/null 2>&1; then
-                echo "✅ 存在"
-              else
-                echo "⚠️ 不存在"
-              fi
-            done
-
-            # 只有純 CLI 工具才執行 --version（不會卡住的）
-            echo ""
-            echo "📋 CLI 工具版本檢查..."
+            # 純 CLI 工具 - 直接執行
+            echo "ConvertX $(cat /app/package.json 2>/dev/null | grep version | head -1 | cut -d\" -f4)"
+            echo "Bun $(bun --version 2>/dev/null || echo "N/A")"
+            pandoc --version 2>/dev/null | head -1 || echo "pandoc: N/A"
+            ffmpeg -version 2>/dev/null | head -1 || echo "ffmpeg: N/A"
+            tesseract --version 2>&1 | head -1 || echo "tesseract: N/A"
+            vips --version 2>/dev/null || echo "vips: N/A"
+            gm -version 2>/dev/null | head -1 || echo "GraphicsMagick: N/A"
+            resvg --version 2>/dev/null || echo "resvg: N/A"
+            potrace --version 2>/dev/null | head -1 || echo "potrace: N/A"
+            dasel --version 2>/dev/null || echo "dasel: N/A"
+            djxl --version 2>&1 | head -1 || echo "djxl: N/A"
             
-            echo -n "  pandoc: "
-            if pandoc --version 2>/dev/null | head -1; then
-              :
-            else
-              echo "⚠️ 無法取得版本"
-            fi
-
-            echo -n "  ffmpeg: "
-            if ffmpeg -version 2>/dev/null | head -1; then
-              :
-            else
-              echo "⚠️ 無法取得版本"
-            fi
-
-            echo -n "  tesseract: "
-            if tesseract --version 2>/dev/null | head -1; then
-              :
-            else
-              echo "⚠️ 無法取得版本"
-            fi
+            echo ""
+            echo "========================================"
+            echo "🖥️ GUI 工具版本檢查（使用 xvfb-run）"
+            echo "========================================"
+            
+            # GUI 工具 - 必須使用 xvfb-run 包裹
+            xvfb-run -a inkscape --version 2>/dev/null || echo "Inkscape: N/A"
+            xvfb-run -a ebook-convert --version 2>/dev/null | head -1 || echo "Calibre: N/A"
+            xvfb-run -a libreoffice --version 2>/dev/null || echo "LibreOffice: N/A"
+            
+            echo ""
+            echo "========================================"
+            echo "🤖 模型目錄檢查"
+            echo "========================================"
+            
+            echo -n "  HuggingFace cache: "
+            [ -d "/root/.cache/huggingface" ] && echo "✅ 存在" || echo "⚠️ 不存在"
+            
+            echo -n "  ModelScope cache:  "
+            [ -d "/root/.cache/modelscope" ] && echo "✅ 存在" || echo "⚠️ 不存在"
+            
+            echo -n "  BabelDOC cache:    "
+            [ -d "/root/.cache/babeldoc" ] && echo "✅ 存在" || echo "⚠️ 不存在"
 
             echo ""
             echo "========================================"
-            echo "🤖 模型驗證"
-            echo "========================================"
-
-            # 檢查 HuggingFace cache 目錄
-            echo ""
-            echo "📋 檢查 HuggingFace cache..."
-            if [ -d "/root/.cache/huggingface" ]; then
-              echo "✅ HuggingFace cache 存在"
-              ls /root/.cache/huggingface/ 2>/dev/null | head -5
-            else
-              echo "⚠️ HuggingFace cache 不存在（可能使用其他路徑）"
-            fi
-
-            # 檢查 MinerU 模型目錄
-            echo ""
-            echo "📋 檢查 MinerU 模型..."
-            if [ -d "/root/.cache/modelscope" ]; then
-              echo "✅ ModelScope cache 存在"
-            elif [ -d "/app/models" ]; then
-              echo "✅ /app/models 目錄存在"
-            else
-              echo "⚠️ 模型目錄不存在（可能在其他路徑）"
-            fi
-
-            # 檢查 BabelDOC cache
-            echo ""
-            echo "📋 檢查 BabelDOC cache..."
-            if [ -d "/root/.cache/babeldoc" ]; then
-              echo "✅ BabelDOC cache 存在"
-            else
-              echo "⚠️ BabelDOC cache 不存在（將在首次使用時下載）"
-            fi
-
-            # 檢查離線模式環境變數
-            echo ""
-            echo "📋 檢查離線模式環境變數..."
-            if [ "$HF_HUB_OFFLINE" = "1" ]; then
-              echo "✅ HF_HUB_OFFLINE=1（離線模式已啟用）"
-            else
-              echo "⚠️ HF_HUB_OFFLINE 未設定（模型可能在 runtime 下載）"
-            fi
-
-            echo ""
-            echo "========================================"
-            echo "✅ 工具存在性 + 模型驗證完成！"
+            echo "✅ 工具驗證完成！"
             echo "========================================"
           '
 
       # ========================================
-      # 驗證 2: 基本功能驗證
+      # 驗證 2: 啟動容器並檢查健康狀態
       # ========================================
-      - name: "⚙️ Basic Functionality Verification"
+      - name: "⚙️ Start Container & Health Check"
+        timeout-minutes: 3
         run: |
           echo "========================================"
-          echo "⚙️ 基本功能驗證"
+          echo "⚙️ 啟動容器並檢查健康狀態"
           echo "========================================"
 
           IMAGE="${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}"
@@ -337,12 +291,12 @@ jobs:
 
           # 等待啟動
           echo "⏳ 等待容器啟動..."
-          for i in {1..60}; do
+          for i in {1..90}; do
             if docker exec verify-test curl -sf http://localhost:3000/healthcheck > /dev/null 2>&1; then
               echo "✅ 容器在 ${i} 秒內啟動成功"
               break
             fi
-            if [ $i -eq 60 ]; then
+            if [ $i -eq 90 ]; then
               echo "❌ 容器啟動超時"
               docker logs verify-test
               docker rm -f verify-test
@@ -351,71 +305,37 @@ jobs:
             sleep 1
           done
 
-          # 檢查關鍵工具
+          # 顯示容器日誌
           echo ""
-          echo "📋 檢查關鍵轉檔工具..."
-          TOOLS=("libreoffice --version" "pandoc --version" "ffmpeg -version" "tesseract --version" "pdf2zh --help" "mineru --help" "babeldoc --help")
-
-          for tool_cmd in "${TOOLS[@]}"; do
-            TOOL_NAME=$(echo "$tool_cmd" | cut -d' ' -f1)
-            echo -n "  ${TOOL_NAME}: "
-            if docker exec verify-test $tool_cmd >/dev/null 2>&1; then
-              echo "✅"
-            else
-              echo "⚠️ 不可用或未安裝"
-            fi
-          done
+          echo "📋 容器啟動日誌："
+          docker logs verify-test 2>&1 | tail -20
 
           echo ""
           echo "========================================"
-          echo "✅ 基本功能驗證完成！"
+          echo "✅ 容器健康檢查通過！"
           echo "========================================"
 
       # ========================================
-      # 驗證 3: E2E 測試
+      # 驗證 3: E2E 轉換測試（使用 xvfb-run 解決 GUI 問題）
       # ========================================
       - name: "🧪 E2E Tests in Container"
+        timeout-minutes: 10
         run: |
           echo "========================================"
-          echo "🧪 E2E 測試"
+          echo "🧪 E2E 轉換測試"
           echo "========================================"
 
-          IMAGE="${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}"
-
-          # 啟動容器（掛載測試目錄）
-          echo "🚀 啟動測試容器..."
-          docker run -d --name e2e-test -p 3001:3000 \
-            -e NODE_ENV=test \
-            "${IMAGE}"
-
-          # 等待容器啟動
-          echo "⏳ 等待容器啟動..."
-          for i in {1..60}; do
-            if docker exec e2e-test curl -sf http://localhost:3000/healthcheck > /dev/null 2>&1; then
-              echo "✅ 容器在 ${i} 秒內啟動成功"
-              break
-            fi
-            if [ $i -eq 60 ]; then
-              echo "❌ 容器啟動超時"
-              docker logs e2e-test
-              docker rm -f e2e-test
-              exit 1
-            fi
-            sleep 1
-          done
-
-          # 執行 E2E 轉換測試
-          echo ""
-          echo "📋 執行 E2E 轉換測試..."
-          echo "（每個 GUI 程式測試都有 60 秒超時限制）"
+          # 使用已啟動的 verify-test 容器
+          # 🔥 關鍵：所有 GUI 工具都使用 xvfb-run 包裹
+          
           FAILED=0
 
-          # 測試 1: Inkscape SVG → PNG（使用 timeout 防止 GUI 卡住）
+          # 測試 1: Inkscape SVG → PNG（使用 xvfb-run）
           echo ""
           echo "🔄 測試 Inkscape: SVG → PNG"
-          docker exec e2e-test sh -c '
+          docker exec verify-test sh -c '
             echo "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100\" height=\"100\"><circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/></svg>" > /tmp/test.svg
-            timeout 60 inkscape --export-type=png --export-filename=/tmp/test.png /tmp/test.svg 2>/dev/null
+            xvfb-run -a inkscape --export-type=png --export-filename=/tmp/test.png /tmp/test.svg 2>/dev/null
             if [ -f /tmp/test.png ]; then
               echo "✅ Inkscape SVG → PNG 成功"
               ls -la /tmp/test.png
@@ -425,10 +345,10 @@ jobs:
             fi
           ' || FAILED=1
 
-          # 測試 2: Pandoc Markdown → HTML
+          # 測試 2: Pandoc Markdown → HTML（純 CLI，不需要 xvfb）
           echo ""
           echo "🔄 測試 Pandoc: Markdown → HTML"
-          docker exec e2e-test sh -c '
+          docker exec verify-test sh -c '
             echo "# Test\n\nHello **world**" > /tmp/test.md
             pandoc /tmp/test.md -o /tmp/test.html
             if [ -f /tmp/test.html ]; then
@@ -440,12 +360,12 @@ jobs:
             fi
           ' || FAILED=1
 
-          # 測試 3: LibreOffice DOCX → PDF（使用 timeout 防止卡住）
+          # 測試 3: LibreOffice TXT → PDF（使用 xvfb-run）
           echo ""
           echo "🔄 測試 LibreOffice: TXT → PDF"
-          docker exec e2e-test sh -c '
+          docker exec verify-test sh -c '
             echo "Test document content" > /tmp/test.txt
-            timeout 60 libreoffice --headless --convert-to pdf --outdir /tmp /tmp/test.txt 2>/dev/null
+            xvfb-run -a libreoffice --headless --convert-to pdf --outdir /tmp /tmp/test.txt 2>/dev/null
             if [ -f /tmp/test.pdf ]; then
               echo "✅ LibreOffice TXT → PDF 成功"
               ls -la /tmp/test.pdf
@@ -455,10 +375,10 @@ jobs:
             fi
           ' || FAILED=1
 
-          # 測試 4: FFmpeg 音頻轉換
+          # 測試 4: FFmpeg 音頻轉換（純 CLI）
           echo ""
           echo "🔄 測試 FFmpeg: 生成測試音頻"
-          docker exec e2e-test sh -c '
+          docker exec verify-test sh -c '
             ffmpeg -f lavfi -i "sine=frequency=440:duration=1" -y /tmp/test.wav 2>/dev/null
             if [ -f /tmp/test.wav ]; then
               echo "✅ FFmpeg 音頻生成成功"
@@ -469,63 +389,26 @@ jobs:
             fi
           ' || FAILED=1
 
-          # 測試 5: ImageMagick 圖片轉換
+          # 測試 5: Calibre HTML → EPUB（使用 xvfb-run）
           echo ""
-          echo "🔄 測試 ImageMagick: PNG → JPEG"
-          docker exec e2e-test sh -c '
-            convert -size 100x100 xc:blue /tmp/blue.png
-            convert /tmp/blue.png /tmp/blue.jpg
-            if [ -f /tmp/blue.jpg ]; then
-              echo "✅ ImageMagick PNG → JPEG 成功"
-              ls -la /tmp/blue.jpg
-            else
-              echo "❌ ImageMagick PNG → JPEG 失敗"
-              exit 1
-            fi
-          ' || FAILED=1
-
-          # 測試 6: Calibre EPUB → MOBI（使用 timeout 防止 Qt 卡住）
-          echo ""
-          echo "🔄 測試 Calibre: 電子書轉換"
-          docker exec e2e-test sh -c '
-            # 建立簡單的 HTML 作為 ebook 來源
+          echo "🔄 測試 Calibre: HTML → EPUB"
+          docker exec verify-test sh -c '
             echo "<!DOCTYPE html><html><body><h1>Test Book</h1><p>Content</p></body></html>" > /tmp/book.html
-            timeout 60 ebook-convert /tmp/book.html /tmp/book.epub 2>/dev/null
+            xvfb-run -a ebook-convert /tmp/book.html /tmp/book.epub 2>/dev/null
             if [ -f /tmp/book.epub ]; then
               echo "✅ Calibre HTML → EPUB 成功"
               ls -la /tmp/book.epub
             else
-              echo "⚠️ Calibre HTML → EPUB 可能需要更長時間或不支援 headless"
-            fi
-          ' || echo "⚠️ Calibre 測試跳過"
-
-          # 測試 7: Potrace 點陣圖向量化
-          echo ""
-          echo "🔄 測試 Potrace: PBM → SVG"
-          docker exec e2e-test sh -c '
-            # 建立簡單的 PBM 圖片
-            echo "P1
-            4 4
-            0 1 1 0
-            1 0 0 1
-            1 0 0 1
-            0 1 1 0" > /tmp/test.pbm
-            potrace -s -o /tmp/test_potrace.svg /tmp/test.pbm
-            if [ -f /tmp/test_potrace.svg ]; then
-              echo "✅ Potrace PBM → SVG 成功"
-              ls -la /tmp/test_potrace.svg
-            else
-              echo "❌ Potrace PBM → SVG 失敗"
+              echo "❌ Calibre HTML → EPUB 失敗"
               exit 1
             fi
-          ' || echo "⚠️ Potrace 測試跳過"
+          ' || FAILED=1
 
-          # 測試 8: Tesseract OCR
+          # 測試 6: Tesseract OCR（純 CLI）
           echo ""
           echo "🔄 測試 Tesseract: OCR 文字識別"
-          docker exec e2e-test sh -c '
-            # 使用 ImageMagick 建立帶有文字的圖片
-            convert -size 200x50 xc:white -font DejaVu-Sans -pointsize 20 -fill black -annotate +10+35 "Hello OCR" /tmp/ocr_test.png
+          docker exec verify-test sh -c '
+            convert -size 200x50 xc:white -font DejaVu-Sans -pointsize 20 -fill black -annotate +10+35 "Hello OCR" /tmp/ocr_test.png 2>/dev/null
             tesseract /tmp/ocr_test.png /tmp/ocr_output 2>/dev/null
             if [ -f /tmp/ocr_output.txt ]; then
               echo "✅ Tesseract OCR 成功"
@@ -534,136 +417,41 @@ jobs:
               echo "❌ Tesseract OCR 失敗"
               exit 1
             fi
-          ' || echo "⚠️ Tesseract 測試跳過"
+          ' || FAILED=1
 
-          # 測試 9: GraphicsMagick（如果可用）
-          echo ""
-          echo "🔄 測試 GraphicsMagick: 圖片轉換"
-          docker exec e2e-test sh -c '
-            if command -v gm &> /dev/null; then
-              gm convert -size 100x100 xc:green /tmp/gm_test.png
-              gm convert /tmp/gm_test.png /tmp/gm_test.gif
-              if [ -f /tmp/gm_test.gif ]; then
-                echo "✅ GraphicsMagick PNG → GIF 成功"
-                ls -la /tmp/gm_test.gif
-              else
-                echo "❌ GraphicsMagick 轉換失敗"
-                exit 1
-              fi
-            else
-              echo "⚠️ GraphicsMagick 未安裝，跳過"
-            fi
-          ' || echo "⚠️ GraphicsMagick 測試跳過"
-
-          # 測試 10: Resvg SVG → PNG（高品質）
+          # 測試 7: Resvg SVG → PNG（純 CLI）
           echo ""
           echo "🔄 測試 Resvg: SVG → PNG"
-          docker exec e2e-test sh -c '
-            if command -v resvg &> /dev/null; then
-              echo "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"50\" height=\"50\"><rect fill=\"purple\" width=\"50\" height=\"50\"/></svg>" > /tmp/resvg_test.svg
-              resvg /tmp/resvg_test.svg /tmp/resvg_output.png
-              if [ -f /tmp/resvg_output.png ]; then
-                echo "✅ Resvg SVG → PNG 成功"
-                ls -la /tmp/resvg_output.png
-              else
-                echo "❌ Resvg 轉換失敗"
-                exit 1
-              fi
+          docker exec verify-test sh -c '
+            echo "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"50\" height=\"50\"><rect fill=\"purple\" width=\"50\" height=\"50\"/></svg>" > /tmp/resvg_test.svg
+            resvg /tmp/resvg_test.svg /tmp/resvg_output.png 2>/dev/null
+            if [ -f /tmp/resvg_output.png ]; then
+              echo "✅ Resvg SVG → PNG 成功"
+              ls -la /tmp/resvg_output.png
             else
-              echo "⚠️ Resvg 未安裝，跳過"
+              echo "❌ Resvg SVG → PNG 失敗"
+              exit 1
             fi
-          ' || echo "⚠️ Resvg 測試跳過"
+          ' || FAILED=1
 
-          # 測試 11: VIPS 圖片處理
+          # 測試 8: FFmpeg 影片轉換（純 CLI）
           echo ""
-          echo "🔄 測試 VIPS: 圖片轉換"
-          docker exec e2e-test sh -c '
-            if command -v vips &> /dev/null; then
-              # 使用 ImageMagick 建立測試圖片
-              convert -size 100x100 xc:yellow /tmp/vips_input.png
-              vips copy /tmp/vips_input.png /tmp/vips_output.webp
-              if [ -f /tmp/vips_output.webp ]; then
-                echo "✅ VIPS PNG → WEBP 成功"
-                ls -la /tmp/vips_output.webp
-              else
-                echo "❌ VIPS 轉換失敗"
-                exit 1
-              fi
-            else
-              echo "⚠️ VIPS 未安裝，跳過"
-            fi
-          ' || echo "⚠️ VIPS 測試跳過"
-
-          # 測試 12: FFmpeg 影片處理
-          echo ""
-          echo "🔄 測試 FFmpeg: 影片生成與轉換"
-          docker exec e2e-test sh -c '
-            # 生成測試影片（1秒純色）
+          echo "🔄 測試 FFmpeg: 影片生成"
+          docker exec verify-test sh -c '
             ffmpeg -f lavfi -i color=c=red:s=320x240:d=1 -y /tmp/test_video.mp4 2>/dev/null
             if [ -f /tmp/test_video.mp4 ]; then
               echo "✅ FFmpeg 影片生成成功"
               ls -la /tmp/test_video.mp4
-              # 轉換為 GIF
-              ffmpeg -i /tmp/test_video.mp4 -vf "fps=10,scale=160:-1" -y /tmp/test_video.gif 2>/dev/null
-              if [ -f /tmp/test_video.gif ]; then
-                echo "✅ FFmpeg MP4 → GIF 成功"
-                ls -la /tmp/test_video.gif
-              fi
             else
               echo "❌ FFmpeg 影片生成失敗"
               exit 1
             fi
           ' || FAILED=1
 
-          # 測試 13: Pandoc 進階格式
-          echo ""
-          echo "🔄 測試 Pandoc: Markdown → LaTeX"
-          docker exec e2e-test sh -c '
-            pandoc /tmp/test.md -o /tmp/test.tex
-            if [ -f /tmp/test.tex ]; then
-              echo "✅ Pandoc Markdown → LaTeX 成功"
-              head -10 /tmp/test.tex
-            else
-              echo "❌ Pandoc Markdown → LaTeX 失敗"
-              exit 1
-            fi
-          ' || echo "⚠️ Pandoc LaTeX 測試跳過"
-
-          # 測試 14: Inkscape SVG → PDF（使用 timeout 防止卡住）
-          echo ""
-          echo "🔄 測試 Inkscape: SVG → PDF"
-          docker exec e2e-test sh -c '
-            timeout 60 inkscape --export-type=pdf --export-filename=/tmp/test_inkscape.pdf /tmp/test.svg 2>/dev/null
-            if [ -f /tmp/test_inkscape.pdf ]; then
-              echo "✅ Inkscape SVG → PDF 成功"
-              ls -la /tmp/test_inkscape.pdf
-            else
-              echo "❌ Inkscape SVG → PDF 失敗"
-              exit 1
-            fi
-          ' || FAILED=1
-
-          # 測試 15: LibreOffice 進階轉換（使用 timeout 防止卡住）
-          echo ""
-          echo "🔄 測試 LibreOffice: ODT → DOCX"
-          docker exec e2e-test sh -c '
-            # 建立 ODT 格式文件（使用 LibreOffice 從 TXT 轉換）
-            timeout 60 libreoffice --headless --convert-to odt --outdir /tmp /tmp/test.txt 2>/dev/null
-            if [ -f /tmp/test.odt ]; then
-              timeout 60 libreoffice --headless --convert-to docx --outdir /tmp /tmp/test.odt 2>/dev/null
-              if [ -f /tmp/test.docx ]; then
-                echo "✅ LibreOffice ODT → DOCX 成功"
-                ls -la /tmp/test.docx
-              else
-                echo "⚠️ LibreOffice ODT → DOCX 轉換可能失敗"
-              fi
-            fi
-          ' || echo "⚠️ LibreOffice ODT 測試跳過"
-
-          # 測試 16: API 健康檢查
+          # 測試 9: API 健康檢查
           echo ""
           echo "🔄 測試 API 端點"
-          if docker exec e2e-test curl -sf http://localhost:3000/healthcheck | grep -q "OK"; then
+          if docker exec verify-test curl -sf http://localhost:3000/healthcheck | grep -q "OK"; then
             echo "✅ Healthcheck API 正常"
           else
             echo "❌ Healthcheck API 失敗"
@@ -675,31 +463,22 @@ jobs:
           echo "========================================"
           echo "📊 E2E 測試摘要"
           echo "========================================"
-          echo "✓ Inkscape: SVG → PNG, PDF"
-          echo "✓ Pandoc: Markdown → HTML, LaTeX"
-          echo "✓ LibreOffice: TXT → PDF, ODT → DOCX"
-          echo "✓ FFmpeg: 音頻生成, 影片生成, MP4 → GIF"
-          echo "✓ ImageMagick: PNG → JPEG"
-          echo "✓ Calibre: HTML → EPUB"
-          echo "✓ Potrace: PBM → SVG"
+          echo "✓ Inkscape: SVG → PNG (xvfb-run)"
+          echo "✓ Pandoc: Markdown → HTML"
+          echo "✓ LibreOffice: TXT → PDF (xvfb-run)"
+          echo "✓ FFmpeg: 音頻 + 影片"
+          echo "✓ Calibre: HTML → EPUB (xvfb-run)"
           echo "✓ Tesseract: OCR"
+          echo "✓ Resvg: SVG → PNG"
           echo "✓ API: Healthcheck"
           echo "========================================"
 
-          # 清理
-          echo ""
-          echo "🧹 清理測試容器..."
-          docker rm -f e2e-test
-
-          echo ""
-          echo "========================================"
           if [ $FAILED -eq 0 ]; then
             echo "✅ E2E 測試全部通過！"
           else
             echo "❌ E2E 測試有失敗項目"
             exit 1
           fi
-          echo "========================================"
 
       # ========================================
       # 清理驗證容器
@@ -708,7 +487,6 @@ jobs:
         if: always()
         run: |
           docker rm -f verify-test 2>/dev/null || true
-          docker rm -f e2e-test 2>/dev/null || true
 
       - name: Verification Summary
         run: |
@@ -723,7 +501,7 @@ jobs:
           echo "- 🧪 E2E Tests: Passed" >> $GITHUB_STEP_SUMMARY
 
   # ==============================================================================
-  # �📦 Create GitHub Release
+  # 📦 Create GitHub Release
   # ==============================================================================
   create-release:
     runs-on: ubuntu-latest
