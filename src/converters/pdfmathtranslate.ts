@@ -18,8 +18,10 @@ type TranslationService = (typeof TRANSLATION_SERVICES)[number];
  *   - original.pdf（原始 PDF）
  *   - translated-<lang>.pdf（翻譯後的 PDF）
  *
- * 必須在 Docker build 階段預先下載所需模型，
- * 不允許在 runtime 隱式下載模型。
+ * 模型路徑說明：
+ *   - pdf2zh 使用 babeldoc.assets 內部載入 ONNX 模型
+ *   - 模型預先下載到 /root/.cache/babeldoc/models/ 目錄
+ *   - Runtime 不會再下載任何模型（由 Docker build 預下載）
  */
 
 // 支援的目標語言列表
@@ -41,8 +43,10 @@ const SUPPORTED_LANGUAGES = [
   "th", // Thai
 ] as const;
 
-// 模型路徑（Docker 環境中）
-const MODELS_PATH = process.env.PDFMATHTRANSLATE_MODELS_PATH || "/models/pdfmathtranslate";
+// 模型路徑（BabelDOC cache 目錄，由 pdf2zh 內部使用）
+// 注意：pdf2zh 會自動從 babeldoc.assets 載入模型，此路徑僅供參考
+const BABELDOC_CACHE_PATH = process.env.BABELDOC_CACHE_PATH || "/root/.cache/babeldoc";
+const MODELS_PATH = `${BABELDOC_CACHE_PATH}/models`;
 
 // 生成 from/to 格式映射
 function generateLanguageMappings(): {
@@ -110,12 +114,21 @@ function normalizeLanguageCode(lang: string): string {
  * @returns 模型是否存在
  */
 function checkModelsExist(): boolean {
-  // 檢查 ONNX 模型目錄是否存在
+  // 檢查 BabelDOC ONNX 模型目錄是否存在
   if (!existsSync(MODELS_PATH)) {
-    console.warn(`[PDFMathTranslate] Models directory not found: ${MODELS_PATH}`);
+    console.warn(`[PDFMathTranslate] BabelDOC models directory not found: ${MODELS_PATH}`);
     console.warn(`[PDFMathTranslate] Models should be pre-downloaded during Docker build.`);
     return false;
   }
+  
+  // 檢查特定的 ONNX 模型檔案
+  const onnxModelPath = join(MODELS_PATH, "doclayout_yolo_docstructbench_imgsz1024.onnx");
+  if (!existsSync(onnxModelPath)) {
+    console.warn(`[PDFMathTranslate] ONNX model not found: ${onnxModelPath}`);
+    console.warn(`[PDFMathTranslate] Model should be pre-downloaded during Docker build.`);
+    return false;
+  }
+  
   return true;
 }
 
@@ -195,13 +208,8 @@ function runPdf2zhWithService(
 
     const args = [inputPath, "-lo", targetLang, "-o", outputDir, "-s", service];
 
-    // 如果設定了自訂模型路徑，使用 --onnx 參數
-    if (existsSync(MODELS_PATH)) {
-      const onnxModelPath = join(MODELS_PATH, "model.onnx");
-      if (existsSync(onnxModelPath)) {
-        args.push("--onnx", onnxModelPath);
-      }
-    }
+    // pdf2zh 使用 babeldoc.assets 內部載入模型，不需要手動指定 --onnx 參數
+    // 模型路徑：/root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx
 
     console.log(`[PDFMathTranslate] Running: pdf2zh ${args.join(" ")} (service: ${service})`);
 

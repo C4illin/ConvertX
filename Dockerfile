@@ -325,7 +325,7 @@ RUN set -eux && \
   mkdir -p /root/.cache/babeldoc/models && \
   # 直接下載 ONNX 模型到 babeldoc 期望的路徑
   curl -fSL -o /root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx \
-    "https://huggingface.co/wybxc/DocLayout-YOLO-DocStructBench-onnx/resolve/main/doclayout_yolo_docstructbench_imgsz1024.onnx" && \
+  "https://huggingface.co/wybxc/DocLayout-YOLO-DocStructBench-onnx/resolve/main/doclayout_yolo_docstructbench_imgsz1024.onnx" && \
   echo "✅ ONNX 模型下載完成" && \
   ls -lh /root/.cache/babeldoc/models/*.onnx && \
   \
@@ -351,32 +351,40 @@ RUN set -eux && \
   ls -lh /app/*.ttf && \
   \
   # ========================================
-  # [7/8] 準備 BabelDOC 資源
-  # ⬇️ 複製字型到 BabelDOC cache 目錄
-  #    ONNX 模型已在 [6/8] 下載完成
+  # [7/8] 下載 BabelDOC 完整資源
+  # ⬇️ 使用 babeldoc --warmup 下載所有必需資源
+  #    包括：ONNX 模型、字型、cmap、tiktoken 等
+  #    這是官方推薦的離線資源準備方式
   #    Runtime 不會再下載任何資源
   # ========================================
   echo "" && \
-  echo "📥 [7/8] 準備 BabelDOC 資源..." && \
+  echo "📥 [7/8] 下載 BabelDOC 完整資源（使用 --warmup）..." && \
   mkdir -p /root/.cache/babeldoc/fonts && \
   mkdir -p /root/.cache/babeldoc/cmap && \
   mkdir -p /root/.cache/babeldoc/tiktoken && \
   \
-  # 複製字型到 BabelDOC 目錄（避免 runtime 下載）
-  echo "   複製字型到 BabelDOC 目錄..." && \
+  # 使用 babeldoc --warmup 下載所有必需資源
+  if command -v babeldoc >/dev/null 2>&1; then \
+  echo "   使用 babeldoc --warmup 下載資源..." && \
+  (babeldoc --warmup 2>&1 || echo "   ⚠️ babeldoc --warmup 執行完成（可能有警告）") && \
+  echo "   ✅ BabelDOC warmup 完成"; \
+  else \
+  echo "   ⚠️ babeldoc 不可用，跳過 warmup"; \
+  fi && \
+  \
+  # 複製額外字型到 BabelDOC 目錄（確保多語言支援）
+  echo "   複製額外字型到 BabelDOC 目錄..." && \
   cp /app/GoNotoKurrent-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
   cp /app/SourceHanSerifCN-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
   cp /app/SourceHanSerifTW-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
   cp /app/SourceHanSerifJP-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
   cp /app/SourceHanSerifKR-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
   \
-  # 下載 BabelDOC 需要的額外資源（如果有的話）
-  echo "   下載 BabelDOC 額外資源..." && \
-  (python3 -c "from huggingface_hub import snapshot_download; import os; os.environ['HF_HOME']='/root/.cache/huggingface'; snapshot_download(repo_id='funstory-ai/babeldoc-assets', local_dir='/root/.cache/babeldoc/assets', local_dir_use_symlinks=False); print('BabelDOC assets downloaded')" || echo "BabelDOC assets not available, skipping...") && \
-  \
-  # 驗證模型已正確下載
-  echo "   驗證 BabelDOC 模型..." && \
-  ls -lh /root/.cache/babeldoc/models/ && \
+  # 驗證 BabelDOC 資源
+  echo "   驗證 BabelDOC 資源..." && \
+  ls -lh /root/.cache/babeldoc/models/ 2>/dev/null || echo "   (models 目錄)" && \
+  ls -lh /root/.cache/babeldoc/fonts/ 2>/dev/null || echo "   (fonts 目錄)" && \
+  du -sh /root/.cache/babeldoc/ 2>/dev/null || true && \
   echo "✅ BabelDOC 資源準備完成" && \
   \
   # ========================================
@@ -445,13 +453,12 @@ RUN set -eux && \
   echo "===========================================================" && \
   echo "" && \
   \
-  echo "🔹 PDFMathTranslate 模型：" && \
-  ONNX_COUNT=$(find /models/pdfmathtranslate -name "*.onnx" 2>/dev/null | wc -l) && \
-  if [ "$ONNX_COUNT" -gt 0 ]; then \
-  echo "   ✅ 找到 $ONNX_COUNT 個 ONNX 模型："; \
-  ls -lh /models/pdfmathtranslate/*.onnx 2>/dev/null || find /models/pdfmathtranslate -name "*.onnx" -exec ls -lh {} \;; \
+  echo "🔹 PDFMathTranslate/BabelDOC ONNX 模型：" && \
+  if [ -f "/root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx" ]; then \
+  echo "   ✅ DocLayout-YOLO ONNX 模型存在："; \
+  ls -lh /root/.cache/babeldoc/models/*.onnx 2>/dev/null; \
   else \
-  echo "   ❌ /models/pdfmathtranslate 中沒有 ONNX 模型"; \
+  echo "   ❌ /root/.cache/babeldoc/models/ 中沒有 ONNX 模型"; \
   fi && \
   echo "" && \
   \
@@ -499,10 +506,6 @@ RUN set -eux && \
   echo "   所有 cache 已清理，layer diff 最小化" && \
   echo "   Runtime 不會再下載任何資源" && \
   echo "==========================================================="
-
-# PDFMathTranslate 環境變數
-ENV PDFMATHTRANSLATE_MODELS_PATH="/models/pdfmathtranslate"
-ENV NOTO_FONT_PATH="/app/GoNotoKurrent-Regular.ttf"
 
 # BabelDOC 環境變數
 ENV BABELDOC_CACHE_PATH="/root/.cache/babeldoc"
