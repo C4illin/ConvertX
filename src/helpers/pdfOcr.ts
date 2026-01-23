@@ -1,5 +1,5 @@
 import { execFile as execFileOriginal } from "node:child_process";
-import { existsSync, unlinkSync, readFileSync } from "node:fs";
+import { existsSync, unlinkSync } from "node:fs";
 import { join, dirname, basename } from "node:path";
 import type { ExecFileFn } from "../converters/types";
 
@@ -27,7 +27,7 @@ function extractTextFromPdf(
   pdfPath: string,
   execFile: ExecFileFn = execFileOriginal,
 ): Promise<string> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     // pdftotext -layout <input.pdf> -
     // -layout: 保持排版
     // -: 輸出到 stdout
