@@ -131,41 +131,47 @@ eng + chi_tra + chi_sim + jpn + kor + deu + fra
 
 ## 新增語言
 
-### 方法一：自訂 Dockerfile
+ConvertX-CN 預設內建 7 種 OCR 語言，但你可以透過 Docker Compose 配置擴展支援更多語言。
 
-> 💡 在 `Dockerfile.full` 中取消註解以下內容
+### 擴展方法
 
-```dockerfile
-RUN apt-get update && apt-get install -y --no-install-recommends \
-  tesseract-ocr-spa \
-  tesseract-ocr-ita \
-  && rm -rf /var/lib/apt/lists/*
-```
+| 方法              | 說明                       | 適用場景       |
+| ----------------- | -------------------------- | -------------- |
+| compose.yaml 安裝 | 容器啟動時自動安裝語言包   | 測試、臨時使用 |
+| 掛載語言包        | 下載 .traineddata 檔案掛載 | 離線環境       |
+| 自訂 Dockerfile   | 建置包含語言包的自訂映像   | 生產環境       |
 
-- `tesseract-ocr-spa` — 西班牙文
-- `tesseract-ocr-ita` — 義大利文
+### 常用可選語言
 
-### 方法二：掛載語言包
+| Tesseract 包名      | 語言     |
+| ------------------- | -------- |
+| `tesseract-ocr-spa` | 西班牙文 |
+| `tesseract-ocr-ita` | 義大利文 |
+| `tesseract-ocr-por` | 葡萄牙文 |
+| `tesseract-ocr-rus` | 俄文     |
+| `tesseract-ocr-ara` | 阿拉伯文 |
+| `tesseract-ocr-vie` | 越南文   |
+| `tesseract-ocr-tha` | 泰文     |
 
-```yaml
-volumes:
-  - ./tessdata:/usr/share/tesseract-ocr/5/tessdata
-```
-
-下載語言包：https://github.com/tesseract-ocr/tessdata_best
+> 📖 **詳細配置指南**：[OCR 語言擴展指南](../Docker組合配置/OCR語言擴展.md)
+>
+> 包含完整的 compose.yaml 範例、語言包下載方法、以及 50+ 種可用語言列表。
 
 ---
 
-## 可選語言包
+## OCRmyPDF vs 翻譯引擎語言支援
 
-| 區域   | 語言                           |
-| ------ | ------------------------------ |
-| 西歐   | 西班牙文、義大利文、葡萄牙文   |
-| 北歐   | 瑞典文、丹麥文、挪威文、芬蘭文 |
-| 東歐   | 俄文、波蘭文、捷克文、匈牙利文 |
-| 中東   | 阿拉伯文、希伯來文、土耳其文   |
-| 南亞   | 印地文、孟加拉文、泰米爾文     |
-| 東南亞 | 泰文、越南文、印尼文           |
+| 功能     | OCRmyPDF                    | PDFMathTranslate / BabelDOC |
+| -------- | --------------------------- | --------------------------- |
+| 內建語言 | 8 種                        | 15 種                       |
+| 可擴展   | ✅ 可透過 compose.yaml 添加 | ❌ 固定                     |
+| 語言用途 | OCR 文字辨識                | 翻譯目標語言                |
+
+**OCRmyPDF 內建語言**：英文、繁體中文、簡體中文、日文、韓文、德文、法文 + 自動多語言模式
+
+**翻譯引擎內建語言**：英文、簡體中文、繁體中文、日文、韓文、德文、法文、西班牙文、義大利文、葡萄牙文、俄文、阿拉伯文、印地文、越南文、泰文
+
+> 💡 如果需要 OCR 更多語言，請參考 [OCR 語言擴展指南](../Docker組合配置/OCR語言擴展.md)。
 
 ---
 
@@ -173,4 +179,5 @@ volumes:
 
 - [支援的轉換器](轉換器.md)
 - [翻譯功能](翻譯功能.md)
+- [OCR 語言擴展指南](../Docker組合配置/OCR語言擴展.md)
 - [Docker 部署](../部署指南/Docker部署.md)

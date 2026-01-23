@@ -1,5 +1,5 @@
 import { execFile as execFileOriginal } from "node:child_process";
-import { mkdirSync, existsSync, readdirSync, unlinkSync, rmdirSync, statSync } from "node:fs";
+import { mkdirSync, existsSync, readdirSync, unlinkSync, rmdirSync } from "node:fs";
 import { join, basename, dirname } from "node:path";
 import { ExecFileFn } from "./types";
 

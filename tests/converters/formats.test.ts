@@ -41,7 +41,25 @@ describe("FFmpeg 格式", () => {
   const toFormats = ffmpegProps.to.muxer;
 
   // 關鍵影片格式（wmv 由 asf 處理）
-  const keyVideoFormats = ["264", "265", "3g2", "3gp", "asf", "av1", "avi", "flv", "h264", "h265", "hevc", "mkv", "mov", "mp4", "mpeg", "mpg", "webm"];
+  const keyVideoFormats = [
+    "264",
+    "265",
+    "3g2",
+    "3gp",
+    "asf",
+    "av1",
+    "avi",
+    "flv",
+    "h264",
+    "h265",
+    "hevc",
+    "mkv",
+    "mov",
+    "mp4",
+    "mpeg",
+    "mpg",
+    "webm",
+  ];
   // 關鍵音訊格式
   const keyAudioFormats = ["aac", "ac3", "aiff", "flac", "m4a", "mp3", "ogg", "opus", "wav", "wma"];
   // 關鍵字幕格式
@@ -110,7 +128,21 @@ describe("ImageMagick 格式", () => {
   // 關鍵 RAW 相機格式
   const keyRawFormats = ["arw", "cr2", "cr3", "dng", "nef", "orf", "raf"];
   // 關鍵常見圖片格式
-  const keyImageFormats = ["apng", "avif", "bmp", "gif", "heic", "heif", "ico", "jpeg", "jpg", "jxl", "png", "tiff", "webp"];
+  const keyImageFormats = [
+    "apng",
+    "avif",
+    "bmp",
+    "gif",
+    "heic",
+    "heif",
+    "ico",
+    "jpeg",
+    "jpg",
+    "jxl",
+    "png",
+    "tiff",
+    "webp",
+  ];
   // 關鍵向量格式
   const keyVectorFormats = ["eps", "pdf", "ps", "psd", "svg"];
 
@@ -913,8 +945,16 @@ describe("PDFMathTranslate 格式", () => {
   const toFormats = pdfmathtranslateProps.to.document;
 
   const keyOutputFormats = [
-    "pdf-en", "pdf-zh", "pdf-zh-TW", "pdf-ja", "pdf-ko",
-    "pdf-de", "pdf-fr", "pdf-es", "pdf-it", "pdf-ru"
+    "pdf-en",
+    "pdf-zh",
+    "pdf-zh-TW",
+    "pdf-ja",
+    "pdf-ko",
+    "pdf-de",
+    "pdf-fr",
+    "pdf-es",
+    "pdf-it",
+    "pdf-ru",
   ];
 
   test("輸入格式應為 pdf", () => {
@@ -1011,7 +1051,13 @@ describe("OCRmyPDF 格式", () => {
   const toFormats = ocrmypdfProps.to.document;
 
   const keyOutputFormats = [
-    "pdf-en", "pdf-zh-TW", "pdf-zh", "pdf-ja", "pdf-ko", "pdf-de", "pdf-fr"
+    "pdf-en",
+    "pdf-zh-TW",
+    "pdf-zh",
+    "pdf-ja",
+    "pdf-ko",
+    "pdf-de",
+    "pdf-fr",
   ];
 
   test("輸入格式應為 pdf", () => {
@@ -1029,8 +1075,8 @@ describe("OCRmyPDF 格式", () => {
     console.log(`OCRmyPDF 輸入格式：${fromFormats.length} 種`);
   });
 
-  test("輸出格式數量應等於 7 種", () => {
-    expect(toFormats.length).toBe(7);
+  test("輸出格式數量應等於 8 種", () => {
+    expect(toFormats.length).toBe(8);
     console.log(`OCRmyPDF 輸出格式：${toFormats.length} 種`);
   });
 
@@ -1081,14 +1127,38 @@ describe("格式總覽", () => {
 
     const summary = [
       { name: "FFmpeg", from: ffmpegProps.from.muxer.length, to: ffmpegProps.to.muxer.length },
-      { name: "ImageMagick", from: imagemagickProps.from.images.length, to: imagemagickProps.to.images.length },
-      { name: "GraphicsMagick", from: graphicsmagickProps.from.image.length, to: graphicsmagickProps.to.image.length },
+      {
+        name: "ImageMagick",
+        from: imagemagickProps.from.images.length,
+        to: imagemagickProps.to.images.length,
+      },
+      {
+        name: "GraphicsMagick",
+        from: graphicsmagickProps.from.image.length,
+        to: graphicsmagickProps.to.image.length,
+      },
       { name: "Vips", from: vipsProps.from.images.length, to: vipsProps.to.images.length },
-      { name: "LibreOffice", from: libreofficeProps.from.text.length, to: libreofficeProps.to.text.length },
+      {
+        name: "LibreOffice",
+        from: libreofficeProps.from.text.length,
+        to: libreofficeProps.to.text.length,
+      },
       { name: "Pandoc", from: pandocProps.from.text.length, to: pandocProps.to.text.length },
-      { name: "Calibre", from: calibreProps.from.document.length, to: calibreProps.to.document.length },
-      { name: "Inkscape", from: inkscapeProps.from.images.length, to: inkscapeProps.to.images.length },
-      { name: "libjxl", from: libjxlProps.from.jxl.length + libjxlProps.from.images.length, to: libjxlProps.to.jxl.length + libjxlProps.to.images.length },
+      {
+        name: "Calibre",
+        from: calibreProps.from.document.length,
+        to: calibreProps.to.document.length,
+      },
+      {
+        name: "Inkscape",
+        from: inkscapeProps.from.images.length,
+        to: inkscapeProps.to.images.length,
+      },
+      {
+        name: "libjxl",
+        from: libjxlProps.from.jxl.length + libjxlProps.from.images.length,
+        to: libjxlProps.to.jxl.length + libjxlProps.to.images.length,
+      },
       { name: "libheif", from: libheifProps.from.images.length, to: libheifProps.to.images.length },
       { name: "Assimp", from: assimpProps.from.object.length, to: assimpProps.to.object.length },
       { name: "Potrace", from: potraceProps.from.images.length, to: potraceProps.to.images.length },
@@ -1097,13 +1167,37 @@ describe("格式總覽", () => {
       { name: "XeLaTeX", from: xelatexProps.from.text.length, to: xelatexProps.to.text.length },
       { name: "dvisvgm", from: dvisvgmProps.from.images.length, to: dvisvgmProps.to.images.length },
       { name: "Dasel", from: daselProps.from.document.length, to: daselProps.to.document.length },
-      { name: "msgconvert", from: msgconvertProps.from.email.length, to: msgconvertProps.to.email.length },
+      {
+        name: "msgconvert",
+        from: msgconvertProps.from.email.length,
+        to: msgconvertProps.to.email.length,
+      },
       { name: "VCF", from: vcfProps.from.contacts.length, to: vcfProps.to.contacts.length },
-      { name: "Markitdown", from: markitdownProps.from.document.length, to: markitdownProps.to.document.length },
-      { name: "MinerU", from: mineruProps.from.document.length, to: mineruProps.to.document.length },
-      { name: "PDFMathTranslate", from: pdfmathtranslateProps.from.document.length, to: pdfmathtranslateProps.to.document.length },
-      { name: "BabelDOC", from: babeldocProps.from.document.length, to: babeldocProps.to.document.length },
-      { name: "OCRmyPDF", from: ocrmypdfProps.from.document.length, to: ocrmypdfProps.to.document.length },
+      {
+        name: "Markitdown",
+        from: markitdownProps.from.document.length,
+        to: markitdownProps.to.document.length,
+      },
+      {
+        name: "MinerU",
+        from: mineruProps.from.document.length,
+        to: mineruProps.to.document.length,
+      },
+      {
+        name: "PDFMathTranslate",
+        from: pdfmathtranslateProps.from.document.length,
+        to: pdfmathtranslateProps.to.document.length,
+      },
+      {
+        name: "BabelDOC",
+        from: babeldocProps.from.document.length,
+        to: babeldocProps.to.document.length,
+      },
+      {
+        name: "OCRmyPDF",
+        from: ocrmypdfProps.from.document.length,
+        to: ocrmypdfProps.to.document.length,
+      },
     ];
 
     let totalFrom = 0;

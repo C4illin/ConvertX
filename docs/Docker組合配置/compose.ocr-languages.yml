@@ -1,0 +1,96 @@
+# ==============================================================================
+# ConvertX-CN OCR 語言擴展配置
+#
+# 📚 此配置示範如何在容器啟動時安裝額外的 Tesseract OCR 語言包
+#
+# 🎯 適用情境：
+#    - 需要 OCR 辨識西班牙文、義大利文、俄文等額外語言
+#    - 翻譯引擎支援 15 種語言，但 OCR 預設只內建 8 種
+#    - 需要處理更多語言的掃描版 PDF
+#
+# ⚠️ 注意事項：
+#    - 每次容器啟動時都會安裝語言包，首次啟動較慢
+#    - 語言包會存在容器內，重啟後需重新安裝
+#    - 若需永久安裝，請使用自訂 Dockerfile 方式
+#
+# ==============================================================================
+
+services:
+  convertx:
+    image: convertx/convertx-cn:latest
+    container_name: convertx-cn
+    restart: unless-stopped
+
+    # =========================================================================
+    # 使用自訂 entrypoint 安裝額外語言包
+    # =========================================================================
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "📦 正在安裝額外 OCR 語言包..."
+        apt-get update && apt-get install -y --no-install-recommends \
+          tesseract-ocr-spa \
+          tesseract-ocr-ita \
+          tesseract-ocr-por \
+          tesseract-ocr-rus \
+        && rm -rf /var/lib/apt/lists/*
+        echo "✅ 語言包安裝完成"
+        echo "🚀 啟動 ConvertX..."
+        exec bun run start
+
+    ports:
+      - "3000:3000"
+
+    volumes:
+      - ./data:/app/data
+
+    environment:
+      - TZ=Asia/Taipei
+      - JWT_SECRET=請改成你自己的長隨機字串-至少32個字元
+      - ACCOUNT_REGISTRATION=true
+      - HTTP_ALLOWED=true
+      - ALLOW_UNAUTHENTICATED=false
+      - AUTO_DELETE_EVERY_N_HOURS=24
+
+# ==============================================================================
+# 可用語言包對照表
+# ==============================================================================
+#
+# 💡 只需安裝你需要的語言，不必全部安裝
+#
+# 語言包名稱             | 語言代碼 | 語言
+# ----------------------|---------|----------------
+# tesseract-ocr-spa     | es      | 西班牙文
+# tesseract-ocr-ita     | it      | 義大利文
+# tesseract-ocr-por     | pt      | 葡萄牙文
+# tesseract-ocr-rus     | ru      | 俄文
+# tesseract-ocr-ara     | ar      | 阿拉伯文
+# tesseract-ocr-hin     | hi      | 印地文
+# tesseract-ocr-vie     | vi      | 越南文
+# tesseract-ocr-tha     | th      | 泰文
+# tesseract-ocr-swe     | sv      | 瑞典文
+# tesseract-ocr-dan     | da      | 丹麥文
+# tesseract-ocr-nor     | no      | 挪威文
+# tesseract-ocr-fin     | fi      | 芬蘭文
+# tesseract-ocr-pol     | pl      | 波蘭文
+# tesseract-ocr-ces     | cs      | 捷克文
+# tesseract-ocr-hun     | hu      | 匈牙利文
+# tesseract-ocr-tur     | tr      | 土耳其文
+# tesseract-ocr-heb     | he      | 希伯來文
+# tesseract-ocr-ben     | bn      | 孟加拉文
+# tesseract-ocr-tam     | ta      | 泰米爾文
+# tesseract-ocr-ind     | id      | 印尼文
+#
+# ==============================================================================
+# 內建語言（無需額外安裝）
+# ==============================================================================
+#
+# tesseract-ocr-eng     | en      | 英文
+# tesseract-ocr-chi-tra | zh-TW   | 繁體中文
+# tesseract-ocr-chi-sim | zh      | 簡體中文
+# tesseract-ocr-jpn     | ja      | 日文
+# tesseract-ocr-kor     | ko      | 韓文
+# tesseract-ocr-deu     | de      | 德文
+# tesseract-ocr-fra     | fr      | 法文
+#
+# ==============================================================================
