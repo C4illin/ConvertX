@@ -22,7 +22,7 @@ on:
       run_translation_tests:
         description: "Run translation tests (requires API keys)"
         required: false
-        default: "false"
+        default: false
         type: boolean
 
 env:
@@ -262,7 +262,6 @@ jobs:
         run: docker pull ${{ needs.build-test-image.outputs.image }}
 
       - name: Run translation tests
-        if: ${{ secrets.OPENAI_API_KEY != '' || secrets.GOOGLE_API_KEY != '' }}
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
@@ -306,7 +305,7 @@ jobs:
   cleanup:
     name: Cleanup Test Image
     runs-on: ubuntu-24.04
-    needs: [e2e-tests, comprehensive-e2e, translation-tests]
+    needs: [e2e-tests, comprehensive-e2e]
     if: always()
     permissions:
       packages: write
