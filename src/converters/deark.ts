@@ -17,8 +17,9 @@ import { ExecFileFn } from "./types";
 
 export const properties = {
   from: {
-    // 壓縮/封存格式
-    archive: [
+    // 所有 deark 支援的格式合併為一個類別
+    files: [
+      // 壓縮/封存格式
       "zip",
       "lha",
       "lzh",
@@ -41,9 +42,7 @@ export const properties = {
       "deb",
       "ar",
       "a",
-    ],
-    // 圖片格式
-    images: [
+      // 圖片格式
       "ico",
       "cur",
       "ani",
@@ -87,13 +86,22 @@ export const properties = {
       "jbig",
       "jbg",
       "fpx",
-    ],
-    // 字型格式
-    fonts: ["fon", "fnt", "psf", "bdf", "pcf"],
-    // 可執行檔 / 資源檔
-    binary: ["exe", "dll", "com", "ne", "mz", "res", "rsrc", "icl"],
-    // 其他格式
-    other: [
+      // 字型格式
+      "fon",
+      "fnt",
+      "psf",
+      "bdf",
+      "pcf",
+      // 可執行檔 / 資源檔
+      "exe",
+      "dll",
+      "com",
+      "ne",
+      "mz",
+      "res",
+      "rsrc",
+      "icl",
+      // 其他格式
       "swf",
       "fla",
       "amiga",
@@ -105,18 +113,11 @@ export const properties = {
       "crt",
       "tap",
       "tzx",
-      "wav",
       "riff",
-      "avi",
-      "ani",
     ],
   },
   to: {
-    archive: ["extract"],
-    images: ["extract"],
-    fonts: ["extract"],
-    binary: ["extract"],
-    other: ["extract"],
+    files: ["extract"],
   },
   // deark 輸出可能是多個檔案，使用 archive 模式
   outputMode: "archive" as const,
