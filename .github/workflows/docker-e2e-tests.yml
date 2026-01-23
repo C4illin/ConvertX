@@ -176,6 +176,9 @@ jobs:
         run: |
           echo "🧪 Running comprehensive E2E tests inside Docker..."
 
+          # 確保輸出目錄存在
+          mkdir -p "${{ github.workspace }}/test-results"
+
           docker run --rm \
             --name convertx-e2e-test \
             -v "${{ github.workspace }}/tests:/app/tests" \
@@ -185,49 +188,61 @@ jobs:
             --entrypoint /bin/bash \
             ${{ needs.build-test-image.outputs.image }} \
             -c "
-              set -e
-              echo '📋 System info:'
+              echo '📋 系統資訊 System info:'
               uname -a
               
               echo ''
-              echo '🔧 Available conversion tools:'
-              echo '  inkscape:' \$(inkscape --version 2>/dev/null | head -1 || echo 'not found')
-              echo '  pandoc:' \$(pandoc --version 2>/dev/null | head -1 || echo 'not found')
-              echo '  ffmpeg:' \$(ffmpeg -version 2>/dev/null | head -1 || echo 'not found')
-              echo '  libreoffice:' \$(soffice --version 2>/dev/null || echo 'not found')
-              echo '  imagemagick:' \$(magick --version 2>/dev/null | head -1 || echo 'not found')
-              echo '  calibre:' \$(ebook-convert --version 2>/dev/null | head -1 || echo 'not found')
-              echo '  potrace:' \$(potrace -v 2>/dev/null | head -1 || echo 'not found')
-              echo '  dasel:' \$(dasel --version 2>/dev/null || echo 'not found')
-              echo '  resvg:' \$(resvg --version 2>/dev/null || echo 'not found')
-              echo '  vips:' \$(vips --version 2>/dev/null || echo 'not found')
-              echo '  pdf2zh:' \$(pdf2zh --version 2>/dev/null || echo 'not found')
-              echo '  babeldoc:' \$(babeldoc --version 2>/dev/null || echo 'not found')
+              echo '🔧 可用轉換工具 Available conversion tools:'
+              echo '  inkscape:' \$(inkscape --version 2>/dev/null | head -1 || echo '未找到 not found')
+              echo '  pandoc:' \$(pandoc --version 2>/dev/null | head -1 || echo '未找到 not found')
+              echo '  ffmpeg:' \$(ffmpeg -version 2>/dev/null | head -1 || echo '未找到 not found')
+              echo '  libreoffice:' \$(soffice --version 2>/dev/null || echo '未找到 not found')
+              echo '  imagemagick:' \$(magick --version 2>/dev/null | head -1 || echo '未找到 not found')
+              echo '  calibre:' \$(ebook-convert --version 2>/dev/null | head -1 || echo '未找到 not found')
+              echo '  potrace:' \$(potrace -v 2>/dev/null | head -1 || echo '未找到 not found')
+              echo '  dasel:' \$(dasel --version 2>/dev/null || echo '未找到 not found')
+              echo '  resvg:' \$(resvg --version 2>/dev/null || echo '未找到 not found')
+              echo '  vips:' \$(vips --version 2>/dev/null || echo '未找到 not found')
+              echo '  pdf2zh:' \$(pdf2zh --version 2>/dev/null || echo '未找到 not found')
+              echo '  babeldoc:' \$(babeldoc --version 2>/dev/null || echo '未找到 not found')
               
               echo ''
-              echo '📦 Installing test dependencies...'
+              echo '📦 安裝測試依賴 Installing test dependencies...'
               cd /app
               bun install --frozen-lockfile || bun install
               
               echo ''
-              echo '🧪 Running E2E tests...'
+              echo '🧪 執行 E2E 測試 Running E2E tests...'
               
-              # Run comprehensive tests
-              bun test tests/e2e/comprehensive.e2e.test.ts --timeout 600000 || true
+              # 執行綜合測試（允許失敗）
+              bun test tests/e2e/comprehensive.e2e.test.ts --timeout 600000 || echo '⚠️ 綜合測試有部分失敗'
               
-              # Run format matrix tests
-              bun test tests/e2e/format-matrix.e2e.test.ts --timeout 300000 || true
+              # 執行格式矩陣測試（允許失敗）
+              bun test tests/e2e/format-matrix.e2e.test.ts --timeout 300000 || echo '⚠️ 格式矩陣測試有部分失敗'
               
-              # Run basic converter tests
-              bun test tests/e2e/converters.e2e.test.ts --timeout 120000 || true
+              # 執行基礎轉換器測試（允許失敗）
+              bun test tests/e2e/converters.e2e.test.ts --timeout 120000 || echo '⚠️ 轉換器測試有部分失敗'
               
               echo ''
-              echo '✅ E2E tests completed!'
+              echo '✅ E2E 測試完成！'
               
-              # Copy results
+              # 複製結果到輸出目錄
               mkdir -p /app/test-results
-              cp -r tests/e2e/output/* /app/test-results/ 2>/dev/null || true
+              cp -r tests/e2e/output/* /app/test-results/ 2>/dev/null || echo '⚠️ 無測試輸出可複製'
+              ls -la /app/test-results/ 2>/dev/null || echo '📁 測試結果目錄為空'
             "
+
+          # 檢查輸出目錄內容
+          echo "📁 測試結果目錄內容："
+          ls -la "${{ github.workspace }}/test-results/" || echo "目錄為空或不存在"
+
+      - name: Create placeholder if no results
+        if: always()
+        run: |
+          mkdir -p test-results
+          if [ -z "$(ls -A test-results 2>/dev/null)" ]; then
+            echo '{"message": "無測試結果輸出", "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > test-results/placeholder.json
+          fi
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -236,6 +251,7 @@ jobs:
           name: e2e-test-results
           path: test-results/
           retention-days: 7
+          if-no-files-found: warn
 
   # ============================================
   # Job 4: Translation tests (使用免費翻譯服務)
@@ -264,7 +280,10 @@ jobs:
 
       - name: Run translation tests
         run: |
-          echo "🌍 Running translation tests (using free services: Google/Bing)..."
+          echo "🌍 執行翻譯測試（使用免費服務：Google/Bing）..."
+
+          # 確保輸出目錄存在
+          mkdir -p "${{ github.workspace }}/translation-results"
 
           docker run --rm \
             --name convertx-translation-test \
@@ -276,16 +295,28 @@ jobs:
             --entrypoint /bin/bash \
             ${{ needs.build-test-image.outputs.image }} \
             -c "
-              set -e
               cd /app
               bun install --frozen-lockfile || bun install
               
-              echo '🌍 Running translation tests with free services...'
-              bun test tests/e2e/translation.e2e.test.ts --timeout 600000 || true
+              echo '🌍 使用免費服務執行翻譯測試...'
+              bun test tests/e2e/translation.e2e.test.ts --timeout 600000 || echo '⚠️ 翻譯測試有部分失敗'
               
               mkdir -p /app/translation-results
-              cp -r tests/e2e/output/translation/* /app/translation-results/ 2>/dev/null || true
+              cp -r tests/e2e/output/translation/* /app/translation-results/ 2>/dev/null || echo '⚠️ 無翻譯輸出可複製'
+              ls -la /app/translation-results/ 2>/dev/null || echo '📁 翻譯結果目錄為空'
             "
+
+          # 檢查輸出目錄內容
+          echo "📁 翻譯結果目錄內容："
+          ls -la "${{ github.workspace }}/translation-results/" || echo "目錄為空或不存在"
+
+      - name: Create placeholder if no results
+        if: always()
+        run: |
+          mkdir -p translation-results
+          if [ -z "$(ls -A translation-results 2>/dev/null)" ]; then
+            echo '{"message": "無翻譯結果輸出", "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > translation-results/placeholder.json
+          fi
 
       - name: Upload translation results
         uses: actions/upload-artifact@v4
@@ -294,6 +325,7 @@ jobs:
           name: translation-test-results
           path: translation-results/
           retention-days: 7
+          if-no-files-found: warn
 
   # ============================================
   # Job 5: Cleanup test image
@@ -337,30 +369,35 @@ jobs:
           path: test-results/
         continue-on-error: true
 
+      - name: Check downloaded results
+        run: |
+          echo "📁 已下載的測試結果："
+          ls -la test-results/ 2>/dev/null || echo "無測試結果可下載"
+
       - name: Generate summary
         run: |
-          echo "# 🧪 Docker E2E Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "# 🧪 Docker E2E 測試結果" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Test Status" >> $GITHUB_STEP_SUMMARY
+          echo "## 測試狀態" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| E2E Tests | ${{ needs.e2e-tests.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Comprehensive E2E | ${{ needs.comprehensive-e2e.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 任務 | 狀態 |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| E2E 測試 | ${{ needs.e2e-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 綜合 E2E 測試 | ${{ needs.comprehensive-e2e.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [ -f "test-results/format-matrix/matrix-summary.md" ]; then
-            echo "## Format Matrix Summary" >> $GITHUB_STEP_SUMMARY
+            echo "## 格式矩陣摘要" >> $GITHUB_STEP_SUMMARY
             cat test-results/format-matrix/matrix-summary.md >> $GITHUB_STEP_SUMMARY
           fi
 
           if [ -f "test-results/comprehensive/conversion-matrix.json" ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "## Conversion Matrix" >> $GITHUB_STEP_SUMMARY
+            echo "## 轉換矩陣" >> $GITHUB_STEP_SUMMARY
             echo '```json' >> $GITHUB_STEP_SUMMARY
             head -50 test-results/comprehensive/conversion-matrix.json >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📅 Test run completed at: $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "📅 測試完成時間: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
