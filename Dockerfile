@@ -508,21 +508,6 @@ RUN set -eux && \
   echo "   Runtime 不會再下載任何資源" && \
   echo "==========================================================="
 
-# BabelDOC 環境變數
-ENV BABELDOC_CACHE_PATH="/root/.cache/babeldoc"
-ENV BABELDOC_SERVICE="google"
-# 禁止 BabelDOC 自動下載（強制使用預下載資源）
-ENV BABELDOC_OFFLINE="1"
-
-# MinerU 環境變數
-# 強制使用本地模型，禁止 runtime 下載
-ENV MINERU_MODEL_SOURCE="local"
-
-# HuggingFace 離線模式（禁止 runtime 下載）
-# ⚠️ 此變數在所有模型下載完成後設定
-ENV HF_HUB_OFFLINE="1"
-ENV TRANSFORMERS_OFFLINE="1"
-
 # ==============================================================================
 # 最終清理（模型下載完成後）
 # ==============================================================================
@@ -546,10 +531,6 @@ RUN sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
   sed -i 's/# de_DE.UTF-8 UTF-8/de_DE.UTF-8 UTF-8/' /etc/locale.gen && \
   sed -i 's/# fr_FR.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen && \
   locale-gen
-
-# 預設使用 zh_TW.UTF-8 確保中文 PDF 正確顯示
-ENV LANG=zh_TW.UTF-8
-ENV LC_ALL=zh_TW.UTF-8
 
 # ==============================================================================
 # 安裝自訂字型（標楷體等台灣常用字型）
@@ -586,58 +567,74 @@ RUN mkdir data
 EXPOSE 3000/tcp
 
 # ==============================================================================
-# 環境變數
+# 🔧 環境變數總覽
 # ==============================================================================
-# Headless 環境設定（解決 GTK/Qt 在無 DISPLAY 環境的問題）
-# ⚠️ 某些 GUI 工具（Inkscape、Calibre、LibreOffice）需要這些設定
-ENV QT_QPA_PLATFORM="offscreen"
-ENV DISPLAY=":99"
+#
+# 📂 分類說明：
+#   1. 系統路徑與 Locale
+#   2. Headless 環境（GUI 工具支援）
+#   3. 翻譯服務設定
+#   4. Runtime 離線模式
+#   5. 應用程式設定
+#
+# ==============================================================================
 
-# Calibre 需要（禁用 Chromium sandbox，Docker 環境無法使用）
+# ------------------------------------------------------------------------------
+# 1️⃣ 系統 Locale（支援中文 PDF 避免亂碼）
+# ------------------------------------------------------------------------------
+ENV LANG=zh_TW.UTF-8
+ENV LC_ALL=zh_TW.UTF-8
+
+# ------------------------------------------------------------------------------
+# 2️⃣ Headless 環境設定
+# ------------------------------------------------------------------------------
+# ⚠️ 解決 GTK/Qt 在無 DISPLAY 環境的問題
+#    某些 GUI 工具（Inkscape、Calibre、LibreOffice）需要這些設定
+# ------------------------------------------------------------------------------
+# Qt 離屏模式
+ENV QT_QPA_PLATFORM="offscreen"
+# 虛擬 display（配合 xvfb-run 使用）
+ENV DISPLAY=":99"
+# Calibre/Qt WebEngine 需要（禁用 Chromium sandbox，Docker 環境無法使用）
 ENV QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox"
 ENV CALIBRE_USE_SYSTEM_THEME="0"
 
+# ------------------------------------------------------------------------------
+# 3️⃣ 翻譯服務設定
+# ------------------------------------------------------------------------------
+# PDFMathTranslate / BabelDOC 預設翻譯服務
+# 支援：google, bing, deepl, ollama
+# ⚠️ google/bing/deepl 需要網路連接
+#    ollama 可完全離線（需設定 OLLAMA_HOST）
+# ------------------------------------------------------------------------------
+ENV PDFMATHTRANSLATE_SERVICE="google"
+ENV BABELDOC_SERVICE="google"
+# Ollama 設定（若使用本地 LLM）
+# ENV OLLAMA_HOST="http://localhost:11434"
+
+# ------------------------------------------------------------------------------
+# 4️⃣ Runtime 離線模式（禁止模型下載）
+# ------------------------------------------------------------------------------
+# ⚠️ 這些設定禁止 runtime 下載「模型」，但不影響翻譯 API 調用
+# ------------------------------------------------------------------------------
+# HuggingFace 離線模式
+ENV HF_HUB_OFFLINE="1"
+ENV TRANSFORMERS_OFFLINE="1"
+ENV HF_DATASETS_OFFLINE="1"
+# BabelDOC 模型離線模式
+ENV BABELDOC_OFFLINE="1"
+ENV BABELDOC_CACHE_PATH="/root/.cache/babeldoc"
+# MinerU 強制使用本地模型
+ENV MINERU_MODEL_SOURCE="local"
+# 禁止 pip 安裝新套件
+ENV PIP_NO_INDEX="1"
+
+# ------------------------------------------------------------------------------
+# 5️⃣ 應用程式設定
+# ------------------------------------------------------------------------------
 # Pandoc PDF 引擎（使用 pdflatex 以獲得最佳相容性）
 ENV PANDOC_PDF_ENGINE=pdflatex
 # Node 環境
 ENV NODE_ENV=production
-
-# ==============================================================================
-# 🌐 PDFMathTranslate 翻譯服務設定
-# ==============================================================================
-# ⚠️ 重要：PDFMathTranslate 的翻譯功能需要網路連接！
-#    - DocLayout-YOLO ONNX 模型（已離線預下載）：用於佈局分析
-#    - 翻譯服務（需要網路）：將文字翻譯成目標語言
-#
-# 支援的翻譯服務：
-#   - google: Google Translate（免費，需網路）
-#   - bing: Microsoft Bing Translator（免費，需網路）
-#   - deepl: DeepL（需 API Key，需網路）
-#   - ollama: 本地 Ollama LLM（可離線，需額外設定）
-#
-# 若要完全離線翻譯，請使用 ollama 並設定 OLLAMA_HOST
-# ==============================================================================
-ENV PDFMATHTRANSLATE_SERVICE="google"
-
-# ==============================================================================
-# 🔒 Runtime 模型離線模式設定
-# ==============================================================================
-# ⚠️ 這些設定禁止 runtime 下載「模型」，但不影響翻譯 API 調用
-#    PDFMathTranslate 使用的 Google/Bing 翻譯是線上 API，不是模型下載
-# ==============================================================================
-
-# HuggingFace 模型離線（禁止下載新模型）
-ENV HF_HUB_OFFLINE="1"
-ENV TRANSFORMERS_OFFLINE="1"
-ENV HF_DATASETS_OFFLINE="1"
-
-# 禁止 pip 安裝新套件
-ENV PIP_NO_INDEX="1"
-
-# MinerU 強制使用本地模型
-ENV MINERU_MODEL_SOURCE="local"
-
-# BabelDOC 模型離線模式
-ENV BABELDOC_OFFLINE="1"
 
 ENTRYPOINT [ "bun", "run", "dist/src/index.js" ]
