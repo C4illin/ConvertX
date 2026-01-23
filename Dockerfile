@@ -588,8 +588,15 @@ EXPOSE 3000/tcp
 # ==============================================================================
 # 環境變數
 # ==============================================================================
-# Calibre 需要
+# Headless 環境設定（解決 GTK/Qt 在無 DISPLAY 環境的問題）
+# ⚠️ 某些 GUI 工具（Inkscape、Calibre、LibreOffice）需要這些設定
+ENV QT_QPA_PLATFORM="offscreen"
+ENV DISPLAY=":99"
+
+# Calibre 需要（禁用 Chromium sandbox，Docker 環境無法使用）
 ENV QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox"
+ENV CALIBRE_USE_SYSTEM_THEME="0"
+
 # Pandoc PDF 引擎（使用 pdflatex 以獲得最佳相容性）
 ENV PANDOC_PDF_ENGINE=pdflatex
 # Node 環境
