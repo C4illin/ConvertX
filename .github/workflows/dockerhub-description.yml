@@ -1,7 +1,12 @@
 name: Update Docker Hub Description
 
 # ==============================================================================
-# 🔧 非關鍵流程 - 即使失敗也不影響 Release
+# 🔧 自動更新 Docker Hub Repository Overview
+# ==============================================================================
+# 觸發時機：
+#   1. push 到 main 分支時（README.md 或此 workflow 更改）
+#   2. Release workflow 成功完成後
+#   3. 手動觸發
 # ==============================================================================
 
 env:
@@ -15,17 +20,22 @@ on:
     paths:
       - README.md
       - .github/workflows/dockerhub-description.yml
-  # 也在 Release 完成後觸發
+  # Release 完成後觸發
   workflow_run:
     workflows: ["Release"]
     types:
       - completed
+  # 允許手動觸發
+  workflow_dispatch:
 
 jobs:
   dockerHubDescription:
     runs-on: ubuntu-latest
-    # 只在 workflow_run 成功或直接 push 時執行
-    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
+    # 條件：push / 手動觸發 / Release 成功
+    if: |
+      github.event_name == 'push' || 
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
 
     steps:
       - uses: actions/checkout@v4
