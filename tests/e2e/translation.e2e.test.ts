@@ -1,24 +1,24 @@
 /**
  * 多語言翻譯 E2E 測試
- * 
+ *
  * 測試涵蓋：
  * - PDFMathTranslate (pdf2zh)
  * - BabelDOC
  * - 支援語言：中文（簡繁）、英文、日文、韓文、德文、法文等
- * 
+ *
  * 注意：這些測試需要：
  * 1. 網路連接（使用翻譯 API）
  * 2. 設置翻譯服務 API 金鑰
  * 3. PDF 測試檔案
- * 
+ *
  * 執行方式：
  *   bun test tests/e2e/translation.e2e.test.ts
  */
 
 import { describe, test, expect, beforeAll, afterAll } from "bun:test";
-import { existsSync, mkdirSync, writeFileSync, readFileSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { spawnSync, execSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 
 // =============================================================================
 // 配置
@@ -41,7 +41,12 @@ interface Language {
 
 const SUPPORTED_LANGUAGES: Language[] = [
   { code: "zh", name: "Simplified Chinese", nativeName: "简体中文", testPhrase: "这是一个测试" },
-  { code: "zh-TW", name: "Traditional Chinese", nativeName: "繁體中文", testPhrase: "這是一個測試" },
+  {
+    code: "zh-TW",
+    name: "Traditional Chinese",
+    nativeName: "繁體中文",
+    testPhrase: "這是一個測試",
+  },
   { code: "en", name: "English", nativeName: "English", testPhrase: "This is a test" },
   { code: "ja", name: "Japanese", nativeName: "日本語", testPhrase: "これはテストです" },
   { code: "ko", name: "Korean", nativeName: "한국어", testPhrase: "이것은 테스트입니다" },
@@ -53,7 +58,12 @@ const SUPPORTED_LANGUAGES: Language[] = [
   { code: "it", name: "Italian", nativeName: "Italiano", testPhrase: "Questo è un test" },
   { code: "ar", name: "Arabic", nativeName: "العربية", testPhrase: "هذا اختبار" },
   { code: "th", name: "Thai", nativeName: "ไทย", testPhrase: "นี่คือการทดสอบ" },
-  { code: "vi", name: "Vietnamese", nativeName: "Tiếng Việt", testPhrase: "Đây là một bài kiểm tra" },
+  {
+    code: "vi",
+    name: "Vietnamese",
+    nativeName: "Tiếng Việt",
+    testPhrase: "Đây là một bài kiểm tra",
+  },
 ];
 
 // =============================================================================
@@ -133,15 +143,15 @@ This document is used for testing multilingual translation capabilities.
 
   try {
     // 嘗試使用 xelatex
-    const result = spawnSync("xelatex", [
-      "-interaction=nonstopmode",
-      "-output-directory=" + join(path, ".."),
-      texPath,
-    ], {
-      timeout: 60000,
-      encoding: "utf-8",
-      stdio: ["pipe", "pipe", "pipe"],
-    });
+    const result = spawnSync(
+      "xelatex",
+      ["-interaction=nonstopmode", "-output-directory=" + join(path, ".."), texPath],
+      {
+        timeout: 60000,
+        encoding: "utf-8",
+        stdio: ["pipe", "pipe", "pipe"],
+      },
+    );
 
     return result.status === 0 && existsSync(path);
   } catch {
@@ -192,9 +202,9 @@ let testPdfPath: string;
 
 beforeAll(async () => {
   console.log("\n🔧 初始化翻譯測試... Initializing translation tests...\n");
-  
+
   ensureDir(E2E_OUTPUT_DIR);
-  
+
   // 檢測翻譯工具
   console.log("  檢測翻譯工具...");
   translators = {
@@ -204,7 +214,9 @@ beforeAll(async () => {
 
   for (const [name, status] of Object.entries(translators)) {
     const icon = status.available ? "✅" : "❌";
-    console.log(`    ${icon} ${name}: ${status.available ? status.version || "available" : "not found"}`);
+    console.log(
+      `    ${icon} ${name}: ${status.available ? status.version || "available" : "not found"}`,
+    );
   }
 
   // 檢查或創建測試 PDF
@@ -230,16 +242,25 @@ afterAll(() => {
   console.log(`✅ 通過 Passed: ${stats.passed}`);
   console.log(`❌ 失敗 Failed: ${stats.failed}`);
   console.log(`⏭ 跳過 Skipped: ${stats.skipped}`);
-  console.log(`成功率 Success Rate: ${((stats.passed / (stats.total - stats.skipped || 1)) * 100).toFixed(1)}%`);
+  console.log(
+    `成功率 Success Rate: ${((stats.passed / (stats.total - stats.skipped || 1)) * 100).toFixed(1)}%`,
+  );
   console.log("=".repeat(70));
 
   // 生成報告
   const reportPath = join(E2E_OUTPUT_DIR, "translation-report.json");
-  writeFileSync(reportPath, JSON.stringify({
-    generatedAt: new Date().toISOString(),
-    translators,
-    stats,
-  }, null, 2));
+  writeFileSync(
+    reportPath,
+    JSON.stringify(
+      {
+        generatedAt: new Date().toISOString(),
+        translators,
+        stats,
+      },
+      null,
+      2,
+    ),
+  );
   console.log(`📁 報告已保存: ${reportPath}`);
 });
 
@@ -250,86 +271,92 @@ afterAll(() => {
 describe("📚 PDFMathTranslate (pdf2zh)", () => {
   // 主要語言測試
   describe("主要語言翻譯 Primary Languages", () => {
-    const primaryLanguages = SUPPORTED_LANGUAGES.filter(l => 
-      ["zh", "en", "ja", "ko"].includes(l.code)
+    const primaryLanguages = SUPPORTED_LANGUAGES.filter((l) =>
+      ["zh", "en", "ja", "ko"].includes(l.code),
     );
 
     for (const lang of primaryLanguages) {
-      test(`英文 → ${lang.nativeName} (${lang.code})`, async () => {
-        stats.total++;
+      test(
+        `英文 → ${lang.nativeName} (${lang.code})`,
+        async () => {
+          stats.total++;
 
-        if (!translators.pdf2zh?.available) {
-          stats.skipped++;
-          console.log(`  ⏭ 跳過: pdf2zh 不可用`);
-          return;
-        }
-
-        if (!existsSync(testPdfPath)) {
-          stats.skipped++;
-          console.log(`  ⏭ 跳過: 測試 PDF 不存在`);
-          return;
-        }
-
-        const outputPath = join(E2E_OUTPUT_DIR, `pdf2zh_en_to_${lang.code}.tar`);
-        const startTime = Date.now();
-        const inputSize = statSync(testPdfPath).size;
-
-        try {
-          // 動態導入轉換器
-          const module = await import("../../src/converters/pdfmathtranslate");
-          
-          // 設置目標語言（透過環境變數或參數）
-          process.env.PDF2ZH_TARGET_LANG = lang.code;
-          
-          await module.convert(testPdfPath, "pdf", "tar", outputPath);
-
-          const duration = Date.now() - startTime;
-          const outputSize = existsSync(outputPath) ? statSync(outputPath).size : 0;
-          const success = outputSize > 0;
-
-          stats.results.push({
-            translator: "pdf2zh",
-            sourceLang: "en",
-            targetLang: lang.code,
-            success,
-            duration,
-            inputSize,
-            outputSize,
-          });
-
-          if (success) {
-            stats.passed++;
-            console.log(`  ✓ en → ${lang.code}: ${outputSize} bytes (${(duration / 1000).toFixed(1)}s)`);
-          } else {
-            stats.failed++;
-            console.log(`  ✗ en → ${lang.code}: 輸出為空`);
+          if (!translators.pdf2zh?.available) {
+            stats.skipped++;
+            console.log(`  ⏭ 跳過: pdf2zh 不可用`);
+            return;
           }
 
-          expect(success).toBe(true);
-        } catch (error) {
-          const duration = Date.now() - startTime;
-          stats.failed++;
-          stats.results.push({
-            translator: "pdf2zh",
-            sourceLang: "en",
-            targetLang: lang.code,
-            success: false,
-            duration,
-            inputSize,
-            outputSize: 0,
-            error: String(error),
-          });
-          console.log(`  ✗ en → ${lang.code}: ${error}`);
-          throw error;
-        }
-      }, TIMEOUT);
+          if (!existsSync(testPdfPath)) {
+            stats.skipped++;
+            console.log(`  ⏭ 跳過: 測試 PDF 不存在`);
+            return;
+          }
+
+          const outputPath = join(E2E_OUTPUT_DIR, `pdf2zh_en_to_${lang.code}.tar`);
+          const startTime = Date.now();
+          const inputSize = statSync(testPdfPath).size;
+
+          try {
+            // 動態導入轉換器
+            const module = await import("../../src/converters/pdfmathtranslate");
+
+            // 設置目標語言（透過環境變數或參數）
+            process.env.PDF2ZH_TARGET_LANG = lang.code;
+
+            await module.convert(testPdfPath, "pdf", "tar", outputPath);
+
+            const duration = Date.now() - startTime;
+            const outputSize = existsSync(outputPath) ? statSync(outputPath).size : 0;
+            const success = outputSize > 0;
+
+            stats.results.push({
+              translator: "pdf2zh",
+              sourceLang: "en",
+              targetLang: lang.code,
+              success,
+              duration,
+              inputSize,
+              outputSize,
+            });
+
+            if (success) {
+              stats.passed++;
+              console.log(
+                `  ✓ en → ${lang.code}: ${outputSize} bytes (${(duration / 1000).toFixed(1)}s)`,
+              );
+            } else {
+              stats.failed++;
+              console.log(`  ✗ en → ${lang.code}: 輸出為空`);
+            }
+
+            expect(success).toBe(true);
+          } catch (error) {
+            const duration = Date.now() - startTime;
+            stats.failed++;
+            stats.results.push({
+              translator: "pdf2zh",
+              sourceLang: "en",
+              targetLang: lang.code,
+              success: false,
+              duration,
+              inputSize,
+              outputSize: 0,
+              error: String(error),
+            });
+            console.log(`  ✗ en → ${lang.code}: ${error}`);
+            throw error;
+          }
+        },
+        TIMEOUT,
+      );
     }
   });
 
   // 次要語言測試（可選）
   describe("次要語言翻譯 Secondary Languages", () => {
-    const secondaryLanguages = SUPPORTED_LANGUAGES.filter(l => 
-      ["de", "fr", "es", "ru"].includes(l.code)
+    const secondaryLanguages = SUPPORTED_LANGUAGES.filter((l) =>
+      ["de", "fr", "es", "ru"].includes(l.code),
     );
 
     for (const lang of secondaryLanguages) {
@@ -349,78 +376,82 @@ describe("📚 PDFMathTranslate (pdf2zh)", () => {
 
 describe("🌐 BabelDOC", () => {
   describe("PDF 翻譯", () => {
-    const testLanguages = SUPPORTED_LANGUAGES.filter(l => 
-      ["zh", "ja"].includes(l.code)
-    );
+    const testLanguages = SUPPORTED_LANGUAGES.filter((l) => ["zh", "ja"].includes(l.code));
 
     for (const lang of testLanguages) {
-      test(`英文 → ${lang.nativeName} (${lang.code})`, async () => {
-        stats.total++;
+      test(
+        `英文 → ${lang.nativeName} (${lang.code})`,
+        async () => {
+          stats.total++;
 
-        if (!translators.babeldoc?.available) {
-          stats.skipped++;
-          console.log(`  ⏭ 跳過: babeldoc 不可用`);
-          return;
-        }
-
-        if (!existsSync(testPdfPath)) {
-          stats.skipped++;
-          console.log(`  ⏭ 跳過: 測試 PDF 不存在`);
-          return;
-        }
-
-        const outputPath = join(E2E_OUTPUT_DIR, `babeldoc_en_to_${lang.code}.tar`);
-        const startTime = Date.now();
-        const inputSize = statSync(testPdfPath).size;
-
-        try {
-          const module = await import("../../src/converters/babeldoc");
-          
-          // 設置目標語言
-          process.env.BABELDOC_TARGET_LANG = lang.code;
-          
-          await module.convert(testPdfPath, "pdf", "tar", outputPath);
-
-          const duration = Date.now() - startTime;
-          const outputSize = existsSync(outputPath) ? statSync(outputPath).size : 0;
-          const success = outputSize > 0;
-
-          stats.results.push({
-            translator: "babeldoc",
-            sourceLang: "en",
-            targetLang: lang.code,
-            success,
-            duration,
-            inputSize,
-            outputSize,
-          });
-
-          if (success) {
-            stats.passed++;
-            console.log(`  ✓ en → ${lang.code}: ${outputSize} bytes (${(duration / 1000).toFixed(1)}s)`);
-          } else {
-            stats.failed++;
-            console.log(`  ✗ en → ${lang.code}: 輸出為空`);
+          if (!translators.babeldoc?.available) {
+            stats.skipped++;
+            console.log(`  ⏭ 跳過: babeldoc 不可用`);
+            return;
           }
 
-          expect(success).toBe(true);
-        } catch (error) {
-          const duration = Date.now() - startTime;
-          stats.failed++;
-          stats.results.push({
-            translator: "babeldoc",
-            sourceLang: "en",
-            targetLang: lang.code,
-            success: false,
-            duration,
-            inputSize,
-            outputSize: 0,
-            error: String(error),
-          });
-          console.log(`  ✗ en → ${lang.code}: ${error}`);
-          throw error;
-        }
-      }, TIMEOUT);
+          if (!existsSync(testPdfPath)) {
+            stats.skipped++;
+            console.log(`  ⏭ 跳過: 測試 PDF 不存在`);
+            return;
+          }
+
+          const outputPath = join(E2E_OUTPUT_DIR, `babeldoc_en_to_${lang.code}.tar`);
+          const startTime = Date.now();
+          const inputSize = statSync(testPdfPath).size;
+
+          try {
+            const module = await import("../../src/converters/babeldoc");
+
+            // 設置目標語言
+            process.env.BABELDOC_TARGET_LANG = lang.code;
+
+            await module.convert(testPdfPath, "pdf", "tar", outputPath);
+
+            const duration = Date.now() - startTime;
+            const outputSize = existsSync(outputPath) ? statSync(outputPath).size : 0;
+            const success = outputSize > 0;
+
+            stats.results.push({
+              translator: "babeldoc",
+              sourceLang: "en",
+              targetLang: lang.code,
+              success,
+              duration,
+              inputSize,
+              outputSize,
+            });
+
+            if (success) {
+              stats.passed++;
+              console.log(
+                `  ✓ en → ${lang.code}: ${outputSize} bytes (${(duration / 1000).toFixed(1)}s)`,
+              );
+            } else {
+              stats.failed++;
+              console.log(`  ✗ en → ${lang.code}: 輸出為空`);
+            }
+
+            expect(success).toBe(true);
+          } catch (error) {
+            const duration = Date.now() - startTime;
+            stats.failed++;
+            stats.results.push({
+              translator: "babeldoc",
+              sourceLang: "en",
+              targetLang: lang.code,
+              success: false,
+              duration,
+              inputSize,
+              outputSize: 0,
+              error: String(error),
+            });
+            console.log(`  ✗ en → ${lang.code}: ${error}`);
+            throw error;
+          }
+        },
+        TIMEOUT,
+      );
     }
   });
 });
@@ -434,18 +465,27 @@ describe("🔤 語言矩陣測試 Language Matrix", () => {
     console.log("\n📋 支援的語言 Supported Languages:\n");
     console.log("| 代碼 | 名稱 | 本地名稱 | 測試短語 |");
     console.log("|------|------|----------|----------|");
-    
+
     for (const lang of SUPPORTED_LANGUAGES) {
-      console.log(`| ${lang.code.padEnd(6)} | ${lang.name.padEnd(20)} | ${lang.nativeName} | ${lang.testPhrase} |`);
+      console.log(
+        `| ${lang.code.padEnd(6)} | ${lang.name.padEnd(20)} | ${lang.nativeName} | ${lang.testPhrase} |`,
+      );
     }
 
     // 生成語言矩陣報告
     const matrixPath = join(E2E_OUTPUT_DIR, "language-matrix.json");
-    writeFileSync(matrixPath, JSON.stringify({
-      languages: SUPPORTED_LANGUAGES,
-      translators: Object.keys(translators),
-      generatedAt: new Date().toISOString(),
-    }, null, 2));
+    writeFileSync(
+      matrixPath,
+      JSON.stringify(
+        {
+          languages: SUPPORTED_LANGUAGES,
+          translators: Object.keys(translators),
+          generatedAt: new Date().toISOString(),
+        },
+        null,
+        2,
+      ),
+    );
 
     console.log(`\n📁 語言矩陣已保存: ${matrixPath}`);
     expect(SUPPORTED_LANGUAGES.length).toBeGreaterThan(0);

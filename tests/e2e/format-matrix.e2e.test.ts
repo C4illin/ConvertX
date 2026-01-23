@@ -1,20 +1,20 @@
 /**
  * 格式轉換矩陣測試
- * 
+ *
  * 測試目標：驗證 1000+ 種格式轉換組合
- * 
+ *
  * 這個測試會：
  * 1. 自動發現所有轉換器支援的格式
  * 2. 生成所有可能的轉換組合
  * 3. 執行抽樣測試（避免耗時過長）
  * 4. 生成詳細的測試報告
- * 
+ *
  * 執行方式：
  *   bun test tests/e2e/format-matrix.e2e.test.ts
  */
 
 import { describe, test, expect, beforeAll, afterAll } from "bun:test";
-import { existsSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 
@@ -24,9 +24,6 @@ import { spawnSync } from "node:child_process";
 
 const E2E_OUTPUT_DIR = "tests/e2e/output/format-matrix";
 const TIMEOUT = 60_000; // 60 秒超時
-
-// 抽樣比例（0.1 = 10%，避免測試過長）
-const SAMPLING_RATE = 0.05;
 
 // 每個轉換器最大測試數
 const MAX_TESTS_PER_CONVERTER = 20;
@@ -118,18 +115,14 @@ function createTestContent(format: string): Buffer | string {
 
     case "png":
       return Buffer.from([
-        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
-        0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
-        0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-        0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,
-        0xde, 0x00, 0x00, 0x00, 0x0c, 0x49, 0x44, 0x41,
-        0x54, 0x08, 0xd7, 0x63, 0xf8, 0xcf, 0xc0, 0x00,
-        0x00, 0x00, 0x03, 0x00, 0x01, 0x00, 0x05, 0xfe,
-        0xd4, 0xef, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45,
-        0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
+        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44,
+        0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x00, 0x00, 0x00, 0x90,
+        0x77, 0x53, 0xde, 0x00, 0x00, 0x00, 0x0c, 0x49, 0x44, 0x41, 0x54, 0x08, 0xd7, 0x63, 0xf8,
+        0xcf, 0xc0, 0x00, 0x00, 0x00, 0x03, 0x00, 0x01, 0x00, 0x05, 0xfe, 0xd4, 0xef, 0x00, 0x00,
+        0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
       ]);
 
-    case "bmp":
+    case "bmp": {
       const bmp = Buffer.alloc(70);
       bmp.write("BM", 0);
       bmp.writeUInt32LE(70, 2);
@@ -143,6 +136,7 @@ function createTestContent(format: string): Buffer | string {
       bmp[55] = 0x00;
       bmp[56] = 0x00;
       return bmp;
+    }
 
     // 文檔格式
     case "md":
@@ -232,7 +226,21 @@ const CONVERTERS: ConverterConfig[] = [
     name: "imagemagick",
     command: "magick",
     from: ["png", "jpg", "jpeg", "gif", "bmp", "tiff", "tif", "webp", "ico", "ppm", "pgm", "pbm"],
-    to: ["png", "jpg", "jpeg", "gif", "bmp", "tiff", "tif", "webp", "ico", "ppm", "pgm", "pbm", "pdf"],
+    to: [
+      "png",
+      "jpg",
+      "jpeg",
+      "gif",
+      "bmp",
+      "tiff",
+      "tif",
+      "webp",
+      "ico",
+      "ppm",
+      "pgm",
+      "pbm",
+      "pdf",
+    ],
   },
   {
     name: "graphicsmagick",
@@ -316,7 +324,7 @@ const CONVERTERS: ConverterConfig[] = [
 // 主測試
 // =============================================================================
 
-let report: MatrixReport = {
+const report: MatrixReport = {
   generatedAt: new Date().toISOString(),
   converters: [],
   totalCombinations: 0,
@@ -350,7 +358,9 @@ afterAll(() => {
   console.log(`通過 Passed: ${report.passedTests}`);
   console.log(`失敗 Failed: ${report.failedTests}`);
   console.log(`跳過 Skipped: ${report.skippedTests}`);
-  console.log(`成功率 Success Rate: ${((report.passedTests / (report.testedCombinations || 1)) * 100).toFixed(1)}%`);
+  console.log(
+    `成功率 Success Rate: ${((report.passedTests / (report.testedCombinations || 1)) * 100).toFixed(1)}%`,
+  );
   console.log("=".repeat(70));
   console.log(`📁 報告路徑: ${reportPath}`);
   console.log(`📄 摘要路徑: ${summaryPath}`);
@@ -380,7 +390,7 @@ function generateMarkdownSummary(report: MatrixReport): string {
   }
 
   md += `## 失敗的測試\n\n`;
-  const failedResults = report.results.filter(r => !r.success);
+  const failedResults = report.results.filter((r) => !r.success);
   if (failedResults.length === 0) {
     md += `無失敗的測試 ✅\n`;
   } else {
@@ -399,7 +409,6 @@ function generateMarkdownSummary(report: MatrixReport): string {
 // =============================================================================
 
 describe("📊 格式轉換矩陣 Format Conversion Matrix", () => {
-  
   describe("發現可用轉換器 Discover Available Converters", () => {
     test("檢測所有轉換器", () => {
       for (const config of CONVERTERS) {
@@ -427,7 +436,9 @@ describe("📊 格式轉換矩陣 Format Conversion Matrix", () => {
         report.totalCombinations += combinations.length;
 
         const icon = available ? "✅" : "❌";
-        console.log(`  ${icon} ${config.name}: ${combinations.length} 組合 (${available ? "可用" : "不可用"})`);
+        console.log(
+          `  ${icon} ${config.name}: ${combinations.length} 組合 (${available ? "可用" : "不可用"})`,
+        );
       }
 
       console.log(`\n  📈 總組合數: ${report.totalCombinations}`);
@@ -436,82 +447,98 @@ describe("📊 格式轉換矩陣 Format Conversion Matrix", () => {
   });
 
   describe("圖像格式轉換 Image Format Conversions", () => {
-    const imageConverters = ["inkscape", "imagemagick", "graphicsmagick", "potrace", "vtracer", "resvg", "vips"];
+    const imageConverters = [
+      "inkscape",
+      "imagemagick",
+      "graphicsmagick",
+      "potrace",
+      "vtracer",
+      "resvg",
+      "vips",
+    ];
 
     for (const converterName of imageConverters) {
       describe(`${converterName}`, () => {
-        test(`測試格式轉換`, async () => {
-          const converter = report.converters.find(c => c.name === converterName);
-          if (!converter) {
-            report.skippedTests++;
-            console.log(`  ⏭ ${converterName}: 轉換器未找到`);
-            return;
-          }
-
-          if (!converter.available) {
-            report.skippedTests += converter.combinations.length;
-            console.log(`  ⏭ ${converterName}: 工具不可用，跳過 ${converter.combinations.length} 個測試`);
-            return;
-          }
-
-          // 抽樣測試
-          const sampled = sampleCombinations(converter.combinations, MAX_TESTS_PER_CONVERTER);
-          console.log(`  🧪 ${converterName}: 測試 ${sampled.length}/${converter.combinations.length} 個組合`);
-
-          for (const [from, to] of sampled) {
-            report.testedCombinations++;
-            const startTime = Date.now();
-
-            try {
-              // 建立測試檔案
-              const inputDir = join(E2E_OUTPUT_DIR, converterName);
-              ensureDir(inputDir);
-              const inputPath = join(inputDir, `input.${from}`);
-              const outputPath = join(inputDir, `output_${from}_to_${to}.${to}`);
-
-              const content = createTestContent(from);
-              if (Buffer.isBuffer(content)) {
-                writeFileSync(inputPath, content);
-              } else {
-                writeFileSync(inputPath, content, "utf-8");
-              }
-
-              // 動態導入並執行轉換
-              const module = await import(`../../src/converters/${converterName}`);
-              await module.convert(inputPath, from, to, outputPath);
-
-              const duration = Date.now() - startTime;
-              const success = existsSync(outputPath);
-
-              report.results.push({
-                converter: converterName,
-                from,
-                to,
-                success,
-                duration,
-              });
-
-              if (success) {
-                report.passedTests++;
-              } else {
-                report.failedTests++;
-                console.log(`    ❌ ${from} → ${to}: 輸出檔案不存在`);
-              }
-            } catch (error) {
-              const duration = Date.now() - startTime;
-              report.failedTests++;
-              report.results.push({
-                converter: converterName,
-                from,
-                to,
-                success: false,
-                duration,
-                error: String(error),
-              });
-              console.log(`    ❌ ${from} → ${to}: ${error}`);
+        test(
+          `測試格式轉換`,
+          async () => {
+            const converter = report.converters.find((c) => c.name === converterName);
+            if (!converter) {
+              report.skippedTests++;
+              console.log(`  ⏭ ${converterName}: 轉換器未找到`);
+              return;
             }
-          }
-        }, TIMEOUT * sampled.length);
+
+            if (!converter.available) {
+              report.skippedTests += converter.combinations.length;
+              console.log(
+                `  ⏭ ${converterName}: 工具不可用，跳過 ${converter.combinations.length} 個測試`,
+              );
+              return;
+            }
+
+            // 抽樣測試
+            const sampled = sampleCombinations(converter.combinations, MAX_TESTS_PER_CONVERTER);
+            console.log(
+              `  🧪 ${converterName}: 測試 ${sampled.length}/${converter.combinations.length} 個組合`,
+            );
+
+            for (const [from, to] of sampled) {
+              report.testedCombinations++;
+              const startTime = Date.now();
+
+              try {
+                // 建立測試檔案
+                const inputDir = join(E2E_OUTPUT_DIR, converterName);
+                ensureDir(inputDir);
+                const inputPath = join(inputDir, `input.${from}`);
+                const outputPath = join(inputDir, `output_${from}_to_${to}.${to}`);
+
+                const content = createTestContent(from);
+                if (Buffer.isBuffer(content)) {
+                  writeFileSync(inputPath, content);
+                } else {
+                  writeFileSync(inputPath, content, "utf-8");
+                }
+
+                // 動態導入並執行轉換
+                const module = await import(`../../src/converters/${converterName}`);
+                await module.convert(inputPath, from, to, outputPath);
+
+                const duration = Date.now() - startTime;
+                const success = existsSync(outputPath);
+
+                report.results.push({
+                  converter: converterName,
+                  from,
+                  to,
+                  success,
+                  duration,
+                });
+
+                if (success) {
+                  report.passedTests++;
+                } else {
+                  report.failedTests++;
+                  console.log(`    ❌ ${from} → ${to}: 輸出檔案不存在`);
+                }
+              } catch (error) {
+                const duration = Date.now() - startTime;
+                report.failedTests++;
+                report.results.push({
+                  converter: converterName,
+                  from,
+                  to,
+                  success: false,
+                  duration,
+                  error: String(error),
+                });
+                console.log(`    ❌ ${from} → ${to}: ${error}`);
+              }
+            }
+          },
+          TIMEOUT * sampled.length,
+        );
       });
     }
   });
@@ -521,85 +548,94 @@ describe("📊 格式轉換矩陣 Format Conversion Matrix", () => {
 
     for (const converterName of docConverters) {
       describe(`${converterName}`, () => {
-        test(`測試格式轉換`, async () => {
-          const converter = report.converters.find(c => c.name === converterName);
-          if (!converter) {
-            report.skippedTests++;
-            console.log(`  ⏭ ${converterName}: 轉換器未找到`);
-            return;
-          }
-
-          if (!converter.available) {
-            report.skippedTests += converter.combinations.length;
-            console.log(`  ⏭ ${converterName}: 工具不可用，跳過 ${converter.combinations.length} 個測試`);
-            return;
-          }
-
-          // 抽樣測試
-          const sampled = sampleCombinations(converter.combinations, MAX_TESTS_PER_CONVERTER);
-          console.log(`  🧪 ${converterName}: 測試 ${sampled.length}/${converter.combinations.length} 個組合`);
-
-          for (const [from, to] of sampled) {
-            report.testedCombinations++;
-            const startTime = Date.now();
-
-            try {
-              const inputDir = join(E2E_OUTPUT_DIR, converterName);
-              ensureDir(inputDir);
-              const inputPath = join(inputDir, `input.${from}`);
-              const outputPath = join(inputDir, `output_${from}_to_${to}.${to}`);
-
-              // 跳過複雜的二進制輸入格式（需要真實檔案）
-              if (isComplexFormat(from)) {
-                report.skippedTests++;
-                continue;
-              }
-
-              const content = createTestContent(from);
-              if (Buffer.isBuffer(content)) {
-                writeFileSync(inputPath, content);
-              } else {
-                writeFileSync(inputPath, content, "utf-8");
-              }
-
-              const module = await import(`../../src/converters/${converterName}`);
-              // 對於 Pandoc，正規化格式名稱
-              const normalizedFrom = converterName === "pandoc" ? normalizeFormatForPandoc(from) : from;
-              const normalizedTo = converterName === "pandoc" ? normalizeFormatForPandoc(to) : to;
-              await module.convert(inputPath, normalizedFrom, normalizedTo, outputPath);
-
-              const duration = Date.now() - startTime;
-              const success = existsSync(outputPath);
-
-              report.results.push({
-                converter: converterName,
-                from,
-                to,
-                success,
-                duration,
-              });
-
-              if (success) {
-                report.passedTests++;
-              } else {
-                report.failedTests++;
-                console.log(`    ❌ ${from} → ${to}: 輸出檔案不存在`);
-              }
-            } catch (error) {
-              const duration = Date.now() - startTime;
-              report.failedTests++;
-              report.results.push({
-                converter: converterName,
-                from,
-                to,
-                success: false,
-                duration,
-                error: String(error),
-              });
-              console.log(`    ❌ ${from} → ${to}: ${error}`);
+        test(
+          `測試格式轉換`,
+          async () => {
+            const converter = report.converters.find((c) => c.name === converterName);
+            if (!converter) {
+              report.skippedTests++;
+              console.log(`  ⏭ ${converterName}: 轉換器未找到`);
+              return;
             }
-          }
-        }, TIMEOUT * sampled.length);
+
+            if (!converter.available) {
+              report.skippedTests += converter.combinations.length;
+              console.log(
+                `  ⏭ ${converterName}: 工具不可用，跳過 ${converter.combinations.length} 個測試`,
+              );
+              return;
+            }
+
+            // 抽樣測試
+            const sampled = sampleCombinations(converter.combinations, MAX_TESTS_PER_CONVERTER);
+            console.log(
+              `  🧪 ${converterName}: 測試 ${sampled.length}/${converter.combinations.length} 個組合`,
+            );
+
+            for (const [from, to] of sampled) {
+              report.testedCombinations++;
+              const startTime = Date.now();
+
+              try {
+                const inputDir = join(E2E_OUTPUT_DIR, converterName);
+                ensureDir(inputDir);
+                const inputPath = join(inputDir, `input.${from}`);
+                const outputPath = join(inputDir, `output_${from}_to_${to}.${to}`);
+
+                // 跳過複雜的二進制輸入格式（需要真實檔案）
+                if (isComplexFormat(from)) {
+                  report.skippedTests++;
+                  continue;
+                }
+
+                const content = createTestContent(from);
+                if (Buffer.isBuffer(content)) {
+                  writeFileSync(inputPath, content);
+                } else {
+                  writeFileSync(inputPath, content, "utf-8");
+                }
+
+                const module = await import(`../../src/converters/${converterName}`);
+                // 對於 Pandoc，正規化格式名稱
+                const normalizedFrom =
+                  converterName === "pandoc" ? normalizeFormatForPandoc(from) : from;
+                const normalizedTo = converterName === "pandoc" ? normalizeFormatForPandoc(to) : to;
+                await module.convert(inputPath, normalizedFrom, normalizedTo, outputPath);
+
+                const duration = Date.now() - startTime;
+                const success = existsSync(outputPath);
+
+                report.results.push({
+                  converter: converterName,
+                  from,
+                  to,
+                  success,
+                  duration,
+                });
+
+                if (success) {
+                  report.passedTests++;
+                } else {
+                  report.failedTests++;
+                  console.log(`    ❌ ${from} → ${to}: 輸出檔案不存在`);
+                }
+              } catch (error) {
+                const duration = Date.now() - startTime;
+                report.failedTests++;
+                report.results.push({
+                  converter: converterName,
+                  from,
+                  to,
+                  success: false,
+                  duration,
+                  error: String(error),
+                });
+                console.log(`    ❌ ${from} → ${to}: ${error}`);
+              }
+            }
+          },
+          TIMEOUT * sampled.length,
+        );
       });
     }
   });
@@ -609,69 +645,77 @@ describe("📊 格式轉換矩陣 Format Conversion Matrix", () => {
 
     for (const converterName of dataConverters) {
       describe(`${converterName}`, () => {
-        test(`測試格式轉換`, async () => {
-          const converter = report.converters.find(c => c.name === converterName);
-          if (!converter) {
-            report.skippedTests++;
-            console.log(`  ⏭ ${converterName}: 轉換器未找到`);
-            return;
-          }
-
-          if (!converter.available) {
-            report.skippedTests += converter.combinations.length;
-            console.log(`  ⏭ ${converterName}: 工具不可用，跳過 ${converter.combinations.length} 個測試`);
-            return;
-          }
-
-          const sampled = sampleCombinations(converter.combinations, MAX_TESTS_PER_CONVERTER);
-          console.log(`  🧪 ${converterName}: 測試 ${sampled.length}/${converter.combinations.length} 個組合`);
-
-          for (const [from, to] of sampled) {
-            report.testedCombinations++;
-            const startTime = Date.now();
-
-            try {
-              const inputDir = join(E2E_OUTPUT_DIR, converterName);
-              ensureDir(inputDir);
-              const inputPath = join(inputDir, `input.${from}`);
-              const outputPath = join(inputDir, `output_${from}_to_${to}.${to}`);
-
-              const content = createTestContent(from);
-              writeFileSync(inputPath, content, "utf-8");
-
-              const module = await import(`../../src/converters/${converterName}`);
-              await module.convert(inputPath, from, to, outputPath);
-
-              const duration = Date.now() - startTime;
-              const success = existsSync(outputPath);
-
-              report.results.push({
-                converter: converterName,
-                from,
-                to,
-                success,
-                duration,
-              });
-
-              if (success) {
-                report.passedTests++;
-              } else {
-                report.failedTests++;
-              }
-            } catch (error) {
-              const duration = Date.now() - startTime;
-              report.failedTests++;
-              report.results.push({
-                converter: converterName,
-                from,
-                to,
-                success: false,
-                duration,
-                error: String(error),
-              });
+        test(
+          `測試格式轉換`,
+          async () => {
+            const converter = report.converters.find((c) => c.name === converterName);
+            if (!converter) {
+              report.skippedTests++;
+              console.log(`  ⏭ ${converterName}: 轉換器未找到`);
+              return;
             }
-          }
-        }, TIMEOUT * sampled.length);
+
+            if (!converter.available) {
+              report.skippedTests += converter.combinations.length;
+              console.log(
+                `  ⏭ ${converterName}: 工具不可用，跳過 ${converter.combinations.length} 個測試`,
+              );
+              return;
+            }
+
+            const sampled = sampleCombinations(converter.combinations, MAX_TESTS_PER_CONVERTER);
+            console.log(
+              `  🧪 ${converterName}: 測試 ${sampled.length}/${converter.combinations.length} 個組合`,
+            );
+
+            for (const [from, to] of sampled) {
+              report.testedCombinations++;
+              const startTime = Date.now();
+
+              try {
+                const inputDir = join(E2E_OUTPUT_DIR, converterName);
+                ensureDir(inputDir);
+                const inputPath = join(inputDir, `input.${from}`);
+                const outputPath = join(inputDir, `output_${from}_to_${to}.${to}`);
+
+                const content = createTestContent(from);
+                writeFileSync(inputPath, content, "utf-8");
+
+                const module = await import(`../../src/converters/${converterName}`);
+                await module.convert(inputPath, from, to, outputPath);
+
+                const duration = Date.now() - startTime;
+                const success = existsSync(outputPath);
+
+                report.results.push({
+                  converter: converterName,
+                  from,
+                  to,
+                  success,
+                  duration,
+                });
+
+                if (success) {
+                  report.passedTests++;
+                } else {
+                  report.failedTests++;
+                }
+              } catch (error) {
+                const duration = Date.now() - startTime;
+                report.failedTests++;
+                report.results.push({
+                  converter: converterName,
+                  from,
+                  to,
+                  success: false,
+                  duration,
+                  error: String(error),
+                });
+              }
+            }
+          },
+          TIMEOUT * sampled.length,
+        );
       });
     }
   });
@@ -693,6 +737,3 @@ function sampleCombinations(
   const shuffled = [...combinations].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, maxCount);
 }
-
-// 為 sampled 變數提供全局作用域
-let sampled: [string, string][] = [];

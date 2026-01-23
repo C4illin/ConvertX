@@ -51,4 +51,3 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Basic tests completed. For comprehensive E2E tests with all converters," >> $GITHUB_STEP_SUMMARY
           echo "see the [Docker E2E Tests](${{ github.server_url }}/${{ github.repository }}/actions/workflows/docker-e2e-tests.yml) workflow." >> $GITHUB_STEP_SUMMARY
-

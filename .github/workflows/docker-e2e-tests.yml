@@ -132,15 +132,15 @@ jobs:
       - name: Run API health check
         run: |
           echo "🔍 Testing API endpoints..."
-          
+
           # Health check
           curl -f http://localhost:3000/healthcheck
           echo ""
-          
+
           # Check if main page loads
           curl -f -o /dev/null -w "%{http_code}" http://localhost:3000/
           echo ""
-          
+
           echo "✅ API health checks passed!"
 
   # ============================================
@@ -175,7 +175,7 @@ jobs:
       - name: Run E2E tests inside Docker container
         run: |
           echo "🧪 Running comprehensive E2E tests inside Docker..."
-          
+
           docker run --rm \
             --name convertx-e2e-test \
             -v "${{ github.workspace }}/tests:/app/tests" \
@@ -269,7 +269,7 @@ jobs:
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
         run: |
           echo "🌍 Running translation tests..."
-          
+
           docker run --rm \
             --name convertx-translation-test \
             -v "${{ github.workspace }}/tests:/app/tests" \
@@ -320,7 +320,7 @@ jobs:
           script: |
             const tag = `test-${{ github.sha }}`;
             console.log(`🗑️ Attempting to delete test image with tag: ${tag}`);
-            
+
             // Note: This requires ghcr.io API access which may need additional setup
             // For now, images will be cleaned up by retention policies
             console.log('Test images will be cleaned up by retention policies');
@@ -353,12 +353,12 @@ jobs:
           echo "| E2E Tests | ${{ needs.e2e-tests.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Comprehensive E2E | ${{ needs.comprehensive-e2e.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ -f "test-results/format-matrix/matrix-summary.md" ]; then
             echo "## Format Matrix Summary" >> $GITHUB_STEP_SUMMARY
             cat test-results/format-matrix/matrix-summary.md >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if [ -f "test-results/comprehensive/conversion-matrix.json" ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "## Conversion Matrix" >> $GITHUB_STEP_SUMMARY
@@ -366,6 +366,6 @@ jobs:
             head -50 test-results/comprehensive/conversion-matrix.json >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "📅 Test run completed at: $(date -u)" >> $GITHUB_STEP_SUMMARY

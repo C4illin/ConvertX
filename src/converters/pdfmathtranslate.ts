@@ -120,7 +120,7 @@ function checkModelsExist(): boolean {
     console.warn(`[PDFMathTranslate] Models should be pre-downloaded during Docker build.`);
     return false;
   }
-  
+
   // 檢查特定的 ONNX 模型檔案
   const onnxModelPath = join(MODELS_PATH, "doclayout_yolo_docstructbench_imgsz1024.onnx");
   if (!existsSync(onnxModelPath)) {
@@ -128,7 +128,7 @@ function checkModelsExist(): boolean {
     console.warn(`[PDFMathTranslate] Model should be pre-downloaded during Docker build.`);
     return false;
   }
-  
+
   return true;
 }
 

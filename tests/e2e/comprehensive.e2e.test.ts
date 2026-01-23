@@ -15,8 +15,8 @@
  */
 
 import { describe, test, expect, beforeAll, afterAll } from "bun:test";
-import { existsSync, statSync, mkdirSync, writeFileSync, readdirSync } from "node:fs";
-import { join, basename } from "node:path";
+import { existsSync, statSync, mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 
 // =============================================================================
@@ -28,9 +28,9 @@ const E2E_FIXTURES_DIR = "tests/e2e/fixtures";
 
 // 測試超時（毫秒）
 const TIMEOUT = {
-  fast: 30_000,      // 快速轉換
-  medium: 60_000,    // 中等複雜度
-  slow: 180_000,     // 複雜轉換
+  fast: 30_000, // 快速轉換
+  medium: 60_000, // 中等複雜度
+  slow: 180_000, // 複雜轉換
   translation: 300_000, // 翻譯（需網路）
 };
 
@@ -97,25 +97,24 @@ function ensureDir(dir: string): void {
 }
 
 function createTestSvg(path: string): void {
-  writeFileSync(path, `<?xml version="1.0" encoding="UTF-8"?>
+  writeFileSync(
+    path,
+    `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
   <rect x="10" y="10" width="180" height="180" fill="#4285f4" rx="20"/>
   <circle cx="100" cy="100" r="50" fill="#ffffff"/>
   <text x="100" y="110" text-anchor="middle" font-size="24" fill="#333">測試</text>
-</svg>`);
+</svg>`,
+  );
 }
 
 function createTestPng(path: string): void {
   // 最小有效 PNG (1x1 紅色像素)
   const png = Buffer.from([
-    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
-    0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
-    0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-    0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,
-    0xde, 0x00, 0x00, 0x00, 0x0c, 0x49, 0x44, 0x41,
-    0x54, 0x08, 0xd7, 0x63, 0xf8, 0xcf, 0xc0, 0x00,
-    0x00, 0x00, 0x03, 0x00, 0x01, 0x00, 0x05, 0xfe,
-    0xd4, 0xef, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45,
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+    0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,
+    0xde, 0x00, 0x00, 0x00, 0x0c, 0x49, 0x44, 0x41, 0x54, 0x08, 0xd7, 0x63, 0xf8, 0xcf, 0xc0, 0x00,
+    0x00, 0x00, 0x03, 0x00, 0x01, 0x00, 0x05, 0xfe, 0xd4, 0xef, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45,
     0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
   ]);
   writeFileSync(path, png);
@@ -142,7 +141,9 @@ function createTestBmp(path: string): void {
 }
 
 function createTestMarkdown(path: string): void {
-  writeFileSync(path, `# 測試文件 Test Document
+  writeFileSync(
+    path,
+    `# 測試文件 Test Document
 
 這是一個**多語言**測試文件。
 
@@ -173,23 +174,33 @@ This is an English paragraph for testing.
 \`\`\`javascript
 console.log("Hello, 世界!");
 \`\`\`
-`);
+`,
+  );
 }
 
 function createTestJson(path: string): void {
-  writeFileSync(path, JSON.stringify({
-    name: "測試",
-    version: "1.0.0",
-    languages: ["zh-TW", "zh-CN", "en", "ja", "ko"],
-    config: {
-      enabled: true,
-      count: 42,
-    },
-  }, null, 2));
+  writeFileSync(
+    path,
+    JSON.stringify(
+      {
+        name: "測試",
+        version: "1.0.0",
+        languages: ["zh-TW", "zh-CN", "en", "ja", "ko"],
+        config: {
+          enabled: true,
+          count: 42,
+        },
+      },
+      null,
+      2,
+    ),
+  );
 }
 
 function createTestHtml(path: string): void {
-  writeFileSync(path, `<!DOCTYPE html>
+  writeFileSync(
+    path,
+    `<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -203,11 +214,14 @@ function createTestHtml(path: string): void {
     <li>項目二</li>
   </ul>
 </body>
-</html>`);
+</html>`,
+  );
 }
 
 function createTestTxt(path: string): void {
-  writeFileSync(path, `測試文字檔案 Test Text File
+  writeFileSync(
+    path,
+    `測試文字檔案 Test Text File
 
 這是一個純文字測試檔案。
 This is a plain text test file.
@@ -220,16 +234,20 @@ This is a plain text test file.
 - 한국어
 - Deutsch
 - Français
-`);
+`,
+  );
 }
 
 function createTestCsv(path: string): void {
-  writeFileSync(path, `name,value,description
+  writeFileSync(
+    path,
+    `name,value,description
 測試1,100,這是第一項
 測試2,200,這是第二項
 test3,300,This is the third item
 テスト4,400,これは4番目の項目です
-`);
+`,
+  );
 }
 
 // =============================================================================
@@ -250,7 +268,6 @@ async function runConversion(
   converter: string,
   inputPath: string,
   outputPath: string,
-  timeout = TIMEOUT.medium,
 ): Promise<ConversionResult> {
   const startTime = Date.now();
   const inputSize = existsSync(inputPath) ? statSync(inputPath).size : 0;
@@ -315,7 +332,9 @@ function printSummary(): void {
   console.log(`✅ 通過 Passed: ${stats.passed}`);
   console.log(`❌ 失敗 Failed: ${stats.failed}`);
   console.log(`⏭ 跳過 Skipped: ${stats.skipped}`);
-  console.log(`成功率 Success Rate: ${((stats.passed / (stats.total - stats.skipped)) * 100).toFixed(1)}%`);
+  console.log(
+    `成功率 Success Rate: ${((stats.passed / (stats.total - stats.skipped)) * 100).toFixed(1)}%`,
+  );
   console.log("=".repeat(60));
 }
 
@@ -323,18 +342,20 @@ function printSummary(): void {
 // 測試套件
 // =============================================================================
 
-let availableTools: Record<string, boolean> = {};
+const availableTools: Record<string, boolean> = {};
 
 beforeAll(() => {
   console.log("\n🔧 檢測可用工具 Detecting available tools...\n");
-  
+
   for (const [name, check] of Object.entries(TOOLS)) {
     const status = check();
     availableTools[name] = status.available;
     const icon = status.available ? "✅" : "❌";
-    console.log(`  ${icon} ${name}: ${status.available ? status.version || "available" : "not found"}`);
+    console.log(
+      `  ${icon} ${name}: ${status.available ? status.version || "available" : "not found"}`,
+    );
   }
-  
+
   console.log("\n");
   ensureDir(E2E_OUTPUT_DIR);
 });
@@ -365,29 +386,35 @@ describe("🖼️ 圖像格式轉換 Image Conversions", () => {
     });
 
     for (const format of formats) {
-      test(`SVG → ${format.toUpperCase()}`, async () => {
-        if (!availableTools.inkscape || !availableTools.xvfbRun) {
-          stats.skipped++;
+      test(
+        `SVG → ${format.toUpperCase()}`,
+        async () => {
+          if (!availableTools.inkscape || !availableTools.xvfbRun) {
+            stats.skipped++;
+            stats.total++;
+            console.log(`⏭ Skipping: xvfb-run or inkscape not available`);
+            return;
+          }
+
           stats.total++;
-          console.log(`⏭ Skipping: xvfb-run or inkscape not available`);
-          return;
-        }
+          const outputPath = join(outputDir, `inkscape_output.${format}`);
+          const result = await runConversion("inkscape", inputPath, outputPath);
+          stats.results.push(result);
 
-        stats.total++;
-        const outputPath = join(outputDir, `inkscape_output.${format}`);
-        const result = await runConversion("inkscape", inputPath, outputPath);
-        stats.results.push(result);
+          if (result.success) {
+            stats.passed++;
+            console.log(
+              `  ✓ SVG → ${format.toUpperCase()}: ${result.outputSize} bytes (${result.duration}ms)`,
+            );
+          } else {
+            stats.failed++;
+            console.log(`  ✗ SVG → ${format.toUpperCase()}: ${result.error}`);
+          }
 
-        if (result.success) {
-          stats.passed++;
-          console.log(`  ✓ SVG → ${format.toUpperCase()}: ${result.outputSize} bytes (${result.duration}ms)`);
-        } else {
-          stats.failed++;
-          console.log(`  ✗ SVG → ${format.toUpperCase()}: ${result.error}`);
-        }
-
-        expect(result.success).toBe(true);
-      }, TIMEOUT.medium);
+          expect(result.success).toBe(true);
+        },
+        TIMEOUT.medium,
+      );
     }
   });
 
@@ -403,33 +430,39 @@ describe("🖼️ 圖像格式轉換 Image Conversions", () => {
     ];
 
     for (const [from, to] of conversions) {
-      test(`${from.toUpperCase()} → ${to.toUpperCase()}`, async () => {
-        if (!availableTools.imagemagick) {
-          stats.skipped++;
+      test(
+        `${from.toUpperCase()} → ${to.toUpperCase()}`,
+        async () => {
+          if (!availableTools.imagemagick) {
+            stats.skipped++;
+            stats.total++;
+            console.log(`⏭ Skipping: ImageMagick not available`);
+            return;
+          }
+
           stats.total++;
-          console.log(`⏭ Skipping: ImageMagick not available`);
-          return;
-        }
+          const inputPath = join(outputDir, `imagemagick_input.${from}`);
+          const outputPath = join(outputDir, `imagemagick_${from}_to_${to}.${to}`);
 
-        stats.total++;
-        const inputPath = join(outputDir, `imagemagick_input.${from}`);
-        const outputPath = join(outputDir, `imagemagick_${from}_to_${to}.${to}`);
+          if (from === "png") createTestPng(inputPath);
+          else if (from === "bmp") createTestBmp(inputPath);
 
-        if (from === "png") createTestPng(inputPath);
-        else if (from === "bmp") createTestBmp(inputPath);
+          const result = await runConversion("imagemagick", inputPath, outputPath);
+          stats.results.push(result);
 
-        const result = await runConversion("imagemagick", inputPath, outputPath);
-        stats.results.push(result);
+          if (result.success) {
+            stats.passed++;
+            console.log(
+              `  ✓ ${from.toUpperCase()} → ${to.toUpperCase()}: ${result.outputSize} bytes`,
+            );
+          } else {
+            stats.failed++;
+          }
 
-        if (result.success) {
-          stats.passed++;
-          console.log(`  ✓ ${from.toUpperCase()} → ${to.toUpperCase()}: ${result.outputSize} bytes`);
-        } else {
-          stats.failed++;
-        }
-
-        expect(result.success).toBe(true);
-      }, TIMEOUT.fast);
+          expect(result.success).toBe(true);
+        },
+        TIMEOUT.fast,
+      );
     }
   });
 
@@ -438,31 +471,35 @@ describe("🖼️ 圖像格式轉換 Image Conversions", () => {
     const formats = ["svg", "eps", "pdf"];
 
     for (const format of formats) {
-      test(`BMP → ${format.toUpperCase()}`, async () => {
-        if (!availableTools.potrace) {
-          stats.skipped++;
+      test(
+        `BMP → ${format.toUpperCase()}`,
+        async () => {
+          if (!availableTools.potrace) {
+            stats.skipped++;
+            stats.total++;
+            console.log(`⏭ Skipping: Potrace not available`);
+            return;
+          }
+
           stats.total++;
-          console.log(`⏭ Skipping: Potrace not available`);
-          return;
-        }
+          const inputPath = join(outputDir, "potrace_input.bmp");
+          const outputPath = join(outputDir, `potrace_output.${format}`);
+          createTestBmp(inputPath);
 
-        stats.total++;
-        const inputPath = join(outputDir, "potrace_input.bmp");
-        const outputPath = join(outputDir, `potrace_output.${format}`);
-        createTestBmp(inputPath);
+          const result = await runConversion("potrace", inputPath, outputPath);
+          stats.results.push(result);
 
-        const result = await runConversion("potrace", inputPath, outputPath);
-        stats.results.push(result);
+          if (result.success) {
+            stats.passed++;
+            console.log(`  ✓ BMP → ${format.toUpperCase()}: ${result.outputSize} bytes`);
+          } else {
+            stats.failed++;
+          }
 
-        if (result.success) {
-          stats.passed++;
-          console.log(`  ✓ BMP → ${format.toUpperCase()}: ${result.outputSize} bytes`);
-        } else {
-          stats.failed++;
-        }
-
-        expect(result.success).toBe(true);
-      }, TIMEOUT.fast);
+          expect(result.success).toBe(true);
+        },
+        TIMEOUT.fast,
+      );
     }
   });
 });
@@ -488,28 +525,32 @@ describe("📄 文件格式轉換 Document Conversions", () => {
     });
 
     for (const format of formats) {
-      test(`Markdown → ${format.toUpperCase()}`, async () => {
-        if (!availableTools.pandoc) {
-          stats.skipped++;
+      test(
+        `Markdown → ${format.toUpperCase()}`,
+        async () => {
+          if (!availableTools.pandoc) {
+            stats.skipped++;
+            stats.total++;
+            console.log(`⏭ Skipping: Pandoc not available`);
+            return;
+          }
+
           stats.total++;
-          console.log(`⏭ Skipping: Pandoc not available`);
-          return;
-        }
+          const outputPath = join(outputDir, `pandoc_output.${format}`);
+          const result = await runConversion("pandoc", inputPath, outputPath);
+          stats.results.push(result);
 
-        stats.total++;
-        const outputPath = join(outputDir, `pandoc_output.${format}`);
-        const result = await runConversion("pandoc", inputPath, outputPath);
-        stats.results.push(result);
+          if (result.success) {
+            stats.passed++;
+            console.log(`  ✓ Markdown → ${format.toUpperCase()}: ${result.outputSize} bytes`);
+          } else {
+            stats.failed++;
+          }
 
-        if (result.success) {
-          stats.passed++;
-          console.log(`  ✓ Markdown → ${format.toUpperCase()}: ${result.outputSize} bytes`);
-        } else {
-          stats.failed++;
-        }
-
-        expect(result.success).toBe(true);
-      }, TIMEOUT.medium);
+          expect(result.success).toBe(true);
+        },
+        TIMEOUT.medium,
+      );
     }
   });
 
@@ -522,33 +563,39 @@ describe("📄 文件格式轉換 Document Conversions", () => {
     ];
 
     for (const [from, to] of conversions) {
-      test(`${from.toUpperCase()} → ${to.toUpperCase()}`, async () => {
-        if (!availableTools.libreoffice) {
-          stats.skipped++;
+      test(
+        `${from.toUpperCase()} → ${to.toUpperCase()}`,
+        async () => {
+          if (!availableTools.libreoffice) {
+            stats.skipped++;
+            stats.total++;
+            console.log(`⏭ Skipping: LibreOffice not available`);
+            return;
+          }
+
           stats.total++;
-          console.log(`⏭ Skipping: LibreOffice not available`);
-          return;
-        }
+          const inputPath = join(outputDir, `libreoffice_input.${from}`);
+          const outputPath = join(outputDir, `libreoffice_${from}_to_${to}.${to}`);
 
-        stats.total++;
-        const inputPath = join(outputDir, `libreoffice_input.${from}`);
-        const outputPath = join(outputDir, `libreoffice_${from}_to_${to}.${to}`);
+          if (from === "html") createTestHtml(inputPath);
+          else if (from === "txt") createTestTxt(inputPath);
 
-        if (from === "html") createTestHtml(inputPath);
-        else if (from === "txt") createTestTxt(inputPath);
+          const result = await runConversion("libreoffice", inputPath, outputPath);
+          stats.results.push(result);
 
-        const result = await runConversion("libreoffice", inputPath, outputPath);
-        stats.results.push(result);
+          if (result.success) {
+            stats.passed++;
+            console.log(
+              `  ✓ ${from.toUpperCase()} → ${to.toUpperCase()}: ${result.outputSize} bytes`,
+            );
+          } else {
+            stats.failed++;
+          }
 
-        if (result.success) {
-          stats.passed++;
-          console.log(`  ✓ ${from.toUpperCase()} → ${to.toUpperCase()}: ${result.outputSize} bytes`);
-        } else {
-          stats.failed++;
-        }
-
-        expect(result.success).toBe(true);
-      }, TIMEOUT.slow);
+          expect(result.success).toBe(true);
+        },
+        TIMEOUT.slow,
+      );
     }
   });
 });
@@ -575,37 +622,43 @@ describe("📊 資料格式轉換 Data Format Conversions", () => {
     ];
 
     for (const [from, to] of conversions) {
-      test(`${from.toUpperCase()} → ${to.toUpperCase()}`, async () => {
-        if (!availableTools.dasel) {
-          stats.skipped++;
+      test(
+        `${from.toUpperCase()} → ${to.toUpperCase()}`,
+        async () => {
+          if (!availableTools.dasel) {
+            stats.skipped++;
+            stats.total++;
+            console.log(`⏭ Skipping: Dasel not available`);
+            return;
+          }
+
           stats.total++;
-          console.log(`⏭ Skipping: Dasel not available`);
-          return;
-        }
+          const inputPath = join(outputDir, `dasel_input.${from}`);
+          const outputPath = join(outputDir, `dasel_${from}_to_${to}.${to}`);
 
-        stats.total++;
-        const inputPath = join(outputDir, `dasel_input.${from}`);
-        const outputPath = join(outputDir, `dasel_${from}_to_${to}.${to}`);
+          if (from === "json") createTestJson(inputPath);
+          else if (from === "yaml") {
+            writeFileSync(inputPath, "name: test\nvalue: 42\n");
+          } else if (from === "csv") {
+            createTestCsv(inputPath);
+          }
 
-        if (from === "json") createTestJson(inputPath);
-        else if (from === "yaml") {
-          writeFileSync(inputPath, "name: test\nvalue: 42\n");
-        } else if (from === "csv") {
-          createTestCsv(inputPath);
-        }
+          const result = await runConversion("dasel", inputPath, outputPath);
+          stats.results.push(result);
 
-        const result = await runConversion("dasel", inputPath, outputPath);
-        stats.results.push(result);
+          if (result.success) {
+            stats.passed++;
+            console.log(
+              `  ✓ ${from.toUpperCase()} → ${to.toUpperCase()}: ${result.outputSize} bytes`,
+            );
+          } else {
+            stats.failed++;
+          }
 
-        if (result.success) {
-          stats.passed++;
-          console.log(`  ✓ ${from.toUpperCase()} → ${to.toUpperCase()}: ${result.outputSize} bytes`);
-        } else {
-          stats.failed++;
-        }
-
-        expect(result.success).toBe(true);
-      }, TIMEOUT.fast);
+          expect(result.success).toBe(true);
+        },
+        TIMEOUT.fast,
+      );
     }
   });
 });
@@ -636,75 +689,87 @@ describe("🌍 多語言翻譯 Multilingual Translation", () => {
   // PDFMathTranslate 測試
   describe("PDFMathTranslate (PDF 翻譯)", () => {
     // 注意：這些測試需要網路連接和 PDF 測試檔案
-    
-    for (const lang of LANGUAGES.slice(0, 4)) { // 只測試前 4 種語言
-      test.skip(`PDF → ${lang.name} (${lang.code})`, async () => {
-        if (!availableTools.pdf2zh) {
-          stats.skipped++;
+
+    for (const lang of LANGUAGES.slice(0, 4)) {
+      // 只測試前 4 種語言
+      test.skip(
+        `PDF → ${lang.name} (${lang.code})`,
+        async () => {
+          if (!availableTools.pdf2zh) {
+            stats.skipped++;
+            stats.total++;
+            console.log(`⏭ Skipping: pdf2zh not available`);
+            return;
+          }
+
           stats.total++;
-          console.log(`⏭ Skipping: pdf2zh not available`);
-          return;
-        }
+          // 這裡需要一個真實的 PDF 測試檔案
+          const inputPath = join(E2E_FIXTURES_DIR, "sample.pdf");
+          const outputPath = join(outputDir, `translated_${lang.code}.tar`);
 
-        stats.total++;
-        // 這裡需要一個真實的 PDF 測試檔案
-        const inputPath = join(E2E_FIXTURES_DIR, "sample.pdf");
-        const outputPath = join(outputDir, `translated_${lang.code}.tar`);
+          if (!existsSync(inputPath)) {
+            stats.skipped++;
+            console.log(`⏭ Skipping: sample.pdf not found in fixtures`);
+            return;
+          }
 
-        if (!existsSync(inputPath)) {
-          stats.skipped++;
-          console.log(`⏭ Skipping: sample.pdf not found in fixtures`);
-          return;
-        }
+          const result = await runConversion("pdfmathtranslate", inputPath, outputPath);
+          stats.results.push(result);
 
-        const result = await runConversion("pdfmathtranslate", inputPath, outputPath);
-        stats.results.push(result);
+          if (result.success) {
+            stats.passed++;
+            console.log(
+              `  ✓ PDF → ${lang.name}: ${result.outputSize} bytes (${result.duration}ms)`,
+            );
+          } else {
+            stats.failed++;
+          }
 
-        if (result.success) {
-          stats.passed++;
-          console.log(`  ✓ PDF → ${lang.name}: ${result.outputSize} bytes (${result.duration}ms)`);
-        } else {
-          stats.failed++;
-        }
-
-        expect(result.success).toBe(true);
-      }, TIMEOUT.translation);
+          expect(result.success).toBe(true);
+        },
+        TIMEOUT.translation,
+      );
     }
   });
 
   // BabelDOC 測試
   describe("BabelDOC (進階 PDF 翻譯)", () => {
-    for (const lang of LANGUAGES.slice(0, 2)) { // 只測試中英
-      test.skip(`PDF → ${lang.name} (babeldoc)`, async () => {
-        if (!availableTools.babeldoc) {
-          stats.skipped++;
+    for (const lang of LANGUAGES.slice(0, 2)) {
+      // 只測試中英
+      test.skip(
+        `PDF → ${lang.name} (babeldoc)`,
+        async () => {
+          if (!availableTools.babeldoc) {
+            stats.skipped++;
+            stats.total++;
+            console.log(`⏭ Skipping: babeldoc not available`);
+            return;
+          }
+
           stats.total++;
-          console.log(`⏭ Skipping: babeldoc not available`);
-          return;
-        }
+          const inputPath = join(E2E_FIXTURES_DIR, "sample.pdf");
+          const outputPath = join(outputDir, `babeldoc_${lang.code}.tar`);
 
-        stats.total++;
-        const inputPath = join(E2E_FIXTURES_DIR, "sample.pdf");
-        const outputPath = join(outputDir, `babeldoc_${lang.code}.tar`);
+          if (!existsSync(inputPath)) {
+            stats.skipped++;
+            console.log(`⏭ Skipping: sample.pdf not found in fixtures`);
+            return;
+          }
 
-        if (!existsSync(inputPath)) {
-          stats.skipped++;
-          console.log(`⏭ Skipping: sample.pdf not found in fixtures`);
-          return;
-        }
+          const result = await runConversion("babeldoc", inputPath, outputPath);
+          stats.results.push(result);
 
-        const result = await runConversion("babeldoc", inputPath, outputPath);
-        stats.results.push(result);
+          if (result.success) {
+            stats.passed++;
+            console.log(`  ✓ PDF → ${lang.name} (babeldoc): ${result.outputSize} bytes`);
+          } else {
+            stats.failed++;
+          }
 
-        if (result.success) {
-          stats.passed++;
-          console.log(`  ✓ PDF → ${lang.name} (babeldoc): ${result.outputSize} bytes`);
-        } else {
-          stats.failed++;
-        }
-
-        expect(result.success).toBe(true);
-      }, TIMEOUT.translation);
+          expect(result.success).toBe(true);
+        },
+        TIMEOUT.translation,
+      );
     }
   });
 });
@@ -731,33 +796,39 @@ describe("📚 電子書格式轉換 Ebook Conversions", () => {
     ];
 
     for (const [from, to] of conversions) {
-      test(`${from.toUpperCase()} → ${to.toUpperCase()}`, async () => {
-        if (!availableTools.calibre || !availableTools.xvfbRun) {
-          stats.skipped++;
+      test(
+        `${from.toUpperCase()} → ${to.toUpperCase()}`,
+        async () => {
+          if (!availableTools.calibre || !availableTools.xvfbRun) {
+            stats.skipped++;
+            stats.total++;
+            console.log(`⏭ Skipping: Calibre or xvfb-run not available`);
+            return;
+          }
+
           stats.total++;
-          console.log(`⏭ Skipping: Calibre or xvfb-run not available`);
-          return;
-        }
+          const inputPath = join(outputDir, `calibre_input.${from}`);
+          const outputPath = join(outputDir, `calibre_${from}_to_${to}.${to}`);
 
-        stats.total++;
-        const inputPath = join(outputDir, `calibre_input.${from}`);
-        const outputPath = join(outputDir, `calibre_${from}_to_${to}.${to}`);
+          if (from === "html") createTestHtml(inputPath);
+          else if (from === "txt") createTestTxt(inputPath);
 
-        if (from === "html") createTestHtml(inputPath);
-        else if (from === "txt") createTestTxt(inputPath);
+          const result = await runConversion("calibre", inputPath, outputPath);
+          stats.results.push(result);
 
-        const result = await runConversion("calibre", inputPath, outputPath);
-        stats.results.push(result);
+          if (result.success) {
+            stats.passed++;
+            console.log(
+              `  ✓ ${from.toUpperCase()} → ${to.toUpperCase()}: ${result.outputSize} bytes`,
+            );
+          } else {
+            stats.failed++;
+          }
 
-        if (result.success) {
-          stats.passed++;
-          console.log(`  ✓ ${from.toUpperCase()} → ${to.toUpperCase()}: ${result.outputSize} bytes`);
-        } else {
-          stats.failed++;
-        }
-
-        expect(result.success).toBe(true);
-      }, TIMEOUT.slow);
+          expect(result.success).toBe(true);
+        },
+        TIMEOUT.slow,
+      );
     }
   });
 });
@@ -777,29 +848,33 @@ describe("🎬 音視頻格式轉換 Media Conversions", () => {
   describe("FFmpeg (音視頻格式)", () => {
     // 注意：這些測試需要實際的音視頻測試檔案
 
-    test.skip("MP3 → WAV", async () => {
-      if (!availableTools.ffmpeg) {
-        stats.skipped++;
+    test.skip(
+      "MP3 → WAV",
+      async () => {
+        if (!availableTools.ffmpeg) {
+          stats.skipped++;
+          stats.total++;
+          console.log(`⏭ Skipping: FFmpeg not available`);
+          return;
+        }
+
         stats.total++;
-        console.log(`⏭ Skipping: FFmpeg not available`);
-        return;
-      }
+        const inputPath = join(E2E_FIXTURES_DIR, "sample.mp3");
+        const outputPath = join(outputDir, "ffmpeg_output.wav");
 
-      stats.total++;
-      const inputPath = join(E2E_FIXTURES_DIR, "sample.mp3");
-      const outputPath = join(outputDir, "ffmpeg_output.wav");
+        if (!existsSync(inputPath)) {
+          stats.skipped++;
+          console.log(`⏭ Skipping: sample.mp3 not found`);
+          return;
+        }
 
-      if (!existsSync(inputPath)) {
-        stats.skipped++;
-        console.log(`⏭ Skipping: sample.mp3 not found`);
-        return;
-      }
+        const result = await runConversion("ffmpeg", inputPath, outputPath);
+        stats.results.push(result);
 
-      const result = await runConversion("ffmpeg", inputPath, outputPath);
-      stats.results.push(result);
-
-      expect(result.success).toBe(true);
-    }, TIMEOUT.medium);
+        expect(result.success).toBe(true);
+      },
+      TIMEOUT.medium,
+    );
   });
 });
 
@@ -812,11 +887,18 @@ describe("🔢 格式轉換矩陣 Conversion Matrix", () => {
    * 這個測試會生成一個轉換矩陣報告
    * 顯示所有支援的格式轉換組合
    */
-  
+
   test("生成格式轉換矩陣報告", async () => {
     const converters = [
-      "inkscape", "imagemagick", "graphicsmagick", "pandoc",
-      "dasel", "potrace", "vtracer", "libreoffice", "calibre",
+      "inkscape",
+      "imagemagick",
+      "graphicsmagick",
+      "pandoc",
+      "dasel",
+      "potrace",
+      "vtracer",
+      "libreoffice",
+      "calibre",
     ];
 
     const matrix: Record<string, { from: string[]; to: string[] }> = {};
@@ -862,8 +944,12 @@ describe("🔢 格式轉換矩陣 Conversion Matrix", () => {
       totalCombinations += combinations;
 
       console.log(`${converter}:`);
-      console.log(`  輸入格式: ${formats.from.length} (${formats.from.slice(0, 5).join(", ")}${formats.from.length > 5 ? "..." : ""})`);
-      console.log(`  輸出格式: ${formats.to.length} (${formats.to.slice(0, 5).join(", ")}${formats.to.length > 5 ? "..." : ""})`);
+      console.log(
+        `  輸入格式: ${formats.from.length} (${formats.from.slice(0, 5).join(", ")}${formats.from.length > 5 ? "..." : ""})`,
+      );
+      console.log(
+        `  輸出格式: ${formats.to.length} (${formats.to.slice(0, 5).join(", ")}${formats.to.length > 5 ? "..." : ""})`,
+      );
       console.log(`  組合數: ${combinations}`);
       console.log();
     }
@@ -944,35 +1030,40 @@ describe("⚠️ 邊界條件測試 Edge Cases", () => {
     expect(result.success).toBe(true);
   });
 
-  test("超長內容處理", async () => {
-    if (!availableTools.pandoc) {
-      stats.skipped++;
+  test(
+    "超長內容處理",
+    async () => {
+      if (!availableTools.pandoc) {
+        stats.skipped++;
+        stats.total++;
+        return;
+      }
+
       stats.total++;
-      return;
-    }
+      const inputPath = join(outputDir, "long_content.markdown");
+      const outputPath = join(outputDir, "long_output.html");
 
-    stats.total++;
-    const inputPath = join(outputDir, "long_content.markdown");
-    const outputPath = join(outputDir, "long_output.html");
+      // 生成 10000 行的文件
+      const lines = Array.from(
+        { length: 10000 },
+        (_, i) => `第 ${i + 1} 行：這是測試內容 Line ${i + 1}: This is test content`,
+      ).join("\n");
+      writeFileSync(inputPath, `# 長文件測試\n\n${lines}`);
 
-    // 生成 10000 行的文件
-    const lines = Array.from({ length: 10000 }, (_, i) => 
-      `第 ${i + 1} 行：這是測試內容 Line ${i + 1}: This is test content`
-    ).join("\n");
-    writeFileSync(inputPath, `# 長文件測試\n\n${lines}`);
+      const result = await runConversion("pandoc", inputPath, outputPath);
+      stats.results.push(result);
 
-    const result = await runConversion("pandoc", inputPath, outputPath);
-    stats.results.push(result);
+      if (result.success) {
+        stats.passed++;
+        console.log(`  ✓ 超長內容處理成功: ${result.outputSize} bytes`);
+      } else {
+        stats.failed++;
+      }
 
-    if (result.success) {
-      stats.passed++;
-      console.log(`  ✓ 超長內容處理成功: ${result.outputSize} bytes`);
-    } else {
-      stats.failed++;
-    }
-
-    expect(result.success).toBe(true);
-  }, TIMEOUT.slow);
+      expect(result.success).toBe(true);
+    },
+    TIMEOUT.slow,
+  );
 
   test("特殊字元處理", async () => {
     if (!availableTools.pandoc) {
@@ -985,7 +1076,9 @@ describe("⚠️ 邊界條件測試 Edge Cases", () => {
     const inputPath = join(outputDir, "special_chars.markdown");
     const outputPath = join(outputDir, "special_output.html");
 
-    writeFileSync(inputPath, `# 特殊字元測試
+    writeFileSync(
+      inputPath,
+      `# 特殊字元測試
 
 &amp; &lt; &gt; " ' \` ~ ! @ # $ % ^ & * ( ) - = + [ ] { } | \\ : ; < > ? , . /
 
@@ -996,7 +1089,8 @@ describe("⚠️ 邊界條件測試 Edge Cases", () => {
 CJK 擴展：㊀ ㊁ ㊂ ㊃ ㊄
 
 全形標點：「」『』【】〈〉《》
-`);
+`,
+    );
 
     const result = await runConversion("pandoc", inputPath, outputPath);
     stats.results.push(result);
