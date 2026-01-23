@@ -4,10 +4,10 @@ import type { ExecFileException } from "node:child_process";
 import { ExecFileFn } from "../../src/converters/types";
 
 // Inkscape 測試
-// 使用 Inkscape 1.0+ 的 headless-safe 命令列語法：
-// inkscape input.png --export-type=svg --export-filename=output.svg
+// 使用 xvfb-run 包裝 Inkscape 命令，確保在無 DISPLAY 環境下也能運作
+// xvfb-run -a --server-args="-screen 0 1024x768x24" inkscape input.svg --export-type=png --export-filename=output.png
 
-test("convert uses correct headless-safe arguments", async () => {
+test("convert uses correct xvfb-run wrapped arguments", async () => {
   let capturedCmd = "";
   let capturedArgs: string[] = [];
 
@@ -23,8 +23,15 @@ test("convert uses correct headless-safe arguments", async () => {
 
   await convert("input.svg", "svg", "png", "output.png", undefined, mockExecFile);
 
-  expect(capturedCmd).toBe("inkscape");
-  expect(capturedArgs).toEqual(["input.svg", "--export-type=png", "--export-filename=output.png"]);
+  expect(capturedCmd).toBe("xvfb-run");
+  expect(capturedArgs).toEqual([
+    "-a",
+    "--server-args=-screen 0 1024x768x24",
+    "inkscape",
+    "input.svg",
+    "--export-type=png",
+    "--export-filename=output.png",
+  ]);
 });
 
 test("convert resolves when inkscape succeeds", async () => {
@@ -33,7 +40,7 @@ test("convert resolves when inkscape succeeds", async () => {
     _args: string[],
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
-    if (cmd === "inkscape") {
+    if (cmd === "xvfb-run") {
       callback(null, "Conversion complete", "");
     }
   };
@@ -48,7 +55,7 @@ test("convert rejects when inkscape fails", async () => {
     _args: string[],
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
-    if (cmd === "inkscape") {
+    if (cmd === "xvfb-run") {
       callback(new Error("inkscape failed"), "", "");
     }
   };
@@ -72,7 +79,7 @@ test("convert logs stdout when present", async () => {
     _args: string[],
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
-    if (cmd === "inkscape") {
+    if (cmd === "xvfb-run") {
       callback(null, "Fake stdout", "");
     }
   };
@@ -97,7 +104,7 @@ test("convert logs stderr when present (non-fatal warning)", async () => {
     _args: string[],
     callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
   ) => {
-    if (cmd === "inkscape") {
+    if (cmd === "xvfb-run") {
       // Inkscape 經常輸出警告到 stderr，但轉換仍成功
       callback(null, "", "Some warning message");
     }

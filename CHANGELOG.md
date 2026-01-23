@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.13](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.13) (2026-01-23)
+
+工作流程優化與測試修復版本。
+
+### 📦 CI/CD
+
+- **翻譯測試優化**：改用免費翻譯服務（Google/Bing），移除付費 API 金鑰依賴
+- **自動化測試**：翻譯測試現在會在 push 時自動執行
+
+### 🧪 Testing
+
+- **Inkscape 測試修復**：更新測試以配合 xvfb-run 包裝器
+- **format-matrix 測試修復**：修復超時參數中的 `sampled` 未定義錯誤
+
+---
+
 ## [0.1.12](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.12) (2026-01-23)
 
 測試與品質強化版本，大幅提升 CI/CD 可靠性與測試覆蓋率。

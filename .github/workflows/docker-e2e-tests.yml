@@ -238,10 +238,11 @@ jobs:
           retention-days: 7
 
   # ============================================
-  # Job 4: Translation tests (optional, needs API keys)
+  # Job 4: Translation tests (使用免費翻譯服務)
+  # 使用 Google/Bing 免費翻譯，不需要付費 API 金鑰
   # ============================================
   translation-tests:
-    name: Translation Tests
+    name: Translation Tests (Free Services)
     runs-on: ubuntu-24.04
     needs: build-test-image
     if: ${{ github.event.inputs.run_translation_tests == 'true' || github.event_name == 'push' }}
@@ -262,21 +263,16 @@ jobs:
         run: docker pull ${{ needs.build-test-image.outputs.image }}
 
       - name: Run translation tests
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
         run: |
-          echo "🌍 Running translation tests..."
+          echo "🌍 Running translation tests (using free services: Google/Bing)..."
 
           docker run --rm \
             --name convertx-translation-test \
             -v "${{ github.workspace }}/tests:/app/tests" \
             -v "${{ github.workspace }}/translation-results:/app/translation-results" \
-            -e OPENAI_API_KEY="${OPENAI_API_KEY}" \
-            -e GOOGLE_API_KEY="${GOOGLE_API_KEY}" \
-            -e DEEPL_API_KEY="${DEEPL_API_KEY}" \
             -e CI=true \
+            -e PDFMATHTRANSLATE_SERVICE=google \
+            -e BABELDOC_SERVICE=google \
             --entrypoint /bin/bash \
             ${{ needs.build-test-image.outputs.image }} \
             -c "
@@ -284,7 +280,7 @@ jobs:
               cd /app
               bun install --frozen-lockfile || bun install
               
-              echo '🌍 Running translation tests...'
+              echo '🌍 Running translation tests with free services...'
               bun test tests/e2e/translation.e2e.test.ts --timeout 600000 || true
               
               mkdir -p /app/translation-results

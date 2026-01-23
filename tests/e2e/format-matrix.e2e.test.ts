@@ -537,7 +537,7 @@ describe("📊 格式轉換矩陣 Format Conversion Matrix", () => {
               }
             }
           },
-          TIMEOUT * sampled.length,
+          TIMEOUT * MAX_TESTS_PER_CONVERTER,
         );
       });
     }
@@ -634,7 +634,7 @@ describe("📊 格式轉換矩陣 Format Conversion Matrix", () => {
               }
             }
           },
-          TIMEOUT * sampled.length,
+          TIMEOUT * MAX_TESTS_PER_CONVERTER,
         );
       });
     }
@@ -714,7 +714,7 @@ describe("📊 格式轉換矩陣 Format Conversion Matrix", () => {
               }
             }
           },
-          TIMEOUT * sampled.length,
+          TIMEOUT * MAX_TESTS_PER_CONVERTER,
         );
       });
     }
