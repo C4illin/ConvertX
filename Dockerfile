@@ -167,13 +167,14 @@ RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
 
 # 階段 4：圖像處理工具
 # 注意：bookworm 使用 imagemagick（版本 6），trixie 才有 imagemagick-7
-# 注意：Inkscape 1.0+ 使用 --export-type/--export-filename 語法，支援 headless 執行，不需要 xvfb
+# 注意：Inkscape 需要 xvfb 在無 DISPLAY 環境下執行某些操作（如 PNG 轉 SVG）
 RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   imagemagick \
   inkscape \
   libheif-examples \
   libjxl-tools \
   libvips-tools \
+  xvfb \
   && rm -rf /var/lib/apt/lists/*
 
 # 階段 5：文件處理工具

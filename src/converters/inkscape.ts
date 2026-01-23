@@ -33,14 +33,11 @@ export const properties = {
  * Inkscape 轉換器
  *
  * ⚠️ Headless 環境注意事項：
- *    Inkscape 1.0+ 的新版命令列語法支援 headless 執行，
- *    不需要 X11 或 xvfb。
+ *    某些 Inkscape 操作（如 PNG 轉 SVG）需要 GTK 初始化，
+ *    在無 DISPLAY 環境下需要使用 xvfb-run 包裝。
  *
- * 🔧 正確的 headless-safe 語法：
- *    inkscape input.png --export-type=svg --export-filename=output.svg
- *
- * ❌ 舊版語法（會觸發 GTK 初始化）：
- *    inkscape input.png -o output.svg
+ * 🔧 使用 xvfb-run 的 headless 語法：
+ *    xvfb-run -a inkscape input.png --export-type=svg --export-filename=output.svg
  *
  * 參考：https://inkscape.org/doc/inkscape-man.html
  */
@@ -56,13 +53,20 @@ export function convert(
     // 從目標路徑取得輸出格式（移除開頭的點）
     const exportType = extname(targetPath).slice(1).toLowerCase();
 
-    // 使用 Inkscape 1.0+ 的 headless-safe 命令列語法
-    // --export-type: 明確指定輸出格式
-    // --export-filename: 指定輸出檔案路徑
-    // 這種語法不會初始化 GTK，因此在無 DISPLAY 的環境也能運作
-    const args = [filePath, `--export-type=${exportType}`, `--export-filename=${targetPath}`];
+    // 使用 xvfb-run 包裝 Inkscape 命令，確保在無 DISPLAY 環境下也能運作
+    // -a: 自動選擇可用的 display number
+    // --server-args="-screen 0 1024x768x24": 設定虛擬螢幕解析度
+    const args = [
+      "-a",
+      "--server-args=-screen 0 1024x768x24",
+      "inkscape",
+      filePath,
+      `--export-type=${exportType}`,
+      `--export-filename=${targetPath}`,
+    ];
 
-    execFile("inkscape", args, (error: Error | null, stdout: string, stderr: string) => {
+    // 使用 xvfb-run 而非直接呼叫 inkscape
+    execFile("xvfb-run", args, (error: Error | null, stdout: string, stderr: string) => {
       if (error) {
         reject(`error: ${error}`);
         return;
