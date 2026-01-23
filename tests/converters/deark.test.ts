@@ -85,4 +85,4 @@ describe("deark converter", () => {
 });
 
 // Skip common tests as deark has different behavior (archive output)
-test.skip("dummy - required to trigger test detection", () => {});
+test.skip("dummy - required to trigger test detection", () => { });
