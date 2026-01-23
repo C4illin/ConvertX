@@ -87,8 +87,9 @@ export async function convert(
   const runMinerU = (useTableMode: boolean): Promise<void> => {
     return new Promise((resolve, reject) => {
       // Build MinerU command arguments
-      // MinerU CLI: mineru -p <input> -o <output_dir> -m auto
-      const args = ["-p", filePath, "-o", mineruOutputDir, "-m", "auto"];
+      // MinerU CLI: mineru -p <input> -o <output_dir> -m pipeline
+      // 注意：使用 pipeline 模式而非 auto，避免 VLM 模型未配置的問題
+      const args = ["-p", filePath, "-o", mineruOutputDir, "-m", "pipeline"];
 
       // 表格模式支援（可能與某些 vLLM 版本不相容）
       if (useTableMode) {

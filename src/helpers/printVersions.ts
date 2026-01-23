@@ -44,7 +44,7 @@ const tools = [
     formatter: (s: string) => s.split("\n")[0],
   },
   {
-    cmd: "magick --version",
+    cmd: "convert --version",
     name: "ImageMagick",
     errorMsg: "ImageMagick is not installed.",
     formatter: (s: string) => s.split("\n")[0]?.replace("Version: ", ""),
@@ -98,10 +98,10 @@ const tools = [
     formatter: (s: string) => s.split("\n")[0],
   },
   {
-    cmd: "heif-info -v",
+    cmd: "dpkg -l libheif1 | tail -1 | awk '{print $3}'",
     name: "libheif",
     errorMsg: "libheif is not installed",
-    formatter: (s: string) => `libheif v${s.split("\n")[0]}`,
+    formatter: (s: string) => `libheif v${s.trim()}`,
   },
   {
     cmd: "potrace -v",
@@ -116,10 +116,13 @@ const tools = [
     formatter: (s: string) => s.split("\n")[0],
   },
   {
-    cmd: "msgconvert --version",
+    cmd: "which msgconvert && dpkg -l libemail-outlook-message-perl | tail -1 | awk '{print $3}'",
     name: "msgconvert",
     errorMsg: "msgconvert (libemail-outlook-message-perl) is not installed",
-    formatter: (s: string) => s.split("\n")[0],
+    formatter: (s: string) => {
+      const lines = s.split("\n").filter((l) => l.trim());
+      return `msgconvert v${lines[lines.length - 1] || "unknown"}`;
+    },
   },
   {
     cmd: "bun -v",

@@ -18,12 +18,18 @@ import type { ExecFileFn } from "./types";
  *   - deu: 德文
  *   - fra: 法文
  *
- * UI 顯示格式（與 PDFMathTranslate 風格一致）：
- *   pdf-en, pdf-zh-TW, pdf-ja 等
+ * UI 顯示格式：
+ *   - pdf-ocr: 自動檢測語言（推薦，支援多語言文件）
+ *   - pdf-en, pdf-zh-TW, pdf-ja 等：指定單一語言
+ *
+ * 多語言自動檢測模式：
+ *   使用 Tesseract 的多語言組合 eng+chi_tra+chi_sim+jpn+kor+deu+fra
+ *   可處理包含多種語言的文件（如中英混排）
  */
 
-// 內建支援的 OCR 語言（與 PDFMathTranslate 風格一致）
+// 內建支援的 OCR 語言
 const SUPPORTED_LANGUAGES = [
+  "ocr", // 自動檢測（多語言）- 推薦
   "en", // English
   "zh-TW", // 繁體中文
   "zh", // 簡體中文
@@ -35,6 +41,10 @@ const SUPPORTED_LANGUAGES = [
 
 // Tesseract 語言代碼映射（UI 代碼 → Tesseract 代碼）
 const LANG_MAP: Record<string, string> = {
+  // 自動檢測模式：使用所有已安裝的語言包
+  // 順序：英文優先（最常見），然後是 CJK 語言，最後是歐洲語言
+  ocr: "eng+chi_tra+chi_sim+jpn+kor+deu+fra",
+  auto: "eng+chi_tra+chi_sim+jpn+kor+deu+fra",
   en: "eng",
   "zh-TW": "chi_tra",
   zh: "chi_sim",
@@ -53,6 +63,11 @@ export const properties = {
   },
 };
 
+// 建立大小寫不敏感的語言映射查找表
+const LANG_MAP_LOWER: Record<string, string> = Object.fromEntries(
+  Object.entries(LANG_MAP).map(([k, v]) => [k.toLowerCase(), v]),
+);
+
 /**
  * 從 convertTo 格式中提取 OCR 語言
  * @param convertTo 格式如 "pdf-en" 或 "pdf-zh-TW"
@@ -60,14 +75,14 @@ export const properties = {
  */
 function extractOcrLanguage(convertTo: string): string {
   // convertTo 格式: pdf-<lang>
-  const match = convertTo.match(/^pdf-(.+)$/);
+  const match = convertTo.match(/^pdf-(.+)$/i);
   if (!match || !match[1]) {
     throw new Error(`Invalid convertTo format: ${convertTo}. Expected pdf-<lang>`);
   }
 
   const uiLang = match[1];
-  // 轉換為 Tesseract 語言代碼
-  const tessLang = LANG_MAP[uiLang] || uiLang.replace(/-/g, "_");
+  // 轉換為 Tesseract 語言代碼（大小寫不敏感查找）
+  const tessLang = LANG_MAP_LOWER[uiLang.toLowerCase()] || uiLang.replace(/-/g, "_");
   return tessLang;
 }
 
@@ -111,7 +126,13 @@ function runOcrMyPdf(
 
     // 階段 2：準備 OCR 參數
     console.log(`[OCRmyPDF] 📋 階段 2/5：準備 OCR 參數`);
-    console.log(`[OCRmyPDF]    ✅ OCR 語言: ${lang}`);
+    const isMultiLang = lang.includes("+");
+    if (isMultiLang) {
+      console.log(`[OCRmyPDF]    ✅ OCR 模式: 多語言自動檢測`);
+      console.log(`[OCRmyPDF]    ✅ 語言包: ${lang.split("+").join(", ")}`);
+    } else {
+      console.log(`[OCRmyPDF]    ✅ OCR 語言: ${lang}`);
+    }
 
     const args = [
       "-l",

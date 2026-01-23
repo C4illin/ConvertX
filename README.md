@@ -6,7 +6,8 @@
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/convertx/convertx-cn?style=flat&logo=docker)](https://hub.docker.com/r/convertx/convertx-cn)
 [![GitHub Release](https://img.shields.io/github/v/release/pi-docket/ConvertX-CN)](https://github.com/pi-docket/ConvertX-CN/releases)
-[![License AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
+![License AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)
+![Source Available](https://img.shields.io/badge/source-available-green)
 
 ---
 
@@ -25,14 +26,14 @@
 
 ## 📚 文件
 
-完整文件請參閱 **[文件中心](docs/說明文件.md)**
+完整文件請參閱 **[文件中心](docs/README.md)**
 
 | 分類        | 連結                                                                                                     |
 | ----------- | -------------------------------------------------------------------------------------------------------- |
 | 🚀 快速入門 | [概覽](docs/快速入門/概覽.md) · [快速開始](docs/快速入門/快速開始.md) · [FAQ](docs/快速入門/常見問題.md) |
 | 🐳 部署指南 | [Docker](docs/部署指南/Docker.md) · [反向代理](docs/部署指南/反向代理.md)                                |
 | ⚙️ 配置設定 | [環境變數](docs/配置設定/環境變數.md) · [安全性](docs/配置設定/安全性.md)                                |
-| 🔌 功能說明 | [轉換器](docs/功能說明/轉換器.md) · [OCR](docs/功能說明/OCR.md) · [翻譯](docs/功能說明/翻譯功能.md)      |
+| 🔌 功能說明 | [轉換器](docs/功能說明/轉換器.md) · [OCR](docs/功能說明/OCR.md) · [翻譯](docs/功能說明/翻譯.md)          |
 | 🔗 API      | [API 總覽](docs/API/總覽.md) · [端點說明](docs/API/端點.md)                                              |
 | 👩‍💻 開發     | [專案結構](docs/開發指南/專案結構.md) · [貢獻指南](docs/開發指南/貢獻指南.md)                            |
 
@@ -148,8 +149,23 @@ docker compose up -d
 
 ---
 
-## 📄 License
+## 📄 License Overview
 
-This project is licensed under the **[GNU Affero General Public License v3.0 (AGPL-3.0)](LICENSE)**.
+**This is a Mixed License / Source-Available Project.**
 
-Based on [C4illin/ConvertX](https://github.com/C4illin/ConvertX).
+### 1. Upstream Components
+
+Core components derived from [C4illin/ConvertX](https://github.com/C4illin/ConvertX) are licensed under **[GNU AGPL v3.0](LICENSE)**.
+
+- Any modifications to these files are open source under AGPL-3.0.
+
+### 2. Author Original Components
+
+Original modules, UI, i18n, and new features created by the ConvertX-CN author are licensed under **[Custom Non-Commercial License](LICENSE-AUTHOR)**.
+
+- **Commercial Use / SaaS**: ❌ Prohibited without written permission.
+- **Personal / Research Use**: ✅ Allowed.
+
+> ⚠️ **Commercial Usage**: If you plan to use this project in a commercial product, SaaS, or revenue-generating service, you **must contact the author** for a license exception regarding the custom components. The AGPL obligations (sharing source code) still apply to the upstream portions.
+
+Check [LICENSE-OVERVIEW.md](LICENSE-OVERVIEW.md) for full details.
