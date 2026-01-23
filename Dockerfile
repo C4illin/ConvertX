@@ -314,15 +314,20 @@ RUN set -eux && \
   (pipx install "mineru[all]" || echo "⚠️ mineru 安裝失敗（可能是 arm64 相容性問題），跳過...") && \
   \
   # ========================================
-  # [6/8] 顯式下載 PDFMathTranslate 模型
+  # [6/8] 顯式下載 PDFMathTranslate/BabelDOC ONNX 模型
   # ⬇️ Docker build 階段下載 DocLayout-YOLO ONNX 模型
+  #    必須放到 /root/.cache/babeldoc/models/ 目錄
+  #    因為 pdf2zh 使用 babeldoc.assets.get_doclayout_onnx_model_path()
   #    Runtime 不會再下載任何資源
   # ========================================
   echo "" && \
-  echo "📥 [6/8] 下載 PDFMathTranslate DocLayout-YOLO ONNX 模型..." && \
-  mkdir -p /models/pdfmathtranslate && \
-  python3 -c "from huggingface_hub import snapshot_download; import os; os.environ['HF_HOME']='/root/.cache/huggingface'; snapshot_download(repo_id='wybxc/DocLayout-YOLO-DocStructBench-onnx', local_dir='/models/pdfmathtranslate', allow_patterns=['*.onnx'], local_dir_use_symlinks=False); print('DocLayout-YOLO ONNX downloaded')" && \
-  ls -lh /models/pdfmathtranslate/*.onnx 2>/dev/null || ls -lh /models/pdfmathtranslate/ && \
+  echo "📥 [6/8] 下載 PDFMathTranslate/BabelDOC DocLayout-YOLO ONNX 模型..." && \
+  mkdir -p /root/.cache/babeldoc/models && \
+  # 直接下載 ONNX 模型到 babeldoc 期望的路徑
+  curl -fSL -o /root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx \
+    "https://huggingface.co/wybxc/DocLayout-YOLO-DocStructBench-onnx/resolve/main/doclayout_yolo_docstructbench_imgsz1024.onnx" && \
+  echo "✅ ONNX 模型下載完成" && \
+  ls -lh /root/.cache/babeldoc/models/*.onnx && \
   \
   # ========================================
   # [6.1/8] 下載 PDFMathTranslate 多語言字型
@@ -346,21 +351,16 @@ RUN set -eux && \
   ls -lh /app/*.ttf && \
   \
   # ========================================
-  # [7/8] 顯式下載 BabelDOC 資源
-  # ⬇️ Docker build 階段顯式下載 BabelDOC 所需資源
-  #    ❌ 禁止使用 --warmup（不可控的隱性下載）
-  #    ✅ 使用 HuggingFace 顯式下載模型
+  # [7/8] 準備 BabelDOC 資源
+  # ⬇️ 複製字型到 BabelDOC cache 目錄
+  #    ONNX 模型已在 [6/8] 下載完成
   #    Runtime 不會再下載任何資源
   # ========================================
   echo "" && \
-  echo "📥 [7/8] 顯式下載 BabelDOC 資源..." && \
-  mkdir -p /root/.cache/babeldoc/models && \
+  echo "📥 [7/8] 準備 BabelDOC 資源..." && \
   mkdir -p /root/.cache/babeldoc/fonts && \
-  \
-  # 下載 BabelDOC 使用的 DocLayout-YOLO 模型（與 pdf2zh 共用）
-  echo "   下載 BabelDOC DocLayout-YOLO 模型..." && \
-  (python3 -c "from huggingface_hub import snapshot_download; import os; os.environ['HF_HOME']='/root/.cache/huggingface'; snapshot_download(repo_id='wybxc/DocLayout-YOLO-DocStructBench-onnx', local_dir='/root/.cache/babeldoc/models/doclayout-yolo', allow_patterns=['*.onnx'], local_dir_use_symlinks=False); print('BabelDOC DocLayout-YOLO downloaded')" || echo "BabelDOC DocLayout-YOLO skipped") && \
-  (python3 -c "from huggingface_hub import snapshot_download; import os; os.environ['HF_HOME']='/root/.cache/huggingface'; snapshot_download(repo_id='funstory-ai/babeldoc-assets', local_dir='/root/.cache/babeldoc/assets', local_dir_use_symlinks=False); print('BabelDOC assets downloaded')" || echo "BabelDOC assets not available") && \
+  mkdir -p /root/.cache/babeldoc/cmap && \
+  mkdir -p /root/.cache/babeldoc/tiktoken && \
   \
   # 複製字型到 BabelDOC 目錄（避免 runtime 下載）
   echo "   複製字型到 BabelDOC 目錄..." && \
@@ -369,6 +369,14 @@ RUN set -eux && \
   cp /app/SourceHanSerifTW-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
   cp /app/SourceHanSerifJP-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
   cp /app/SourceHanSerifKR-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
+  \
+  # 下載 BabelDOC 需要的額外資源（如果有的話）
+  echo "   下載 BabelDOC 額外資源..." && \
+  (python3 -c "from huggingface_hub import snapshot_download; import os; os.environ['HF_HOME']='/root/.cache/huggingface'; snapshot_download(repo_id='funstory-ai/babeldoc-assets', local_dir='/root/.cache/babeldoc/assets', local_dir_use_symlinks=False); print('BabelDOC assets downloaded')" || echo "BabelDOC assets not available, skipping...") && \
+  \
+  # 驗證模型已正確下載
+  echo "   驗證 BabelDOC 模型..." && \
+  ls -lh /root/.cache/babeldoc/models/ && \
   echo "✅ BabelDOC 資源準備完成" && \
   \
   # ========================================
