@@ -49,6 +49,6 @@ docker compose up -d
 
 ## 相關文件
 
-- [Docker 部署](../deployment/docker.md)
-- [環境變數](../configuration/environment-variables.md)
-- [反向代理](../deployment/reverse-proxy.md)
+- [Docker 部署](../部署指南/Docker.md)
+- [環境變數](../配置設定/環境變數.md)
+- [反向代理](../部署指南/反向代理.md)

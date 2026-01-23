@@ -111,7 +111,7 @@ environment:
   - AUTO_DELETE_EVERY_N_HOURS=24
 ```
 
-完整環境變數說明請參考 [環境變數文件](../config/environment.md)。
+完整環境變數說明請參考 [環境變數文件](../配置設定/環境變數.md)。
 
 ---
 

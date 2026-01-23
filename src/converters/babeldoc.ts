@@ -11,6 +11,7 @@ import {
 import { join, basename, dirname } from "node:path";
 import { ExecFileFn } from "./types";
 import { getArchiveFileName } from "../transfer";
+import { ensureSearchablePdf, cleanupOcrTempFile } from "../helpers/pdfOcr";
 
 /**
  * BabelDOC Content Engine
@@ -275,7 +276,19 @@ export async function convert(
   _options?: unknown,
   execFile: ExecFileFn = execFileOriginal,
 ): Promise<string> {
+  let ocrTempFile: string | undefined;
+
   try {
+    // 0. 自動偵測掃描版 PDF 並進行 OCR 處理
+    console.log(`[BabelDOC] Checking if PDF needs OCR...`);
+    const ocrResult = await ensureSearchablePdf(filePath, execFile);
+    const inputPdf = ocrResult.path;
+    ocrTempFile = ocrResult.tempFile;
+
+    if (ocrResult.wasOcred) {
+      console.log(`[BabelDOC] ✅ Scanned PDF detected and OCR'd automatically`);
+    }
+
     // 1. 檢查資源（警告但不阻止）
     checkResourcesExist();
 
@@ -300,8 +313,8 @@ export async function convert(
     // 5. 設定 BabelDOC 輸出路徑（依輸出格式決定副檔名）
     const translatedFilePath = join(tempDir, `${inputFileName}-translated.${outputExt}`);
 
-    // 6. 執行 babeldoc 翻譯
-    await runBabelDoc(filePath, translatedFilePath, targetLang, outputFormat, execFile);
+    // 6. 執行 babeldoc 翻譯（使用 OCR 處理後的 PDF）
+    await runBabelDoc(inputPdf, translatedFilePath, targetLang, outputFormat, execFile);
 
     // 7. 複製翻譯後的檔案到封裝目錄
     const translatedDest = join(archiveDir, `translated-${targetLang}.${outputExt}`);
@@ -345,8 +358,13 @@ export async function convert(
     // 10. 清理臨時目錄
     removeDir(tempDir);
 
+    // 11. 清理 OCR 暫存檔案
+    cleanupOcrTempFile(ocrTempFile);
+
     return "Done";
   } catch (error) {
+    // 確保清理 OCR 暫存檔案
+    cleanupOcrTempFile(ocrTempFile);
     throw new Error(`BabelDOC error: ${error}`);
   }
 }

@@ -116,15 +116,24 @@ RUN echo 'Acquire::Retries "5";' > /etc/apt/apt.conf.d/80-retries \
   && echo 'DPkg::Lock::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries
 
 # 階段 1：基礎系統工具
-RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+RUN echo "" && \
+  echo "========================================" && \
+  echo "📦 階段 1/11：安裝基礎系統工具" && \
+  echo "========================================" && \
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   locales \
   ca-certificates \
   curl \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* && \
+  echo "✅ 階段 1/11 完成：基礎系統工具已安裝"
 
 # 階段 2：核心轉換工具（小型）
 # 注意：dasel 和 resvg 在 bookworm 中不存在，後續用二進位檔案安裝
-RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+RUN echo "" && \
+  echo "========================================" && \
+  echo "📦 階段 2/11：安裝核心轉換工具" && \
+  echo "========================================" && \
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   assimp-utils \
   dcraw \
   dvisvgm \
@@ -133,64 +142,95 @@ RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   mupdf-tools \
   poppler-utils \
   potrace \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* && \
+  echo "✅ 階段 2/11 完成：核心轉換工具已安裝"
 
 # 階段 2.1：安裝 dasel（從 GitHub 下載二進位檔案）
-RUN ARCH=$(uname -m) && \
+RUN echo "" && \
+  echo "   🔧 階段 2.1：安裝 dasel..." && \
+  ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
   DASEL_ARCH="linux_arm64"; \
   else \
   DASEL_ARCH="linux_amd64"; \
   fi && \
   curl -sSLf "https://github.com/TomWright/dasel/releases/download/v2.8.1/dasel_${DASEL_ARCH}" -o /usr/local/bin/dasel && \
-  chmod +x /usr/local/bin/dasel
+  chmod +x /usr/local/bin/dasel && \
+  echo "   ✅ dasel 安裝完成"
 
 # 階段 2.2：安裝 resvg（從 GitHub 下載二進位檔案）
 # 注意：resvg 官方只提供 x86_64 版本，ARM64 需從源碼編譯或跳過
-RUN ARCH=$(uname -m) && \
+RUN echo "" && \
+  echo "   🔧 階段 2.2：安裝 resvg..." && \
+  ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
-  echo "⚠️ resvg 沒有 ARM64 預編譯版本，跳過安裝（可改用 ImageMagick 或 Inkscape 替代）"; \
+  echo "   ⚠️ resvg 沒有 ARM64 預編譯版本，跳過安裝"; \
   else \
   curl -sSLf "https://github.com/linebender/resvg/releases/download/v0.44.0/resvg-linux-x86_64.tar.gz" -o /tmp/resvg.tar.gz && \
   tar -xzf /tmp/resvg.tar.gz -C /tmp/ && \
   mv /tmp/resvg /usr/local/bin/resvg && \
   chmod +x /usr/local/bin/resvg && \
-  rm -rf /tmp/resvg.tar.gz; \
+  rm -rf /tmp/resvg.tar.gz && \
+  echo "   ✅ resvg 安裝完成"; \
   fi
 
 # 階段 3：影音處理工具
-RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+RUN echo "" && \
+  echo "========================================" && \
+  echo "📦 階段 3/11：安裝影音處理工具" && \
+  echo "========================================" && \
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   ffmpeg \
   libavcodec-extra \
   libva2 \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* && \
+  echo "✅ 階段 3/11 完成：影音處理工具已安裝（ffmpeg）"
 
 # 階段 4：圖像處理工具
 # 注意：bookworm 使用 imagemagick（版本 6），trixie 才有 imagemagick-7
 # 注意：Inkscape 需要 xvfb 在無 DISPLAY 環境下執行某些操作（如 PNG 轉 SVG）
-RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+RUN echo "" && \
+  echo "========================================" && \
+  echo "📦 階段 4/11：安裝圖像處理工具" && \
+  echo "========================================" && \
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   imagemagick \
   inkscape \
   libheif-examples \
   libjxl-tools \
   libvips-tools \
   xvfb \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* && \
+  echo "✅ 階段 4/11 完成：圖像處理工具已安裝（ImageMagick, Inkscape, VIPS）"
 
 # 階段 5：文件處理工具
-RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+RUN echo "" && \
+  echo "========================================" && \
+  echo "📦 階段 5/11：安裝文件處理工具" && \
+  echo "========================================" && \
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   calibre \
   libemail-outlook-message-perl \
   pandoc \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* && \
+  echo "✅ 階段 5/11 完成：文件處理工具已安裝（Calibre, Pandoc）"
 
 # 階段 6：LibreOffice（最大的套件，單獨安裝）
-RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+RUN echo "" && \
+  echo "========================================" && \
+  echo "📦 階段 6/11：安裝 LibreOffice（較大，需要數分鐘）" && \
+  echo "========================================" && \
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   libreoffice \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* && \
+  echo "✅ 階段 6/11 完成：LibreOffice 已安裝"
 
 # 階段 7：TexLive 基礎
-RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+RUN echo "" && \
+  echo "========================================" && \
+  echo "📦 階段 7/11：安裝 TexLive 基礎（較大，需要數分鐘）" && \
+  echo "========================================" && \
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   texlive-base \
   texlive-latex-base \
   texlive-latex-recommended \
@@ -198,19 +238,29 @@ RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   texlive-xetex \
   latexmk \
   lmodern \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* && \
+  echo "✅ 階段 7/11 完成：TexLive 基礎已安裝"
 
 # 階段 8：TexLive 語言包
-RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+RUN echo "" && \
+  echo "========================================" && \
+  echo "📦 階段 8/11：安裝 TexLive 語言包（CJK + 歐語）" && \
+  echo "========================================" && \
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   texlive-lang-cjk \
   texlive-lang-german \
   texlive-lang-french \
   texlive-lang-arabic \
   texlive-lang-other \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* && \
+  echo "✅ 階段 8/11 完成：TexLive 語言包已安裝"
 
 # 階段 9：OCR 支援
-RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+RUN echo "" && \
+  echo "========================================" && \
+  echo "📦 階段 9/11：安裝 OCR 支援（Tesseract + ocrmypdf）" && \
+  echo "========================================" && \
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   tesseract-ocr \
   tesseract-ocr-eng \
   tesseract-ocr-chi-tra \
@@ -219,25 +269,41 @@ RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   tesseract-ocr-kor \
   tesseract-ocr-deu \
   tesseract-ocr-fra \
-  && rm -rf /var/lib/apt/lists/*
+  ocrmypdf \
+  && rm -rf /var/lib/apt/lists/* && \
+  echo "✅ 階段 9/11 完成：OCR 支援已安裝（7 種語言）"
 
 # 階段 10：字型
-RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+RUN echo "" && \
+  echo "========================================" && \
+  echo "📦 階段 10/11：安裝字型（Noto CJK + Liberation）" && \
+  echo "========================================" && \
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   fonts-noto-cjk \
   fonts-noto-core \
   fonts-noto-color-emoji \
   fonts-liberation \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* && \
+  echo "✅ 階段 10/11 完成：字型已安裝"
 
 # 階段 11：Python 依賴
-RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+RUN echo "" && \
+  echo "========================================" && \
+  echo "📦 階段 11/11：安裝 Python 依賴" && \
+  echo "========================================" && \
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
   python3 \
   python3-pip \
   python3-numpy \
   python3-tinycss2 \
   python3-opencv \
   pipx \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* && \
+  echo "✅ 階段 11/11 完成：Python 依賴已安裝" && \
+  echo "" && \
+  echo "========================================" && \
+  echo "✅ 所有 APT 套件安裝完成！" && \
+  echo "========================================"
 
 # ==============================================================================
 # 🔥 階段 12-UNIFIED：Python 工具安裝 + 模型下載（單一 RUN 原則）

@@ -24,12 +24,12 @@ docker compose up -d
 
 ### 更新到指定版本
 
-修改 `docker-compose.yml`：
+修改 `docker-compose.yml`（指定要更新的版本號）：
 
 ```yaml
 services:
   convertx:
-    image: convertx/convertx-cn:v0.1.9 # 指定版本
+    image: convertx/convertx-cn:v0.1.9
 ```
 
 然後執行：
@@ -78,12 +78,12 @@ Copy-Item -Recurse .\data .\data.backup.$(Get-Date -Format "yyyyMMdd")
 
 ## 回滾版本
 
-如果新版本有問題，可以回滾到舊版本：
+如果新版本有問題，可以回滾到舊版本（將版本號改為舊版本）：
 
 ```yaml
 services:
   convertx:
-    image: convertx/convertx-cn:v0.1.8 # 舊版本
+    image: convertx/convertx-cn:v0.1.8
 ```
 
 ```bash
@@ -120,6 +120,8 @@ docker rmi convertx/convertx-cn:v0.1.7
 
 可使用 [Watchtower](https://containrrr.dev/watchtower/) 自動更新容器：
 
+> 💡 `--interval 86400` — 每 24 小時檢查一次更新
+
 ```yaml
 services:
   convertx:
@@ -130,7 +132,7 @@ services:
     image: containrrr/watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 86400 # 每 24 小時檢查一次
+    command: --interval 86400
 ```
 
 > ⚠️ 自動更新適合測試環境。生產環境建議手動更新，確認新版本穩定後再升級。

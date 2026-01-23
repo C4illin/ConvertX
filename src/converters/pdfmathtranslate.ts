@@ -2,6 +2,7 @@ import { execFile as execFileOriginal } from "node:child_process";
 import { mkdirSync, existsSync, readdirSync, unlinkSync, rmdirSync, copyFileSync } from "node:fs";
 import { join, basename, dirname } from "node:path";
 import { getArchiveFileName } from "../transfer";
+import { ensureSearchablePdf, cleanupOcrTempFile } from "../helpers/pdfOcr";
 import type { ExecFileFn } from "./types";
 
 // 翻譯服務優先順序（自動 fallback）
@@ -339,7 +340,19 @@ export async function convert(
   _options?: unknown,
   execFile: ExecFileFn = execFileOriginal,
 ): Promise<string> {
+  let ocrTempFile: string | undefined;
+
   try {
+    // 0. 自動偵測掃描版 PDF 並進行 OCR 處理
+    console.log(`[PDFMathTranslate] Checking if PDF needs OCR...`);
+    const ocrResult = await ensureSearchablePdf(filePath, execFile);
+    const inputPdf = ocrResult.path;
+    ocrTempFile = ocrResult.tempFile;
+
+    if (ocrResult.wasOcred) {
+      console.log(`[PDFMathTranslate] ✅ Scanned PDF detected and OCR'd automatically`);
+    }
+
     // 1. 檢查模型（警告但不阻止，因為 pdf2zh 可能會自動下載）
     checkModelsExist();
 
@@ -361,8 +374,8 @@ export async function convert(
     const archiveDir = join(tempDir, "archive");
     mkdirSync(archiveDir, { recursive: true });
 
-    // 5. 執行 pdf2zh 翻譯
-    const { monoPath, dualPath } = await runPdf2zh(filePath, tempDir, targetLang, execFile);
+    // 5. 執行 pdf2zh 翻譯（使用 OCR 處理後的 PDF）
+    const { monoPath, dualPath } = await runPdf2zh(inputPdf, tempDir, targetLang, execFile);
 
     // 6. 複製翻譯後的檔案到封裝目錄
     // PDFMathTranslate 輸出：
@@ -440,8 +453,13 @@ export async function convert(
     // 9. 清理臨時目錄
     removeDir(tempDir);
 
+    // 10. 清理 OCR 暫存檔案
+    cleanupOcrTempFile(ocrTempFile);
+
     return "Done";
   } catch (error) {
+    // 確保清理 OCR 暫存檔案
+    cleanupOcrTempFile(ocrTempFile);
     throw new Error(`PDFMathTranslate error: ${error}`);
   }
 }

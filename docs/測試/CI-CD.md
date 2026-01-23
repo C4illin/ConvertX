@@ -143,6 +143,6 @@ docker build -t convertx-cn-test .
 
 ## 相關文件
 
-- [測試策略](test-strategy.md)
-- [E2E 測試](e2e-tests.md)
-- [貢獻指南](../development/contribution.md)
+- [測試策略](測試策略.md)
+- [E2E 測試](E2E測試.md)
+- [貢獻指南](../開發指南/貢獻指南.md)

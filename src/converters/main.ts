@@ -31,6 +31,7 @@ import {
   properties as propertiesPDFMathTranslate,
 } from "./pdfmathtranslate";
 import { convert as convertBabelDoc, properties as propertiesBabelDoc } from "./babeldoc";
+import { convert as convertOcrMyPdf, properties as propertiesOcrMyPdf } from "./ocrmypdf";
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
 
@@ -155,6 +156,10 @@ const properties: Record<
   BabelDOC: {
     properties: propertiesBabelDoc,
     converter: convertBabelDoc,
+  },
+  OCRmyPDF: {
+    properties: propertiesOcrMyPdf,
+    converter: convertOcrMyPdf,
   },
 };
 

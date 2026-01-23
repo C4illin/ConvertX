@@ -1,6 +1,6 @@
 {
   "name": "convertx-frontend",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "scripts": {
     "dev": "bun run --watch src/index.tsx",
     "hot": "bun run --hot src/index.tsx",
@@ -60,5 +60,6 @@
     "@parcel/watcher",
     "@tailwindcss/oxide",
     "oxc-resolver"
-  ]
+  ],
+  "license": "AGPL-3.0"
 }

@@ -6,18 +6,20 @@
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/convertx/convertx-cn?style=flat&logo=docker)](https://hub.docker.com/r/convertx/convertx-cn)
 [![GitHub Release](https://img.shields.io/github/v/release/pi-docket/ConvertX-CN)](https://github.com/pi-docket/ConvertX-CN/releases)
+[![License AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 
 ---
 
 ## 為什麼選擇 ConvertX-CN？
 
-| 特色              | 說明                                 |
-| ----------------- | ------------------------------------ |
-| 📁 **1000+ 格式** | 文件、圖片、影音、電子書一次搞定     |
-| 🔧 **20+ 引擎**   | LibreOffice、FFmpeg、Pandoc 全到位   |
-| 🈶 **中文優化**   | 內建中日韓字型與 OCR，告別亂碼       |
-| 🌐 **65 種語言**  | 跨國團隊無障礙使用                   |
-| 📊 **PDF 翻譯**   | 數學公式完整保留（PDFMathTranslate） |
+| 特色              | 說明                                    |
+| ----------------- | --------------------------------------- |
+| 📁 **1000+ 格式** | 文件、圖片、影音、電子書一次搞定        |
+| 🔧 **20+ 引擎**   | LibreOffice、FFmpeg、Pandoc 全到位      |
+| 🈶 **中文優化**   | 內建中日韓字型與 OCR，告別亂碼          |
+| 🌐 **65 種語言**  | 跨國團隊無障礙使用                      |
+| 📊 **PDF 翻譯**   | PDFMathTranslate + BabelDOC 雙引擎      |
+| 📄 **PDF 轉 MD**  | MinerU 智能擷取（保留表格、公式、圖片） |
 
 ---
 
@@ -25,26 +27,43 @@
 
 完整文件請參閱 **[文件中心](docs/README.md)**
 
-| 分類        | 連結                                                                                                                            |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| 🚀 快速入門 | [概覽](docs/getting-started/overview.md) · [快速開始](docs/getting-started/quick-start.md) · [FAQ](docs/getting-started/faq.md) |
-| 🐳 部署指南 | [Docker](docs/deployment/docker.md) · [反向代理](docs/deployment/reverse-proxy.md)                                              |
-| ⚙️ 配置設定 | [環境變數](docs/configuration/environment-variables.md) · [安全性](docs/configuration/security.md)                              |
-| 🔌 功能說明 | [轉換器](docs/features/converters.md) · [OCR](docs/features/ocr.md) · [翻譯](docs/features/translation.md)                      |
-| 🔗 API      | [API 總覽](docs/api/overview.md) · [端點說明](docs/api/endpoints.md)                                                            |
-| 👩‍💻 開發     | [專案結構](docs/development/project-structure.md) · [貢獻指南](docs/development/contribution.md)                                |
+| 分類        | 連結                                                                                                     |
+| ----------- | -------------------------------------------------------------------------------------------------------- |
+| 🚀 快速入門 | [概覽](docs/快速入門/概覽.md) · [快速開始](docs/快速入門/快速開始.md) · [FAQ](docs/快速入門/常見問題.md) |
+| 🐳 部署指南 | [Docker](docs/部署指南/Docker.md) · [反向代理](docs/部署指南/反向代理.md)                                |
+| ⚙️ 配置設定 | [環境變數](docs/配置設定/環境變數.md) · [安全性](docs/配置設定/安全性.md)                                |
+| 🔌 功能說明 | [轉換器](docs/功能說明/轉換器.md) · [OCR](docs/功能說明/OCR.md) · [翻譯](docs/功能說明/翻譯.md)          |
+| 🔗 API      | [API 總覽](docs/API/總覽.md) · [端點說明](docs/API/端點.md)                                              |
+| 👩‍💻 開發     | [專案結構](docs/開發指南/專案結構.md) · [貢獻指南](docs/開發指南/貢獻指南.md)                            |
 
 ---
 
 ## 🚀 快速開始
 
-### Docker Compose（推薦）
+### Docker Run
 
 ```bash
-# 1. 建立專案資料夾
-mkdir -p ~/convertx-cn && cd ~/convertx-cn
+mkdir -p ~/convertx-cn/data && cd ~/convertx-cn && \
+docker run -d \
+  --name convertx-cn \
+  --restart unless-stopped \
+  -p 3000:3000 \
+  -v ./data:/app/data \
+  -e TZ=Asia/Taipei \
+  -e JWT_SECRET=Xk9mPqL2vN7wR4tY6uI8oA3sD5fG1hJ0 \
+  convertx/convertx-cn:latest
+```
 
-# 2. 建立 docker-compose.yml
+> ⚠️ **安全提醒**：正式環境請更換 `JWT_SECRET` 為自己的隨機字串（至少 32 字元）
+
+開啟瀏覽器：`http://localhost:3000`
+
+### Docker Compose（推薦）
+
+> 💡 以下命令會自動建立 `~/convertx-cn/data` 資料夾、產生 `docker-compose.yml` 並啟動服務
+
+```bash
+mkdir -p ~/convertx-cn/data && cd ~/convertx-cn && \
 cat > docker-compose.yml << 'EOF'
 services:
   convertx:
@@ -57,31 +76,16 @@ services:
       - ./data:/app/data
     environment:
       - TZ=Asia/Taipei
-      - JWT_SECRET=請更換為長且隨機的字串至少32字元
+      - JWT_SECRET=Xk9mPqL2vN7wR4tY6uI8oA3sD5fG1hJ0
 EOF
-
-# 3. 啟動
 docker compose up -d
 ```
 
+> ⚠️ **安全提醒**：正式環境請更換 `JWT_SECRET` 為自己的隨機字串（至少 32 字元）
+
 開啟瀏覽器：`http://localhost:3000`
 
-> 📖 詳細說明請參閱 [快速開始](docs/getting-started/quick-start.md)
-
-### Docker Run
-
-```bash
-mkdir -p ~/convertx-cn/data && cd ~/convertx-cn
-
-docker run -d \
-  --name convertx-cn \
-  --restart unless-stopped \
-  -p 3000:3000 \
-  -v ./data:/app/data \
-  -e TZ=Asia/Taipei \
-  -e JWT_SECRET=請更換為長且隨機的字串 \
-  convertx/convertx-cn:latest
-```
+> 📖 詳細說明請參閱 [快速開始](docs/快速入門/快速開始.md)
 
 ---
 
@@ -94,7 +98,7 @@ docker run -d \
 | 帳號 | admin@example.com |
 | 密碼 | admin             |
 
-> ⚠️ 示範站僅供測試，請勿上傳敏感檔案
+> ⚠️ 示範站僅供測試，請勿上傳敏感檔案，會定期清理資料。
 
 ---
 
@@ -106,23 +110,25 @@ docker run -d \
 | 重啟後資料消失     | 確認 `./data:/app/data` 且資料夾存在           |
 | 重啟後被登出       | 設定固定的 `JWT_SECRET`                        |
 
-更多問題 → [FAQ](docs/getting-started/faq.md)
+更多問題 → [FAQ](docs/快速入門/常見問題.md)
 
 ---
 
 ## 📦 支援格式
 
-| 轉換器           | 用途     | 格式數 |
-| ---------------- | -------- | ------ |
-| FFmpeg           | 影音     | 400+   |
-| ImageMagick      | 圖片     | 200+   |
-| LibreOffice      | 文件     | 60+    |
-| Pandoc           | 文件     | 100+   |
-| Calibre          | 電子書   | 40+    |
-| Inkscape         | 向量圖   | 20+    |
-| PDFMathTranslate | PDF 翻譯 | 15+    |
+| 轉換器           | 用途            | 格式數 |
+| ---------------- | --------------- | ------ |
+| FFmpeg           | 影音            | 400+   |
+| ImageMagick      | 圖片            | 200+   |
+| LibreOffice      | 文件            | 60+    |
+| Pandoc           | 文件            | 100+   |
+| Calibre          | 電子書          | 40+    |
+| Inkscape         | 向量圖          | 20+    |
+| PDFMathTranslate | PDF 翻譯        | 15+    |
+| BabelDOC         | PDF 翻譯/轉換   | 15+    |
+| MinerU           | PDF 轉 Markdown | 10+    |
 
-完整列表 → [轉換器文件](docs/features/converters.md)
+完整列表 → [轉換器文件](docs/功能說明/轉換器.md)
 
 ---
 
@@ -144,4 +150,6 @@ docker compose up -d
 
 ## 📄 License
 
-[MIT](LICENSE) | 基於 [C4illin/ConvertX](https://github.com/C4illin/ConvertX)
+This project is licensed under the **[GNU Affero General Public License v3.0 (AGPL-3.0)](LICENSE)**.
+
+Based on [C4illin/ConvertX](https://github.com/C4illin/ConvertX).

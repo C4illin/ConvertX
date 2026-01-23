@@ -8,9 +8,9 @@
 
 剛開始使用？從這裡開始：
 
-1. **[概覽](getting-started/overview.md)** — 了解 ConvertX-CN 是什麼
-2. **[快速開始](getting-started/quick-start.md)** — 5 分鐘內完成部署
-3. **[常見問題](getting-started/faq.md)** — 解決常見問題
+1. **[概覽](快速入門/概覽.md)** — 了解 ConvertX-CN 是什麼
+2. **[快速開始](快速入門/快速開始.md)** — 5 分鐘內完成部署
+3. **[常見問題](快速入門/常見問題.md)** — 解決常見問題
 
 ---
 
@@ -18,14 +18,14 @@
 
 適合一般使用者：
 
-| 文件                                       | 說明                 |
-| ------------------------------------------ | -------------------- |
-| [快速開始](getting-started/quick-start.md) | 最快部署方式         |
-| [支援的轉換器](features/converters.md)     | 所有可用的轉換格式   |
-| [OCR 功能](features/ocr.md)                | 光學字元辨識         |
-| [翻譯功能](features/translation.md)        | PDF 翻譯（保留公式） |
-| [多語言介面](features/i18n.md)             | 切換介面語言         |
-| [常見問題](getting-started/faq.md)         | FAQ                  |
+| 文件                               | 說明                 |
+| ---------------------------------- | -------------------- |
+| [快速開始](快速入門/快速開始.md)   | 最快部署方式         |
+| [支援的轉換器](功能說明/轉換器.md) | 所有可用的轉換格式   |
+| [OCR 功能](功能說明/OCR.md)        | 光學字元辨識         |
+| [翻譯功能](功能說明/翻譯.md)       | PDF 翻譯（保留公式） |
+| [多語言介面](功能說明/多語言.md)   | 切換介面語言         |
+| [常見問題](快速入門/常見問題.md)   | FAQ                  |
 
 ---
 
@@ -35,19 +35,19 @@
 
 ### 部署
 
-| 文件                                    | 說明                        |
-| --------------------------------------- | --------------------------- |
-| [Docker 部署](deployment/docker.md)     | Docker Run & Docker Compose |
-| [反向代理](deployment/reverse-proxy.md) | Nginx / Traefik / Caddy     |
-| [範例配置](samples/README.md)           | 可直接使用的配置檔          |
+| 文件                              | 說明                        |
+| --------------------------------- | --------------------------- |
+| [Docker 部署](部署指南/Docker.md) | Docker Run & Docker Compose |
+| [反向代理](部署指南/反向代理.md)  | Nginx / Traefik / Caddy     |
+| [範例配置](範例/README.md)        | 可直接使用的配置檔          |
 
 ### 配置
 
-| 文件                                               | 說明               |
-| -------------------------------------------------- | ------------------ |
-| [環境變數](configuration/environment-variables.md) | 所有可用設定       |
-| [安全性設定](configuration/security.md)            | HTTPS、認證、防護  |
-| [清理與限制](configuration/limits-and-cleanup.md)  | 自動清理、資源限制 |
+| 文件                                 | 說明               |
+| ------------------------------------ | ------------------ |
+| [環境變數](配置設定/環境變數.md)     | 所有可用設定       |
+| [安全性設定](配置設定/安全性.md)     | HTTPS、認證、防護  |
+| [清理與限制](配置設定/清理與限制.md) | 自動清理、資源限制 |
 
 ---
 
@@ -57,26 +57,26 @@
 
 ### 開發
 
-| 文件                                         | 說明           |
-| -------------------------------------------- | -------------- |
-| [專案結構](development/project-structure.md) | 程式碼結構說明 |
-| [本地開發](development/local-development.md) | 開發環境設定   |
-| [貢獻指南](development/contribution.md)      | 如何參與專案   |
+| 文件                             | 說明           |
+| -------------------------------- | -------------- |
+| [專案結構](開發指南/專案結構.md) | 程式碼結構說明 |
+| [本地開發](開發指南/本地開發.md) | 開發環境設定   |
+| [貢獻指南](開發指南/貢獻指南.md) | 如何參與專案   |
 
 ### API
 
-| 文件                         | 說明               |
-| ---------------------------- | ------------------ |
-| [API 總覽](api/overview.md)  | REST & GraphQL API |
-| [API 端點](api/endpoints.md) | 詳細端點說明       |
+| 文件                    | 說明               |
+| ----------------------- | ------------------ |
+| [API 總覽](API/總覽.md) | REST & GraphQL API |
+| [API 端點](API/端點.md) | 詳細端點說明       |
 
 ### 測試
 
-| 文件                                 | 說明           |
-| ------------------------------------ | -------------- |
-| [測試策略](testing/test-strategy.md) | 測試類型與方法 |
-| [CI/CD](testing/ci-cd.md)            | 持續整合設定   |
-| [E2E 測試](testing/e2e-tests.md)     | 端對端測試     |
+| 文件                         | 說明           |
+| ---------------------------- | -------------- |
+| [測試策略](測試/測試策略.md) | 測試類型與方法 |
+| [CI/CD](測試/CI-CD.md)       | 持續整合設定   |
+| [E2E 測試](測試/E2E測試.md)  | 端對端測試     |
 
 ---
 
@@ -85,38 +85,38 @@
 ```
 docs/
 ├── README.md                          ← 您在這裡
-├── getting-started/                   # 快速入門
-│   ├── overview.md                    # 概覽
-│   ├── quick-start.md                 # 快速開始
-│   └── faq.md                         # 常見問題
-├── deployment/                        # 部署指南
-│   ├── docker.md                      # Docker 部署
-│   └── reverse-proxy.md               # 反向代理
-├── configuration/                     # 配置設定
-│   ├── environment-variables.md       # 環境變數
-│   ├── security.md                    # 安全性
-│   └── limits-and-cleanup.md          # 清理與限制
-├── features/                          # 功能說明
-│   ├── converters.md                  # 轉換器
-│   ├── translation.md                 # 翻譯
-│   ├── ocr.md                         # OCR
-│   └── i18n.md                        # 多語言
-├── api/                               # API 文件
-│   ├── overview.md                    # API 總覽
-│   └── endpoints.md                   # API 端點
-├── testing/                           # 測試
-│   ├── test-strategy.md               # 測試策略
-│   ├── ci-cd.md                       # CI/CD
-│   └── e2e-tests.md                   # E2E 測試
-├── development/                       # 開發指南
-│   ├── project-structure.md           # 專案結構
-│   ├── local-development.md           # 本地開發
-│   └── contribution.md                # 貢獻指南
-└── samples/                           # 範例檔案
-    ├── compose.minimal.yml            # 最小配置
-    ├── compose.production.yml         # 生產環境
-    ├── compose.with-traefik.yml       # Traefik 整合
-    └── nginx.example.conf             # Nginx 設定
+├── 快速入門/
+│   ├── 概覽.md
+│   ├── 快速開始.md
+│   └── 常見問題.md
+├── 部署指南/
+│   ├── Docker.md
+│   └── 反向代理.md
+├── 配置設定/
+│   ├── 環境變數.md
+│   ├── 安全性.md
+│   └── 清理與限制.md
+├── 功能說明/
+│   ├── 轉換器.md
+│   ├── 翻譯.md
+│   ├── OCR.md
+│   └── 多語言.md
+├── API/
+│   ├── 總覽.md
+│   └── 端點.md
+├── 測試/
+│   ├── 測試策略.md
+│   ├── CI-CD.md
+│   └── E2E測試.md
+├── 開發指南/
+│   ├── 專案結構.md
+│   ├── 本地開發.md
+│   └── 貢獻指南.md
+└── 範例/
+    ├── compose.minimal.yml
+    ├── compose.production.yml
+    ├── compose.with-traefik.yml
+    └── nginx.example.conf
 ```
 
 ---
@@ -135,23 +135,23 @@ docs/
 
 ### 我是新手
 
-1. [概覽](getting-started/overview.md)
-2. [快速開始](getting-started/quick-start.md)
-3. [支援的轉換器](features/converters.md)
+1. [概覽](快速入門/概覽.md)
+2. [快速開始](快速入門/快速開始.md)
+3. [支援的轉換器](功能說明/轉換器.md)
 
 ### 我要部署到生產環境
 
-1. [Docker 部署](deployment/docker.md)
-2. [反向代理](deployment/reverse-proxy.md)
-3. [安全性設定](configuration/security.md)
-4. [環境變數](configuration/environment-variables.md)
+1. [Docker 部署](部署指南/Docker.md)
+2. [反向代理](部署指南/反向代理.md)
+3. [安全性設定](配置設定/安全性.md)
+4. [環境變數](配置設定/環境變數.md)
 
 ### 我想參與開發
 
-1. [專案結構](development/project-structure.md)
-2. [本地開發](development/local-development.md)
-3. [貢獻指南](development/contribution.md)
-4. [測試策略](testing/test-strategy.md)
+1. [專案結構](開發指南/專案結構.md)
+2. [本地開發](開發指南/本地開發.md)
+3. [貢獻指南](開發指南/貢獻指南.md)
+4. [測試策略](測試/測試策略.md)
 
 ---
 

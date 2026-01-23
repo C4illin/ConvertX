@@ -176,6 +176,6 @@ npx playwright codegen http://localhost:3000
 
 ## 相關文件
 
-- [測試策略](test-strategy.md)
-- [CI/CD](ci-cd.md)
-- [本地開發](../development/local-development.md)
+- [測試策略](測試策略.md)
+- [CI/CD](CI-CD.md)
+- [本地開發](../開發指南/本地開發.md)

@@ -59,6 +59,8 @@ cd C:\convertx-cn
 
 在專案資料夾建立 `docker-compose.yml`：
 
+> 💡 `JWT_SECRET` 請改成你自己的隨機字串（至少 32 字元）
+
 ```yaml
 services:
   convertx:
@@ -71,7 +73,7 @@ services:
       - ./data:/app/data
     environment:
       - TZ=Asia/Taipei
-      - JWT_SECRET=請改成你自己的隨機字串至少32字元
+      - JWT_SECRET=your-random-secret-at-least-32-chars
 ```
 
 ### 必要參數說明
@@ -119,12 +121,12 @@ docker compose logs -f  # Ctrl+C 退出
 | 重啟後被登出         | 設定固定的 `JWT_SECRET`              |
 | 3000 埠被佔用        | 改用 `"8080:3000"`                   |
 
-更多問題請參考 [FAQ](../faq.md)。
+更多問題請參考 [FAQ](../快速入門/常見問題.md)。
 
 ---
 
 ## 下一步
 
-- [環境變數完整說明](../config/environment.md)
-- [反向代理與 HTTPS](../deployment.md)
+- [環境變數完整說明](../配置設定/環境變數.md)
+- [反向代理與 HTTPS](反向代理.md)
 - [版本更新方法](update.md)

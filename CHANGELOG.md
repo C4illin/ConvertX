@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.1.14](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.14) (2026-01-23)
+
+OCR 功能強化版本，新增 OCRmyPDF 轉換引擎。
+
+### ✨ Features
+
+- **OCRmyPDF 轉換引擎**：新增獨立的 OCR 轉換引擎，支援將掃描版 PDF 轉換為可搜尋 PDF
+  - 支援 7 種語言：英文、繁體中文、簡體中文、日文、韓文、德文、法文
+  - 與 PDFMathTranslate 風格一致的 UI 格式（`pdf-en`、`pdf-zh-TW` 等）
+  - 自動偵測頁面方向並旋轉
+  - 自動校正傾斜
+  - 跳過已有文字層的頁面
+  - 詳細的5階段處理進度輸出
+
+### 📦 Build
+
+- **Dockerfile**：安裝 ocrmypdf 與 Tesseract OCR 語言包（階段 9/11）
+
+### 📚 Documentation
+
+- 更新 OCR 功能文件，說明 OCRmyPDF 轉換引擎用法
+
+---
+
 ## [0.1.13](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.13) (2026-01-23)
 
 工作流程優化與測試修復版本。

@@ -67,7 +67,10 @@ describe("BabelDOC converter - Chinese translation", () => {
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
     ) => {
-      if (cmd === "babeldoc") {
+      if (cmd === "pdftotext") {
+        // 返回超過 100 個字元，表示 PDF 不需要 OCR
+        callback(null, "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.", "");
+      } else if (cmd === "babeldoc") {
         babeldocCalled = true;
         babeldocArgs = args;
 
@@ -131,7 +134,9 @@ describe("BabelDOC converter - English translation", () => {
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
     ) => {
-      if (cmd === "babeldoc") {
+      if (cmd === "pdftotext") {
+        callback(null, "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.", "");
+      } else if (cmd === "babeldoc") {
         babeldocArgs = args;
         const outputIndex = args.indexOf("-o");
         if (outputIndex !== -1 && args[outputIndex + 1]) {
@@ -181,7 +186,9 @@ describe("BabelDOC converter - Traditional Chinese", () => {
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
     ) => {
-      if (cmd === "babeldoc") {
+      if (cmd === "pdftotext") {
+        callback(null, "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.", "");
+      } else if (cmd === "babeldoc") {
         babeldocArgs = args;
         const outputIndex = args.indexOf("-o");
         if (outputIndex !== -1 && args[outputIndex + 1]) {
@@ -231,7 +238,9 @@ describe("BabelDOC converter - Output structure", () => {
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
     ) => {
-      if (cmd === "babeldoc") {
+      if (cmd === "pdftotext") {
+        callback(null, "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.", "");
+      } else if (cmd === "babeldoc") {
         const outputIndex = args.indexOf("-o");
         if (outputIndex !== -1 && args[outputIndex + 1]) {
           const outputPath = args[outputIndex + 1];
@@ -267,7 +276,9 @@ describe("BabelDOC converter - Output structure", () => {
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
     ) => {
-      if (cmd === "babeldoc") {
+      if (cmd === "pdftotext") {
+        callback(null, "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.", "");
+      } else if (cmd === "babeldoc") {
         const outputIndex = args.indexOf("-o");
         if (outputIndex !== -1 && args[outputIndex + 1]) {
           const outputPath = args[outputIndex + 1];
@@ -317,7 +328,9 @@ describe("BabelDOC converter - Error handling", () => {
       _args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
     ) => {
-      if (cmd === "babeldoc") {
+      if (cmd === "pdftotext") {
+        callback(null, "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.", "");
+      } else if (cmd === "babeldoc") {
         const error = new Error("Translation failed") as ExecFileException;
         error.code = 1;
         callback(error, "", "babeldoc: Translation error");
@@ -337,7 +350,9 @@ describe("BabelDOC converter - Error handling", () => {
       _args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
     ) => {
-      if (cmd === "babeldoc") {
+      if (cmd === "pdftotext") {
+        callback(null, "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.", "");
+      } else if (cmd === "babeldoc") {
         // Don't create output file, simulating failed translation
         callback(null, "Complete", "");
       }
@@ -376,7 +391,9 @@ describe("BabelDOC converter - Markdown output format", () => {
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
     ) => {
-      if (cmd === "babeldoc") {
+      if (cmd === "pdftotext") {
+        callback(null, "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.", "");
+      } else if (cmd === "babeldoc") {
         babeldocArgs = args;
         const outputIndex = args.indexOf("-o");
         if (outputIndex !== -1 && args[outputIndex + 1]) {
@@ -428,7 +445,9 @@ describe("BabelDOC converter - HTML output format", () => {
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
     ) => {
-      if (cmd === "babeldoc") {
+      if (cmd === "pdftotext") {
+        callback(null, "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.", "");
+      } else if (cmd === "babeldoc") {
         babeldocArgs = args;
         const outputIndex = args.indexOf("-o");
         if (outputIndex !== -1 && args[outputIndex + 1]) {

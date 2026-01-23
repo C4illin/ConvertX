@@ -97,21 +97,29 @@ docker run -d \
 
 **重要**：請務必先建立資料夾，否則 Docker 會建立匿名 volume。
 
-```bash
-# Linux / macOS
-mkdir -p ~/convertx-cn/data
+**Linux / macOS：**
 
-# Windows PowerShell
+```bash
+mkdir -p ~/convertx-cn/data
+```
+
+**Windows PowerShell：**
+
+```powershell
 mkdir C:\convertx-cn\data
 ```
 
 ### 備份與還原
 
-```bash
-# 備份
-tar -czvf convertx-backup-$(date +%Y%m%d).tar.gz ./data
+**備份：**
 
-# 還原
+```bash
+tar -czvf convertx-backup-$(date +%Y%m%d).tar.gz ./data
+```
+
+**還原：**
+
+```bash
 tar -xzvf convertx-backup-20260120.tar.gz
 ```
 
@@ -199,18 +207,23 @@ services:
 
 ## 版本更新
 
-```bash
-# 拉取最新版本
-docker pull convertx/convertx-cn:latest
+**1. 拉取最新版本：**
 
-# 停止並移除舊容器
+```bash
+docker pull convertx/convertx-cn:latest
+```
+
+**2. 停止並移除舊容器：**
+
+```bash
 docker stop convertx-cn
 docker rm convertx-cn
+```
 
-# 重新啟動（使用相同的參數）
-docker run -d \
-  --name convertx-cn \
-  # ... 其他參數
+**3. 重新啟動（使用相同的參數）：**
+
+```bash
+docker run -d --name convertx-cn ...
 ```
 
 或使用 Docker Compose：
@@ -228,7 +241,12 @@ docker compose up -d
 
 ```bash
 docker logs convertx-cn
-docker logs -f convertx-cn  # 持續追蹤
+```
+
+持續追蹤日誌：
+
+```bash
+docker logs -f convertx-cn
 ```
 
 ### 進入容器
@@ -251,5 +269,5 @@ docker exec -it convertx-cn /bin/bash
 ## 相關文件
 
 - [Docker Compose 詳解](docker-compose.md)
-- [反向代理設定](reverse-proxy.md)
-- [環境變數設定](../configuration/environment-variables.md)
+- [反向代理設定](反向代理.md)
+- [環境變數設定](../配置設定/環境變數.md)
