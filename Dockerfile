@@ -174,6 +174,26 @@ RUN echo "" && \
   echo "   ✅ resvg 安裝完成"; \
   fi
 
+# 階段 2.3：安裝 deark（從源碼編譯）
+# deark 是一個用於解碼和轉換各種二進位格式的工具
+# @see https://github.com/jsummers/deark
+RUN echo "" && \
+  echo "   🔧 階段 2.3：安裝 deark..." && \
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  build-essential \
+  git \
+  && cd /tmp && \
+  git clone --depth 1 https://github.com/jsummers/deark.git && \
+  cd deark && \
+  make -j$(nproc) && \
+  cp deark /usr/local/bin/deark && \
+  chmod +x /usr/local/bin/deark && \
+  cd / && rm -rf /tmp/deark && \
+  apt-get remove -y build-essential git && \
+  apt-get autoremove -y && \
+  rm -rf /var/lib/apt/lists/* && \
+  echo "   ✅ deark 安裝完成"
+
 # 階段 3：影音處理工具
 RUN echo "" && \
   echo "========================================" && \

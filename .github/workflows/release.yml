@@ -242,6 +242,7 @@ jobs:
             potrace --version 2>/dev/null | head -1 || echo "potrace: N/A"
             dasel --version 2>/dev/null || echo "dasel: N/A"
             djxl --version 2>&1 | head -1 || echo "djxl: N/A"
+            deark -version 2>/dev/null | head -1 || echo "deark: N/A"
             
             echo ""
             echo "========================================"
@@ -327,7 +328,7 @@ jobs:
 
           # 使用已啟動的 verify-test 容器
           # 🔥 關鍵：所有 GUI 工具都使用 xvfb-run 包裹
-          
+
           FAILED=0
 
           # 測試 1: Inkscape SVG → PNG（使用 xvfb-run）
