@@ -1,5 +1,16 @@
 # ConvertX-CN + Traefik 配置
 # 適用於：使用 Traefik 作為反向代理
+#
+# 使用方式：
+# 1. 確保已有 Traefik 服務且建立 traefik-network
+# 2. 複製此檔案並重命名為 docker-compose.yml
+# 3. 將 YOUR_DOMAIN_HERE 替換為你的網域
+# 4. 將 YOUR_JWT_SECRET_HERE 替換為隨機字串
+# 5. docker compose up -d
+#
+# 必須修改的欄位：
+#   - YOUR_JWT_SECRET_HERE
+#   - YOUR_DOMAIN_HERE（共 2 處）
 
 services:
   convertx:
@@ -9,7 +20,8 @@ services:
     volumes:
       - ./data:/app/data
     environment:
-      - JWT_SECRET=${JWT_SECRET:?請設定 JWT_SECRET}
+      # ⚠️ 必填：請更換為長且隨機的字串（至少 32 字元）
+      - JWT_SECRET=YOUR_JWT_SECRET_HERE
       - TZ=Asia/Taipei
       - HTTP_ALLOWED=false
       - TRUST_PROXY=true
@@ -17,11 +29,11 @@ services:
     labels:
       - "traefik.enable=true"
       # HTTP 路由
-      - "traefik.http.routers.convertx.rule=Host(`convertx.example.com`)"
+      - "traefik.http.routers.convertx.rule=Host(`YOUR_DOMAIN_HERE`)"
       - "traefik.http.routers.convertx.entrypoints=web"
       - "traefik.http.routers.convertx.middlewares=https-redirect"
       # HTTPS 路由
-      - "traefik.http.routers.convertx-secure.rule=Host(`convertx.example.com`)"
+      - "traefik.http.routers.convertx-secure.rule=Host(`YOUR_DOMAIN_HERE`)"
       - "traefik.http.routers.convertx-secure.entrypoints=websecure"
       - "traefik.http.routers.convertx-secure.tls=true"
       - "traefik.http.routers.convertx-secure.tls.certresolver=letsencrypt"

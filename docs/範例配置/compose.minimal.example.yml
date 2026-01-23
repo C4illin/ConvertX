@@ -1,0 +1,23 @@
+# ConvertX-CN 最小配置
+# 適用於：快速測試、個人使用
+#
+# 使用方式：
+# 1. cp compose.minimal.example.yml docker-compose.yml
+# 2. mkdir -p data
+# 3. 修改 JWT_SECRET（必填）
+# 4. docker compose up -d
+
+services:
+  convertx:
+    image: convertx/convertx-cn:latest
+    container_name: convertx-cn
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - TZ=Asia/Taipei
+      # ⚠️ 必填：請更換為長且隨機的字串（至少 32 字元）
+      # 產生方式：openssl rand -hex 32
+      - JWT_SECRET=YOUR_JWT_SECRET_HERE

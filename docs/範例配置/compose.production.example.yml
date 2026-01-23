@@ -1,5 +1,14 @@
 # ConvertX-CN 生產環境配置
-# 適用於：正式部署
+# 適用於：正式部署（搭配反向代理）
+#
+# 使用方式：
+# 1. cp compose.production.example.yml docker-compose.yml
+# 2. mkdir -p data
+# 3. 修改 JWT_SECRET（必填）
+# 4. docker compose up -d
+#
+# 必須修改的欄位：
+#   - JWT_SECRET
 
 services:
   convertx:
@@ -11,8 +20,9 @@ services:
     volumes:
       - ./data:/app/data
     environment:
-      # 必填：登入驗證金鑰（至少 32 字元）
-      - JWT_SECRET=${JWT_SECRET:?請設定 JWT_SECRET}
+      # ⚠️ 必填：請更換為長且隨機的字串（至少 32 字元）
+      # 產生方式：openssl rand -hex 32
+      - JWT_SECRET=YOUR_JWT_SECRET_HERE
 
       # 時區
       - TZ=Asia/Taipei

@@ -1,15 +1,19 @@
 # ==============================================================================
-# ConvertX-CN 生產環境 Docker Compose
+# ConvertX-CN 生產環境 Docker Compose（詳細註解版）
 #
 # 適用情境：
 #   - 透過 Reverse Proxy（Nginx / Traefik / Caddy）存取
 #   - 已設定 HTTPS
 #   - 需要限制註冊與存取
 #
-# ⚠️ 使用前請確認：
-#    1. 已建立 data 資料夾
-#    2. 已將 JWT_SECRET 改成你自己的值
-#    3. 已設定好 Reverse Proxy
+# 使用方式：
+#   1. cp compose.production-alt.example.yml docker-compose.yml
+#   2. mkdir -p data
+#   3. 修改 JWT_SECRET（必填）
+#   4. docker compose up -d
+#
+# 必須修改的欄位：
+#   - JWT_SECRET
 # ==============================================================================
 
 services:
@@ -28,9 +32,9 @@ services:
 
     environment:
       # === 必填設定 ===
-      # 🔐 JWT 密鑰：請務必改成你自己的隨機字串（至少 32 字元）
-      # 可用 openssl rand -hex 32 產生
-      - JWT_SECRET=change-me-to-a-very-long-random-string-at-least-32-characters
+      # ⚠️ JWT 密鑰：請務必改成你自己的隨機字串（至少 32 字元）
+      # 產生方式：openssl rand -hex 32
+      - JWT_SECRET=YOUR_JWT_SECRET_HERE
 
       # === 安全設定 ===
       # 關閉註冊（首次帳號仍可建立）
