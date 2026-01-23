@@ -25,23 +25,108 @@ const execWithTimeout = (
 
 // 定義所有要檢查的工具
 const tools = [
-  { cmd: "pandoc -v", name: "Pandoc", errorMsg: "Pandoc is not installed.", formatter: (s: string) => s.split("\n")[0] },
-  { cmd: "ffmpeg -version", name: "FFmpeg", errorMsg: "FFmpeg is not installed.", formatter: (s: string) => s.split("\n")[0] },
-  { cmd: "vips -v", name: "Vips", errorMsg: "Vips is not installed.", formatter: (s: string) => s.split("\n")[0] },
-  { cmd: "magick --version", name: "ImageMagick", errorMsg: "ImageMagick is not installed.", formatter: (s: string) => s.split("\n")[0]?.replace("Version: ", "") },
-  { cmd: "gm version", name: "GraphicsMagick", errorMsg: "GraphicsMagick is not installed.", formatter: (s: string) => s.split("\n")[0] },
-  { cmd: "inkscape --version", name: "Inkscape", errorMsg: "Inkscape is not installed.", formatter: (s: string) => s.split("\n")[0] },
-  { cmd: "djxl --version", name: "libjxl", errorMsg: "libjxl-tools is not installed.", formatter: (s: string) => s.split("\n")[0] },
-  { cmd: "dasel --version", name: "dasel", errorMsg: "dasel is not installed.", formatter: (s: string) => s.split("\n")[0] },
-  { cmd: "xelatex -version", name: "XeTeX", errorMsg: "Tex Live with XeTeX is not installed.", formatter: (s: string) => s.split("\n")[0] },
-  { cmd: "resvg -V", name: "resvg", errorMsg: "resvg is not installed", formatter: (s: string) => `resvg v${s.split("\n")[0]}` },
-  { cmd: "assimp version", name: "assimp", errorMsg: "assimp is not installed", formatter: (s: string) => `assimp ${s.split("\n")[5]}` },
-  { cmd: "ebook-convert --version", name: "calibre", errorMsg: "ebook-convert (calibre) is not installed", formatter: (s: string) => s.split("\n")[0] },
-  { cmd: "heif-info -v", name: "libheif", errorMsg: "libheif is not installed", formatter: (s: string) => `libheif v${s.split("\n")[0]}` },
-  { cmd: "potrace -v", name: "potrace", errorMsg: "potrace is not installed", formatter: (s: string) => s.split("\n")[0] },
-  { cmd: "soffice --version", name: "LibreOffice", errorMsg: "libreoffice is not installed", formatter: (s: string) => s.split("\n")[0] },
-  { cmd: "msgconvert --version", name: "msgconvert", errorMsg: "msgconvert (libemail-outlook-message-perl) is not installed", formatter: (s: string) => s.split("\n")[0] },
-  { cmd: "bun -v", name: "Bun", errorMsg: "Bun is not installed. wait what", formatter: (s: string) => `Bun v${s.split("\n")[0]}` },
+  {
+    cmd: "pandoc -v",
+    name: "Pandoc",
+    errorMsg: "Pandoc is not installed.",
+    formatter: (s: string) => s.split("\n")[0],
+  },
+  {
+    cmd: "ffmpeg -version",
+    name: "FFmpeg",
+    errorMsg: "FFmpeg is not installed.",
+    formatter: (s: string) => s.split("\n")[0],
+  },
+  {
+    cmd: "vips -v",
+    name: "Vips",
+    errorMsg: "Vips is not installed.",
+    formatter: (s: string) => s.split("\n")[0],
+  },
+  {
+    cmd: "magick --version",
+    name: "ImageMagick",
+    errorMsg: "ImageMagick is not installed.",
+    formatter: (s: string) => s.split("\n")[0]?.replace("Version: ", ""),
+  },
+  {
+    cmd: "gm version",
+    name: "GraphicsMagick",
+    errorMsg: "GraphicsMagick is not installed.",
+    formatter: (s: string) => s.split("\n")[0],
+  },
+  {
+    cmd: "inkscape --version",
+    name: "Inkscape",
+    errorMsg: "Inkscape is not installed.",
+    formatter: (s: string) => s.split("\n")[0],
+  },
+  {
+    cmd: "djxl --version",
+    name: "libjxl",
+    errorMsg: "libjxl-tools is not installed.",
+    formatter: (s: string) => s.split("\n")[0],
+  },
+  {
+    cmd: "dasel --version",
+    name: "dasel",
+    errorMsg: "dasel is not installed.",
+    formatter: (s: string) => s.split("\n")[0],
+  },
+  {
+    cmd: "xelatex -version",
+    name: "XeTeX",
+    errorMsg: "Tex Live with XeTeX is not installed.",
+    formatter: (s: string) => s.split("\n")[0],
+  },
+  {
+    cmd: "resvg -V",
+    name: "resvg",
+    errorMsg: "resvg is not installed",
+    formatter: (s: string) => `resvg v${s.split("\n")[0]}`,
+  },
+  {
+    cmd: "assimp version",
+    name: "assimp",
+    errorMsg: "assimp is not installed",
+    formatter: (s: string) => `assimp ${s.split("\n")[5]}`,
+  },
+  {
+    cmd: "ebook-convert --version",
+    name: "calibre",
+    errorMsg: "ebook-convert (calibre) is not installed",
+    formatter: (s: string) => s.split("\n")[0],
+  },
+  {
+    cmd: "heif-info -v",
+    name: "libheif",
+    errorMsg: "libheif is not installed",
+    formatter: (s: string) => `libheif v${s.split("\n")[0]}`,
+  },
+  {
+    cmd: "potrace -v",
+    name: "potrace",
+    errorMsg: "potrace is not installed",
+    formatter: (s: string) => s.split("\n")[0],
+  },
+  {
+    cmd: "soffice --version",
+    name: "LibreOffice",
+    errorMsg: "libreoffice is not installed",
+    formatter: (s: string) => s.split("\n")[0],
+  },
+  {
+    cmd: "msgconvert --version",
+    name: "msgconvert",
+    errorMsg: "msgconvert (libemail-outlook-message-perl) is not installed",
+    formatter: (s: string) => s.split("\n")[0],
+  },
+  {
+    cmd: "bun -v",
+    name: "Bun",
+    errorMsg: "Bun is not installed. wait what",
+    formatter: (s: string) => `Bun v${s.split("\n")[0]}`,
+  },
 ];
 
 if (process.env.NODE_ENV === "production") {
@@ -80,4 +165,3 @@ if (process.env.NODE_ENV === "production") {
     }
   })();
 }
-

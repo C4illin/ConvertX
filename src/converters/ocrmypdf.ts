@@ -24,24 +24,24 @@ import type { ExecFileFn } from "./types";
 
 // 內建支援的 OCR 語言（與 PDFMathTranslate 風格一致）
 const SUPPORTED_LANGUAGES = [
-  "en",       // English
-  "zh-TW",    // 繁體中文
-  "zh",       // 簡體中文
-  "ja",       // 日本語
-  "ko",       // 한국어
-  "de",       // Deutsch
-  "fr",       // Français
+  "en", // English
+  "zh-TW", // 繁體中文
+  "zh", // 簡體中文
+  "ja", // 日本語
+  "ko", // 한국어
+  "de", // Deutsch
+  "fr", // Français
 ] as const;
 
 // Tesseract 語言代碼映射（UI 代碼 → Tesseract 代碼）
 const LANG_MAP: Record<string, string> = {
-  "en": "eng",
+  en: "eng",
   "zh-TW": "chi_tra",
-  "zh": "chi_sim",
-  "ja": "jpn",
-  "ko": "kor",
-  "de": "deu",
-  "fr": "fra",
+  zh: "chi_sim",
+  ja: "jpn",
+  ko: "kor",
+  de: "deu",
+  fr: "fra",
 };
 
 export const properties = {
@@ -64,7 +64,7 @@ function extractOcrLanguage(convertTo: string): string {
   if (!match || !match[1]) {
     throw new Error(`Invalid convertTo format: ${convertTo}. Expected pdf-<lang>`);
   }
-  
+
   const uiLang = match[1];
   // 轉換為 Tesseract 語言代碼
   const tessLang = LANG_MAP[uiLang] || uiLang.replace(/-/g, "_");
@@ -98,7 +98,7 @@ function runOcrMyPdf(
     console.log(`[OCRmyPDF] ========================================`);
     console.log(`[OCRmyPDF] 🔍 開始 PDF OCR 處理`);
     console.log(`[OCRmyPDF] ========================================`);
-    
+
     // 階段 1：驗證輸入檔案
     console.log(`[OCRmyPDF] 📋 階段 1/5：驗證輸入檔案`);
     if (!existsSync(inputPath)) {
@@ -108,23 +108,26 @@ function runOcrMyPdf(
     const inputStats = statSync(inputPath);
     console.log(`[OCRmyPDF]    ✅ 輸入檔案: ${basename(inputPath)}`);
     console.log(`[OCRmyPDF]    ✅ 檔案大小: ${formatFileSize(inputStats.size)}`);
-    
+
     // 階段 2：準備 OCR 參數
     console.log(`[OCRmyPDF] 📋 階段 2/5：準備 OCR 參數`);
     console.log(`[OCRmyPDF]    ✅ OCR 語言: ${lang}`);
-    
+
     const args = [
-      "-l", lang,
-      "--skip-text",      // 跳過已有文字的頁面
-      "--optimize", "1",  // 輕度優化
-      "--deskew",         // 自動校正傾斜
-      "--rotate-pages",   // 自動偵測頁面方向
-      "--jobs", "2",      // 使用 2 個並行處理
+      "-l",
+      lang,
+      "--skip-text", // 跳過已有文字的頁面
+      "--optimize",
+      "1", // 輕度優化
+      "--deskew", // 自動校正傾斜
+      "--rotate-pages", // 自動偵測頁面方向
+      "--jobs",
+      "2", // 使用 2 個並行處理
       inputPath,
       outputPath,
     ];
     console.log(`[OCRmyPDF]    ✅ 參數: --skip-text --optimize 1 --deskew --rotate-pages`);
-    
+
     // 階段 3：執行 OCR
     console.log(`[OCRmyPDF] 📋 階段 3/5：執行 Tesseract OCR...`);
     console.log(`[OCRmyPDF]    ⏳ 處理中（大型 PDF 可能需要數分鐘）...`);
@@ -132,11 +135,11 @@ function runOcrMyPdf(
 
     execFile("ocrmypdf", args, (error: Error | null, stdout: string, stderr: string) => {
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-      
+
       if (error) {
         // 階段 3 失敗處理
         console.log(`[OCRmyPDF]    ❌ OCR 處理失敗（耗時 ${elapsed}s）`);
-        
+
         // 檢查特定錯誤類型
         if (stderr && stderr.includes("PriorOcrFoundError")) {
           console.log(`[OCRmyPDF] 📋 階段 4/5：PDF 已有文字層，跳過 OCR`);
@@ -187,11 +190,11 @@ function runOcrMyPdf(
         reject(new Error(`OCR output file not found: ${outputPath}`));
         return;
       }
-      
+
       const outputStats = statSync(outputPath);
       console.log(`[OCRmyPDF]    ✅ 輸出檔案: ${basename(outputPath)}`);
       console.log(`[OCRmyPDF]    ✅ 檔案大小: ${formatFileSize(outputStats.size)}`);
-      
+
       // 階段 5：完成
       console.log(`[OCRmyPDF] 📋 階段 5/5：處理完成`);
       console.log(`[OCRmyPDF] ========================================`);
@@ -200,7 +203,7 @@ function runOcrMyPdf(
       console.log(`[OCRmyPDF]    📤 輸出: ${formatFileSize(outputStats.size)}`);
       console.log(`[OCRmyPDF]    ⏱️ 耗時: ${elapsed}s`);
       console.log(`[OCRmyPDF] ========================================`);
-      
+
       resolve(outputPath);
     });
   });
@@ -229,7 +232,7 @@ export async function convert(
   console.log(`[OCRmyPDF] ║     OCRmyPDF - PDF OCR 處理引擎       ║`);
   console.log(`[OCRmyPDF] ╚════════════════════════════════════════╝`);
   console.log(``);
-  
+
   try {
     // 步驟 1：解析參數
     console.log(`[OCRmyPDF] 🔧 解析轉換參數...`);

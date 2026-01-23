@@ -55,7 +55,13 @@ describe("PDFMathTranslate converter - Chinese translation", () => {
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
     ) => {
-      if (cmd === "pdftotext") { callback(null, "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.", ""); } else if (cmd === "pdf2zh") {
+      if (cmd === "pdftotext") {
+        callback(
+          null,
+          "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.",
+          "",
+        );
+      } else if (cmd === "pdf2zh") {
         pdf2zhCalled = true;
         pdf2zhArgs = args;
 
@@ -116,7 +122,13 @@ describe("PDFMathTranslate converter - English translation", () => {
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
     ) => {
-      if (cmd === "pdftotext") { callback(null, "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.", ""); } else if (cmd === "pdf2zh") {
+      if (cmd === "pdftotext") {
+        callback(
+          null,
+          "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.",
+          "",
+        );
+      } else if (cmd === "pdf2zh") {
         pdf2zhArgs = args;
         const outputDirIndex = args.indexOf("-o");
         if (outputDirIndex !== -1 && args[outputDirIndex + 1]) {
@@ -165,7 +177,13 @@ describe("PDFMathTranslate converter - Japanese translation", () => {
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
     ) => {
-      if (cmd === "pdftotext") { callback(null, "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.", ""); } else if (cmd === "pdf2zh") {
+      if (cmd === "pdftotext") {
+        callback(
+          null,
+          "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.",
+          "",
+        );
+      } else if (cmd === "pdf2zh") {
         pdf2zhArgs = args;
         const outputDirIndex = args.indexOf("-o");
         if (outputDirIndex !== -1 && args[outputDirIndex + 1]) {
@@ -214,7 +232,13 @@ describe("PDFMathTranslate converter - Traditional Chinese", () => {
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
     ) => {
-      if (cmd === "pdftotext") { callback(null, "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.", ""); } else if (cmd === "pdf2zh") {
+      if (cmd === "pdftotext") {
+        callback(
+          null,
+          "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.",
+          "",
+        );
+      } else if (cmd === "pdf2zh") {
         pdf2zhArgs = args;
         const outputDirIndex = args.indexOf("-o");
         if (outputDirIndex !== -1 && args[outputDirIndex + 1]) {
@@ -264,7 +288,13 @@ describe("PDFMathTranslate converter - Output structure", () => {
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
     ) => {
-      if (cmd === "pdftotext") { callback(null, "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.", ""); } else if (cmd === "pdf2zh") {
+      if (cmd === "pdftotext") {
+        callback(
+          null,
+          "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.",
+          "",
+        );
+      } else if (cmd === "pdf2zh") {
         const outputDirIndex = args.indexOf("-o");
         if (outputDirIndex !== -1 && args[outputDirIndex + 1]) {
           const outputDir = args[outputDirIndex + 1];
@@ -308,7 +338,13 @@ describe("PDFMathTranslate converter - Output structure", () => {
       args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
     ) => {
-      if (cmd === "pdftotext") { callback(null, "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.", ""); } else if (cmd === "pdf2zh") {
+      if (cmd === "pdftotext") {
+        callback(
+          null,
+          "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.",
+          "",
+        );
+      } else if (cmd === "pdf2zh") {
         const outputDirIndex = args.indexOf("-o");
         if (outputDirIndex !== -1 && args[outputDirIndex + 1]) {
           const outputDir = args[outputDirIndex + 1];
@@ -362,7 +398,13 @@ describe("PDFMathTranslate converter - Error handling", () => {
       _args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
     ) => {
-      if (cmd === "pdftotext") { callback(null, "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.", ""); } else if (cmd === "pdf2zh") {
+      if (cmd === "pdftotext") {
+        callback(
+          null,
+          "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.",
+          "",
+        );
+      } else if (cmd === "pdf2zh") {
         const error = new Error("Translation failed") as ExecFileException;
         callback(error, "", "Error: Translation service unavailable");
       }
@@ -381,7 +423,13 @@ describe("PDFMathTranslate converter - Error handling", () => {
       _args: string[],
       callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
     ) => {
-      if (cmd === "pdftotext") { callback(null, "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.", ""); } else if (cmd === "pdf2zh") {
+      if (cmd === "pdftotext") {
+        callback(
+          null,
+          "This is a comprehensive test PDF with more than enough text content to ensure that the OCR detection threshold of 100 characters is exceeded and the PDF is not treated as a scanned document requiring OCR processing.",
+          "",
+        );
+      } else if (cmd === "pdf2zh") {
         // Don't create any output files
         callback(null, "Complete", "");
       } else if (cmd === "tar") {

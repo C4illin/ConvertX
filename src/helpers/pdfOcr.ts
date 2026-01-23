@@ -67,7 +67,9 @@ export async function isScannedPdf(
     const isScanned = charCount < SCANNED_PDF_TEXT_THRESHOLD;
 
     if (isScanned) {
-      console.log(`[PDF-OCR] ⚠️ Detected scanned PDF (chars: ${charCount} < ${SCANNED_PDF_TEXT_THRESHOLD})`);
+      console.log(
+        `[PDF-OCR] ⚠️ Detected scanned PDF (chars: ${charCount} < ${SCANNED_PDF_TEXT_THRESHOLD})`,
+      );
     } else {
       console.log(`[PDF-OCR] ✅ PDF has text layer (chars: ${charCount})`);
     }
@@ -103,14 +105,7 @@ export function runOcrMyPdf(
     // --clean: 清理背景雜訊
     // --force-ocr: 強制對所有頁面進行 OCR（即使有文字層）
 
-    const args = [
-      "-l", lang,
-      "--skip-text",
-      "--optimize", "1",
-      "--deskew",
-      inputPath,
-      outputPath,
-    ];
+    const args = ["-l", lang, "--skip-text", "--optimize", "1", "--deskew", inputPath, outputPath];
 
     console.log(`[PDF-OCR] Running: ocrmypdf ${args.join(" ")}`);
 

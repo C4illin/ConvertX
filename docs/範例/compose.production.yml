@@ -7,7 +7,7 @@ services:
     container_name: convertx-cn
     restart: unless-stopped
     ports:
-      - "127.0.0.1:3000:3000"  # 只允許本機存取，透過反向代理對外
+      - "127.0.0.1:3000:3000" # 只允許本機存取，透過反向代理對外
     volumes:
       - ./data:/app/data
     environment:
@@ -18,8 +18,8 @@ services:
       - TZ=Asia/Taipei
 
       # 安全性設定
-      - HTTP_ALLOWED=false        # 禁止 HTTP（使用 HTTPS）
-      - TRUST_PROXY=true          # 信任反向代理
+      - HTTP_ALLOWED=false # 禁止 HTTP（使用 HTTPS）
+      - TRUST_PROXY=true # 信任反向代理
       - ACCOUNT_REGISTRATION=false # 關閉公開註冊
 
       # 清理設定
