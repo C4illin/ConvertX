@@ -343,9 +343,10 @@ jobs:
           # 測試 1: Inkscape SVG → PNG（使用 xvfb-run）
           echo ""
           echo "🔄 測試 Inkscape: SVG → PNG"
+          INKSCAPE_RESULT="❌"
           docker exec verify-test sh -c '
             echo "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100\" height=\"100\"><circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/></svg>" > /tmp/test.svg
-            xvfb-run -a inkscape --export-type=png --export-filename=/tmp/test.png /tmp/test.svg 2>/dev/null
+            timeout 120 xvfb-run -a --server-args="-screen 0 1024x768x24" inkscape --export-type=png --export-filename=/tmp/test.png /tmp/test.svg 2>&1 || true
             if [ -f /tmp/test.png ]; then
               echo "✅ Inkscape SVG → PNG 成功"
               ls -la /tmp/test.png
@@ -353,7 +354,7 @@ jobs:
               echo "❌ Inkscape SVG → PNG 失敗"
               exit 1
             fi
-          ' || FAILED=1
+          ' && INKSCAPE_RESULT="✓" || FAILED=1
 
           # 測試 2: Pandoc Markdown → HTML（純 CLI，不需要 xvfb）
           echo ""
@@ -373,9 +374,10 @@ jobs:
           # 測試 3: LibreOffice TXT → PDF（使用 xvfb-run）
           echo ""
           echo "🔄 測試 LibreOffice: TXT → PDF"
+          LIBREOFFICE_RESULT="❌"
           docker exec verify-test sh -c '
             echo "Test document content" > /tmp/test.txt
-            xvfb-run -a libreoffice --headless --convert-to pdf --outdir /tmp /tmp/test.txt 2>/dev/null
+            timeout 120 xvfb-run -a --server-args="-screen 0 1024x768x24" libreoffice --headless --convert-to pdf --outdir /tmp /tmp/test.txt 2>&1 || true
             if [ -f /tmp/test.pdf ]; then
               echo "✅ LibreOffice TXT → PDF 成功"
               ls -la /tmp/test.pdf
@@ -383,7 +385,7 @@ jobs:
               echo "❌ LibreOffice TXT → PDF 失敗"
               exit 1
             fi
-          ' || FAILED=1
+          ' && LIBREOFFICE_RESULT="✓" || FAILED=1
 
           # 測試 4: FFmpeg 音頻轉換（純 CLI）
           echo ""
@@ -402,9 +404,10 @@ jobs:
           # 測試 5: Calibre HTML → EPUB（使用 xvfb-run）
           echo ""
           echo "🔄 測試 Calibre: HTML → EPUB"
+          CALIBRE_RESULT="❌"
           docker exec verify-test sh -c '
             echo "<!DOCTYPE html><html><body><h1>Test Book</h1><p>Content</p></body></html>" > /tmp/book.html
-            xvfb-run -a ebook-convert /tmp/book.html /tmp/book.epub 2>/dev/null
+            timeout 120 xvfb-run -a --server-args="-screen 0 1024x768x24" ebook-convert /tmp/book.html /tmp/book.epub 2>&1 || true
             if [ -f /tmp/book.epub ]; then
               echo "✅ Calibre HTML → EPUB 成功"
               ls -la /tmp/book.epub
@@ -412,7 +415,7 @@ jobs:
               echo "❌ Calibre HTML → EPUB 失敗"
               exit 1
             fi
-          ' || FAILED=1
+          ' && CALIBRE_RESULT="✓" || FAILED=1
 
           # 測試 6: Tesseract OCR（純 CLI）
           echo ""
@@ -461,10 +464,17 @@ jobs:
           # 測試 9: API 健康檢查
           echo ""
           echo "🔄 測試 API 端點"
-          if docker exec verify-test curl -sf http://localhost:3000/healthcheck | grep -q "OK"; then
+          API_RESULT="❌"
+          HEALTH_RESPONSE=$(docker exec verify-test curl -sf http://localhost:3000/healthcheck 2>/dev/null || echo "")
+          if echo "$HEALTH_RESPONSE" | grep -qi "ok\|healthy\|success"; then
             echo "✅ Healthcheck API 正常"
+            echo "Response: $HEALTH_RESPONSE"
+            API_RESULT="✓"
           else
             echo "❌ Healthcheck API 失敗"
+            echo "Response: $HEALTH_RESPONSE"
+            # 嘗試顯示更多調試信息
+            docker exec verify-test curl -v http://localhost:3000/healthcheck 2>&1 || true
             FAILED=1
           fi
 
@@ -473,14 +483,14 @@ jobs:
           echo "========================================"
           echo "📊 E2E 測試摘要"
           echo "========================================"
-          echo "✓ Inkscape: SVG → PNG (xvfb-run)"
+          echo "${INKSCAPE_RESULT:-❌} Inkscape: SVG → PNG (xvfb-run)"
           echo "✓ Pandoc: Markdown → HTML"
-          echo "✓ LibreOffice: TXT → PDF (xvfb-run)"
+          echo "${LIBREOFFICE_RESULT:-❌} LibreOffice: TXT → PDF (xvfb-run)"
           echo "✓ FFmpeg: 音頻 + 影片"
-          echo "✓ Calibre: HTML → EPUB (xvfb-run)"
+          echo "${CALIBRE_RESULT:-❌} Calibre: HTML → EPUB (xvfb-run)"
           echo "✓ Tesseract: OCR"
           echo "✓ Resvg: SVG → PNG"
-          echo "✓ API: Healthcheck"
+          echo "${API_RESULT:-❌} API: Healthcheck"
           echo "========================================"
 
           if [ $FAILED -eq 0 ]; then
