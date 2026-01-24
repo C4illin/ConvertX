@@ -302,19 +302,58 @@ jobs:
         run: |
           echo "timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_OUTPUT
 
-      - name: Create manifest list and push
+      # ========================================
+      # 步驟 1：建立 GHCR manifest
+      # ========================================
+      - name: Create manifest list and push to GHCR
         working-directory: /tmp/digests
         run: |
+          echo "========================================"
+          echo "📦 建立 GHCR manifest"
+          echo "========================================"
           docker buildx imagetools create \
-            $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            -t ghcr.io/${{ env.REPO }}:${{ steps.version.outputs.VERSION }} \
+            -t ghcr.io/${{ env.REPO }}:latest-lite \
             --annotation='index:org.opencontainers.image.description=ConvertX-CN Lite - 輕量版檔案轉換服務' \
             --annotation='index:org.opencontainers.image.created=${{ steps.timestamp.outputs.timestamp }}' \
             --annotation='index:org.opencontainers.image.url=${{ github.event.repository.url }}' \
             --annotation='index:org.opencontainers.image.source=${{ github.event.repository.url }}' \
             $(printf 'ghcr.io/${{ env.REPO }}@sha256:%s ' *)
+          echo "✅ GHCR manifest 建立完成"
 
-      - name: Inspect image
+      # ========================================
+      # 步驟 2：複製到 Docker Hub（分開處理避免跨 registry 問題）
+      # ========================================
+      - name: Copy manifest to Docker Hub
         run: |
+          echo "========================================"
+          echo "📦 複製 manifest 到 Docker Hub"
+          echo "========================================"
+
+          # 從 GHCR 複製到 Docker Hub
+          echo "🔄 複製 ${{ steps.version.outputs.VERSION }} 到 Docker Hub..."
+          docker buildx imagetools create \
+            -t ${{ env.DOCKER_IMAGE }}:${{ steps.version.outputs.VERSION }} \
+            ghcr.io/${{ env.REPO }}:${{ steps.version.outputs.VERSION }}
+
+          echo "🔄 複製 latest-lite 到 Docker Hub..."
+          docker buildx imagetools create \
+            -t ${{ env.DOCKER_IMAGE }}:latest-lite \
+            ghcr.io/${{ env.REPO }}:latest-lite
+
+          echo "✅ Docker Hub 推送完成"
+
+      - name: Inspect images
+        run: |
+          echo "========================================"
+          echo "🔍 檢查 GHCR image"
+          echo "========================================"
+          docker buildx imagetools inspect 'ghcr.io/${{ env.REPO }}:${{ steps.version.outputs.VERSION }}'
+
+          echo ""
+          echo "========================================"
+          echo "🔍 檢查 Docker Hub image"
+          echo "========================================"
           docker buildx imagetools inspect '${{ env.DOCKER_IMAGE }}:${{ steps.version.outputs.VERSION }}'
 
       # ========================================
