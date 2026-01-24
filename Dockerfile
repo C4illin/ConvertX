@@ -462,11 +462,11 @@ RUN echo "Cache bust: ${CACHE_BUST}" && \
   \
   # 方法 1: pipx install（標準方式）
   echo "   [嘗試 1/3] pipx install mineru[all]..." && \
-  (pipx install "mineru[all]" && MINERU_INSTALLED=1) || echo "   ⚠️ 方法 1 失敗，等待 5 秒後重試..." && \
+  (pipx install "mineru[all]" && MINERU_INSTALLED=1) || echo "   ⚠️ 方法 1 失敗，等待 15 秒後重試..." && \
   \
   # 方法 2: pipx install 重試（等待後重試）
   if [ "$MINERU_INSTALLED" != "1" ]; then \
-  sleep 5 && \
+  sleep 15 && \
   echo "   [嘗試 2/3] pipx install mineru[all]（重試）..." && \
   (pipx install "mineru[all]" && MINERU_INSTALLED=1) || echo "   ⚠️ 方法 2 失敗，嘗試 pip 安裝..."; \
   fi && \
