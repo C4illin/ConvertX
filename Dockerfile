@@ -495,14 +495,14 @@ RUN echo "Cache bust: ${CACHE_BUST}" && \
   # 驗證字型檔案大小（確保下載完整）
   echo "   驗證字型檔案..." && \
   for font in GoNotoKurrent-Regular.ttf SourceHanSerifCN-Regular.ttf SourceHanSerifTW-Regular.ttf SourceHanSerifJP-Regular.ttf SourceHanSerifKR-Regular.ttf; do \
-    if [ ! -f "/app/$font" ]; then \
-      echo "   ERROR: Font not found: /app/$font" && exit 1; \
-    fi; \
-    size=$(stat -c%s "/app/$font" 2>/dev/null || stat -f%z "/app/$font" 2>/dev/null || echo 0); \
-    if [ "$size" -lt 1000000 ]; then \
-      echo "   ERROR: Font too small: /app/$font ($size bytes)" && exit 1; \
-    fi; \
-    echo "   ✓ $font ($size bytes)"; \
+  if [ ! -f "/app/$font" ]; then \
+  echo "   ERROR: Font not found: /app/$font" && exit 1; \
+  fi; \
+  size=$(stat -c%s "/app/$font" 2>/dev/null || stat -f%z "/app/$font" 2>/dev/null || echo 0); \
+  if [ "$size" -lt 1000000 ]; then \
+  echo "   ERROR: Font too small: /app/$font ($size bytes)" && exit 1; \
+  fi; \
+  echo "   ✓ $font ($size bytes)"; \
   done && \
   echo "✅ 所有字型驗證通過" && \
   \
