@@ -93,6 +93,10 @@ docker compose up -d
 
 ## 🔗 線上示範
 
+[![Live Demo](https://img.shields.io/badge/demo-online-brightgreen)](https://convertx-cn.bioailab.qzz.io)
+
+<!-- [![Online Preview](https://img.shields.io/badge/online-preview-available-green)](https://convertx-cn.bioailab.qzz.io) -->
+
 🔗 **https://convertx-cn.bioailab.qzz.io**
 
 | 項目 | 內容              |
