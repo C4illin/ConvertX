@@ -33,6 +33,7 @@ import {
 } from "./pdfmathtranslate";
 import { convert as convertBabelDoc, properties as propertiesBabelDoc } from "./babeldoc";
 import { convert as convertOcrMyPdf, properties as propertiesOcrMyPdf } from "./ocrmypdf";
+import { convert as convertPdfPackager, properties as propertiesPdfPackager } from "./pdfpackager";
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
 
@@ -161,6 +162,10 @@ const properties: Record<
   OCRmyPDF: {
     properties: propertiesOcrMyPdf,
     converter: convertOcrMyPdf,
+  },
+  "PDF Packager": {
+    properties: propertiesPdfPackager,
+    converter: convertPdfPackager,
   },
   deark: {
     properties: propertiesDeark,

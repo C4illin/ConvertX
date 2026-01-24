@@ -142,6 +142,7 @@ RUN echo "" && \
   mupdf-tools \
   poppler-utils \
   potrace \
+  qpdf \
   && rm -rf /var/lib/apt/lists/* && \
   echo "✅ 階段 2/11 完成：核心轉換工具已安裝"
 
@@ -319,6 +320,7 @@ RUN echo "" && \
   python3-numpy \
   python3-tinycss2 \
   python3-opencv \
+  python3-img2pdf \
   pipx \
   && rm -rf /var/lib/apt/lists/* && \
   echo "✅ 階段 11/11 完成：Python 依賴已安裝" && \
@@ -326,6 +328,35 @@ RUN echo "" && \
   echo "========================================" && \
   echo "✅ 所有 APT 套件安裝完成！" && \
   echo "========================================"
+
+# ==============================================================================
+# 🔐 階段 11.1：PDF Packager 預設簽章憑證（開箱即用）
+# ==============================================================================
+#
+# 產生自簽憑證供 PDF Packager 簽章功能使用
+# ℹ️ 此憑證僅供測試/展示用途，正式環境請替換為自己的憑證
+# 📚 詳細說明請參考 docs/功能說明/PDF-Packager.md
+#
+# ==============================================================================
+RUN echo "" && \
+  echo "========================================" && \
+  echo "🔐 階段 11.1：產生 PDF Packager 預設簽章憑證" && \
+  echo "========================================" && \
+  mkdir -p /app/certs && \
+  # 產生自簽憑證（有效期 10 年）
+  openssl req -x509 -newkey rsa:2048 \
+  -keyout /tmp/key.pem -out /tmp/cert.pem \
+  -days 3650 -nodes \
+  -subj "/CN=PDF Packager Default/O=ConvertX-CN/C=TW" && \
+  # 匯出為 PKCS12 格式（空密碼）
+  openssl pkcs12 -export \
+  -inkey /tmp/key.pem -in /tmp/cert.pem \
+  -out /app/certs/default.p12 \
+  -passout pass: && \
+  # 清理暫存檔案
+  rm -f /tmp/key.pem /tmp/cert.pem && \
+  chmod 644 /app/certs/default.p12 && \
+  echo "✅ 預設簽章憑證已產生: /app/certs/default.p12"
 
 # ==============================================================================
 # 🔥 階段 12-UNIFIED：Python 工具安裝 + 模型下載（單一 RUN 原則）
@@ -352,6 +383,15 @@ ENV PIP_NO_CACHE_DIR=1
 # HuggingFace 環境變數（安裝時允許下載，安裝完成後設為離線）
 ENV HF_HOME="/root/.cache/huggingface"
 
+# ==============================================================================
+# PDF Packager 簽章預設配置（開箱即用）
+# ==============================================================================
+ENV PDF_SIGN_P12_PATH="/app/certs/default.p12"
+ENV PDF_SIGN_P12_PASSWORD=""
+ENV PDF_SIGN_REASON="ConvertX-CN PDF Packager"
+ENV PDF_SIGN_LOCATION="Taiwan"
+ENV PDF_SIGN_CONTACT="convertx-cn@localhost"
+
 RUN set -eux && \
   echo "===========================================================" && \
   echo "🚀 階段 12-UNIFIED：Python 工具 + 模型統一安裝" && \
@@ -361,11 +401,11 @@ RUN set -eux && \
   echo "===========================================================" && \
   \
   # ========================================
-  # [1/8] 安裝 huggingface_hub（用於顯式模型下載）
+  # [1/8] 安裝 huggingface_hub + endesive（用於顯式模型下載和 PDF 簽章）
   # ========================================
   echo "" && \
-  echo "📦 [1/8] 安裝 huggingface_hub..." && \
-  pip3 install --no-cache-dir --break-system-packages huggingface_hub && \
+  echo "📦 [1/8] 安裝 huggingface_hub + endesive（PDF 簽章）..." && \
+  pip3 install --no-cache-dir --break-system-packages huggingface_hub endesive && \
   \
   # ========================================
   # [2/8] 安裝 markitdown（文件轉換工具）

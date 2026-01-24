@@ -163,9 +163,20 @@ Core components derived from [C4illin/ConvertX](https://github.com/C4illin/Conve
 
 Original modules, UI, i18n, and new features created by the ConvertX-CN author are licensed under **[Custom Non-Commercial License](LICENSE-AUTHOR)**.
 
-- **Commercial Use / SaaS**: ❌ Prohibited without written permission.
-- **Personal / Research Use**: ✅ Allowed.
+| 使用情境        | 是否允許  |
+| --------------- | --------- |
+| 個人使用        | ✅ 允許   |
+| 教育/研究       | ✅ 允許   |
+| 商業使用 / SaaS | ❌ 需授權 |
+
+### 📞 商業授權聯繫
+
+如需商業授權，請透過以下方式聯繫：
+
+- **GitHub Issues**: [建立 Issue](https://github.com/pi-docket/ConvertX-CN/issues) (標題請加上 `[Commercial License Request]`)
+- **GitHub Discussions**: [社群討論](https://github.com/pi-docket/ConvertX-CN/discussions)
+- **GitHub Profile**: [@pi-docket](https://github.com/pi-docket)
 
 > ⚠️ **Commercial Usage**: If you plan to use this project in a commercial product, SaaS, or revenue-generating service, you **must contact the author** for a license exception regarding the custom components. The AGPL obligations (sharing source code) still apply to the upstream portions.
 
-Check [LICENSE-OVERVIEW.md](LICENSE-OVERVIEW.md) for full details.
+📄 完整授權說明 → [LICENSE-OVERVIEW.md](LICENSE-OVERVIEW.md)
