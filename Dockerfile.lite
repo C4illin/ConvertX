@@ -19,9 +19,13 @@
 #   - GraphicsMagick（圖片轉檔：PNG/JPG/GIF/WEBP）
 #   - FFmpeg（影音轉檔：MP4/MP3/AVI/MKV）
 #   - Pandoc（文件格式：Markdown/HTML/DOCX）
-#   - Ghostscript + qpdf（PDF 處理）
-#   - PDF 數位簽章（PFX/PKCS#12）
+#   - Ghostscript + qpdf（PDF 處理：PDF/A、防修改）
 #   - 精簡版 UI（僅英文、簡體中文、繁體中文）
+#
+# ⚠️ Lite 版 PDF 簽章說明：
+#   - 預設憑證會在容器首次啟動時自動產生
+#   - endesive 套件需要使用者自行安裝（pip install endesive）
+#   - 或使用 Full 版以獲得完整 PDF 簽章功能
 #
 # ❌ Lite 版不包含：
 #   - PDFMathTranslate / BabelDOC（PDF 翻譯）
@@ -234,54 +238,53 @@ RUN echo "" && \
 # ==============================================================================
 
 # ==============================================================================
-# 🔐 PDF Packager 預設簽章憑證 + Python
+# 🔐 PDF 簽章設定（Lite 版 - Runtime 初始化）
+# ==============================================================================
+# ⚠️ Lite 版不在 build-time 安裝 endesive（避免編譯問題）
+# ⚠️ 憑證會在容器首次啟動時自動產生
+# ⚠️ PDF 簽章功能需要使用者自行安裝 endesive 或使用 Full 版
 # ==============================================================================
 ENV PATH="/root/.local/bin:${PATH}"
-ENV PIP_NO_CACHE_DIR=1
 ENV PDF_SIGN_P12_PATH="/app/certs/default.p12"
 ENV PDF_SIGN_P12_PASSWORD=""
 ENV PDF_SIGN_REASON="ConvertX-CN Lite PDF Packager"
 ENV PDF_SIGN_LOCATION="Taiwan"
 ENV PDF_SIGN_CONTACT="convertx-cn@localhost"
 
-# 階段 7：安裝 Python 和編譯依賴
+# 階段 7：安裝 Python（僅 runtime，不安裝編譯工具）
 RUN echo "" && \
     echo "========================================" && \
-    echo "🔐 階段 7/8：安裝 Python + 編譯工具" && \
+    echo "🐍 階段 7/7：安裝 Python（僅 runtime）" && \
     echo "========================================" && \
     apt-get update --fix-missing && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
-    python3-dev \
-    gcc \
-    libffi-dev \
     && rm -rf /var/lib/apt/lists/* && \
-    echo "✅ 階段 7/8 完成：Python + 編譯工具已安裝"
+    echo "✅ 階段 7/7 完成：Python 已安裝"
 
-# 階段 8：安裝 endesive 並產生簽章憑證
-RUN echo "" && \
-    echo "========================================" && \
-    echo "🔐 階段 8/8：安裝 endesive + 產生憑證" && \
-    echo "========================================" && \
-    pip3 install --no-cache-dir --break-system-packages endesive && \
-    mkdir -p /app/certs && \
-    openssl req -x509 -newkey rsa:2048 \
-    -keyout /tmp/key.pem -out /tmp/cert.pem \
-    -days 3650 -nodes \
-    -subj "/CN=PDF Packager Default/O=ConvertX-CN Lite/C=TW" && \
-    openssl pkcs12 -export \
-    -inkey /tmp/key.pem -in /tmp/cert.pem \
-    -out /app/certs/default.p12 \
-    -passout pass: && \
-    rm -f /tmp/key.pem /tmp/cert.pem && \
-    chmod 644 /app/certs/default.p12 && \
-    echo "✅ 階段 8/8 完成：endesive + 簽章憑證已安裝"
+# 建立憑證目錄和初始化腳本
+RUN mkdir -p /app/certs /app/scripts
 
-# 清理編譯工具以減小體積
-RUN apt-get update && \
-    apt-get purge -y --auto-remove gcc python3-dev libffi-dev && \
-    rm -rf /var/lib/apt/lists/* && \
-    echo "✅ 編譯工具已清理"
+# 建立 runtime 初始化腳本（容器啟動時產生憑證）
+RUN echo '#!/bin/sh' > /app/scripts/init-certs.sh && \
+    echo '# ConvertX-CN Lite - Runtime 憑證初始化' >> /app/scripts/init-certs.sh && \
+    echo 'CERT_PATH="/app/certs/default.p12"' >> /app/scripts/init-certs.sh && \
+    echo 'if [ ! -f "$CERT_PATH" ]; then' >> /app/scripts/init-certs.sh && \
+    echo '  echo "🔐 首次啟動：產生預設簽章憑證..."' >> /app/scripts/init-certs.sh && \
+    echo '  openssl req -x509 -newkey rsa:2048 \' >> /app/scripts/init-certs.sh && \
+    echo '    -keyout /tmp/key.pem -out /tmp/cert.pem \' >> /app/scripts/init-certs.sh && \
+    echo '    -days 3650 -nodes \' >> /app/scripts/init-certs.sh && \
+    echo '    -subj "/CN=PDF Packager Default/O=ConvertX-CN Lite/C=TW" 2>/dev/null && \' >> /app/scripts/init-certs.sh && \
+    echo '  openssl pkcs12 -export \' >> /app/scripts/init-certs.sh && \
+    echo '    -inkey /tmp/key.pem -in /tmp/cert.pem \' >> /app/scripts/init-certs.sh && \
+    echo '    -out "$CERT_PATH" \' >> /app/scripts/init-certs.sh && \
+    echo '    -passout pass: 2>/dev/null && \' >> /app/scripts/init-certs.sh && \
+    echo '  rm -f /tmp/key.pem /tmp/cert.pem && \' >> /app/scripts/init-certs.sh && \
+    echo '  chmod 644 "$CERT_PATH" && \' >> /app/scripts/init-certs.sh && \
+    echo '  echo "✅ 預設簽章憑證已產生" || \' >> /app/scripts/init-certs.sh && \
+    echo '  echo "⚠️ 憑證產生失敗（不影響其他功能）"' >> /app/scripts/init-certs.sh && \
+    echo 'fi' >> /app/scripts/init-certs.sh && \
+    chmod +x /app/scripts/init-certs.sh
 
 # ==============================================================================
 # 最終清理 + Locale 設定 + 自訂字型（合併以減少 layer）
@@ -349,4 +352,18 @@ ENV NODE_ENV=production
 # ------------------------------------------------------------------------------
 ENV CONVERTX_EDITION="lite"
 
-ENTRYPOINT [ "bun", "run", "dist/src/index.js" ]
+# ==============================================================================
+# 🚀 啟動腳本（包含 runtime 初始化）
+# ==============================================================================
+# 建立啟動腳本：先初始化憑證，再啟動服務
+RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
+    echo '# ConvertX-CN Lite Entrypoint' >> /app/entrypoint.sh && \
+    echo '' >> /app/entrypoint.sh && \
+    echo '# 執行 runtime 初始化（產生憑證）' >> /app/entrypoint.sh && \
+    echo '/app/scripts/init-certs.sh' >> /app/entrypoint.sh && \
+    echo '' >> /app/entrypoint.sh && \
+    echo '# 啟動主服務' >> /app/entrypoint.sh && \
+    echo 'exec bun run dist/src/index.js' >> /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh
+
+ENTRYPOINT [ "/app/entrypoint.sh" ]
