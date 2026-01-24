@@ -448,10 +448,46 @@ RUN echo "Cache bust: ${CACHE_BUST}" && \
   # [5/8] 安裝 mineru（MinerU 引擎）
   # ⬇️ Docker build 階段安裝
   # ⚠️ 模型將在後續步驟顯式下載，此處僅安裝程式
+  # ⚠️ amd64: 必須成功安裝（多重嘗試）
+  #    arm64: 允許失敗（不支援）
   # ========================================
   echo "" && \
   echo "📦 [5/8] 安裝 mineru[all]..." && \
-  (pipx install "mineru[all]" || echo "⚠️ mineru 安裝失敗（可能是 arm64 相容性問題），跳過...") && \
+  ARCH=$(uname -m) && \
+  if [ "$ARCH" = "aarch64" ]; then \
+  echo "   ⚠️ ARM64 架構：MinerU 不支援，跳過安裝"; \
+  else \
+  echo "   正在安裝 MinerU（amd64）..." && \
+  MINERU_INSTALLED=0 && \
+  \
+  # 方法 1: pipx install（標準方式）
+  echo "   [嘗試 1/3] pipx install mineru[all]..." && \
+  (pipx install "mineru[all]" && MINERU_INSTALLED=1) || echo "   ⚠️ 方法 1 失敗，等待 5 秒後重試..." && \
+  \
+  # 方法 2: pipx install 重試（等待後重試）
+  if [ "$MINERU_INSTALLED" != "1" ]; then \
+  sleep 5 && \
+  echo "   [嘗試 2/3] pipx install mineru[all]（重試）..." && \
+  (pipx install "mineru[all]" && MINERU_INSTALLED=1) || echo "   ⚠️ 方法 2 失敗，嘗試 pip 安裝..."; \
+  fi && \
+  \
+  # 方法 3: pip install（備用方式）
+  if [ "$MINERU_INSTALLED" != "1" ]; then \
+  echo "   [嘗試 3/3] pip3 install mineru[all]..." && \
+  (pip3 install --no-cache-dir --break-system-packages "mineru[all]" && MINERU_INSTALLED=1) || echo "   ⚠️ 方法 3 也失敗"; \
+  fi && \
+  \
+  # 驗證安裝結果
+  if command -v mineru >/dev/null 2>&1; then \
+  echo "   ✅ MinerU 安裝成功" && \
+  command -v mineru && \
+  mineru --version 2>/dev/null || true; \
+  else \
+  echo "   ❌ MinerU 安裝失敗（所有方法都失敗）" && \
+  echo "   請檢查網路連接或 Python 環境" && \
+  exit 1; \
+  fi; \
+  fi && \
   \
   # ========================================
   # [6/8] PDFMathTranslate/BabelDOC ONNX 模型
@@ -637,24 +673,26 @@ RUN echo "Cache bust: ${CACHE_BUST}" && \
   echo "🔍 驗證 PDFMathTranslate 字型..." && \
   echo "   ⏭️ 跳過驗證（字型將透過 COPY fonts/ 指令複製）" && \
   \
-  # 驗證 3: MinerU 模型（僅限 amd64 檢查，arm64 跳過）
-  echo "🔍 驗證 MinerU 模型..." && \
+  # 驗證 3: MinerU（amd64 必須安裝成功，arm64 跳過）
+  echo "🔍 驗證 MinerU 安裝..." && \
   if [ "$ARCH" = "aarch64" ]; then \
   echo "   ⚠️ ARM64 架構：跳過 MinerU 驗證"; \
   elif command -v mineru >/dev/null 2>&1; then \
+  echo "   ✅ MinerU 已安裝" && \
   if [ -f /root/mineru.json ]; then \
   MINERU_DIR=$(python3 -c "import json; f=open('/root/mineru.json'); d=json.load(f); print(d.get('models-dir',{}).get('pipeline',''))" 2>/dev/null || echo "") && \
   if [ -n "$MINERU_DIR" ] && [ -d "$MINERU_DIR" ]; then \
   MINERU_SIZE=$(du -sb "$MINERU_DIR" 2>/dev/null | cut -f1 || echo "0") && \
   echo "   ✅ MinerU 模型存在 ($((MINERU_SIZE/1024/1024)) MB)"; \
   else \
-  echo "   ⚠️ MinerU 模型目錄不存在"; \
+  echo "   ⚠️ MinerU 模型目錄不存在（模型將在首次使用時下載）"; \
   fi; \
   else \
-  echo "   ⚠️ mineru.json 不存在"; \
+  echo "   ⚠️ mineru.json 不存在（模型將在首次使用時下載）"; \
   fi; \
   else \
-  echo "   ⚠️ MinerU 未安裝"; \
+  echo "   ❌ MinerU 未安裝（amd64 必須安裝）" && \
+  VALIDATION_FAILED=1; \
   fi && \
   \
   # 最終驗證結果
