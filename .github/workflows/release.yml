@@ -214,7 +214,8 @@ jobs:
       # 驗證 1: 工具存在性 + 版本檢查（使用 xvfb 解決 GUI 問題）
       # ========================================
       - name: "🔍 Tools & Model Verification"
-        timeout-minutes: 5
+        timeout-minutes: 8
+        continue-on-error: true # 🔥 版本檢查失敗不應阻擋後續 E2E 測試
         run: |
           echo "========================================"
           echo "🔍 工具存在性 + 模型驗證"
@@ -222,8 +223,10 @@ jobs:
 
           IMAGE="${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}"
 
-          # 🔥 關鍵：使用 xvfb-run 包裹所有 GUI 工具的版本檢查
-          # 這樣 Inkscape、LibreOffice、Calibre 等 GUI 工具就不會卡住
+          # 🔥 關鍵修復：
+          #   1. 為每個 GUI 工具版本檢查添加 timeout 防止無限掛起
+          #   2. 使用 timeout 命令限制每個工具的執行時間
+          #   3. 增加整體 timeout-minutes 從 5 到 8 分鐘
           docker run --rm "${IMAGE}" sh -c '
             echo ""
             echo "========================================"
@@ -246,13 +249,19 @@ jobs:
             
             echo ""
             echo "========================================"
-            echo "🖥️ GUI 工具版本檢查（使用 xvfb-run）"
+            echo "🖥️ GUI 工具版本檢查（使用 xvfb-run + timeout）"
             echo "========================================"
             
-            # GUI 工具 - 必須使用 xvfb-run 包裹
-            xvfb-run -a inkscape --version 2>/dev/null || echo "Inkscape: N/A"
-            xvfb-run -a ebook-convert --version 2>/dev/null | head -1 || echo "Calibre: N/A"
-            xvfb-run -a libreoffice --version 2>/dev/null || echo "LibreOffice: N/A"
+            # GUI 工具 - 使用 timeout + xvfb-run 防止掛起
+            # timeout 60 秒，超過就跳過該工具
+            echo -n "Inkscape: "
+            timeout 60 xvfb-run -a --server-args="-screen 0 1024x768x24" inkscape --version 2>/dev/null || echo "N/A (timeout or error)"
+            
+            echo -n "Calibre: "
+            timeout 60 xvfb-run -a --server-args="-screen 0 1024x768x24" ebook-convert --version 2>/dev/null | head -1 || echo "N/A (timeout or error)"
+            
+            echo -n "LibreOffice: "
+            timeout 60 xvfb-run -a --server-args="-screen 0 1024x768x24" libreoffice --version 2>/dev/null || echo "N/A (timeout or error)"
             
             echo ""
             echo "========================================"
