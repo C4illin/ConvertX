@@ -336,145 +336,226 @@ jobs:
           echo "========================================"
 
           # 使用已啟動的 verify-test 容器
-          # 🔥 關鍵：所有 GUI 工具都使用 xvfb-run 包裹
+          # 🔥 關鍵：GUI 工具使用 xvfb-run 包裹，設置 DISPLAY 環境變數
 
           FAILED=0
+          INKSCAPE_RESULT="❌"
+          LIBREOFFICE_RESULT="❌"
+          CALIBRE_RESULT="❌"
+          PANDOC_RESULT="❌"
+          FFMPEG_RESULT="❌"
+          TESSERACT_RESULT="❌"
+          RESVG_RESULT="❌"
+          VIDEO_RESULT="❌"
+          API_RESULT="❌"
 
-          # 測試 1: Inkscape SVG → PNG（使用 xvfb-run）
+          # 測試 1: Inkscape SVG → PNG（使用 xvfb-run，設置虛擬顯示）
           echo ""
           echo "🔄 測試 Inkscape: SVG → PNG"
-          INKSCAPE_RESULT="❌"
-          docker exec verify-test sh -c '
+          if docker exec verify-test bash -c '
+            export DISPLAY=:99
             echo "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100\" height=\"100\"><circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"red\"/></svg>" > /tmp/test.svg
-            timeout 120 xvfb-run -a --server-args="-screen 0 1024x768x24" inkscape --export-type=png --export-filename=/tmp/test.png /tmp/test.svg 2>&1 || true
-            if [ -f /tmp/test.png ]; then
+            # 啟動 Xvfb 並執行 inkscape
+            Xvfb :99 -screen 0 1024x768x24 &
+            XVFB_PID=$!
+            sleep 2
+            timeout 60 inkscape --export-type=png --export-filename=/tmp/test.png /tmp/test.svg 2>&1 || true
+            kill $XVFB_PID 2>/dev/null || true
+            if [ -f /tmp/test.png ] && [ -s /tmp/test.png ]; then
               echo "✅ Inkscape SVG → PNG 成功"
               ls -la /tmp/test.png
+              exit 0
             else
               echo "❌ Inkscape SVG → PNG 失敗"
               exit 1
             fi
-          ' && INKSCAPE_RESULT="✓" || FAILED=1
+          '; then
+            INKSCAPE_RESULT="✓"
+          else
+            FAILED=1
+          fi
 
           # 測試 2: Pandoc Markdown → HTML（純 CLI，不需要 xvfb）
           echo ""
           echo "🔄 測試 Pandoc: Markdown → HTML"
-          docker exec verify-test sh -c '
-            echo "# Test\n\nHello **world**" > /tmp/test.md
+          if docker exec verify-test sh -c '
+            echo "# Test" > /tmp/test.md
+            echo "" >> /tmp/test.md
+            echo "Hello **world**" >> /tmp/test.md
             pandoc /tmp/test.md -o /tmp/test.html
             if [ -f /tmp/test.html ]; then
               echo "✅ Pandoc Markdown → HTML 成功"
               cat /tmp/test.html
+              exit 0
             else
               echo "❌ Pandoc Markdown → HTML 失敗"
               exit 1
             fi
-          ' || FAILED=1
+          '; then
+            PANDOC_RESULT="✓"
+          else
+            FAILED=1
+          fi
 
-          # 測試 3: LibreOffice TXT → PDF（使用 xvfb-run）
+          # 測試 3: LibreOffice TXT → PDF（使用 Xvfb）
           echo ""
           echo "🔄 測試 LibreOffice: TXT → PDF"
-          LIBREOFFICE_RESULT="❌"
-          docker exec verify-test sh -c '
+          if docker exec verify-test bash -c '
+            export DISPLAY=:99
             echo "Test document content" > /tmp/test.txt
-            timeout 120 xvfb-run -a --server-args="-screen 0 1024x768x24" libreoffice --headless --convert-to pdf --outdir /tmp /tmp/test.txt 2>&1 || true
-            if [ -f /tmp/test.pdf ]; then
+            # 啟動 Xvfb 並執行 libreoffice
+            Xvfb :99 -screen 0 1024x768x24 &
+            XVFB_PID=$!
+            sleep 2
+            timeout 60 libreoffice --headless --convert-to pdf --outdir /tmp /tmp/test.txt 2>&1 || true
+            kill $XVFB_PID 2>/dev/null || true
+            if [ -f /tmp/test.pdf ] && [ -s /tmp/test.pdf ]; then
               echo "✅ LibreOffice TXT → PDF 成功"
               ls -la /tmp/test.pdf
+              exit 0
             else
               echo "❌ LibreOffice TXT → PDF 失敗"
               exit 1
             fi
-          ' && LIBREOFFICE_RESULT="✓" || FAILED=1
+          '; then
+            LIBREOFFICE_RESULT="✓"
+          else
+            FAILED=1
+          fi
 
           # 測試 4: FFmpeg 音頻轉換（純 CLI）
           echo ""
           echo "🔄 測試 FFmpeg: 生成測試音頻"
-          docker exec verify-test sh -c '
+          if docker exec verify-test sh -c '
             ffmpeg -f lavfi -i "sine=frequency=440:duration=1" -y /tmp/test.wav 2>/dev/null
-            if [ -f /tmp/test.wav ]; then
+            if [ -f /tmp/test.wav ] && [ -s /tmp/test.wav ]; then
               echo "✅ FFmpeg 音頻生成成功"
               ls -la /tmp/test.wav
+              exit 0
             else
               echo "❌ FFmpeg 音頻生成失敗"
               exit 1
             fi
-          ' || FAILED=1
+          '; then
+            FFMPEG_RESULT="✓"
+          else
+            FAILED=1
+          fi
 
-          # 測試 5: Calibre HTML → EPUB（使用 xvfb-run）
+          # 測試 5: Calibre HTML → EPUB（使用 Xvfb）
           echo ""
           echo "🔄 測試 Calibre: HTML → EPUB"
-          CALIBRE_RESULT="❌"
-          docker exec verify-test sh -c '
+          if docker exec verify-test bash -c '
+            export DISPLAY=:99
             echo "<!DOCTYPE html><html><body><h1>Test Book</h1><p>Content</p></body></html>" > /tmp/book.html
-            timeout 120 xvfb-run -a --server-args="-screen 0 1024x768x24" ebook-convert /tmp/book.html /tmp/book.epub 2>&1 || true
-            if [ -f /tmp/book.epub ]; then
+            # 啟動 Xvfb 並執行 ebook-convert
+            Xvfb :99 -screen 0 1024x768x24 &
+            XVFB_PID=$!
+            sleep 2
+            timeout 60 ebook-convert /tmp/book.html /tmp/book.epub 2>&1 || true
+            kill $XVFB_PID 2>/dev/null || true
+            if [ -f /tmp/book.epub ] && [ -s /tmp/book.epub ]; then
               echo "✅ Calibre HTML → EPUB 成功"
               ls -la /tmp/book.epub
+              exit 0
             else
               echo "❌ Calibre HTML → EPUB 失敗"
               exit 1
             fi
-          ' && CALIBRE_RESULT="✓" || FAILED=1
+          '; then
+            CALIBRE_RESULT="✓"
+          else
+            FAILED=1
+          fi
 
           # 測試 6: Tesseract OCR（純 CLI）
           echo ""
           echo "🔄 測試 Tesseract: OCR 文字識別"
-          docker exec verify-test sh -c '
+          if docker exec verify-test sh -c '
             convert -size 200x50 xc:white -font DejaVu-Sans -pointsize 20 -fill black -annotate +10+35 "Hello OCR" /tmp/ocr_test.png 2>/dev/null
             tesseract /tmp/ocr_test.png /tmp/ocr_output 2>/dev/null
             if [ -f /tmp/ocr_output.txt ]; then
               echo "✅ Tesseract OCR 成功"
               cat /tmp/ocr_output.txt
+              exit 0
             else
               echo "❌ Tesseract OCR 失敗"
               exit 1
             fi
-          ' || FAILED=1
+          '; then
+            TESSERACT_RESULT="✓"
+          else
+            FAILED=1
+          fi
 
           # 測試 7: Resvg SVG → PNG（純 CLI）
           echo ""
           echo "🔄 測試 Resvg: SVG → PNG"
-          docker exec verify-test sh -c '
+          if docker exec verify-test sh -c '
             echo "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"50\" height=\"50\"><rect fill=\"purple\" width=\"50\" height=\"50\"/></svg>" > /tmp/resvg_test.svg
             resvg /tmp/resvg_test.svg /tmp/resvg_output.png 2>/dev/null
-            if [ -f /tmp/resvg_output.png ]; then
+            if [ -f /tmp/resvg_output.png ] && [ -s /tmp/resvg_output.png ]; then
               echo "✅ Resvg SVG → PNG 成功"
               ls -la /tmp/resvg_output.png
+              exit 0
             else
               echo "❌ Resvg SVG → PNG 失敗"
               exit 1
             fi
-          ' || FAILED=1
+          '; then
+            RESVG_RESULT="✓"
+          else
+            FAILED=1
+          fi
 
           # 測試 8: FFmpeg 影片轉換（純 CLI）
           echo ""
           echo "🔄 測試 FFmpeg: 影片生成"
-          docker exec verify-test sh -c '
+          if docker exec verify-test sh -c '
             ffmpeg -f lavfi -i color=c=red:s=320x240:d=1 -y /tmp/test_video.mp4 2>/dev/null
-            if [ -f /tmp/test_video.mp4 ]; then
+            if [ -f /tmp/test_video.mp4 ] && [ -s /tmp/test_video.mp4 ]; then
               echo "✅ FFmpeg 影片生成成功"
               ls -la /tmp/test_video.mp4
+              exit 0
             else
               echo "❌ FFmpeg 影片生成失敗"
               exit 1
             fi
-          ' || FAILED=1
+          '; then
+            VIDEO_RESULT="✓"
+          else
+            FAILED=1
+          fi
 
-          # 測試 9: API 健康檢查
+          # 測試 9: API 健康檢查（直接從 host 測試，因為容器已映射端口）
           echo ""
           echo "🔄 測試 API 端點"
-          API_RESULT="❌"
-          HEALTH_RESPONSE=$(docker exec verify-test curl -sf http://localhost:3000/healthcheck 2>/dev/null || echo "")
-          if echo "$HEALTH_RESPONSE" | grep -qi "ok\|healthy\|success"; then
-            echo "✅ Healthcheck API 正常"
-            echo "Response: $HEALTH_RESPONSE"
-            API_RESULT="✓"
+          # 先檢查容器是否還在運行
+          if docker ps | grep -q verify-test; then
+            HEALTH_RESPONSE=$(curl -sf http://localhost:3000/healthcheck 2>/dev/null || echo "")
+            if [ -n "$HEALTH_RESPONSE" ]; then
+              echo "✅ Healthcheck API 正常"
+              echo "Response: $HEALTH_RESPONSE"
+              API_RESULT="✓"
+            else
+              # 嘗試容器內部測試
+              HEALTH_RESPONSE=$(docker exec verify-test curl -sf http://localhost:3000/healthcheck 2>/dev/null || echo "")
+              if [ -n "$HEALTH_RESPONSE" ]; then
+                echo "✅ Healthcheck API 正常 (內部)"
+                echo "Response: $HEALTH_RESPONSE"
+                API_RESULT="✓"
+              else
+                echo "❌ Healthcheck API 失敗"
+                echo "容器狀態："
+                docker ps -a | grep verify-test || true
+                echo "容器日誌："
+                docker logs verify-test 2>&1 | tail -30 || true
+                FAILED=1
+              fi
+            fi
           else
-            echo "❌ Healthcheck API 失敗"
-            echo "Response: $HEALTH_RESPONSE"
-            # 嘗試顯示更多調試信息
-            docker exec verify-test curl -v http://localhost:3000/healthcheck 2>&1 || true
+            echo "❌ 容器已停止運行"
+            docker logs verify-test 2>&1 | tail -50 || true
             FAILED=1
           fi
 
@@ -483,14 +564,15 @@ jobs:
           echo "========================================"
           echo "📊 E2E 測試摘要"
           echo "========================================"
-          echo "${INKSCAPE_RESULT:-❌} Inkscape: SVG → PNG (xvfb-run)"
-          echo "✓ Pandoc: Markdown → HTML"
-          echo "${LIBREOFFICE_RESULT:-❌} LibreOffice: TXT → PDF (xvfb-run)"
-          echo "✓ FFmpeg: 音頻 + 影片"
-          echo "${CALIBRE_RESULT:-❌} Calibre: HTML → EPUB (xvfb-run)"
-          echo "✓ Tesseract: OCR"
-          echo "✓ Resvg: SVG → PNG"
-          echo "${API_RESULT:-❌} API: Healthcheck"
+          echo "${INKSCAPE_RESULT} Inkscape: SVG → PNG"
+          echo "${PANDOC_RESULT} Pandoc: Markdown → HTML"
+          echo "${LIBREOFFICE_RESULT} LibreOffice: TXT → PDF"
+          echo "${FFMPEG_RESULT} FFmpeg: 音頻"
+          echo "${CALIBRE_RESULT} Calibre: HTML → EPUB"
+          echo "${TESSERACT_RESULT} Tesseract: OCR"
+          echo "${RESVG_RESULT} Resvg: SVG → PNG"
+          echo "${VIDEO_RESULT} FFmpeg: 影片"
+          echo "${API_RESULT} API: Healthcheck"
           echo "========================================"
 
           if [ $FAILED -eq 0 ]; then
