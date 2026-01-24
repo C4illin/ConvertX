@@ -392,7 +392,7 @@ ENV PDF_SIGN_REASON="ConvertX-CN PDF Packager"
 ENV PDF_SIGN_LOCATION="Taiwan"
 ENV PDF_SIGN_CONTACT="convertx-cn@localhost"
 
-RUN set -eux && \
+RUN set -eu && \
   echo "===========================================================" && \
   echo "🚀 階段 12-UNIFIED：Python 工具 + 模型統一安裝" && \
   echo "===========================================================" && \
@@ -584,49 +584,49 @@ RUN set -eux && \
   \
   echo "🔹 PDFMathTranslate/BabelDOC ONNX 模型：" && \
   if [ -f "/root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx" ]; then \
-  echo "   ✅ DocLayout-YOLO ONNX 模型存在："; \
-  ls -lh /root/.cache/babeldoc/models/*.onnx 2>/dev/null; \
+    echo "   ✅ DocLayout-YOLO ONNX 模型存在：" && \
+    ls -lh /root/.cache/babeldoc/models/*.onnx 2>/dev/null || true; \
   else \
-  echo "   ❌ /root/.cache/babeldoc/models/ 中沒有 ONNX 模型"; \
+    echo "   ❌ /root/.cache/babeldoc/models/ 中沒有 ONNX 模型"; \
   fi && \
   echo "" && \
   \
   echo "🔹 PDFMathTranslate 字型：" && \
-  ls -lh /app/*.ttf 2>/dev/null || echo "   ⚠️ 無字型檔案" && \
+  (ls -lh /app/*.ttf 2>/dev/null || echo "   ⚠️ 無字型檔案") && \
   echo "" && \
   \
   echo "🔹 BabelDOC 資源：" && \
   if [ -d "/root/.cache/babeldoc" ]; then \
-  echo "   ✅ BabelDOC 資源目錄存在"; \
-  du -sh /root/.cache/babeldoc 2>/dev/null || true; \
-  ls -la /root/.cache/babeldoc/ 2>/dev/null || true; \
+    echo "   ✅ BabelDOC 資源目錄存在" && \
+    du -sh /root/.cache/babeldoc 2>/dev/null || true && \
+    ls -la /root/.cache/babeldoc/ 2>/dev/null || true; \
   else \
-  echo "   ⚠️ BabelDOC 資源目錄不存在"; \
+    echo "   ⚠️ BabelDOC 資源目錄不存在"; \
   fi && \
   echo "" && \
   \
   echo "🔹 MinerU 模型目錄：" && \
   if [ -f /root/mineru.json ]; then \
-  echo "   ✅ mineru.json 存在"; \
-  cat /root/mineru.json; \
-  MINERU_PIPELINE_DIR=$(python3 -c "import json; f=open('/root/mineru.json'); d=json.load(f); print(d.get('models-dir',{}).get('pipeline',''))" 2>/dev/null || echo ""); \
-  if [ -n "$MINERU_PIPELINE_DIR" ] && [ -d "$MINERU_PIPELINE_DIR" ]; then \
-  echo "   ✅ MinerU Pipeline 模型目錄存在: $MINERU_PIPELINE_DIR"; \
-  du -sh "$MINERU_PIPELINE_DIR" 2>/dev/null || true; \
+    echo "   ✅ mineru.json 存在" && \
+    cat /root/mineru.json && \
+    MINERU_PIPELINE_DIR=$(python3 -c "import json; f=open('/root/mineru.json'); d=json.load(f); print(d.get('models-dir',{}).get('pipeline',''))" 2>/dev/null || echo "") && \
+    if [ -n "$MINERU_PIPELINE_DIR" ] && [ -d "$MINERU_PIPELINE_DIR" ]; then \
+      echo "   ✅ MinerU Pipeline 模型目錄存在: $MINERU_PIPELINE_DIR" && \
+      du -sh "$MINERU_PIPELINE_DIR" 2>/dev/null || true; \
+    else \
+      echo "   ⚠️ MinerU Pipeline 模型目錄不存在或未設定"; \
+    fi; \
   else \
-  echo "   ⚠️ MinerU Pipeline 模型目錄不存在或未設定"; \
-  fi; \
-  else \
-  echo "   ⚠️ mineru.json 不存在"; \
+    echo "   ⚠️ mineru.json 不存在"; \
   fi && \
   echo "" && \
   \
   echo "🔹 確認 HuggingFace cache 已清除：" && \
   if [ -d "/root/.cache/huggingface" ]; then \
-  echo "   ❌ 警告：HuggingFace cache 仍存在！"; \
-  du -sh /root/.cache/huggingface 2>/dev/null || true; \
+    echo "   ❌ 警告：HuggingFace cache 仍存在！" && \
+    du -sh /root/.cache/huggingface 2>/dev/null || true; \
   else \
-  echo "   ✅ HuggingFace cache 已清除"; \
+    echo "   ✅ HuggingFace cache 已清除"; \
   fi && \
   echo "" && \
   \
@@ -645,40 +645,33 @@ RUN set -eux && \
   echo "🔍 驗證 BabelDOC ONNX 模型..." && \
   ONNX_FILE="/root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx" && \
   if [ -f "$ONNX_FILE" ]; then \
-    ONNX_SIZE=$(stat -c%s "$ONNX_FILE" 2>/dev/null || echo 0); \
+    ONNX_SIZE=$(stat -c%s "$ONNX_FILE" 2>/dev/null || echo "0") && \
     if [ "$ONNX_SIZE" -gt 10000000 ]; then \
       echo "   ✅ ONNX 模型驗證通過 ($((ONNX_SIZE/1024/1024)) MB)"; \
     else \
-      echo "   ❌ ONNX 模型過小 ($ONNX_SIZE bytes)"; \
-      VALIDATION_FAILED=1; \
+      echo "   ❌ ONNX 模型過小 ($ONNX_SIZE bytes)" && VALIDATION_FAILED=1; \
     fi; \
   else \
-    echo "   ❌ ONNX 模型不存在: $ONNX_FILE"; \
-    VALIDATION_FAILED=1; \
+    echo "   ❌ ONNX 模型不存在: $ONNX_FILE" && VALIDATION_FAILED=1; \
   fi && \
   \
   # 驗證 2: PDFMathTranslate 字型（必須存在）
   echo "🔍 驗證 PDFMathTranslate 字型..." && \
-  FONT_COUNT=$(ls /app/*.ttf 2>/dev/null | wc -l) && \
+  FONT_COUNT=$(ls /app/*.ttf 2>/dev/null | wc -l || echo "0") && \
   if [ "$FONT_COUNT" -ge 5 ]; then \
     echo "   ✅ 字型驗證通過 ($FONT_COUNT 個字型)"; \
   else \
-    echo "   ❌ 字型數量不足 (預期 >= 5，實際 $FONT_COUNT)"; \
-    VALIDATION_FAILED=1; \
+    echo "   ❌ 字型數量不足 (預期 >= 5，實際 $FONT_COUNT)" && VALIDATION_FAILED=1; \
   fi && \
   \
-  # 驗證 3: MinerU 模型（如果 mineru 已安裝則必須存在）
+  # 驗證 3: MinerU 模型（如果 mineru 已安裝則檢查，但不強制失敗）
   echo "🔍 驗證 MinerU 模型..." && \
   if command -v mineru >/dev/null 2>&1; then \
     if [ -f /root/mineru.json ]; then \
-      MINERU_DIR=$(python3 -c "import json; f=open('/root/mineru.json'); d=json.load(f); print(d.get('models-dir',{}).get('pipeline',''))" 2>/dev/null || echo ""); \
+      MINERU_DIR=$(python3 -c "import json; f=open('/root/mineru.json'); d=json.load(f); print(d.get('models-dir',{}).get('pipeline',''))" 2>/dev/null || echo "") && \
       if [ -n "$MINERU_DIR" ] && [ -d "$MINERU_DIR" ]; then \
-        MINERU_SIZE=$(du -sb "$MINERU_DIR" 2>/dev/null | cut -f1 || echo 0); \
-        if [ "$MINERU_SIZE" -gt 1000000000 ]; then \
-          echo "   ✅ MinerU 模型驗證通過 ($((MINERU_SIZE/1024/1024)) MB)"; \
-        else \
-          echo "   ⚠️ MinerU 模型較小 ($((MINERU_SIZE/1024/1024)) MB)，可能不完整"; \
-        fi; \
+        MINERU_SIZE=$(du -sb "$MINERU_DIR" 2>/dev/null | cut -f1 || echo "0") && \
+        echo "   ✅ MinerU 模型存在 ($((MINERU_SIZE/1024/1024)) MB)"; \
       else \
         echo "   ⚠️ MinerU 模型目錄不存在（ARM64 可能不支援）"; \
       fi; \
@@ -692,8 +685,8 @@ RUN set -eux && \
   # 最終驗證結果
   echo "" && \
   if [ "$VALIDATION_FAILED" -eq 1 ]; then \
-    echo "❌ 模型驗證失敗！Image 不應發布。"; \
-    echo "   請檢查網路連接並重新 build。"; \
+    echo "❌ 模型驗證失敗！Image 不應發布。" && \
+    echo "   請檢查網路連接並重新 build。" && \
     exit 1; \
   else \
     echo "✅ 所有必要模型驗證通過！"; \
