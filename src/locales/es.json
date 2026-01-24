@@ -22,7 +22,7 @@
   },
   "nav": {
     "history": "Historial",
-    "account": "Cuenta",
+    "account": "Configuración",
     "logout": "Cerrar sesión",
     "login": "Iniciar sesión",
     "register": "Registrarse",
