@@ -155,6 +155,7 @@ jobs:
       #   - 啟用 zstd compression 減少傳輸量和儲存空間
       #   - Multi-arch build 需要更多磁碟空間，已在上方清理
       #   - 明確指定 file: Dockerfile 避免與 Lite 版混淆
+      #   - 使用 CACHE_BUST 強制重新下載模型
       # ========================================
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
@@ -166,15 +167,15 @@ jobs:
             ${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}
             ${{ env.DOCKER_IMAGE }}:latest
           platforms: linux/amd64,linux/arm64
-          # 🔥 使用獨立的 cache key 避免與 Lite 版交叉污染
-          # registry cache 沒有 10GB 限制，更適合大型模型
+          # 使用 registry cache（已手動刪除 Docker Hub 上的 buildcache tag）
           cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache-full
           cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache-full,mode=max,compression=zstd
           # 啟用壓縮減少 image 大小
           outputs: type=image,compression=zstd,compression-level=3
-          # 設定 build 參數
+          # 設定 build 參數（使用時間戳強制重新下載模型層）
           build-args: |
             BUILDKIT_INLINE_CACHE=1
+            CACHE_BUST=${{ github.run_id }}
 
       - name: Docker Build Summary
         run: |

@@ -392,7 +392,15 @@ ENV PDF_SIGN_REASON="ConvertX-CN PDF Packager"
 ENV PDF_SIGN_LOCATION="Taiwan"
 ENV PDF_SIGN_CONTACT="convertx-cn@localhost"
 
-RUN set -eu && \
+# ==============================================================================
+# 🔥 Cache Busting（強制重新執行模型下載層）
+# ==============================================================================
+# 當 CACHE_BUST 改變時，後續所有層都會重新執行
+# 這確保模型下載不會被損壞的 cache 跳過
+# ==============================================================================
+ARG CACHE_BUST=1
+RUN echo "Cache bust: ${CACHE_BUST}" && \
+  set -eu && \
   echo "===========================================================" && \
   echo "🚀 階段 12-UNIFIED：Python 工具 + 模型統一安裝" && \
   echo "===========================================================" && \
@@ -453,7 +461,8 @@ RUN set -eu && \
   echo "" && \
   echo "📥 [6/8] 下載 PDFMathTranslate/BabelDOC DocLayout-YOLO ONNX 模型..." && \
   mkdir -p /root/.cache/babeldoc/models && \
-  python3 -c "from huggingface_hub import hf_hub_download; import shutil; import os; p=hf_hub_download(repo_id='wybxc/DocLayout-YOLO-DocStructBench-onnx', filename='doclayout_yolo_docstructbench_imgsz1024.onnx'); t='/root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx'; shutil.copy2(p, t); print(f'Downloaded and copied to {t}, size: {os.path.getsize(t)/1024/1024:.2f} MB')" && \
+  echo "   正在下載 ONNX 模型（約 75MB）..." && \
+  python3 -c "from huggingface_hub import hf_hub_download; import shutil, os, sys; print('   Downloading from HuggingFace...'); p=hf_hub_download(repo_id='wybxc/DocLayout-YOLO-DocStructBench-onnx', filename='doclayout_yolo_docstructbench_imgsz1024.onnx'); print(f'   Downloaded to cache: {p}'); t='/root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx'; shutil.copy2(p, t); size=os.path.getsize(t); print(f'   Copied to: {t}'); print(f'   File size: {size} bytes ({size/1024/1024:.2f} MB)'); sys.exit(1) if size < 10000000 else print('   SUCCESS: ONNX model downloaded and verified')" && \
   echo "✅ ONNX 模型下載完成" && \
   ls -lh /root/.cache/babeldoc/models/*.onnx && \
   \
@@ -483,6 +492,19 @@ RUN set -eu && \
   "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifKR-Regular.ttf" && \
   echo "✅ 字型下載完成" && \
   ls -lh /app/*.ttf && \
+  # 驗證字型檔案大小（確保下載完整）
+  echo "   驗證字型檔案..." && \
+  for font in GoNotoKurrent-Regular.ttf SourceHanSerifCN-Regular.ttf SourceHanSerifTW-Regular.ttf SourceHanSerifJP-Regular.ttf SourceHanSerifKR-Regular.ttf; do \
+    if [ ! -f "/app/$font" ]; then \
+      echo "   ERROR: Font not found: /app/$font" && exit 1; \
+    fi; \
+    size=$(stat -c%s "/app/$font" 2>/dev/null || stat -f%z "/app/$font" 2>/dev/null || echo 0); \
+    if [ "$size" -lt 1000000 ]; then \
+      echo "   ERROR: Font too small: /app/$font ($size bytes)" && exit 1; \
+    fi; \
+    echo "   ✓ $font ($size bytes)"; \
+  done && \
+  echo "✅ 所有字型驗證通過" && \
   \
   # ========================================
   # [7/8] 下載 BabelDOC 完整資源
