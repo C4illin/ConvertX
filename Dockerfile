@@ -39,6 +39,9 @@ LABEL org.opencontainers.image.source="https://github.com/pi-docket/ConvertX-CN"
 LABEL org.opencontainers.image.description="ConvertX-CN - 精簡版檔案轉換服務"
 WORKDIR /app
 
+# 設定非互動模式（避免 debconf 等待輸入導致 build 卡住）
+ENV DEBIAN_FRONTEND=noninteractive
+
 # 配置 APT 重試機制（解決 Multi-Arch Build 時的網路不穩定問題）
 RUN echo 'Acquire::Retries "5";' > /etc/apt/apt.conf.d/80-retries \
   && echo 'Acquire::http::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
@@ -456,15 +459,48 @@ RUN echo "Cache bust: ${CACHE_BUST}" && \
   #    必須放到 /root/.cache/babeldoc/models/ 目錄
   #    因為 pdf2zh 使用 babeldoc.assets.get_doclayout_onnx_model_path()
   #    Runtime 不會再下載任何資源
-  # ⚠️ 使用 huggingface_hub 下載（支援 xet 存儲格式）
+  # ⚠️ 使用多重下載策略確保成功：
+  #    1. 優先使用 huggingface_hub（支援 xet 存儲格式）
+  #    2. 備用 curl 直接下載
   # ========================================
   echo "" && \
   echo "📥 [6/8] 下載 PDFMathTranslate/BabelDOC DocLayout-YOLO ONNX 模型..." && \
   mkdir -p /root/.cache/babeldoc/models && \
-  echo "   正在下載 ONNX 模型（約 75MB）..." && \
-  python3 -c "from huggingface_hub import hf_hub_download; import shutil, os, sys; print('   Downloading from HuggingFace...'); p=hf_hub_download(repo_id='wybxc/DocLayout-YOLO-DocStructBench-onnx', filename='doclayout_yolo_docstructbench_imgsz1024.onnx'); print(f'   Downloaded to cache: {p}'); t='/root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx'; shutil.copy2(p, t); size=os.path.getsize(t); print(f'   Copied to: {t}'); print(f'   File size: {size} bytes ({size/1024/1024:.2f} MB)'); sys.exit(1) if size < 10000000 else print('   SUCCESS: ONNX model downloaded and verified')" && \
-  echo "✅ ONNX 模型下載完成" && \
-  ls -lh /root/.cache/babeldoc/models/*.onnx && \
+  ONNX_TARGET="/root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx" && \
+  ONNX_SUCCESS=0 && \
+  \
+  # 方法 1: 使用 huggingface_hub 下載
+  echo "   [方法 1] 嘗試使用 huggingface_hub 下載..." && \
+  (python3 -c "from huggingface_hub import hf_hub_download; import shutil, os, sys; print('   Downloading from HuggingFace...'); p=hf_hub_download(repo_id='wybxc/DocLayout-YOLO-DocStructBench-onnx', filename='doclayout_yolo_docstructbench_imgsz1024.onnx'); print(f'   Downloaded to cache: {p}'); t='/root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx'; shutil.copy2(p, t); size=os.path.getsize(t); print(f'   File size: {size} bytes ({size/1024/1024:.2f} MB)'); sys.exit(1) if size < 10000000 else print('   SUCCESS: ONNX model downloaded via huggingface_hub')" && ONNX_SUCCESS=1) || echo "   ⚠️ huggingface_hub 下載失敗，嘗試備用方法..." && \
+  \
+  # 方法 2: 使用 curl 直接下載（備用）
+  if [ "$ONNX_SUCCESS" != "1" ]; then \
+  echo "   [方法 2] 嘗試使用 curl 直接下載..." && \
+  (curl -fSL --retry 5 --retry-delay 10 --retry-all-errors --connect-timeout 60 --max-time 600 \
+  -o "$ONNX_TARGET" \
+  "https://huggingface.co/wybxc/DocLayout-YOLO-DocStructBench-onnx/resolve/main/doclayout_yolo_docstructbench_imgsz1024.onnx" && \
+  ONNX_SIZE=$(stat -c%s "$ONNX_TARGET" 2>/dev/null || echo "0") && \
+  if [ "$ONNX_SIZE" -gt 10000000 ]; then \
+  echo "   SUCCESS: ONNX model downloaded via curl ($((ONNX_SIZE/1024/1024)) MB)" && \
+  ONNX_SUCCESS=1; \
+  else \
+  echo "   ERROR: Downloaded file too small ($ONNX_SIZE bytes)"; \
+  fi) || echo "   ⚠️ curl 下載也失敗"; \
+  fi && \
+  \
+  # 驗證下載結果
+  if [ -f "$ONNX_TARGET" ]; then \
+  FINAL_SIZE=$(stat -c%s "$ONNX_TARGET" 2>/dev/null || echo "0") && \
+  if [ "$FINAL_SIZE" -gt 10000000 ]; then \
+  echo "✅ ONNX 模型下載完成 ($((FINAL_SIZE/1024/1024)) MB)" && \
+  ls -lh /root/.cache/babeldoc/models/*.onnx; \
+  else \
+  echo "❌ ONNX 模型檔案過小，下載可能不完整" && \
+  rm -f "$ONNX_TARGET"; \
+  fi; \
+  else \
+  echo "❌ ONNX 模型下載失敗"; \
+  fi && \
   \
   # ========================================
   # [6.1/8] PDFMathTranslate 多語言字型

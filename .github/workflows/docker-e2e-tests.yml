@@ -83,6 +83,9 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.REPO }}:test-${{ github.sha }}
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO }}:buildcache-linux-amd64
           cache-to: type=inline
+          # 🔥 CACHE_BUST 強制重新執行模型下載層
+          build-args: |
+            CACHE_BUST=${{ github.run_id }}${{ github.run_attempt }}
 
       - name: Set image output
         id: image

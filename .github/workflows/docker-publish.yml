@@ -195,8 +195,10 @@ jobs:
           cache-from: type=registry,ref=ghcr.io/${{ env.REPO }}:buildcache-${{ env.PLATFORM_PAIR }}
           cache-to: type=registry,ref=ghcr.io/${{ env.REPO }}:buildcache-${{ env.PLATFORM_PAIR }},mode=max,compression=zstd
           # 設定 build 參數
+          # 🔥 CACHE_BUST 使用時間戳強制重新執行模型下載層
           build-args: |
             BUILDKIT_INLINE_CACHE=1
+            CACHE_BUST=${{ github.run_id }}${{ github.run_attempt }}
 
       - name: Export digest
         run: |
