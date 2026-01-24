@@ -1,6 +1,7 @@
 {
-  "name": "ConvertX-CN | Self Hosted File Converter",
+  "name": "ConvertX-CN | 自架檔案轉換器",
   "short_name": "ConvertX-CN",
+  "description": "自架式多格式檔案轉換工具，支援文件、圖片、音訊、影片等多種格式轉換",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -15,5 +16,9 @@
   ],
   "theme_color": "#a5d601",
   "background_color": "#13171f",
-  "display": "standalone"
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/",
+  "lang": "zh-TW",
+  "categories": ["utilities", "productivity"]
 }

@@ -18,6 +18,48 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 
+// 靜態導入所有轉換器
+import { convert as convertInkscape } from "../../src/converters/inkscape";
+import { convert as convertImagemagick } from "../../src/converters/imagemagick";
+import { convert as convertGraphicsmagick } from "../../src/converters/graphicsmagick";
+import { convert as convertPandoc } from "../../src/converters/pandoc";
+import { convert as convertDasel } from "../../src/converters/dasel";
+import { convert as convertPotrace } from "../../src/converters/potrace";
+import { convert as convertVtracer } from "../../src/converters/vtracer";
+import { convert as convertResvg } from "../../src/converters/resvg";
+import { convert as convertVips } from "../../src/converters/vips";
+import { convert as convertLibreoffice } from "../../src/converters/libreoffice";
+import { convert as convertCalibre } from "../../src/converters/calibre";
+import { convert as convertFfmpeg } from "../../src/converters/ffmpeg";
+import { convert as convertLibheif } from "../../src/converters/libheif";
+import { convert as convertLibjxl } from "../../src/converters/libjxl";
+
+// 轉換器映射表
+type ConvertFn = (
+  filePath: string,
+  fileType: string,
+  convertTo: string,
+  targetPath: string,
+  options?: unknown,
+) => Promise<string>;
+
+const converterMap: Record<string, ConvertFn> = {
+  inkscape: convertInkscape,
+  imagemagick: convertImagemagick,
+  graphicsmagick: convertGraphicsmagick,
+  pandoc: convertPandoc,
+  dasel: convertDasel,
+  potrace: convertPotrace,
+  vtracer: convertVtracer,
+  resvg: convertResvg,
+  vips: convertVips,
+  libreoffice: convertLibreoffice,
+  calibre: convertCalibre,
+  ffmpeg: convertFfmpeg,
+  libheif: convertLibheif,
+  libjxl: convertLibjxl,
+};
+
 // =============================================================================
 // 配置
 // =============================================================================
@@ -501,9 +543,12 @@ describe("📊 格式轉換矩陣 Format Conversion Matrix", () => {
                   writeFileSync(inputPath, content, "utf-8");
                 }
 
-                // 動態導入並執行轉換
-                const module = await import(`../../src/converters/${converterName}`);
-                await module.convert(inputPath, from, to, outputPath);
+                // 使用靜態導入的轉換器映射表
+                const convertFn = converterMap[converterName];
+                if (!convertFn) {
+                  throw new Error(`Converter not found in converterMap: ${converterName}`);
+                }
+                await convertFn(inputPath, from, to, outputPath);
 
                 const duration = Date.now() - startTime;
                 const success = existsSync(outputPath);
@@ -595,12 +640,16 @@ describe("📊 格式轉換矩陣 Format Conversion Matrix", () => {
                   writeFileSync(inputPath, content, "utf-8");
                 }
 
-                const module = await import(`../../src/converters/${converterName}`);
+                // 使用靜態導入的轉換器映射表
+                const convertFn = converterMap[converterName];
+                if (!convertFn) {
+                  throw new Error(`Converter not found in converterMap: ${converterName}`);
+                }
                 // 對於 Pandoc，正規化格式名稱
                 const normalizedFrom =
                   converterName === "pandoc" ? normalizeFormatForPandoc(from) : from;
                 const normalizedTo = converterName === "pandoc" ? normalizeFormatForPandoc(to) : to;
-                await module.convert(inputPath, normalizedFrom, normalizedTo, outputPath);
+                await convertFn(inputPath, normalizedFrom, normalizedTo, outputPath);
 
                 const duration = Date.now() - startTime;
                 const success = existsSync(outputPath);
@@ -681,8 +730,12 @@ describe("📊 格式轉換矩陣 Format Conversion Matrix", () => {
                 const content = createTestContent(from);
                 writeFileSync(inputPath, content, "utf-8");
 
-                const module = await import(`../../src/converters/${converterName}`);
-                await module.convert(inputPath, from, to, outputPath);
+                // 使用靜態導入的轉換器映射表
+                const convertFn = converterMap[converterName];
+                if (!convertFn) {
+                  throw new Error(`Converter not found in converterMap: ${converterName}`);
+                }
+                await convertFn(inputPath, from, to, outputPath);
 
                 const duration = Date.now() - startTime;
                 const success = existsSync(outputPath);

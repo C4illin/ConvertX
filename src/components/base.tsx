@@ -18,6 +18,12 @@ export const BaseHtml = ({
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <meta name="webroot" content={webroot} />
       <meta name="locale" content={locale} />
+      <meta name="application-name" content="ConvertX-CN" />
+      <meta name="apple-mobile-web-app-title" content="ConvertX-CN" />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="mobile-web-app-capable" content="yes" />
+      <meta name="description" content="自架式多格式檔案轉換工具" />
+      <meta name="theme-color" content="#a5d601" />
       <title safe>{title}</title>
       <link rel="stylesheet" href={`${webroot}/generated.css`} />
       <link rel="apple-touch-icon" sizes="180x180" href={`${webroot}/apple-touch-icon.png`} />
