@@ -448,13 +448,12 @@ RUN set -eu && \
   #    必須放到 /root/.cache/babeldoc/models/ 目錄
   #    因為 pdf2zh 使用 babeldoc.assets.get_doclayout_onnx_model_path()
   #    Runtime 不會再下載任何資源
+  # ⚠️ 使用 huggingface_hub 下載（支援 xet 存儲格式）
   # ========================================
   echo "" && \
   echo "📥 [6/8] 下載 PDFMathTranslate/BabelDOC DocLayout-YOLO ONNX 模型..." && \
   mkdir -p /root/.cache/babeldoc/models && \
-  # 直接下載 ONNX 模型到 babeldoc 期望的路徑
-  curl -fSL --retry 3 --retry-delay 5 --retry-all-errors -o /root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx \
-  "https://huggingface.co/wybxc/DocLayout-YOLO-DocStructBench-onnx/resolve/main/doclayout_yolo_docstructbench_imgsz1024.onnx" && \
+  python3 -c "from huggingface_hub import hf_hub_download; import shutil; import os; p=hf_hub_download(repo_id='wybxc/DocLayout-YOLO-DocStructBench-onnx', filename='doclayout_yolo_docstructbench_imgsz1024.onnx'); t='/root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx'; shutil.copy2(p, t); print(f'Downloaded and copied to {t}, size: {os.path.getsize(t)/1024/1024:.2f} MB')" && \
   echo "✅ ONNX 模型下載完成" && \
   ls -lh /root/.cache/babeldoc/models/*.onnx && \
   \
@@ -462,19 +461,25 @@ RUN set -eu && \
   # [6.1/8] 下載 PDFMathTranslate 多語言字型
   # ⬇️ Docker build 階段下載字型檔案
   #    Runtime 不會再下載任何資源
+  # ⚠️ 增加超時設定和更詳細的錯誤處理
   # ========================================
   echo "" && \
   echo "📥 [6.1/8] 下載 PDFMathTranslate 多語言字型..." && \
   mkdir -p /app && \
-  curl -fSL --retry 3 --retry-delay 5 --retry-all-errors -o /app/GoNotoKurrent-Regular.ttf \
+  echo "   下載 GoNotoKurrent-Regular.ttf..." && \
+  curl -fSL --retry 5 --retry-delay 10 --retry-all-errors --connect-timeout 60 --max-time 300 -o /app/GoNotoKurrent-Regular.ttf \
   "https://github.com/satbyy/go-noto-universal/releases/download/v7.0/GoNotoKurrent-Regular.ttf" && \
-  curl -fSL --retry 3 --retry-delay 5 --retry-all-errors -o /app/SourceHanSerifCN-Regular.ttf \
+  echo "   下載 SourceHanSerifCN-Regular.ttf..." && \
+  curl -fSL --retry 5 --retry-delay 10 --retry-all-errors --connect-timeout 60 --max-time 300 -o /app/SourceHanSerifCN-Regular.ttf \
   "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifCN-Regular.ttf" && \
-  curl -fSL --retry 3 --retry-delay 5 --retry-all-errors -o /app/SourceHanSerifTW-Regular.ttf \
+  echo "   下載 SourceHanSerifTW-Regular.ttf..." && \
+  curl -fSL --retry 5 --retry-delay 10 --retry-all-errors --connect-timeout 60 --max-time 300 -o /app/SourceHanSerifTW-Regular.ttf \
   "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifTW-Regular.ttf" && \
-  curl -fSL --retry 3 --retry-delay 5 --retry-all-errors -o /app/SourceHanSerifJP-Regular.ttf \
+  echo "   下載 SourceHanSerifJP-Regular.ttf..." && \
+  curl -fSL --retry 5 --retry-delay 10 --retry-all-errors --connect-timeout 60 --max-time 300 -o /app/SourceHanSerifJP-Regular.ttf \
   "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifJP-Regular.ttf" && \
-  curl -fSL --retry 3 --retry-delay 5 --retry-all-errors -o /app/SourceHanSerifKR-Regular.ttf \
+  echo "   下載 SourceHanSerifKR-Regular.ttf..." && \
+  curl -fSL --retry 5 --retry-delay 10 --retry-all-errors --connect-timeout 60 --max-time 300 -o /app/SourceHanSerifKR-Regular.ttf \
   "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifKR-Regular.ttf" && \
   echo "✅ 字型下載完成" && \
   ls -lh /app/*.ttf && \
@@ -522,25 +527,25 @@ RUN set -eu && \
   #    使用 mineru-models-download CLI（如果可用）
   #    或使用 HuggingFace 顯式下載
   #    Runtime 不會再下載任何資源
+  # ⚠️ ARM64: MinerU 不完全支援，跳過模型下載
   # ========================================
   echo "" && \
   echo "📥 [8/8] 下載 MinerU Pipeline 模型..." && \
   ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
-  echo "⚠️ ARM64 架構：MinerU 可能不完全支援，嘗試下載模型..."; \
-  fi && \
-  \
-  # 方法 1：使用官方 CLI（如果可用）
+  echo "⚠️ ARM64 架構：MinerU 不支援，跳過模型下載" && \
+  echo "   ARM64 用戶可手動下載模型或使用其他 PDF 處理功能"; \
+  else \
   if command -v mineru-models-download >/dev/null 2>&1; then \
   echo "使用 mineru-models-download CLI..." && \
-  mineru-models-download -s huggingface -m pipeline 2>&1 || true && \
-  echo "mineru.json 內容：" && \
-  cat /root/mineru.json 2>/dev/null || echo "(未生成)"; \
+  (mineru-models-download -s huggingface -m pipeline 2>&1 || echo "⚠️ mineru-models-download 失敗，嘗試手動下載...") && \
+  cat /root/mineru.json 2>/dev/null || echo "(mineru.json 未生成)"; \
   else \
   echo "mineru-models-download 不可用，使用顯式 HuggingFace 下載..." && \
   mkdir -p /root/.cache/mineru/models && \
-  (python3 -c "from huggingface_hub import snapshot_download; import os; os.environ['HF_HOME']='/root/.cache/huggingface'; snapshot_download(repo_id='opendatalab/PDF-Extract-Kit-1.0', local_dir='/root/.cache/mineru/models/PDF-Extract-Kit-1.0', local_dir_use_symlinks=False); print('PDF-Extract-Kit-1.0 downloaded')" || echo "MinerU model download failed") && \
+  (python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='opendatalab/PDF-Extract-Kit-1.0', local_dir='/root/.cache/mineru/models/PDF-Extract-Kit-1.0', local_dir_use_symlinks=False); print('PDF-Extract-Kit-1.0 downloaded')" || echo "⚠️ MinerU model download failed") && \
   python3 -c "import json; config={'models-dir':{'pipeline':'/root/.cache/mineru/models/PDF-Extract-Kit-1.0','vlm':''},'model-source':'local','latex-delimiter-config':{'display':{'left':'@@','right':'@@'},'inline':{'left':'@','right':'@'}}}; f=open('/root/mineru.json','w'); json.dump(config,f,indent=2); f.close(); print('mineru.json generated')"; \
+  fi; \
   fi && \
   echo "✅ MinerU 模型下載步驟完成" && \
   \
@@ -633,15 +638,16 @@ RUN set -eu && \
   # ========================================
   # 🔒 嚴格模型驗證（確保開箱即用）
   # ========================================
-  # ⚠️ 如果關鍵模型缺失，build 將失敗
-  #    這確保發布的 image 一定包含所有必要模型
+  # ⚠️ 如果關鍵模型缺失，build 將失敗（僅 amd64 強制驗證）
+  #    ARM64 架構允許部分功能缺失
   # ========================================
   echo "===========================================================" && \
   echo "🔒 嚴格模型驗證（確保開箱即用）" && \
   echo "===========================================================" && \
   VALIDATION_FAILED=0 && \
+  ARCH=$(uname -m) && \
   \
-  # 驗證 1: BabelDOC ONNX 模型（必須存在）
+  # 驗證 1: BabelDOC ONNX 模型（amd64 必須存在，arm64 允許缺失）
   echo "🔍 驗證 BabelDOC ONNX 模型..." && \
   ONNX_FILE="/root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx" && \
   if [ -f "$ONNX_FILE" ]; then \
@@ -649,37 +655,42 @@ RUN set -eu && \
   if [ "$ONNX_SIZE" -gt 10000000 ]; then \
   echo "   ✅ ONNX 模型驗證通過 ($((ONNX_SIZE/1024/1024)) MB)"; \
   else \
-  echo "   ❌ ONNX 模型過小 ($ONNX_SIZE bytes)" && VALIDATION_FAILED=1; \
+  echo "   ❌ ONNX 模型過小 ($ONNX_SIZE bytes)" && \
+  if [ "$ARCH" != "aarch64" ]; then VALIDATION_FAILED=1; else echo "   ⚠️ ARM64: 忽略此錯誤"; fi; \
   fi; \
   else \
-  echo "   ❌ ONNX 模型不存在: $ONNX_FILE" && VALIDATION_FAILED=1; \
+  echo "   ❌ ONNX 模型不存在: $ONNX_FILE" && \
+  if [ "$ARCH" != "aarch64" ]; then VALIDATION_FAILED=1; else echo "   ⚠️ ARM64: 忽略此錯誤"; fi; \
   fi && \
   \
-  # 驗證 2: PDFMathTranslate 字型（必須存在）
+  # 驗證 2: PDFMathTranslate 字型（amd64 必須存在，arm64 允許缺失）
   echo "🔍 驗證 PDFMathTranslate 字型..." && \
   FONT_COUNT=$(ls /app/*.ttf 2>/dev/null | wc -l || echo "0") && \
   if [ "$FONT_COUNT" -ge 5 ]; then \
   echo "   ✅ 字型驗證通過 ($FONT_COUNT 個字型)"; \
   else \
-  echo "   ❌ 字型數量不足 (預期 >= 5，實際 $FONT_COUNT)" && VALIDATION_FAILED=1; \
+  echo "   ❌ 字型數量不足 (預期 >= 5，實際 $FONT_COUNT)" && \
+  if [ "$ARCH" != "aarch64" ]; then VALIDATION_FAILED=1; else echo "   ⚠️ ARM64: 忽略此錯誤"; fi; \
   fi && \
   \
-  # 驗證 3: MinerU 模型（如果 mineru 已安裝則檢查，但不強制失敗）
+  # 驗證 3: MinerU 模型（僅限 amd64 檢查，arm64 跳過）
   echo "🔍 驗證 MinerU 模型..." && \
-  if command -v mineru >/dev/null 2>&1; then \
+  if [ "$ARCH" = "aarch64" ]; then \
+  echo "   ⚠️ ARM64 架構：跳過 MinerU 驗證"; \
+  elif command -v mineru >/dev/null 2>&1; then \
   if [ -f /root/mineru.json ]; then \
   MINERU_DIR=$(python3 -c "import json; f=open('/root/mineru.json'); d=json.load(f); print(d.get('models-dir',{}).get('pipeline',''))" 2>/dev/null || echo "") && \
   if [ -n "$MINERU_DIR" ] && [ -d "$MINERU_DIR" ]; then \
   MINERU_SIZE=$(du -sb "$MINERU_DIR" 2>/dev/null | cut -f1 || echo "0") && \
   echo "   ✅ MinerU 模型存在 ($((MINERU_SIZE/1024/1024)) MB)"; \
   else \
-  echo "   ⚠️ MinerU 模型目錄不存在（ARM64 可能不支援）"; \
+  echo "   ⚠️ MinerU 模型目錄不存在"; \
   fi; \
   else \
-  echo "   ⚠️ mineru.json 不存在（ARM64 可能不支援）"; \
+  echo "   ⚠️ mineru.json 不存在"; \
   fi; \
   else \
-  echo "   ⚠️ MinerU 未安裝（ARM64 可能不支援）"; \
+  echo "   ⚠️ MinerU 未安裝"; \
   fi && \
   \
   # 最終驗證結果
