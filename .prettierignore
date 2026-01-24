@@ -1,0 +1,17 @@
+# Build outputs
+dist/
+node_modules/
+
+# Test outputs (generated files)
+tests/e2e/output/
+test-output-*/
+
+# Data files
+data/
+
+# Lock files
+bun.lock
+package-lock.json
+
+# Generated files
+public/generated.css

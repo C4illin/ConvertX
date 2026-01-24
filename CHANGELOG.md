@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.1.15](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.15) (2026-01-24)
+
+Docker 基礎架構優化版本，新增 Lite 版 Docker Image。
+
+### ✨ Features
+
+- **Lite 版 Docker Image**：新增輕量版 Docker Image，適合資源受限環境
+  - 目標體積 < 1.5 GB（vs 一般版 8-12 GB）
+  - 保留日常最常用功能：LibreOffice、FFmpeg、Pandoc、Ghostscript、qpdf
+  - 移除 AI/OCR/翻譯等進階功能
+  - 支援 amd64 和 arm64 架構
+  - Runtime 憑證初始化（容器首次啟動時自動產生簽章憑證）
+
+### 📦 Build
+
+- **Docker Build Lite Workflow**：新增 `docker-build-lite.yml` 自動觸發 Lite 版構建
+  - Tag 格式：`v*.*.*-lite`（如 `v0.1.15-lite`）
+  - 動態版本號修改（Build-time 自動加上 `-lite` 後綴）
+  - 分開處理 GHCR 和 Docker Hub manifest 推送，避免跨 registry 問題
+
+### 🐛 Bug Fixes
+
+- **Lite 版 endesive 問題**：移除 build-time endesive 安裝，改用 runtime 初始化
+  - 解決 ARM64 架構上 pykcs11 編譯失敗的問題
+  - PDF 簽章功能改為可選（需使用者自行安裝 endesive 或使用一般版）
+
+---
+
 ## [0.1.14](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.14) (2026-01-23)
 
 OCR 功能強化版本，新增 OCRmyPDF 轉換引擎。
