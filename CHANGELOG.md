@@ -1,5 +1,52 @@
 # Changelog
 
+## [0.1.16](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.16) (2026-01-24)
+
+一般版 Docker Image 修復版本，確保開箱即用。
+
+### 🐛 Bug Fixes
+
+- **一般版 Docker Image 大小修復**：修復 0.1.15 版本 image 體積異常問題
+  - 問題：一般版 image 僅約 1.5-2 GB，應為 8-12 GB
+  - 原因：release.yml 未明確指定 Dockerfile，可能導致 cache 問題
+  - 修復：明確指定 `file: Dockerfile` 並使用獨立的 cache key
+
+- **嚴格模型驗證**：新增 build-time 模型驗證機制
+  - 若 ONNX 模型缺失或過小，build 將失敗
+  - 若 PDFMathTranslate 字型數量不足，build 將失敗
+  - 確保發布的 image 一定包含所有必要模型
+
+- **下載重試機制**：所有 curl 下載增加重試機制
+  - 新增 `--retry 3 --retry-delay 5 --retry-all-errors` 參數
+  - 覆蓋範圍：Bun、dasel、resvg、vtracer、ONNX 模型、字型檔案
+
+### 📦 Build
+
+- **release.yml 改進**：
+  - 新增 `file: Dockerfile` 明確指定使用一般版 Dockerfile
+  - 使用 `buildcache-full` 作為 cache key，避免與 Lite 版交叉污染
+- **Dockerfile 強化**：
+  - 版本號更新為 v0.1.16
+  - 新增嚴格模型驗證區塊（驗證 ONNX、字型、MinerU）
+  - 驗證失敗時 build 將中止並報錯
+  - 所有下載均添加重試機制
+
+### 📚 Documentation
+
+- **版本術語統一**：
+  - **一般版**（Standard）：官方預建版 `convertx-cn:latest`，約 8-12 GB，開箱即用
+  - **擴充版**（Extended）：使用 `Dockerfile.full` 自建，支援 65 種 OCR 語言，>10 GB
+  - **Lite 版**（Lightweight）：`convertx-cn:latest-lite`，約 1.2 GB，基本轉檔
+- **環境變數文檔重整**：
+  - 刪除重複的 `docs/環境變數總覽.md`
+  - 改進 `docs/配置設定/環境變數.md` 結構
+  - 新增快速參考表（分類：安全性、一般、轉換、PDF翻譯）
+- **Docker 部署指南更新**：
+  - 新增版本對照表
+  - 明確三種版本的區別與適用場景
+
+---
+
 ## [0.1.15](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.15) (2026-01-24)
 
 Docker 基礎架構優化版本，新增 Lite 版 Docker Image。

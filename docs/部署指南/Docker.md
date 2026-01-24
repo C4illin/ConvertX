@@ -6,33 +6,53 @@
 
 ---
 
-## Docker Image 版本
+## 📦 Docker Image 版本總覽
+
+ConvertX-CN 提供三種 Docker Image 版本，滿足不同使用場景：
+
+| 版本    | 說明                 | Image Tag                   | 大小       |
+| ------- | -------------------- | --------------------------- | ---------- |
+| 一般版  | 官方預建版，開箱即用 | `convertx-cn:latest`        | 約 8-12 GB |
+| 擴充版  | 自行建構，65 種語言  | 使用 `Dockerfile.full` 自建 | >10 GB     |
+| Lite 版 | 輕量化，基本轉檔功能 | `convertx-cn:latest-lite`   | 約 1.2 GB  |
 
 ### 官方預建版（推薦）
 
 | Tag                                | 說明              |
 | ---------------------------------- | ----------------- |
-| `convertx/convertx-cn:latest`      | Full 版最新穩定版 |
+| `convertx/convertx-cn:latest`      | 一般版最新穩定版  |
 | `convertx/convertx-cn:latest-lite` | Lite 版最新穩定版 |
-| `convertx/convertx-cn:v0.1.x`      | Full 版指定版本號 |
+| `convertx/convertx-cn:v0.1.x`      | 一般版指定版本號  |
 | `convertx/convertx-cn:v0.1.x-lite` | Lite 版指定版本號 |
 
-### Full 版（預設）
+---
+
+### 一般版（Standard） ⭐ 推薦
+
+**Image Tag：** `convertx/convertx-cn:latest`
 
 **Image 大小：約 8-12 GB**
+
+> 💡 **開箱即用**：所有 AI 模型在 Build 階段已預下載，Runtime 不需要網路即可使用所有功能。
 
 **內建功能：**
 
 - ✅ 核心轉換工具（FFmpeg、LibreOffice、ImageMagick 等）
-- ✅ OCR 支援：英文、繁/簡中文、日文、韓文、德文、法文
+- ✅ OCR 支援：英文、繁/簡中文、日文、韓文、德文、法文（7 種語言）
 - ✅ PDF 翻譯：PDFMathTranslate、BabelDOC
 - ✅ PDF 轉 Markdown：MinerU
-- ✅ 字型：Noto CJK、Liberation、自訂中文字型
+- ✅ 字型：Noto CJK、Liberation、Source Han Serif
 - ✅ TexLive（支援 CJK/德/法）
+- ✅ 電子書轉換（Calibre）
+- ✅ CAD/3D 支援（assimp）
 
-### Lite 版（輕量版）
+---
 
-**Image 大小：約 1.5-2.5 GB**
+### Lite 版（Lightweight）
+
+**Image Tag：** `convertx/convertx-cn:latest-lite`
+
+**Image 大小：約 1.2-1.5 GB**
 
 **內建功能：**
 
@@ -44,16 +64,22 @@
 
 > 📖 Lite 版詳細說明請參閱 [Lite 版部署指南](Docker-Lite.md)
 
-### 完整版（自行 Build）
+---
+
+### 擴充版（Extended）- 自行建構
+
+**Dockerfile：** `Dockerfile.full`
+
+**Image 大小：>10 GB**
 
 使用 `Dockerfile.full` 自行建構，適合需要：
 
-- 65 種 OCR 語言
-- 完整 TexLive
-- 額外字型套件
+- ✅ 65 種 OCR 語言（完整 Tesseract 語言包）
+- ✅ 完整 TexLive（所有排版套件）
+- ✅ 額外字型套件
 
 ```bash
-docker build -f Dockerfile.full -t convertx-cn-full .
+docker build -f Dockerfile.full -t convertx-cn-extended .
 ```
 
 > ⚠️ 注意：Image 大小可能超過 **10GB**，Build 時間約 **30-60 分鐘**

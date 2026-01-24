@@ -1,6 +1,6 @@
 # ==============================================================================
 # ConvertX-CN 官方 Docker Image
-# 版本：v0.1.12
+# 版本：v0.1.16
 # ==============================================================================
 #
 # 📦 Image 說明：
@@ -56,9 +56,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # if architecture is arm64, use the arm64 version of bun
 RUN ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
-  curl -fsSL -o bun-linux-aarch64.zip https://github.com/oven-sh/bun/releases/download/bun-v1.3.6/bun-linux-aarch64.zip; \
+  curl -fsSL --retry 3 --retry-delay 5 --retry-all-errors -o bun-linux-aarch64.zip https://github.com/oven-sh/bun/releases/download/bun-v1.3.6/bun-linux-aarch64.zip; \
   else \
-  curl -fsSL -o bun-linux-x64-baseline.zip https://github.com/oven-sh/bun/releases/download/bun-v1.3.6/bun-linux-x64-baseline.zip; \
+  curl -fsSL --retry 3 --retry-delay 5 --retry-all-errors -o bun-linux-x64-baseline.zip https://github.com/oven-sh/bun/releases/download/bun-v1.3.6/bun-linux-x64-baseline.zip; \
   fi
 
 RUN unzip -j bun-linux-*.zip -d /usr/local/bin && \
@@ -155,7 +155,7 @@ RUN echo "" && \
   else \
   DASEL_ARCH="linux_amd64"; \
   fi && \
-  curl -sSLf "https://github.com/TomWright/dasel/releases/download/v2.8.1/dasel_${DASEL_ARCH}" -o /usr/local/bin/dasel && \
+  curl -sSLf --retry 3 --retry-delay 5 --retry-all-errors "https://github.com/TomWright/dasel/releases/download/v2.8.1/dasel_${DASEL_ARCH}" -o /usr/local/bin/dasel && \
   chmod +x /usr/local/bin/dasel && \
   echo "   ✅ dasel 安裝完成"
 
@@ -167,7 +167,7 @@ RUN echo "" && \
   if [ "$ARCH" = "aarch64" ]; then \
   echo "   ⚠️ resvg 沒有 ARM64 預編譯版本，跳過安裝"; \
   else \
-  curl -sSLf "https://github.com/linebender/resvg/releases/download/v0.44.0/resvg-linux-x86_64.tar.gz" -o /tmp/resvg.tar.gz && \
+  curl -sSLf --retry 3 --retry-delay 5 --retry-all-errors "https://github.com/linebender/resvg/releases/download/v0.44.0/resvg-linux-x86_64.tar.gz" -o /tmp/resvg.tar.gz && \
   tar -xzf /tmp/resvg.tar.gz -C /tmp/ && \
   mv /tmp/resvg /usr/local/bin/resvg && \
   chmod +x /usr/local/bin/resvg && \
@@ -453,7 +453,7 @@ RUN set -eux && \
   echo "📥 [6/8] 下載 PDFMathTranslate/BabelDOC DocLayout-YOLO ONNX 模型..." && \
   mkdir -p /root/.cache/babeldoc/models && \
   # 直接下載 ONNX 模型到 babeldoc 期望的路徑
-  curl -fSL -o /root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx \
+  curl -fSL --retry 3 --retry-delay 5 --retry-all-errors -o /root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx \
   "https://huggingface.co/wybxc/DocLayout-YOLO-DocStructBench-onnx/resolve/main/doclayout_yolo_docstructbench_imgsz1024.onnx" && \
   echo "✅ ONNX 模型下載完成" && \
   ls -lh /root/.cache/babeldoc/models/*.onnx && \
@@ -466,15 +466,15 @@ RUN set -eux && \
   echo "" && \
   echo "📥 [6.1/8] 下載 PDFMathTranslate 多語言字型..." && \
   mkdir -p /app && \
-  curl -fSL -o /app/GoNotoKurrent-Regular.ttf \
+  curl -fSL --retry 3 --retry-delay 5 --retry-all-errors -o /app/GoNotoKurrent-Regular.ttf \
   "https://github.com/satbyy/go-noto-universal/releases/download/v7.0/GoNotoKurrent-Regular.ttf" && \
-  curl -fSL -o /app/SourceHanSerifCN-Regular.ttf \
+  curl -fSL --retry 3 --retry-delay 5 --retry-all-errors -o /app/SourceHanSerifCN-Regular.ttf \
   "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifCN-Regular.ttf" && \
-  curl -fSL -o /app/SourceHanSerifTW-Regular.ttf \
+  curl -fSL --retry 3 --retry-delay 5 --retry-all-errors -o /app/SourceHanSerifTW-Regular.ttf \
   "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifTW-Regular.ttf" && \
-  curl -fSL -o /app/SourceHanSerifJP-Regular.ttf \
+  curl -fSL --retry 3 --retry-delay 5 --retry-all-errors -o /app/SourceHanSerifJP-Regular.ttf \
   "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifJP-Regular.ttf" && \
-  curl -fSL -o /app/SourceHanSerifKR-Regular.ttf \
+  curl -fSL --retry 3 --retry-delay 5 --retry-all-errors -o /app/SourceHanSerifKR-Regular.ttf \
   "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifKR-Regular.ttf" && \
   echo "✅ 字型下載完成" && \
   ls -lh /app/*.ttf && \
@@ -630,6 +630,76 @@ RUN set -eux && \
   fi && \
   echo "" && \
   \
+  # ========================================
+  # 🔒 嚴格模型驗證（確保開箱即用）
+  # ========================================
+  # ⚠️ 如果關鍵模型缺失，build 將失敗
+  #    這確保發布的 image 一定包含所有必要模型
+  # ========================================
+  echo "===========================================================" && \
+  echo "🔒 嚴格模型驗證（確保開箱即用）" && \
+  echo "===========================================================" && \
+  VALIDATION_FAILED=0 && \
+  \
+  # 驗證 1: BabelDOC ONNX 模型（必須存在）
+  echo "🔍 驗證 BabelDOC ONNX 模型..." && \
+  ONNX_FILE="/root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx" && \
+  if [ -f "$ONNX_FILE" ]; then \
+    ONNX_SIZE=$(stat -c%s "$ONNX_FILE" 2>/dev/null || echo 0); \
+    if [ "$ONNX_SIZE" -gt 10000000 ]; then \
+      echo "   ✅ ONNX 模型驗證通過 ($((ONNX_SIZE/1024/1024)) MB)"; \
+    else \
+      echo "   ❌ ONNX 模型過小 ($ONNX_SIZE bytes)"; \
+      VALIDATION_FAILED=1; \
+    fi; \
+  else \
+    echo "   ❌ ONNX 模型不存在: $ONNX_FILE"; \
+    VALIDATION_FAILED=1; \
+  fi && \
+  \
+  # 驗證 2: PDFMathTranslate 字型（必須存在）
+  echo "🔍 驗證 PDFMathTranslate 字型..." && \
+  FONT_COUNT=$(ls /app/*.ttf 2>/dev/null | wc -l) && \
+  if [ "$FONT_COUNT" -ge 5 ]; then \
+    echo "   ✅ 字型驗證通過 ($FONT_COUNT 個字型)"; \
+  else \
+    echo "   ❌ 字型數量不足 (預期 >= 5，實際 $FONT_COUNT)"; \
+    VALIDATION_FAILED=1; \
+  fi && \
+  \
+  # 驗證 3: MinerU 模型（如果 mineru 已安裝則必須存在）
+  echo "🔍 驗證 MinerU 模型..." && \
+  if command -v mineru >/dev/null 2>&1; then \
+    if [ -f /root/mineru.json ]; then \
+      MINERU_DIR=$(python3 -c "import json; f=open('/root/mineru.json'); d=json.load(f); print(d.get('models-dir',{}).get('pipeline',''))" 2>/dev/null || echo ""); \
+      if [ -n "$MINERU_DIR" ] && [ -d "$MINERU_DIR" ]; then \
+        MINERU_SIZE=$(du -sb "$MINERU_DIR" 2>/dev/null | cut -f1 || echo 0); \
+        if [ "$MINERU_SIZE" -gt 1000000000 ]; then \
+          echo "   ✅ MinerU 模型驗證通過 ($((MINERU_SIZE/1024/1024)) MB)"; \
+        else \
+          echo "   ⚠️ MinerU 模型較小 ($((MINERU_SIZE/1024/1024)) MB)，可能不完整"; \
+        fi; \
+      else \
+        echo "   ⚠️ MinerU 模型目錄不存在（ARM64 可能不支援）"; \
+      fi; \
+    else \
+      echo "   ⚠️ mineru.json 不存在（ARM64 可能不支援）"; \
+    fi; \
+  else \
+    echo "   ⚠️ MinerU 未安裝（ARM64 可能不支援）"; \
+  fi && \
+  \
+  # 最終驗證結果
+  echo "" && \
+  if [ "$VALIDATION_FAILED" -eq 1 ]; then \
+    echo "❌ 模型驗證失敗！Image 不應發布。"; \
+    echo "   請檢查網路連接並重新 build。"; \
+    exit 1; \
+  else \
+    echo "✅ 所有必要模型驗證通過！"; \
+  fi && \
+  echo "" && \
+  \
   echo "===========================================================" && \
   echo "✅ 階段 12-UNIFIED 完成：所有 Python 工具 + 模型已安裝" && \
   echo "   所有 cache 已清理，layer diff 最小化" && \
@@ -676,7 +746,7 @@ RUN ARCH=$(uname -m) && \
   else \
   VTRACER_ASSET="vtracer-x86_64-unknown-linux-musl.tar.gz"; \
   fi && \
-  curl -L -o /tmp/vtracer.tar.gz "https://github.com/visioncortex/vtracer/releases/download/0.6.4/${VTRACER_ASSET}" && \
+  curl -L --retry 3 --retry-delay 5 --retry-all-errors -o /tmp/vtracer.tar.gz "https://github.com/visioncortex/vtracer/releases/download/0.6.4/${VTRACER_ASSET}" && \
   tar -xzf /tmp/vtracer.tar.gz -C /tmp/ && \
   mv /tmp/vtracer /usr/local/bin/vtracer && \
   chmod +x /usr/local/bin/vtracer && \

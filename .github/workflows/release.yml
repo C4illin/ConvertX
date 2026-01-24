@@ -154,20 +154,22 @@ jobs:
       #   - 使用 registry cache 而非 GHA cache（避免 10GB 限制）
       #   - 啟用 zstd compression 減少傳輸量和儲存空間
       #   - Multi-arch build 需要更多磁碟空間，已在上方清理
+      #   - 明確指定 file: Dockerfile 避免與 Lite 版混淆
       # ========================================
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: Dockerfile
           push: true
           tags: |
             ${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}
             ${{ env.DOCKER_IMAGE }}:latest
           platforms: linux/amd64,linux/arm64
-          # 🔥 使用 registry cache 取代 GHA cache
+          # 🔥 使用獨立的 cache key 避免與 Lite 版交叉污染
           # registry cache 沒有 10GB 限制，更適合大型模型
-          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache
-          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache,mode=max,compression=zstd
+          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache-full
+          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache-full,mode=max,compression=zstd
           # 啟用壓縮減少 image 大小
           outputs: type=image,compression=zstd,compression-level=3
           # 設定 build 參數
