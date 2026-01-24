@@ -209,6 +209,7 @@ RUN echo "" && \
 # 階段 4：圖像處理工具
 # 注意：bookworm 使用 imagemagick（版本 6），trixie 才有 imagemagick-7
 # 注意：Inkscape 需要 xvfb 在無 DISPLAY 環境下執行某些操作（如 PNG 轉 SVG）
+# 注意：xvfb-run 需要 xauth 才能正常運作
 RUN echo "" && \
   echo "========================================" && \
   echo "📦 階段 4/11：安裝圖像處理工具" && \
@@ -219,6 +220,7 @@ RUN echo "" && \
   libheif-examples \
   libjxl-tools \
   libvips-tools \
+  xauth \
   xvfb \
   && rm -rf /var/lib/apt/lists/* && \
   echo "✅ 階段 4/11 完成：圖像處理工具已安裝（ImageMagick, Inkscape, VIPS）"
