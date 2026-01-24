@@ -14,7 +14,7 @@ on:
       image_tag:
         description: "📦 版本號（例如：0.1.15、0.1.15-lite、0.1.15.test）"
         required: true
-        default: ""
+        default: "0.1.15.test"
         type: string
       build_target:
         description: "🎯 Build 目標版本（auto = 自動從版本號偵測）"
@@ -61,21 +61,21 @@ jobs:
           echo "========================================"
           echo "🔧 解析版本設定"
           echo "========================================"
-          
+
           INPUT_TAG="${{ github.event.inputs.image_tag }}"
           BUILD_TARGET_INPUT="${{ github.event.inputs.build_target }}"
-          
+
           echo "輸入參數："
           echo "  image_tag: ${INPUT_TAG}"
           echo "  build_target: ${BUILD_TARGET_INPUT}"
           echo ""
-          
+
           # 驗證版本號不為空
           if [ -z "${INPUT_TAG}" ]; then
             echo "❌ 錯誤：必須填寫版本號"
             exit 1
           fi
-          
+
           # ========================================
           # 判斷 build target（auto 時根據 tag 自動判斷）
           # ========================================
@@ -93,14 +93,14 @@ jobs:
           else
             FINAL_BUILD_TARGET="${BUILD_TARGET_INPUT}"
           fi
-          
+
           # ========================================
           # 根據 build target 決定最終 tag
           # ========================================
           # 移除可能的後綴以獲取基礎版本號
           BASE_TAG="${INPUT_TAG%-lite}"
           BASE_TAG="${BASE_TAG%-full}"
-          
+
           case "${FINAL_BUILD_TARGET}" in
             "lite")
               FINAL_TAG="${BASE_TAG}-lite"
@@ -121,7 +121,7 @@ jobs:
               EDITION="一般版（標準版）"
               ;;
           esac
-          
+
           # ========================================
           # 判斷是否為正式版本（決定是否更新 latest）
           # 正式版本格式：純數字+點號（如 0.1.15、0.1.15.1）
@@ -134,7 +134,7 @@ jobs:
             IS_OFFICIAL="false"
             echo "⚠️ 測試版本：不更新 ${LATEST_TAG}"
           fi
-          
+
           echo ""
           echo "========================================"
           echo "📋 最終設定："
@@ -146,7 +146,7 @@ jobs:
           echo "  Latest Tag: ${LATEST_TAG}"
           echo "  正式版本: ${IS_OFFICIAL}"
           echo "========================================"
-          
+
           # 輸出到 GITHUB_OUTPUT
           echo "image_tag=${FINAL_TAG}" >> $GITHUB_OUTPUT
           echo "base_tag=${BASE_TAG}" >> $GITHUB_OUTPUT
@@ -422,19 +422,19 @@ jobs:
           echo "========================================"
           echo "🔨 開始 Multi-Arch Docker Build"
           echo "========================================"
-          
+
           # 使用 parse_version 步驟的輸出
           FINAL_TAG="${{ steps.parse_version.outputs.image_tag }}"
           DOCKERFILE="${{ steps.parse_version.outputs.dockerfile }}"
           LATEST_TAG="${{ steps.parse_version.outputs.latest_tag }}"
           IS_OFFICIAL="${{ steps.parse_version.outputs.is_official }}"
           EDITION="${{ steps.parse_version.outputs.edition }}"
-          
+
           echo "🔹 Build 目標: ${EDITION}"
           echo "🔹 使用 Dockerfile: ${DOCKERFILE}"
           echo "🔹 版本: v${FINAL_TAG}"
           echo "🔹 映像名稱: ${{ env.DOCKER_IMAGE_REPO }}:${FINAL_TAG}"
-          
+
           if [ "${IS_OFFICIAL}" = "true" ]; then
             echo "✅ 正式版本，將同時標記 ${LATEST_TAG}"
             ADD_LATEST="true"
@@ -528,18 +528,18 @@ jobs:
           echo "========================================"
           echo "📤 推送映像到 Docker Hub"
           echo "========================================"
-          
+
           # 使用 parse_version 步驟的輸出
           FINAL_TAG="${{ steps.parse_version.outputs.image_tag }}"
           DOCKERFILE="${{ steps.parse_version.outputs.dockerfile }}"
           LATEST_TAG="${{ steps.parse_version.outputs.latest_tag }}"
           IS_OFFICIAL="${{ steps.parse_version.outputs.is_official }}"
           EDITION="${{ steps.parse_version.outputs.edition }}"
-          
+
           echo "🔹 Push 目標: ${EDITION}"
           echo "🔹 版本: v${FINAL_TAG}"
           echo "🔹 映像: ${{ env.DOCKER_IMAGE_REPO }}:${FINAL_TAG}"
-          
+
           if [ "${IS_OFFICIAL}" = "true" ]; then
             echo "✅ 正式版本，將同時推送 ${LATEST_TAG}"
             ADD_LATEST="true"
@@ -641,10 +641,10 @@ jobs:
           echo "========================================"
           echo "✅ 驗證 Docker Hub 映像"
           echo "========================================"
-          
+
           FINAL_TAG="${{ steps.parse_version.outputs.image_tag }}"
           EDITION="${{ steps.parse_version.outputs.edition }}"
-          
+
           echo "🔹 版本類型: ${EDITION}"
           echo "🔹 版本: v${FINAL_TAG}"
           echo "🔹 映像: ${{ env.DOCKER_IMAGE_REPO }}:${FINAL_TAG}"
@@ -737,7 +737,7 @@ jobs:
           echo "✅ Multi-Arch Docker Build & Push 完成！"
           echo "========================================"
           echo ""
-          
+
           # 使用 parse_version 步驟的輸出
           FINAL_TAG="${{ steps.parse_version.outputs.image_tag }}"
           BASE_TAG="${{ steps.parse_version.outputs.base_tag }}"
@@ -745,7 +745,7 @@ jobs:
           LATEST_TAG="${{ steps.parse_version.outputs.latest_tag }}"
           IS_OFFICIAL="${{ steps.parse_version.outputs.is_official }}"
           EDITION="${{ steps.parse_version.outputs.edition }}"
-          
+
           echo "🏷️ 版本: v${FINAL_TAG}"
           echo "📦 版本類型: ${EDITION}"
           echo ""

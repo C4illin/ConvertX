@@ -10,12 +10,12 @@
 
 ### 官方預建版（推薦）
 
-| Tag                                | 說明                 |
-| ---------------------------------- | -------------------- |
-| `convertx/convertx-cn:latest`      | Full 版最新穩定版    |
-| `convertx/convertx-cn:latest-lite` | Lite 版最新穩定版    |
-| `convertx/convertx-cn:v0.1.x`      | Full 版指定版本號    |
-| `convertx/convertx-cn:v0.1.x-lite` | Lite 版指定版本號    |
+| Tag                                | 說明              |
+| ---------------------------------- | ----------------- |
+| `convertx/convertx-cn:latest`      | Full 版最新穩定版 |
+| `convertx/convertx-cn:latest-lite` | Lite 版最新穩定版 |
+| `convertx/convertx-cn:v0.1.x`      | Full 版指定版本號 |
+| `convertx/convertx-cn:v0.1.x-lite` | Lite 版指定版本號 |
 
 ### Full 版（預設）
 

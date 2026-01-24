@@ -66,6 +66,65 @@ jobs:
           echo "📦 版本: ${VERSION}"
 
       # ========================================
+      # 動態修改 Lite 版本號（Build-time variant）
+      # 只在 runner workspace 生效，不 commit 回 repo
+      # ========================================
+      - name: Update version for Lite build
+        run: |
+          echo "========================================"
+          echo "🔧 動態修改 Lite 版本號"
+          echo "========================================"
+
+          VERSION="${{ steps.version.outputs.VERSION }}"
+
+          # 確保版本號包含 -lite
+          if [[ "${VERSION}" != *"-lite"* ]]; then
+            LITE_VERSION="${VERSION}-lite"
+          else
+            LITE_VERSION="${VERSION}"
+          fi
+
+          echo "🔍 Detected base version: ${VERSION}"
+          echo "✏️ Lite build detected, updating version to: ${LITE_VERSION}"
+          echo ""
+
+          # 修改 package.json
+          if [ -f "package.json" ]; then
+            ORIGINAL_VERSION=$(jq -r '.version' package.json)
+            echo "📄 package.json 原版本: ${ORIGINAL_VERSION}"
+            jq --arg v "${LITE_VERSION}" '.version = $v' package.json > package.json.tmp && mv package.json.tmp package.json
+            echo "✅ package.json 已更新為: ${LITE_VERSION}"
+          fi
+
+          # 修改 src/version.ts（如存在）
+          if [ -f "src/version.ts" ]; then
+            echo "📄 修改 src/version.ts..."
+            sed -i "s/version.*=.*['\"].*['\"]/version = '${LITE_VERSION}'/" src/version.ts
+            echo "✅ src/version.ts 已更新"
+          fi
+
+          # 修改 src/version.js（如存在）
+          if [ -f "src/version.js" ]; then
+            echo "📄 修改 src/version.js..."
+            sed -i "s/version.*=.*['\"].*['\"]/version = '${LITE_VERSION}'/" src/version.js
+            echo "✅ src/version.js 已更新"
+          fi
+
+          # 修改 .env（如存在且有 VERSION 變數）
+          if [ -f ".env" ] && grep -q "^VERSION=" .env; then
+            echo "📄 修改 .env..."
+            sed -i "s/^VERSION=.*/VERSION=${LITE_VERSION}/" .env
+            echo "✅ .env 已更新"
+          fi
+
+          echo ""
+          echo "========================================"
+          echo "✅ Version updated for UI build: ${LITE_VERSION}"
+          echo "========================================"
+          echo ""
+          echo "⚠️ 注意：此修改只影響本次 build，不會 commit 回 repo"
+
+      # ========================================
       # 清理磁碟空間
       # ========================================
       - name: Free disk space (aggressive)

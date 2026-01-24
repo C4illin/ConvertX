@@ -6,37 +6,38 @@ ConvertX-CN Lite 是專為一般使用者設計的輕量版本，提供快速部
 
 ## 📦 什麼是 Lite 版？
 
-| 特性 | Full 版 | Lite 版 |
-|------|---------|---------|
-| **Image 大小** | 約 8-12 GB | 約 1.2-1.5 GB |
-| **部署時間** | 較長（需下載大型模型） | 快速 |
-| **記憶體需求** | 較高（AI 模型） | 較低 |
-| **適用場景** | 進階使用者、需要 AI/OCR/翻譯 | 一般使用者、基本轉檔需求 |
+| 特性           | Full 版                      | Lite 版                  |
+| -------------- | ---------------------------- | ------------------------ |
+| **Image 大小** | 約 8-12 GB                   | 約 1.2-1.5 GB            |
+| **部署時間**   | 較長（需下載大型模型）       | 快速                     |
+| **記憶體需求** | 較高（AI 模型）              | 較低                     |
+| **適用場景**   | 進階使用者、需要 AI/OCR/翻譯 | 一般使用者、基本轉檔需求 |
 
 ---
 
 ## ✅ Lite 版包含的功能
 
 ### 核心功能
+
 - ✅ **多語言 UI**：完整 i18n 介面（65 種語言）
 - ✅ **檔案上傳/轉檔/下載**：完整流程支援
 - ✅ **轉檔進度與錯誤提示**
 
 ### 轉換引擎
 
-| 引擎 | 功能說明 | 支援格式 |
-|------|----------|----------|
-| **LibreOffice** | 文件轉檔 | DOC, DOCX, XLS, XLSX, PPT, PPTX, ODT, PDF... |
-| **GraphicsMagick** | 圖片轉檔 | PNG, JPG, GIF, WEBP, BMP, TIFF... |
-| **FFmpeg** | 影音轉檔（精簡版） | MP4, MP3, WAV, AVI, MKV, MOV... |
-| **Pandoc** | 文件格式轉換 | Markdown, HTML, DOCX, LaTeX, EPUB... |
+| 引擎               | 功能說明           | 支援格式                                     |
+| ------------------ | ------------------ | -------------------------------------------- |
+| **LibreOffice**    | 文件轉檔           | DOC, DOCX, XLS, XLSX, PPT, PPTX, ODT, PDF... |
+| **GraphicsMagick** | 圖片轉檔           | PNG, JPG, GIF, WEBP, BMP, TIFF...            |
+| **FFmpeg**         | 影音轉檔（精簡版） | MP4, MP3, WAV, AVI, MKV, MOV...              |
+| **Pandoc**         | 文件格式轉換       | Markdown, HTML, DOCX, LaTeX, EPUB...         |
 
 ### PDF 功能
 
-| 功能 | 說明 |
-|------|------|
-| **PDF/A 轉換** | 使用 Ghostscript 轉換為 PDF/A-1b、PDF/A-2b |
-| **PDF 防修改** | 使用 qpdf 設定權限保護 |
+| 功能             | 說明                                            |
+| ---------------- | ----------------------------------------------- |
+| **PDF/A 轉換**   | 使用 Ghostscript 轉換為 PDF/A-1b、PDF/A-2b      |
+| **PDF 防修改**   | 使用 qpdf 設定權限保護                          |
 | **PDF 數位簽章** | 使用 PFX/PKCS#12 憑證簽章（單一簽章，不含 LTV） |
 
 ---
@@ -45,19 +46,19 @@ ConvertX-CN Lite 是專為一般使用者設計的輕量版本，提供快速部
 
 以下功能僅在 Full 版中提供：
 
-| 功能類別 | 功能說明 |
-|----------|----------|
-| **向量圖轉換** | Inkscape（SVG, PDF, PNG, EPS） |
-| **高效能圖片** | VIPS（大型圖片處理） |
-| **OCR** | Tesseract OCR 文字辨識 |
-| **PDF 翻譯** | PDFMathTranslate、BabelDOC |
-| **PDF 轉 Markdown** | MinerU 智能擷取 |
-| **AI 模型** | YOLO、VLM 等深度學習模型 |
-| **電子書** | Calibre（ePub、MOBI 轉換） |
-| **CAD/3D** | assimp、OpenCascade |
-| **PDF/A 驗證** | veraPDF |
-| **長期驗證** | LTV、OCSP、CRL、TSA |
-| **完整 TexLive** | 進階 LaTeX 排版 |
+| 功能類別            | 功能說明                       |
+| ------------------- | ------------------------------ |
+| **向量圖轉換**      | Inkscape（SVG, PDF, PNG, EPS） |
+| **高效能圖片**      | VIPS（大型圖片處理）           |
+| **OCR**             | Tesseract OCR 文字辨識         |
+| **PDF 翻譯**        | PDFMathTranslate、BabelDOC     |
+| **PDF 轉 Markdown** | MinerU 智能擷取                |
+| **AI 模型**         | YOLO、VLM 等深度學習模型       |
+| **電子書**          | Calibre（ePub、MOBI 轉換）     |
+| **CAD/3D**          | assimp、OpenCascade            |
+| **PDF/A 驗證**      | veraPDF                        |
+| **長期驗證**        | LTV、OCSP、CRL、TSA            |
+| **完整 TexLive**    | 進階 LaTeX 排版                |
 
 ---
 
@@ -101,12 +102,12 @@ docker compose up -d
 
 ## 🏷️ Image Tag 說明
 
-| Tag | 說明 |
-|-----|------|
-| `convertx/convertx-cn:latest` | Full 版最新穩定版 |
+| Tag                                | 說明              |
+| ---------------------------------- | ----------------- |
+| `convertx/convertx-cn:latest`      | Full 版最新穩定版 |
 | `convertx/convertx-cn:latest-lite` | Lite 版最新穩定版 |
-| `convertx/convertx-cn:0.1.15` | Full 版指定版本 |
-| `convertx/convertx-cn:0.1.15-lite` | Lite 版指定版本 |
+| `convertx/convertx-cn:0.1.15`      | Full 版指定版本   |
+| `convertx/convertx-cn:0.1.15-lite` | Lite 版指定版本   |
 
 ---
 
@@ -158,7 +159,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ```yaml
 services:
   convertx:
-    image: convertx/convertx-cn:latest  # Full 版
+    image: convertx/convertx-cn:latest # Full 版
 ```
 
 ### ⚠️ 重要提醒
@@ -171,33 +172,33 @@ services:
 
 ## 📊 Lite vs Full 功能對照表
 
-| 功能類別 | 功能 | Lite | Full |
-|----------|------|:----:|:----:|
-| **UI** | 多語言介面（65 語言） | ✅ | ✅ |
-| **UI** | 深色/淺色主題 | ✅ | ✅ |
-| **轉檔** | 文件轉檔（LibreOffice） | ✅ | ✅ |
-| **轉檔** | 圖片轉檔（GraphicsMagick） | ✅ | ✅ |
-| **轉檔** | 圖片轉檔（ImageMagick） | ❌ | ✅ |
-| **轉檔** | 影音轉檔（FFmpeg） | ✅ | ✅ |
-| **轉檔** | 文件格式（Pandoc） | ✅ | ✅ |
-| **轉檔** | 向量圖（Inkscape） | ❌ | ✅ |
-| **轉檔** | 高效能圖片（VIPS） | ❌ | ✅ |
-| **轉檔** | 電子書（Calibre） | ❌ | ✅ |
-| **轉檔** | CAD/3D（assimp） | ❌ | ✅ |
-| **PDF** | PDF/A 轉換 | ✅ | ✅ |
-| **PDF** | PDF 防修改 | ✅ | ✅ |
-| **PDF** | PDF 數位簽章 | ✅ | ✅ |
-| **PDF** | PDF/A 驗證（veraPDF） | ❌ | ✅ |
-| **PDF** | 長期驗證（LTV） | ❌ | ✅ |
-| **OCR** | 文字辨識（Tesseract） | ❌ | ✅ |
-| **OCR** | ocrmypdf | ❌ | ✅ |
-| **AI** | PDF 翻譯（PDFMathTranslate） | ❌ | ✅ |
-| **AI** | PDF 翻譯（BabelDOC） | ❌ | ✅ |
-| **AI** | PDF 轉 Markdown（MinerU） | ❌ | ✅ |
-| **字型** | 基本 CJK 字型 | ✅ | ✅ |
-| **字型** | 完整 Noto 字型集 | ❌ | ✅ |
-| **LaTeX** | 基本 LaTeX | ❌ | ✅ |
-| **LaTeX** | 完整 TexLive CJK | ❌ | ✅ |
+| 功能類別  | 功能                         | Lite | Full |
+| --------- | ---------------------------- | :--: | :--: |
+| **UI**    | 多語言介面（65 語言）        |  ✅  |  ✅  |
+| **UI**    | 深色/淺色主題                |  ✅  |  ✅  |
+| **轉檔**  | 文件轉檔（LibreOffice）      |  ✅  |  ✅  |
+| **轉檔**  | 圖片轉檔（GraphicsMagick）   |  ✅  |  ✅  |
+| **轉檔**  | 圖片轉檔（ImageMagick）      |  ❌  |  ✅  |
+| **轉檔**  | 影音轉檔（FFmpeg）           |  ✅  |  ✅  |
+| **轉檔**  | 文件格式（Pandoc）           |  ✅  |  ✅  |
+| **轉檔**  | 向量圖（Inkscape）           |  ❌  |  ✅  |
+| **轉檔**  | 高效能圖片（VIPS）           |  ❌  |  ✅  |
+| **轉檔**  | 電子書（Calibre）            |  ❌  |  ✅  |
+| **轉檔**  | CAD/3D（assimp）             |  ❌  |  ✅  |
+| **PDF**   | PDF/A 轉換                   |  ✅  |  ✅  |
+| **PDF**   | PDF 防修改                   |  ✅  |  ✅  |
+| **PDF**   | PDF 數位簽章                 |  ✅  |  ✅  |
+| **PDF**   | PDF/A 驗證（veraPDF）        |  ❌  |  ✅  |
+| **PDF**   | 長期驗證（LTV）              |  ❌  |  ✅  |
+| **OCR**   | 文字辨識（Tesseract）        |  ❌  |  ✅  |
+| **OCR**   | ocrmypdf                     |  ❌  |  ✅  |
+| **AI**    | PDF 翻譯（PDFMathTranslate） |  ❌  |  ✅  |
+| **AI**    | PDF 翻譯（BabelDOC）         |  ❌  |  ✅  |
+| **AI**    | PDF 轉 Markdown（MinerU）    |  ❌  |  ✅  |
+| **字型**  | 基本 CJK 字型                |  ✅  |  ✅  |
+| **字型**  | 完整 Noto 字型集             |  ❌  |  ✅  |
+| **LaTeX** | 基本 LaTeX                   |  ❌  |  ✅  |
+| **LaTeX** | 完整 TexLive CJK             |  ❌  |  ✅  |
 
 ---
 

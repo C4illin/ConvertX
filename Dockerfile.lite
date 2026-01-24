@@ -234,7 +234,7 @@ RUN echo "" && \
 # ==============================================================================
 
 # ==============================================================================
-# 🔐 PDF Packager 預設簽章憑證 + Python（合併以減少 layer）
+# 🔐 PDF Packager 預設簽章憑證 + Python
 # ==============================================================================
 ENV PATH="/root/.local/bin:${PATH}"
 ENV PIP_NO_CACHE_DIR=1
@@ -244,9 +244,10 @@ ENV PDF_SIGN_REASON="ConvertX-CN Lite PDF Packager"
 ENV PDF_SIGN_LOCATION="Taiwan"
 ENV PDF_SIGN_CONTACT="convertx-cn@localhost"
 
+# 階段 7：安裝 Python 和編譯依賴
 RUN echo "" && \
     echo "========================================" && \
-    echo "🔐 安裝 Python + 產生簽章憑證" && \
+    echo "🔐 階段 7/8：安裝 Python + 編譯工具" && \
     echo "========================================" && \
     apt-get update --fix-missing && apt-get install -y --no-install-recommends \
     python3 \
@@ -255,6 +256,13 @@ RUN echo "" && \
     gcc \
     libffi-dev \
     && rm -rf /var/lib/apt/lists/* && \
+    echo "✅ 階段 7/8 完成：Python + 編譯工具已安裝"
+
+# 階段 8：安裝 endesive 並產生簽章憑證
+RUN echo "" && \
+    echo "========================================" && \
+    echo "🔐 階段 8/8：安裝 endesive + 產生憑證" && \
+    echo "========================================" && \
     pip3 install --no-cache-dir --break-system-packages endesive && \
     mkdir -p /app/certs && \
     openssl req -x509 -newkey rsa:2048 \
@@ -267,8 +275,13 @@ RUN echo "" && \
     -passout pass: && \
     rm -f /tmp/key.pem /tmp/cert.pem && \
     chmod 644 /app/certs/default.p12 && \
+    echo "✅ 階段 8/8 完成：endesive + 簽章憑證已安裝"
+
+# 清理編譯工具以減小體積
+RUN apt-get update && \
     apt-get purge -y --auto-remove gcc python3-dev libffi-dev && \
-    echo "✅ Python + PDF 簽章已安裝"
+    rm -rf /var/lib/apt/lists/* && \
+    echo "✅ 編譯工具已清理"
 
 # ==============================================================================
 # 最終清理 + Locale 設定 + 自訂字型（合併以減少 layer）
