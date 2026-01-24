@@ -454,53 +454,14 @@ RUN echo "Cache bust: ${CACHE_BUST}" && \
   (pipx install "mineru[all]" || echo "⚠️ mineru 安裝失敗（可能是 arm64 相容性問題），跳過...") && \
   \
   # ========================================
-  # [6/8] 顯式下載 PDFMathTranslate/BabelDOC ONNX 模型
-  # ⬇️ Docker build 階段下載 DocLayout-YOLO ONNX 模型
-  #    必須放到 /root/.cache/babeldoc/models/ 目錄
-  #    因為 pdf2zh 使用 babeldoc.assets.get_doclayout_onnx_model_path()
-  #    Runtime 不會再下載任何資源
-  # ⚠️ 使用多重下載策略確保成功：
-  #    1. 優先使用 huggingface_hub（支援 xet 存儲格式）
-  #    2. 備用 curl 直接下載
+  # [6/8] PDFMathTranslate/BabelDOC ONNX 模型
+  # ✅ 模型已預存於 models/ 目錄，透過 COPY 指令複製
+  #    無需 runtime 下載，避免網路問題導致 build 失敗
   # ========================================
   echo "" && \
-  echo "📥 [6/8] 下載 PDFMathTranslate/BabelDOC DocLayout-YOLO ONNX 模型..." && \
-  mkdir -p /root/.cache/babeldoc/models && \
-  ONNX_TARGET="/root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx" && \
-  ONNX_SUCCESS=0 && \
-  \
-  # 方法 1: 使用 huggingface_hub 下載
-  echo "   [方法 1] 嘗試使用 huggingface_hub 下載..." && \
-  (python3 -c "from huggingface_hub import hf_hub_download; import shutil, os, sys; print('   Downloading from HuggingFace...'); p=hf_hub_download(repo_id='wybxc/DocLayout-YOLO-DocStructBench-onnx', filename='doclayout_yolo_docstructbench_imgsz1024.onnx'); print(f'   Downloaded to cache: {p}'); t='/root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx'; shutil.copy2(p, t); size=os.path.getsize(t); print(f'   File size: {size} bytes ({size/1024/1024:.2f} MB)'); sys.exit(1) if size < 10000000 else print('   SUCCESS: ONNX model downloaded via huggingface_hub')" && ONNX_SUCCESS=1) || echo "   ⚠️ huggingface_hub 下載失敗，嘗試備用方法..." && \
-  \
-  # 方法 2: 使用 curl 直接下載（備用）
-  if [ "$ONNX_SUCCESS" != "1" ]; then \
-  echo "   [方法 2] 嘗試使用 curl 直接下載..." && \
-  (curl -fSL --retry 5 --retry-delay 10 --retry-all-errors --connect-timeout 60 --max-time 600 \
-  -o "$ONNX_TARGET" \
-  "https://huggingface.co/wybxc/DocLayout-YOLO-DocStructBench-onnx/resolve/main/doclayout_yolo_docstructbench_imgsz1024.onnx" && \
-  ONNX_SIZE=$(stat -c%s "$ONNX_TARGET" 2>/dev/null || echo "0") && \
-  if [ "$ONNX_SIZE" -gt 10000000 ]; then \
-  echo "   SUCCESS: ONNX model downloaded via curl ($((ONNX_SIZE/1024/1024)) MB)" && \
-  ONNX_SUCCESS=1; \
-  else \
-  echo "   ERROR: Downloaded file too small ($ONNX_SIZE bytes)"; \
-  fi) || echo "   ⚠️ curl 下載也失敗"; \
-  fi && \
-  \
-  # 驗證下載結果
-  if [ -f "$ONNX_TARGET" ]; then \
-  FINAL_SIZE=$(stat -c%s "$ONNX_TARGET" 2>/dev/null || echo "0") && \
-  if [ "$FINAL_SIZE" -gt 10000000 ]; then \
-  echo "✅ ONNX 模型下載完成 ($((FINAL_SIZE/1024/1024)) MB)" && \
-  ls -lh /root/.cache/babeldoc/models/*.onnx; \
-  else \
-  echo "❌ ONNX 模型檔案過小，下載可能不完整" && \
-  rm -f "$ONNX_TARGET"; \
-  fi; \
-  else \
-  echo "❌ ONNX 模型下載失敗"; \
-  fi && \
+  echo "📋 [6/8] PDFMathTranslate/BabelDOC ONNX 模型（已預置於 models/ 目錄）..." && \
+  echo "   ✅ 模型將透過 COPY 指令從本地 models/ 目錄複製" && \
+  echo "   ✅ 包含：doclayout_yolo_docstructbench_imgsz1024.onnx (72MB)" && \
   \
   # ========================================
   # [6.1/8] PDFMathTranslate 多語言字型
@@ -612,13 +573,8 @@ RUN echo "Cache bust: ${CACHE_BUST}" && \
   echo "===========================================================" && \
   echo "" && \
   \
-  echo "🔹 PDFMathTranslate/BabelDOC ONNX 模型：" && \
-  if [ -f "/root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx" ]; then \
-  echo "   ✅ DocLayout-YOLO ONNX 模型存在：" && \
-  ls -lh /root/.cache/babeldoc/models/*.onnx 2>/dev/null || true; \
-  else \
-  echo "   ❌ /root/.cache/babeldoc/models/ 中沒有 ONNX 模型"; \
-  fi && \
+  echo "🔹 PDFMathTranslate/BabelDOC ONNX 模型（預置於 models/ 目錄）：" && \
+  echo "   ⚠️ 模型將透過 COPY 指令複製到 /root/.cache/babeldoc/models/" && \
   echo "" && \
   \
   echo "🔹 PDFMathTranslate 字型（預置於 fonts/ 目錄）：" && \
@@ -663,8 +619,8 @@ RUN echo "Cache bust: ${CACHE_BUST}" && \
   # ========================================
   # 🔒 嚴格模型驗證（確保開箱即用）
   # ========================================
-  # ⚠️ 如果關鍵模型缺失，build 將失敗（僅 amd64 強制驗證）
-  #    ARM64 架構允許部分功能缺失
+  # ⚠️ ONNX 模型和字型已透過 COPY 指令預置
+  #    此處僅驗證 MinerU 模型（需要下載）
   # ========================================
   echo "===========================================================" && \
   echo "🔒 嚴格模型驗證（確保開箱即用）" && \
@@ -672,21 +628,9 @@ RUN echo "Cache bust: ${CACHE_BUST}" && \
   VALIDATION_FAILED=0 && \
   ARCH=$(uname -m) && \
   \
-  # 驗證 1: BabelDOC ONNX 模型（amd64 必須存在，arm64 允許缺失）
+  # 驗證 1: BabelDOC ONNX 模型（已透過 COPY 預置，跳過驗證）
   echo "🔍 驗證 BabelDOC ONNX 模型..." && \
-  ONNX_FILE="/root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx" && \
-  if [ -f "$ONNX_FILE" ]; then \
-  ONNX_SIZE=$(stat -c%s "$ONNX_FILE" 2>/dev/null || echo "0") && \
-  if [ "$ONNX_SIZE" -gt 10000000 ]; then \
-  echo "   ✅ ONNX 模型驗證通過 ($((ONNX_SIZE/1024/1024)) MB)"; \
-  else \
-  echo "   ❌ ONNX 模型過小 ($ONNX_SIZE bytes)" && \
-  if [ "$ARCH" != "aarch64" ]; then VALIDATION_FAILED=1; else echo "   ⚠️ ARM64: 忽略此錯誤"; fi; \
-  fi; \
-  else \
-  echo "   ❌ ONNX 模型不存在: $ONNX_FILE" && \
-  if [ "$ARCH" != "aarch64" ]; then VALIDATION_FAILED=1; else echo "   ⚠️ ARM64: 忽略此錯誤"; fi; \
-  fi && \
+  echo "   ⏭️ 跳過驗證（模型將透過 COPY models/ 指令複製）" && \
   \
   # 驗證 2: PDFMathTranslate 字型（字型已預置於 fonts/ 目錄，透過 COPY 複製）
   # ⚠️ 此驗證跳過，因為字型檔案在稍後的 COPY 階段才會複製到 image
@@ -768,6 +712,15 @@ RUN sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
 RUN mkdir -p /usr/share/fonts/truetype/custom
 COPY fonts/ /usr/share/fonts/truetype/custom/
 
+# ==============================================================================
+# 複製預下載的 ONNX 模型（DocLayout-YOLO）
+# ==============================================================================
+# ✅ models/ 目錄包含：
+#    - doclayout_yolo_docstructbench_imgsz1024.onnx (72MB)
+# ==============================================================================
+RUN mkdir -p /root/.cache/babeldoc/models
+COPY models/ /root/.cache/babeldoc/models/
+
 # 複製字型到 BabelDOC 目錄（供 PDFMathTranslate/BabelDOC 使用）
 RUN mkdir -p /root/.cache/babeldoc/fonts && \
   cp /usr/share/fonts/truetype/custom/GoNotoKurrent-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
@@ -776,7 +729,9 @@ RUN mkdir -p /root/.cache/babeldoc/fonts && \
   cp /usr/share/fonts/truetype/custom/SourceHanSerifJP-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
   cp /usr/share/fonts/truetype/custom/SourceHanSerifKR-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
   echo "✅ 字型已複製到 BabelDOC 目錄" && \
-  ls -lh /root/.cache/babeldoc/fonts/
+  ls -lh /root/.cache/babeldoc/fonts/ && \
+  echo "✅ ONNX 模型已複製到 BabelDOC 目錄" && \
+  ls -lh /root/.cache/babeldoc/models/
 
 RUN fc-cache -fv
 
