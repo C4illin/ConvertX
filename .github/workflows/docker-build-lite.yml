@@ -1,0 +1,346 @@
+# ============================================================
+# Docker Build & Push - Lite 版（自動觸發）
+# ============================================================
+# 說明：當 Git tag 符合 vX.Y.Z-lite 格式時自動觸發 Lite 版 build
+# 範例：v0.1.15-lite, v1.0.0-lite
+# ============================================================
+
+name: Docker Build Lite (Auto Tag)
+
+on:
+  push:
+    tags:
+      - "v*.*.*-lite"
+
+env:
+  # Docker Hub 映像庫
+  DOCKER_IMAGE: convertx/convertx-cn
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ========================================
+  # Build job - 為每個平台建構 Docker image
+  # ========================================
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm64
+
+    permissions:
+      contents: write
+      packages: write
+      attestations: write
+      id-token: write
+
+    runs-on: ${{ matrix.platform == 'linux/amd64' && 'ubuntu-24.04' || matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' }}
+
+    name: Build Lite image for ${{ matrix.platform }}
+
+    steps:
+      - name: Prepare environment for current platform
+        id: prepare
+        run: |
+          platform=${{ matrix.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ========================================
+      # 從 tag 提取版本號
+      # ========================================
+      - name: Extract version from tag
+        id: version
+        run: |
+          # 從 tag 中提取版本號（例如 v0.1.15-lite -> 0.1.15-lite）
+          TAG="${{ github.ref_name }}"
+          VERSION="${TAG#v}"
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          echo "TAG=${TAG}" >> $GITHUB_OUTPUT
+          echo "📦 版本: ${VERSION}"
+
+      # ========================================
+      # 清理磁碟空間
+      # ========================================
+      - name: Free disk space (aggressive)
+        run: |
+          echo "🧹 Aggressive disk cleanup for Lite builds..."
+          echo "========================================"
+          echo "📊 初始磁碟空間："
+          df -h /
+          echo "========================================"
+
+          # 移除大型預裝軟體
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /usr/local/lib/android || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+          sudo rm -rf /usr/local/share/boost || true
+          sudo rm -rf /usr/share/swift || true
+          sudo rm -rf /opt/hostedtoolcache || true
+          sudo rm -rf /usr/share/az_* || true
+          sudo rm -rf /opt/az || true
+          sudo rm -rf /usr/lib/google-cloud-sdk || true
+          sudo rm -rf /usr/local/share/powershell || true
+          sudo rm -rf /usr/share/miniconda || true
+
+          # 清理系統 cache
+          sudo apt-get clean || true
+          sudo apt-get autoremove -y || true
+          sudo rm -rf /var/lib/apt/lists/* || true
+
+          # 清理 Docker cache
+          docker system prune -af --volumes || true
+          sudo rm -rf /var/lib/docker/buildkit || true
+
+          echo "========================================"
+          echo "📊 清理後磁碟空間："
+          df -h /
+          echo "========================================"
+
+      - name: downcase REPO
+        run: |
+          echo "REPO=${GITHUB_REPOSITORY@L}" >> "${GITHUB_ENV}"
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ env.REPO }}
+            ${{ env.DOCKER_IMAGE }}
+          tags: |
+            type=semver,pattern={{version}}-lite
+            type=raw,value=latest-lite,enable={{is_default_branch}}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: ${{ matrix.platform }}
+          driver-opts: |
+            image=moby/buildkit:latest
+            network=host
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # ========================================
+      # Build Lite image
+      # ========================================
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v6
+        env:
+          DOCKER_BUILDKIT: 1
+        with:
+          context: .
+          file: Dockerfile.lite
+          platforms: ${{ matrix.platform }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          outputs: type=image,name=ghcr.io/${{ env.REPO }},push-by-digest=true,name-canonical=true,oci-mediatypes=true,compression=zstd,compression-level=3
+          push: true
+          cache-from: type=registry,ref=ghcr.io/${{ env.REPO }}:buildcache-lite-${{ env.PLATFORM_PAIR }}
+          cache-to: type=registry,ref=ghcr.io/${{ env.REPO }}:buildcache-lite-${{ env.PLATFORM_PAIR }},mode=max,compression=zstd
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-lite-${{ env.PLATFORM_PAIR }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  # ========================================
+  # Merge job - 合併多架構 manifest
+  # ========================================
+  merge:
+    name: Merge Lite Docker manifests
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      packages: write
+      attestations: write
+      id-token: write
+
+    needs:
+      - build
+
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-lite-*
+          merge-multiple: true
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG="${{ github.ref_name }}"
+          VERSION="${TAG#v}"
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          echo "TAG=${TAG}" >> $GITHUB_OUTPUT
+
+      - name: downcase REPO
+        run: |
+          echo "REPO=${GITHUB_REPOSITORY@L}" >> "${GITHUB_ENV}"
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ env.REPO }}
+            ${{ env.DOCKER_IMAGE }}
+          tags: |
+            type=raw,value=${{ steps.version.outputs.VERSION }}
+            type=raw,value=latest-lite
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Get execution timestamp
+        id: timestamp
+        run: |
+          echo "timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_OUTPUT
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create \
+            $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            --annotation='index:org.opencontainers.image.description=ConvertX-CN Lite - 輕量版檔案轉換服務' \
+            --annotation='index:org.opencontainers.image.created=${{ steps.timestamp.outputs.timestamp }}' \
+            --annotation='index:org.opencontainers.image.url=${{ github.event.repository.url }}' \
+            --annotation='index:org.opencontainers.image.source=${{ github.event.repository.url }}' \
+            $(printf 'ghcr.io/${{ env.REPO }}@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect '${{ env.DOCKER_IMAGE }}:${{ steps.version.outputs.VERSION }}'
+
+      # ========================================
+      # 建立 GitHub Release
+      # ========================================
+      - name: Checkout for changelog
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate Changelog
+        id: changelog
+        run: |
+          echo "========================================"
+          echo "📝 生成 Changelog"
+          echo "========================================"
+
+          # 取得前一個 tag
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          if [ -z "$PREVIOUS_TAG" ]; then
+            echo "📋 無前一個 tag，取得所有 commits..."
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" HEAD)
+          else
+            echo "📋 取得 ${PREVIOUS_TAG} 到 HEAD 的 commits..."
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" ${PREVIOUS_TAG}..HEAD)
+          fi
+
+          # 建立 changelog 檔案
+          echo "## ConvertX-CN Lite 版本" > changelog.txt
+          echo "" >> changelog.txt
+          echo "這是 ConvertX-CN 的輕量版本，適合一般使用者與快速部署。" >> changelog.txt
+          echo "" >> changelog.txt
+          echo "### 變更記錄" >> changelog.txt
+          echo "" >> changelog.txt
+          echo "$CHANGELOG" >> changelog.txt
+          echo "" >> changelog.txt
+          echo "### 使用方式" >> changelog.txt
+          echo "" >> changelog.txt
+          echo "\`\`\`bash" >> changelog.txt
+          echo "docker pull ${{ env.DOCKER_IMAGE }}:${{ steps.version.outputs.VERSION }}" >> changelog.txt
+          echo "\`\`\`" >> changelog.txt
+          echo "" >> changelog.txt
+          echo "Full Changelog: https://github.com/${{ github.repository }}/compare/${PREVIOUS_TAG}...${{ steps.version.outputs.TAG }}" >> changelog.txt
+
+          echo ""
+          echo "✅ Changelog 已生成"
+          cat changelog.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.TAG }}
+          name: ${{ steps.version.outputs.TAG }} (Lite)
+          body_path: changelog.txt
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ========================================
+      # 完成摘要
+      # ========================================
+      - name: Build Summary
+        run: |
+          echo "========================================"
+          echo "✅ ConvertX-CN Lite Build 完成！"
+          echo "========================================"
+          echo ""
+          echo "🏷️ 版本: ${{ steps.version.outputs.VERSION }}"
+          echo "📦 版本類型: Lite 版（輕量版）"
+          echo ""
+          echo "📦 映像資訊："
+          echo "  - ${{ env.DOCKER_IMAGE }}:${{ steps.version.outputs.VERSION }}"
+          echo "  - ${{ env.DOCKER_IMAGE }}:latest-lite"
+          echo "  - ghcr.io/${{ env.REPO }}:${{ steps.version.outputs.VERSION }}"
+          echo ""
+          echo "🏗️ 支援的架構："
+          echo "  - linux/amd64"
+          echo "  - linux/arm64"
+          echo ""
+          echo "📝 使用方式："
+          echo "  docker pull ${{ env.DOCKER_IMAGE }}:${{ steps.version.outputs.VERSION }}"
+          echo "  docker pull ${{ env.DOCKER_IMAGE }}:latest-lite"
+          echo ""
+          echo "========================================"
+          echo "🎉 Lite 版本發布成功！"
+          echo "========================================"

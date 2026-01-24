@@ -149,6 +149,33 @@ docker compose up -d
 
 ---
 
+## 🎯 版本選擇：Full vs Lite
+
+ConvertX-CN 提供兩個版本，滿足不同需求：
+
+| 特性 | Full 版 | Lite 版 |
+|------|---------|---------|
+| **Image 大小** | 約 8-12 GB | 約 1.5-2.5 GB |
+| **部署速度** | 較慢 | 快速 |
+| **適用對象** | 進階使用者 | 一般使用者 |
+| **OCR/AI/翻譯** | ✅ | ❌ |
+| **基本轉檔** | ✅ | ✅ |
+
+### Lite 版快速啟動
+
+```bash
+docker run -d \
+  --name convertx-cn-lite \
+  -p 3000:3000 \
+  -v ./data:/app/data \
+  -e JWT_SECRET=你的隨機字串至少32字元 \
+  convertx/convertx-cn:latest-lite
+```
+
+> 📖 詳細說明請參閱 [Lite 版部署指南](docs/部署指南/Docker-Lite.md)
+
+---
+
 ## 📄 License Overview
 
 **This is a Mixed License / Source-Available Project.**

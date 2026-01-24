@@ -8,14 +8,24 @@
 name: Docker Build & Push (Remote Host via Tailscale)
 
 on:
-  # 手動觸發，支援輸入 image tag
+  # 手動觸發，支援輸入 image tag 與 build target
   workflow_dispatch:
     inputs:
       image_tag:
-        description: "Docker Image Tag（例如：0.1.12.test）"
+        description: "📦 版本號（例如：0.1.15、0.1.15-lite、0.1.15.test）"
         required: true
-        default: "0.1.12.test"
+        default: ""
         type: string
+      build_target:
+        description: "🎯 Build 目標版本（auto = 自動從版本號偵測）"
+        required: true
+        default: "auto"
+        type: choice
+        options:
+          - auto
+          - standard
+          - full
+          - lite
 
 # ============================================================
 # 環境變數設定
@@ -41,6 +51,111 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # ========================================
+      # Step 0: 解析版本快捷選項
+      # 說明：根據 version_preset 自動設定 IMAGE_TAG 和 BUILD_TARGET
+      # ========================================
+      - name: 🔧 解析版本設定
+        id: parse_version
+        run: |
+          echo "========================================"
+          echo "🔧 解析版本設定"
+          echo "========================================"
+          
+          INPUT_TAG="${{ github.event.inputs.image_tag }}"
+          BUILD_TARGET_INPUT="${{ github.event.inputs.build_target }}"
+          
+          echo "輸入參數："
+          echo "  image_tag: ${INPUT_TAG}"
+          echo "  build_target: ${BUILD_TARGET_INPUT}"
+          echo ""
+          
+          # 驗證版本號不為空
+          if [ -z "${INPUT_TAG}" ]; then
+            echo "❌ 錯誤：必須填寫版本號"
+            exit 1
+          fi
+          
+          # ========================================
+          # 判斷 build target（auto 時根據 tag 自動判斷）
+          # ========================================
+          if [ "${BUILD_TARGET_INPUT}" = "auto" ]; then
+            if [[ "${INPUT_TAG}" == *"-lite"* ]]; then
+              FINAL_BUILD_TARGET="lite"
+              echo "🔍 自動偵測：版本號含 '-lite'，選擇 Lite 版"
+            elif [[ "${INPUT_TAG}" == *"-full"* ]]; then
+              FINAL_BUILD_TARGET="full"
+              echo "🔍 自動偵測：版本號含 '-full'，選擇 Full 版"
+            else
+              FINAL_BUILD_TARGET="standard"
+              echo "🔍 自動偵測：標準版本號，選擇一般版"
+            fi
+          else
+            FINAL_BUILD_TARGET="${BUILD_TARGET_INPUT}"
+          fi
+          
+          # ========================================
+          # 根據 build target 決定最終 tag
+          # ========================================
+          # 移除可能的後綴以獲取基礎版本號
+          BASE_TAG="${INPUT_TAG%-lite}"
+          BASE_TAG="${BASE_TAG%-full}"
+          
+          case "${FINAL_BUILD_TARGET}" in
+            "lite")
+              FINAL_TAG="${BASE_TAG}-lite"
+              DOCKERFILE="Dockerfile.lite"
+              LATEST_TAG="latest-lite"
+              EDITION="Lite 版（輕量版）"
+              ;;
+            "full")
+              FINAL_TAG="${BASE_TAG}-full"
+              DOCKERFILE="Dockerfile.full"
+              LATEST_TAG="latest-full"
+              EDITION="Full 版（擴充版）"
+              ;;
+            *)
+              FINAL_TAG="${BASE_TAG}"
+              DOCKERFILE="Dockerfile"
+              LATEST_TAG="latest"
+              EDITION="一般版（標準版）"
+              ;;
+          esac
+          
+          # ========================================
+          # 判斷是否為正式版本（決定是否更新 latest）
+          # 正式版本格式：純數字+點號（如 0.1.15、0.1.15.1）
+          # 測試版本格式：含有 test/dev/alpha/beta 或其他非數字字元
+          # ========================================
+          if [[ "${BASE_TAG}" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
+            IS_OFFICIAL="true"
+            echo "✅ 正式版本：將同時更新 ${LATEST_TAG}"
+          else
+            IS_OFFICIAL="false"
+            echo "⚠️ 測試版本：不更新 ${LATEST_TAG}"
+          fi
+          
+          echo ""
+          echo "========================================"
+          echo "📋 最終設定："
+          echo "========================================"
+          echo "  版本號: ${FINAL_TAG}"
+          echo "  Build 目標: ${FINAL_BUILD_TARGET}"
+          echo "  Dockerfile: ${DOCKERFILE}"
+          echo "  版本類型: ${EDITION}"
+          echo "  Latest Tag: ${LATEST_TAG}"
+          echo "  正式版本: ${IS_OFFICIAL}"
+          echo "========================================"
+          
+          # 輸出到 GITHUB_OUTPUT
+          echo "image_tag=${FINAL_TAG}" >> $GITHUB_OUTPUT
+          echo "base_tag=${BASE_TAG}" >> $GITHUB_OUTPUT
+          echo "build_target=${FINAL_BUILD_TARGET}" >> $GITHUB_OUTPUT
+          echo "dockerfile=${DOCKERFILE}" >> $GITHUB_OUTPUT
+          echo "latest_tag=${LATEST_TAG}" >> $GITHUB_OUTPUT
+          echo "edition=${EDITION}" >> $GITHUB_OUTPUT
+          echo "is_official=${IS_OFFICIAL}" >> $GITHUB_OUTPUT
+
       # ========================================
       # Step 1: Checkout repository
       # 說明：檢出程式碼（雖然 build 在遠端，但需要 workflow 完整性）
@@ -300,22 +415,31 @@ jobs:
       # ========================================
       # Step 10: Multi-Arch Docker Build
       # 說明：使用 buildx 同時建構 amd64 和 arm64
+      # 支援 full/lite 版本選擇
       # ========================================
       - name: 🔨 Multi-Arch Docker Build
         run: |
           echo "========================================"
           echo "🔨 開始 Multi-Arch Docker Build"
           echo "========================================"
-          echo "版本: v${{ github.event.inputs.image_tag }}"
-          echo "映像名稱: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
-
-          # 判斷是否為正式版本（純數字+點號，支援任意段數如 0.1.10 或 0.1.10.1）
-          IMAGE_TAG="${{ github.event.inputs.image_tag }}"
-          if [[ "$IMAGE_TAG" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
-            echo "✅ 正式版本，將同時標記 latest"
+          
+          # 使用 parse_version 步驟的輸出
+          FINAL_TAG="${{ steps.parse_version.outputs.image_tag }}"
+          DOCKERFILE="${{ steps.parse_version.outputs.dockerfile }}"
+          LATEST_TAG="${{ steps.parse_version.outputs.latest_tag }}"
+          IS_OFFICIAL="${{ steps.parse_version.outputs.is_official }}"
+          EDITION="${{ steps.parse_version.outputs.edition }}"
+          
+          echo "🔹 Build 目標: ${EDITION}"
+          echo "🔹 使用 Dockerfile: ${DOCKERFILE}"
+          echo "🔹 版本: v${FINAL_TAG}"
+          echo "🔹 映像名稱: ${{ env.DOCKER_IMAGE_REPO }}:${FINAL_TAG}"
+          
+          if [ "${IS_OFFICIAL}" = "true" ]; then
+            echo "✅ 正式版本，將同時標記 ${LATEST_TAG}"
             ADD_LATEST="true"
           else
-            echo "⚠️ 測試版本，不標記 latest"
+            echo "⚠️ 測試版本，不標記 ${LATEST_TAG}"
             ADD_LATEST="false"
           fi
 
@@ -327,10 +451,11 @@ jobs:
 
           WORKDIR="${{ env.REMOTE_WORKDIR }}"
           PROJECT="${{ env.PROJECT_NAME }}"
-          IMAGE="${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
-          IMAGE_LATEST="${{ env.DOCKER_IMAGE_REPO }}:latest"
+          IMAGE="${{ env.DOCKER_IMAGE_REPO }}:${FINAL_TAG}"
+          IMAGE_LATEST="${{ env.DOCKER_IMAGE_REPO }}:${LATEST_TAG}"
           BUILDER_NAME="multiarch-builder-${{ github.run_id }}"
           ADD_LATEST="${ADD_LATEST}"
+          DOCKERFILE="${DOCKERFILE}"
 
           echo "📂 進入專案目錄..."
           cd "\${WORKDIR}/\${PROJECT}"
@@ -339,6 +464,7 @@ jobs:
           echo ""
           echo "🔨 執行 Multi-Arch Docker buildx..."
           echo "映像標籤: \${IMAGE}"
+          echo "Dockerfile: \${DOCKERFILE}"
           echo "目標平台: linux/amd64, linux/arm64"
           echo ""
 
@@ -347,7 +473,7 @@ jobs:
 
           # 根據版本類型決定是否加入 latest tag
           if [ "\${ADD_LATEST}" = "true" ]; then
-            echo "📌 同時標記 latest"
+            echo "📌 同時標記 \${IMAGE_LATEST}"
             BUILD_TAGS="-t \${IMAGE} -t \${IMAGE_LATEST}"
           else
             echo "📌 僅標記版本號（測試版本）"
@@ -355,10 +481,11 @@ jobs:
           fi
 
           # Multi-arch build（只建構，不推送）
-          if ! docker buildx build \
-            --platform linux/amd64,linux/arm64 \
-            \${BUILD_TAGS} \
-            --progress=plain \
+          if ! docker buildx build \\
+            --platform linux/amd64,linux/arm64 \\
+            -f \${DOCKERFILE} \\
+            \${BUILD_TAGS} \\
+            --progress=plain \\
             . 2>&1; then
             
             echo ""
@@ -394,22 +521,30 @@ jobs:
       # ========================================
       # Step 11: Docker Push 到 Docker Hub
       # 說明：推送建構好的映像到 Docker Hub
+      # 支援 standard/full/lite 版本選擇
       # ========================================
       - name: 📤 Docker Push 到 Docker Hub
         run: |
           echo "========================================"
           echo "📤 推送映像到 Docker Hub"
           echo "========================================"
-          echo "版本: v${{ github.event.inputs.image_tag }}"
-          echo "映像: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
-
-          # 判斷是否為正式版本（純數字+點號，支援任意段數如 0.1.10 或 0.1.10.1）
-          IMAGE_TAG="${{ github.event.inputs.image_tag }}"
-          if [[ "$IMAGE_TAG" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
-            echo "✅ 正式版本，將同時推送 latest"
+          
+          # 使用 parse_version 步驟的輸出
+          FINAL_TAG="${{ steps.parse_version.outputs.image_tag }}"
+          DOCKERFILE="${{ steps.parse_version.outputs.dockerfile }}"
+          LATEST_TAG="${{ steps.parse_version.outputs.latest_tag }}"
+          IS_OFFICIAL="${{ steps.parse_version.outputs.is_official }}"
+          EDITION="${{ steps.parse_version.outputs.edition }}"
+          
+          echo "🔹 Push 目標: ${EDITION}"
+          echo "🔹 版本: v${FINAL_TAG}"
+          echo "🔹 映像: ${{ env.DOCKER_IMAGE_REPO }}:${FINAL_TAG}"
+          
+          if [ "${IS_OFFICIAL}" = "true" ]; then
+            echo "✅ 正式版本，將同時推送 ${LATEST_TAG}"
             ADD_LATEST="true"
           else
-            echo "⚠️ 測試版本，不推送 latest"
+            echo "⚠️ 測試版本，不推送 ${LATEST_TAG}"
             ADD_LATEST="false"
           fi
           echo ""
@@ -431,10 +566,11 @@ jobs:
 
           WORKDIR="${{ env.REMOTE_WORKDIR }}"
           PROJECT="${{ env.PROJECT_NAME }}"
-          IMAGE="${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
-          IMAGE_LATEST="${{ env.DOCKER_IMAGE_REPO }}:latest"
+          IMAGE="${{ env.DOCKER_IMAGE_REPO }}:${FINAL_TAG}"
+          IMAGE_LATEST="${{ env.DOCKER_IMAGE_REPO }}:${LATEST_TAG}"
           BUILDER_NAME="multiarch-builder-${{ github.run_id }}"
           ADD_LATEST="${ADD_LATEST}"
+          DOCKERFILE="${DOCKERFILE}"
 
           echo "📂 進入專案目錄..."
           cd "\${WORKDIR}/\${PROJECT}"
@@ -442,6 +578,7 @@ jobs:
           echo ""
           echo "📤 執行 Docker Push..."
           echo "映像標籤: \${IMAGE}"
+          echo "Dockerfile: \${DOCKERFILE}"
 
           # 確保使用正確的 builder
           docker buildx use "\${BUILDER_NAME}"
@@ -451,7 +588,7 @@ jobs:
             echo "同時推送: \${IMAGE_LATEST}"
             BUILD_TAGS="-t \${IMAGE} -t \${IMAGE_LATEST}"
           else
-            echo "（測試版本，不推送 latest）"
+            echo "（測試版本，不推送 ${LATEST_TAG}）"
             BUILD_TAGS="-t \${IMAGE}"
           fi
           echo ""
@@ -459,6 +596,7 @@ jobs:
           # 使用 buildx build --push 來推送 multi-arch 映像
           if ! docker buildx build \
             --platform linux/amd64,linux/arm64 \
+            -f \${DOCKERFILE} \
             \${BUILD_TAGS} \
             --push \
             --progress=plain \
@@ -496,25 +634,31 @@ jobs:
       # ========================================
       # Step 13: 驗證 Docker Hub 映像
       # 說明：確認映像已成功推送並檢查架構
+      # 支援 standard/full/lite 版本
       # ========================================
       - name: ✅ 驗證 Docker Hub 映像
         run: |
           echo "========================================"
           echo "✅ 驗證 Docker Hub 映像"
           echo "========================================"
-          echo "版本: v${{ github.event.inputs.image_tag }}"
-          echo "映像: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
+          
+          FINAL_TAG="${{ steps.parse_version.outputs.image_tag }}"
+          EDITION="${{ steps.parse_version.outputs.edition }}"
+          
+          echo "🔹 版本類型: ${EDITION}"
+          echo "🔹 版本: v${FINAL_TAG}"
+          echo "🔹 映像: ${{ env.DOCKER_IMAGE_REPO }}:${FINAL_TAG}"
           echo ""
 
-          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'REMOTE_EOF'
+          tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << REMOTE_EOF
           set -e
 
-          IMAGE="${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
+          IMAGE="${{ env.DOCKER_IMAGE_REPO }}:${FINAL_TAG}"
 
           echo "📋 檢查映像 manifest（顯示支援的架構）..."
           echo ""
 
-          docker buildx imagetools inspect "${IMAGE}"
+          docker buildx imagetools inspect "\${IMAGE}"
 
           echo ""
           echo "✅ 映像驗證完成"
@@ -585,6 +729,7 @@ jobs:
       # ========================================
       # Step 16: 顯示完成摘要
       # 說明：顯示本次 build 的摘要資訊
+      # 支援 standard/full/lite 版本
       # ========================================
       - name: 📋 Build 完成摘要
         run: |
@@ -592,15 +737,24 @@ jobs:
           echo "✅ Multi-Arch Docker Build & Push 完成！"
           echo "========================================"
           echo ""
-          echo "🏷️ 版本: v${{ github.event.inputs.image_tag }}"
+          
+          # 使用 parse_version 步驟的輸出
+          FINAL_TAG="${{ steps.parse_version.outputs.image_tag }}"
+          BASE_TAG="${{ steps.parse_version.outputs.base_tag }}"
+          DOCKERFILE="${{ steps.parse_version.outputs.dockerfile }}"
+          LATEST_TAG="${{ steps.parse_version.outputs.latest_tag }}"
+          IS_OFFICIAL="${{ steps.parse_version.outputs.is_official }}"
+          EDITION="${{ steps.parse_version.outputs.edition }}"
+          
+          echo "🏷️ 版本: v${FINAL_TAG}"
+          echo "📦 版本類型: ${EDITION}"
           echo ""
           echo "📦 映像資訊："
-          echo "  - 版本標籤: ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
+          echo "  - 版本標籤: ${{ env.DOCKER_IMAGE_REPO }}:${FINAL_TAG}"
 
-          # 判斷是否為正式版本（純數字+點號）
-          IMAGE_TAG="${{ github.event.inputs.image_tag }}"
-          if [[ "$IMAGE_TAG" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
-            echo "  - Latest 標籤: ${{ env.DOCKER_IMAGE_REPO }}:latest ✅"
+          # 判斷是否為正式版本
+          if [ "${IS_OFFICIAL}" = "true" ]; then
+            echo "  - Latest 標籤: ${{ env.DOCKER_IMAGE_REPO }}:${LATEST_TAG} ✅"
           else
             echo "  - Latest 標籤: （測試版本，未更新）"
           fi
@@ -615,11 +769,12 @@ jobs:
           echo "  - 遠端主機: ${{ secrets.SSH_HOST }}"
           echo "  - 工作目錄: ${{ env.REMOTE_WORKDIR }}"
           echo "  - 專案名稱: ${{ env.PROJECT_NAME }}"
+          echo "  - Dockerfile: ${DOCKERFILE}"
           echo ""
           echo "📝 使用方式："
-          echo "  docker pull ${{ env.DOCKER_IMAGE_REPO }}:${{ github.event.inputs.image_tag }}"
-          if [[ "$IMAGE_TAG" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
-            echo "  docker pull ${{ env.DOCKER_IMAGE_REPO }}:latest"
+          echo "  docker pull ${{ env.DOCKER_IMAGE_REPO }}:${FINAL_TAG}"
+          if [ "${IS_OFFICIAL}" = "true" ]; then
+            echo "  docker pull ${{ env.DOCKER_IMAGE_REPO }}:${LATEST_TAG}"
           fi
           echo ""
           echo "========================================"
@@ -631,7 +786,7 @@ jobs:
       # 說明：從 git log 生成變更記錄（與 release.yml 邏輯一致）
       # ========================================
       - name: 📝 Generate Changelog
-        if: ${{ !contains(github.event.inputs.image_tag, 'test') && !contains(github.event.inputs.image_tag, 'dev') && !contains(github.event.inputs.image_tag, 'alpha') && !contains(github.event.inputs.image_tag, 'beta') }}
+        if: ${{ !contains(steps.parse_version.outputs.image_tag, 'test') && !contains(steps.parse_version.outputs.image_tag, 'dev') && !contains(steps.parse_version.outputs.image_tag, 'alpha') && !contains(steps.parse_version.outputs.image_tag, 'beta') }}
         id: changelog
         run: |
           echo "========================================"
@@ -671,12 +826,12 @@ jobs:
       # 注意：如果 Release 已存在會失敗，使用 continue-on-error 跳過
       # ========================================
       - name: 📦 Create GitHub Release
-        if: ${{ !contains(github.event.inputs.image_tag, 'test') && !contains(github.event.inputs.image_tag, 'dev') && !contains(github.event.inputs.image_tag, 'alpha') && !contains(github.event.inputs.image_tag, 'beta') }}
+        if: ${{ !contains(steps.parse_version.outputs.image_tag, 'test') && !contains(steps.parse_version.outputs.image_tag, 'dev') && !contains(steps.parse_version.outputs.image_tag, 'alpha') && !contains(steps.parse_version.outputs.image_tag, 'beta') }}
         continue-on-error: true
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ github.event.inputs.image_tag }}
-          name: v${{ github.event.inputs.image_tag }}
+          tag_name: v${{ steps.parse_version.outputs.image_tag }}
+          name: v${{ steps.parse_version.outputs.image_tag }}
           body_path: changelog.txt
           draft: false
           prerelease: false
@@ -692,13 +847,13 @@ jobs:
           echo "========================================"
           echo "🔄 更新遠端 ConvertX-CN 服務"
           echo "========================================"
-          echo "版本: v${{ github.event.inputs.image_tag }}"
+          echo "版本: v${{ steps.parse_version.outputs.image_tag }}"
           echo ""
 
           tailscale ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << REMOTE_EOF
           set -e
 
-          IMAGE_TAG="v${{ github.event.inputs.image_tag }}"
+          IMAGE_TAG="v${{ steps.parse_version.outputs.image_tag }}"
 
           # 1. 進入專案資料夾
           cd /home/bioailab/miniconda3/lid/app/convertx-cn

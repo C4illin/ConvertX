@@ -1,14 +1,16 @@
-name: Release
+name: Release (一般版)
 
 on:
   push:
     tags:
-      - "v*.*.*"
+      # 只匹配一般版 tag（不含 -lite）
+      - "v[0-9]*.[0-9]*.[0-9]*"
+      - "!v*-lite"
   # 允許手動觸發
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to release (e.g., v0.1.13)"
+        description: "Tag to release (e.g., v0.1.15) - 一般版"
         required: true
         type: string
 

@@ -2,25 +2,47 @@
 
 本文件說明如何使用 Docker 部署 ConvertX-CN。
 
+> 💡 **Lite 版**：如果您只需要基本轉檔功能，可以使用 [Lite 版](Docker-Lite.md)，Image 體積更小、部署更快。
+
 ---
 
 ## Docker Image 版本
 
 ### 官方預建版（推薦）
 
-| Tag                           | 說明       |
-| ----------------------------- | ---------- |
-| `convertx/convertx-cn:latest` | 最新穩定版 |
-| `convertx/convertx-cn:v0.1.x` | 指定版本號 |
+| Tag                                | 說明                 |
+| ---------------------------------- | -------------------- |
+| `convertx/convertx-cn:latest`      | Full 版最新穩定版    |
+| `convertx/convertx-cn:latest-lite` | Lite 版最新穩定版    |
+| `convertx/convertx-cn:v0.1.x`      | Full 版指定版本號    |
+| `convertx/convertx-cn:v0.1.x-lite` | Lite 版指定版本號    |
+
+### Full 版（預設）
+
+**Image 大小：約 8-12 GB**
 
 **內建功能：**
 
 - ✅ 核心轉換工具（FFmpeg、LibreOffice、ImageMagick 等）
 - ✅ OCR 支援：英文、繁/簡中文、日文、韓文、德文、法文
+- ✅ PDF 翻譯：PDFMathTranslate、BabelDOC
+- ✅ PDF 轉 Markdown：MinerU
 - ✅ 字型：Noto CJK、Liberation、自訂中文字型
 - ✅ TexLive（支援 CJK/德/法）
 
-**Image 大小：約 4-6 GB**
+### Lite 版（輕量版）
+
+**Image 大小：約 1.5-2.5 GB**
+
+**內建功能：**
+
+- ✅ 核心轉換工具（FFmpeg、LibreOffice、GraphicsMagick）
+- ✅ 文件轉換（Pandoc）
+- ✅ PDF/A 轉換、PDF 防修改、PDF 數位簽章
+- ✅ 基本 CJK 字型
+- ❌ 不含 OCR、AI 翻譯、MinerU、Calibre
+
+> 📖 Lite 版詳細說明請參閱 [Lite 版部署指南](Docker-Lite.md)
 
 ### 完整版（自行 Build）
 

@@ -1,0 +1,335 @@
+# ==============================================================================
+# ConvertX-CN Lite 版 Docker Image
+# 版本：v0.1.15-lite
+# ==============================================================================
+#
+# 📦 Image 說明：
+#   - ConvertX-CN 輕量版，適合一般使用者與快速部署
+#   - 體積顯著小於一般版（目標 < 1.5 GB vs 8-12 GB）
+#   - 保留日常最常用的轉檔功能，移除 AI/OCR/翻譯等進階功能
+#   - ⚠️ 無 AI 模型、無 OCR、無 PDF 翻譯功能
+#
+# 🎯 適用場景：
+#   - 個人/小型團隊的基本轉檔需求
+#   - 資源受限的環境（如 VPS、NAS、樹莓派）
+#   - 不需要 OCR/AI/翻譯功能的使用者
+#
+# ✅ Lite 版包含功能（日常最常用）：
+#   - LibreOffice（文件轉檔：DOC/DOCX/XLS/PPT → PDF）
+#   - GraphicsMagick（圖片轉檔：PNG/JPG/GIF/WEBP）
+#   - FFmpeg（影音轉檔：MP4/MP3/AVI/MKV）
+#   - Pandoc（文件格式：Markdown/HTML/DOCX）
+#   - Ghostscript + qpdf（PDF 處理）
+#   - PDF 數位簽章（PFX/PKCS#12）
+#   - 精簡版 UI（僅英文、簡體中文、繁體中文）
+#
+# ❌ Lite 版不包含：
+#   - PDFMathTranslate / BabelDOC（PDF 翻譯）
+#   - MinerU（PDF 轉 Markdown）
+#   - OCR / Tesseract
+#   - AI 模型 / VLM / YOLO
+#   - Calibre（電子書轉換）
+#   - ImageMagick / Inkscape / VIPS
+#   - CAD / 3D / assimp
+#   - TexLive（LaTeX）
+#
+# 📊 Image 大小：目標 < 1.5 GB
+#
+# ==============================================================================
+
+FROM debian:bookworm-slim AS base
+LABEL org.opencontainers.image.source="https://github.com/pi-docket/ConvertX-CN"
+LABEL org.opencontainers.image.description="ConvertX-CN Lite - 輕量版檔案轉換服務"
+LABEL org.opencontainers.image.version="lite"
+WORKDIR /app
+
+# 配置 APT 重試機制（解決 Multi-Arch Build 時的網路不穩定問題）
+RUN echo 'Acquire::Retries "5";' > /etc/apt/apt.conf.d/80-retries \
+  && echo 'Acquire::http::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'Acquire::https::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'Acquire::ftp::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'DPkg::Lock::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries
+
+# install bun
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  curl \
+  unzip \
+  ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+# if architecture is arm64, use the arm64 version of bun
+RUN ARCH=$(uname -m) && \
+  if [ "$ARCH" = "aarch64" ]; then \
+  curl -fsSL -o bun-linux-aarch64.zip https://github.com/oven-sh/bun/releases/download/bun-v1.3.6/bun-linux-aarch64.zip; \
+  else \
+  curl -fsSL -o bun-linux-x64-baseline.zip https://github.com/oven-sh/bun/releases/download/bun-v1.3.6/bun-linux-x64-baseline.zip; \
+  fi
+
+RUN unzip -j bun-linux-*.zip -d /usr/local/bin && \
+  rm bun-linux-*.zip && \
+  chmod +x /usr/local/bin/bun
+
+# install dependencies into temp directory
+# this will cache them and speed up future builds
+FROM base AS install
+RUN mkdir -p /temp/dev
+COPY package.json bun.lock /temp/dev/
+RUN cd /temp/dev && bun install --frozen-lockfile
+
+# install with --production (exclude devDependencies)
+RUN mkdir -p /temp/prod
+COPY package.json bun.lock /temp/prod/
+RUN cd /temp/prod && bun install --frozen-lockfile --production
+
+FROM base AS prerelease
+WORKDIR /app
+COPY --from=install /temp/dev/node_modules node_modules
+COPY . .
+
+# ENV NODE_ENV=production
+RUN bun run build
+
+# ==============================================================================
+# Release Stage - Lite 版本
+# ==============================================================================
+FROM base AS release
+
+# ==============================================================================
+# 依賴安裝（Lite 版 - 極簡安裝）
+# ==============================================================================
+#
+# ✅ 保留工具（日常最常用）：
+#   - LibreOffice（文件轉檔 - 最重要）
+#   - GraphicsMagick（圖片轉檔 - 輕量替代 ImageMagick）
+#   - FFmpeg（影音轉檔）
+#   - Pandoc（Markdown/HTML/DOCX 轉換）
+#   - Ghostscript + qpdf（PDF 處理）
+#   - poppler-utils（PDF 工具）
+#   - potrace（點陣圖轉向量）
+#
+# ❌ 移除工具（減少體積）：
+#   - Tesseract / OCR（約 +200MB）
+#   - Calibre（約 +500MB）
+#   - TexLive（約 +1GB）
+#   - ImageMagick（用 GraphicsMagick 替代）
+#   - Inkscape（約 +300MB）
+#   - VIPS（約 +100MB）
+#   - Python AI 套件
+#   - assimp / CAD 工具
+#
+# ==============================================================================
+
+# 配置 APT 重試機制
+RUN echo 'Acquire::Retries "5";' > /etc/apt/apt.conf.d/80-retries \
+  && echo 'Acquire::http::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'Acquire::https::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'Acquire::ftp::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'APT::Get::Assume-Yes "true";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'DPkg::Lock::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries
+
+# 階段 1：基礎系統工具
+RUN echo "" && \
+  echo "========================================" && \
+  echo "📦 階段 1/7：安裝基礎系統工具" && \
+  echo "========================================" && \
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  locales \
+  ca-certificates \
+  curl \
+  openssl \
+  && rm -rf /var/lib/apt/lists/* && \
+  echo "✅ 階段 1/7 完成：基礎系統工具已安裝"
+
+# 階段 2：核心轉換工具
+RUN echo "" && \
+  echo "========================================" && \
+  echo "📦 階段 2/6：安裝核心轉換工具" && \
+  echo "========================================" && \
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  ghostscript \
+  graphicsmagick \
+  poppler-utils \
+  potrace \
+  qpdf \
+  && rm -rf /var/lib/apt/lists/* && \
+  echo "✅ 階段 2/6 完成：核心轉換工具已安裝"
+
+# 階段 2.1：安裝 dasel（從 GitHub 下載二進位檔案）
+RUN echo "" && \
+  echo "   🔧 階段 2.1：安裝 dasel..." && \
+  ARCH=$(uname -m) && \
+  if [ "$ARCH" = "aarch64" ]; then \
+  DASEL_ARCH="linux_arm64"; \
+  else \
+  DASEL_ARCH="linux_amd64"; \
+  fi && \
+  curl -sSLf "https://github.com/TomWright/dasel/releases/download/v2.8.1/dasel_${DASEL_ARCH}" -o /usr/local/bin/dasel && \
+  chmod +x /usr/local/bin/dasel && \
+  echo "   ✅ dasel 安裝完成"
+
+# 階段 2.2：安裝 resvg（從 GitHub 下載二進位檔案）
+RUN echo "" && \
+  echo "   🔧 階段 2.2：安裝 resvg..." && \
+  ARCH=$(uname -m) && \
+  if [ "$ARCH" = "aarch64" ]; then \
+  echo "   ⚠️ resvg 沒有 ARM64 預編譯版本，跳過安裝"; \
+  else \
+  curl -sSLf "https://github.com/linebender/resvg/releases/download/v0.44.0/resvg-linux-x86_64.tar.gz" -o /tmp/resvg.tar.gz && \
+  tar -xzf /tmp/resvg.tar.gz -C /tmp/ && \
+  mv /tmp/resvg /usr/local/bin/resvg && \
+  chmod +x /usr/local/bin/resvg && \
+  rm -rf /tmp/resvg.tar.gz && \
+  echo "   ✅ resvg 安裝完成"; \
+  fi
+
+# 階段 3：影音處理工具（FFmpeg 精簡版）
+RUN echo "" && \
+  echo "========================================" && \
+  echo "📦 階段 3/7：安裝影音處理工具（精簡版）" && \
+  echo "========================================" && \
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  ffmpeg \
+  && rm -rf /var/lib/apt/lists/* && \
+  echo "✅ 階段 3/7 完成：FFmpeg 已安裝"
+
+# 階段 4：Headless 支援（LibreOffice 需要）
+# 注意：Lite 版移除 Inkscape 和 VIPS 以減少體積
+# GraphicsMagick 已在階段 2 安裝
+RUN echo "" && \
+  echo "========================================" && \
+  echo "📦 階段 4/6：安裝 Headless 支援" && \
+  echo "========================================" && \
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  xauth \
+  xvfb \
+  && rm -rf /var/lib/apt/lists/* && \
+  echo "✅ 階段 4/6 完成：Headless 支援已安裝"
+
+# 階段 5：文件處理工具（Pandoc）
+RUN echo "" && \
+  echo "========================================" && \
+  echo "📦 階段 5/6：安裝文件處理工具" && \
+  echo "========================================" && \
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  libemail-outlook-message-perl \
+  pandoc \
+  && rm -rf /var/lib/apt/lists/* && \
+  echo "✅ 階段 5/6 完成：Pandoc 已安裝"
+
+# 階段 6：LibreOffice（核心文件轉檔引擎 + 基本字型）
+# 使用完整 libreoffice 以確保所有轉檔功能正常
+RUN echo "" && \
+  echo "========================================" && \
+  echo "📦 階段 6/6：安裝 LibreOffice + 字型" && \
+  echo "========================================" && \
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  libreoffice \
+  fonts-noto-cjk \
+  fonts-liberation \
+  && rm -rf /var/lib/apt/lists/* && \
+  echo "✅ 階段 6/6 完成：LibreOffice + 字型已安裝"
+
+# ==============================================================================
+# ✅ APT 套件安裝完成
+# ==============================================================================
+
+# ==============================================================================
+# 🔐 PDF Packager 預設簽章憑證 + Python（合併以減少 layer）
+# ==============================================================================
+ENV PATH="/root/.local/bin:${PATH}"
+ENV PIP_NO_CACHE_DIR=1
+ENV PDF_SIGN_P12_PATH="/app/certs/default.p12"
+ENV PDF_SIGN_P12_PASSWORD=""
+ENV PDF_SIGN_REASON="ConvertX-CN Lite PDF Packager"
+ENV PDF_SIGN_LOCATION="Taiwan"
+ENV PDF_SIGN_CONTACT="convertx-cn@localhost"
+
+RUN echo "" && \
+  echo "========================================" && \
+  echo "🔐 安裝 Python + 產生簽章憑證" && \
+  echo "========================================" && \
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  python3 \
+  python3-pip \
+  && rm -rf /var/lib/apt/lists/* && \
+  pip3 install --no-cache-dir --break-system-packages endesive && \
+  mkdir -p /app/certs && \
+  openssl req -x509 -newkey rsa:2048 \
+  -keyout /tmp/key.pem -out /tmp/cert.pem \
+  -days 3650 -nodes \
+  -subj "/CN=PDF Packager Default/O=ConvertX-CN Lite/C=TW" && \
+  openssl pkcs12 -export \
+  -inkey /tmp/key.pem -in /tmp/cert.pem \
+  -out /app/certs/default.p12 \
+  -passout pass: && \
+  rm -f /tmp/key.pem /tmp/cert.pem && \
+  chmod 644 /app/certs/default.p12 && \
+  echo "✅ Python + PDF 簽章已安裝"
+
+# ==============================================================================
+# 最終清理 + Locale 設定 + 自訂字型（合併以減少 layer）
+# ==============================================================================
+RUN rm -rf /usr/share/doc/* \
+  && rm -rf /usr/share/man/* \
+  && rm -rf /usr/share/info/* \
+  && sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
+  && sed -i 's/# zh_TW.UTF-8 UTF-8/zh_TW.UTF-8 UTF-8/' /etc/locale.gen \
+  && sed -i 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/' /etc/locale.gen \
+  && locale-gen
+
+# 安裝自訂字型（標楷體等台灣常用字型）
+RUN mkdir -p /usr/share/fonts/truetype/custom
+COPY fonts/ /usr/share/fonts/truetype/custom/
+RUN fc-cache -fv
+
+# ==============================================================================
+# Install VTracer binary（向量追蹤工具）
+# ==============================================================================
+RUN ARCH=$(uname -m) && \
+  if [ "$ARCH" = "aarch64" ]; then \
+  VTRACER_ASSET="vtracer-aarch64-unknown-linux-musl.tar.gz"; \
+  else \
+  VTRACER_ASSET="vtracer-x86_64-unknown-linux-musl.tar.gz"; \
+  fi && \
+  curl -L -o /tmp/vtracer.tar.gz "https://github.com/visioncortex/vtracer/releases/download/0.6.4/${VTRACER_ASSET}" && \
+  tar -xzf /tmp/vtracer.tar.gz -C /tmp/ && \
+  mv /tmp/vtracer /usr/local/bin/vtracer && \
+  chmod +x /usr/local/bin/vtracer && \
+  rm /tmp/vtracer.tar.gz
+
+COPY --from=install /temp/prod/node_modules node_modules
+COPY --from=prerelease /app/public/ /app/public/
+COPY --from=prerelease /app/dist /app/dist
+
+RUN mkdir data
+
+EXPOSE 3000/tcp
+
+# ==============================================================================
+# 🔧 環境變數總覽（Lite 版）
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1️⃣ 系統 Locale（支援中文避免亂碼）
+# ------------------------------------------------------------------------------
+ENV LANG=zh_TW.UTF-8
+ENV LC_ALL=zh_TW.UTF-8
+
+# ------------------------------------------------------------------------------
+# 2️⃣ Headless 環境設定
+# ------------------------------------------------------------------------------
+ENV QT_QPA_PLATFORM="offscreen"
+ENV DISPLAY=":99"
+
+# ------------------------------------------------------------------------------
+# 3️⃣ 應用程式設定
+# ------------------------------------------------------------------------------
+ENV PANDOC_PDF_ENGINE=pdflatex
+ENV NODE_ENV=production
+
+# ------------------------------------------------------------------------------
+# 4️⃣ Lite 版標識
+# ------------------------------------------------------------------------------
+ENV CONVERTX_EDITION="lite"
+
+ENTRYPOINT [ "bun", "run", "dist/src/index.js" ]
