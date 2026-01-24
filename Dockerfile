@@ -467,44 +467,14 @@ RUN echo "Cache bust: ${CACHE_BUST}" && \
   ls -lh /root/.cache/babeldoc/models/*.onnx && \
   \
   # ========================================
-  # [6.1/8] 下載 PDFMathTranslate 多語言字型
-  # ⬇️ Docker build 階段下載字型檔案
-  #    Runtime 不會再下載任何資源
-  # ⚠️ 增加超時設定和更詳細的錯誤處理
+  # [6.1/8] PDFMathTranslate 多語言字型
+  # ✅ 字型已預存於 fonts/ 目錄，透過 COPY 指令複製
+  #    無需 runtime 下載，避免網路問題導致 build 失敗
   # ========================================
   echo "" && \
-  echo "📥 [6.1/8] 下載 PDFMathTranslate 多語言字型..." && \
-  mkdir -p /app && \
-  echo "   下載 GoNotoKurrent-Regular.ttf..." && \
-  curl -fSL --retry 5 --retry-delay 10 --retry-all-errors --connect-timeout 60 --max-time 300 -o /app/GoNotoKurrent-Regular.ttf \
-  "https://github.com/satbyy/go-noto-universal/releases/download/v7.0/GoNotoKurrent-Regular.ttf" && \
-  echo "   下載 SourceHanSerifCN-Regular.ttf..." && \
-  curl -fSL --retry 5 --retry-delay 10 --retry-all-errors --connect-timeout 60 --max-time 300 -o /app/SourceHanSerifCN-Regular.ttf \
-  "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifCN-Regular.ttf" && \
-  echo "   下載 SourceHanSerifTW-Regular.ttf..." && \
-  curl -fSL --retry 5 --retry-delay 10 --retry-all-errors --connect-timeout 60 --max-time 300 -o /app/SourceHanSerifTW-Regular.ttf \
-  "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifTW-Regular.ttf" && \
-  echo "   下載 SourceHanSerifJP-Regular.ttf..." && \
-  curl -fSL --retry 5 --retry-delay 10 --retry-all-errors --connect-timeout 60 --max-time 300 -o /app/SourceHanSerifJP-Regular.ttf \
-  "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifJP-Regular.ttf" && \
-  echo "   下載 SourceHanSerifKR-Regular.ttf..." && \
-  curl -fSL --retry 5 --retry-delay 10 --retry-all-errors --connect-timeout 60 --max-time 300 -o /app/SourceHanSerifKR-Regular.ttf \
-  "https://github.com/timelic/source-han-serif/releases/download/main/SourceHanSerifKR-Regular.ttf" && \
-  echo "✅ 字型下載完成" && \
-  ls -lh /app/*.ttf && \
-  # 驗證字型檔案大小（確保下載完整）
-  echo "   驗證字型檔案..." && \
-  for font in GoNotoKurrent-Regular.ttf SourceHanSerifCN-Regular.ttf SourceHanSerifTW-Regular.ttf SourceHanSerifJP-Regular.ttf SourceHanSerifKR-Regular.ttf; do \
-  if [ ! -f "/app/$font" ]; then \
-  echo "   ERROR: Font not found: /app/$font" && exit 1; \
-  fi; \
-  size=$(stat -c%s "/app/$font" 2>/dev/null || stat -f%z "/app/$font" 2>/dev/null || echo 0); \
-  if [ "$size" -lt 1000000 ]; then \
-  echo "   ERROR: Font too small: /app/$font ($size bytes)" && exit 1; \
-  fi; \
-  echo "   ✓ $font ($size bytes)"; \
-  done && \
-  echo "✅ 所有字型驗證通過" && \
+  echo "📋 [6.1/8] PDFMathTranslate 多語言字型（已預置於 fonts/ 目錄）..." && \
+  echo "   ✅ 字型將透過 COPY 指令從本地 fonts/ 目錄複製" && \
+  echo "   ✅ 包含：GoNotoKurrent-Regular, SourceHanSerif (CN/TW/JP/KR)" && \
   \
   # ========================================
   # [7/8] 下載 BabelDOC 完整資源
@@ -529,12 +499,9 @@ RUN echo "Cache bust: ${CACHE_BUST}" && \
   fi && \
   \
   # 複製額外字型到 BabelDOC 目錄（確保多語言支援）
-  echo "   複製額外字型到 BabelDOC 目錄..." && \
-  cp /app/GoNotoKurrent-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
-  cp /app/SourceHanSerifCN-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
-  cp /app/SourceHanSerifTW-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
-  cp /app/SourceHanSerifJP-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
-  cp /app/SourceHanSerifKR-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
+  # ⚠️ 字型稍後由 COPY fonts/ 指令複製到 /usr/share/fonts/truetype/custom/
+  #    此處建立目錄結構，字型檔案將在 COPY 階段補充
+  echo "   準備 BabelDOC 字型目錄..." && \
   \
   # 驗證 BabelDOC 資源
   echo "   驗證 BabelDOC 資源..." && \
@@ -618,8 +585,8 @@ RUN echo "Cache bust: ${CACHE_BUST}" && \
   fi && \
   echo "" && \
   \
-  echo "🔹 PDFMathTranslate 字型：" && \
-  (ls -lh /app/*.ttf 2>/dev/null || echo "   ⚠️ 無字型檔案") && \
+  echo "🔹 PDFMathTranslate 字型（預置於 fonts/ 目錄）：" && \
+  echo "   ⚠️ 字型將透過 COPY 指令複製到 /usr/share/fonts/truetype/custom/" && \
   echo "" && \
   \
   echo "🔹 BabelDOC 資源：" && \
@@ -685,15 +652,10 @@ RUN echo "Cache bust: ${CACHE_BUST}" && \
   if [ "$ARCH" != "aarch64" ]; then VALIDATION_FAILED=1; else echo "   ⚠️ ARM64: 忽略此錯誤"; fi; \
   fi && \
   \
-  # 驗證 2: PDFMathTranslate 字型（amd64 必須存在，arm64 允許缺失）
+  # 驗證 2: PDFMathTranslate 字型（字型已預置於 fonts/ 目錄，透過 COPY 複製）
+  # ⚠️ 此驗證跳過，因為字型檔案在稍後的 COPY 階段才會複製到 image
   echo "🔍 驗證 PDFMathTranslate 字型..." && \
-  FONT_COUNT=$(ls /app/*.ttf 2>/dev/null | wc -l || echo "0") && \
-  if [ "$FONT_COUNT" -ge 5 ]; then \
-  echo "   ✅ 字型驗證通過 ($FONT_COUNT 個字型)"; \
-  else \
-  echo "   ❌ 字型數量不足 (預期 >= 5，實際 $FONT_COUNT)" && \
-  if [ "$ARCH" != "aarch64" ]; then VALIDATION_FAILED=1; else echo "   ⚠️ ARM64: 忽略此錯誤"; fi; \
-  fi && \
+  echo "   ⏭️ 跳過驗證（字型將透過 COPY fonts/ 指令複製）" && \
   \
   # 驗證 3: MinerU 模型（僅限 amd64 檢查，arm64 跳過）
   echo "🔍 驗證 MinerU 模型..." && \
@@ -757,10 +719,29 @@ RUN sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
   locale-gen
 
 # ==============================================================================
-# 安裝自訂字型（標楷體等台灣常用字型）
+# 安裝自訂字型（標楷體 + PDFMathTranslate 多語言字型）
+# ==============================================================================
+# ✅ fonts/ 目錄包含：
+#    - BiauKai.ttf（標楷體）
+#    - GoNotoKurrent-Regular.ttf（通用 Noto 字型）
+#    - SourceHanSerifCN-Regular.ttf（簡體中文）
+#    - SourceHanSerifTW-Regular.ttf（繁體中文）
+#    - SourceHanSerifJP-Regular.ttf（日文）
+#    - SourceHanSerifKR-Regular.ttf（韓文）
 # ==============================================================================
 RUN mkdir -p /usr/share/fonts/truetype/custom
 COPY fonts/ /usr/share/fonts/truetype/custom/
+
+# 複製字型到 BabelDOC 目錄（供 PDFMathTranslate/BabelDOC 使用）
+RUN mkdir -p /root/.cache/babeldoc/fonts && \
+  cp /usr/share/fonts/truetype/custom/GoNotoKurrent-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
+  cp /usr/share/fonts/truetype/custom/SourceHanSerifCN-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
+  cp /usr/share/fonts/truetype/custom/SourceHanSerifTW-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
+  cp /usr/share/fonts/truetype/custom/SourceHanSerifJP-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
+  cp /usr/share/fonts/truetype/custom/SourceHanSerifKR-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
+  echo "✅ 字型已複製到 BabelDOC 目錄" && \
+  ls -lh /root/.cache/babeldoc/fonts/
+
 RUN fc-cache -fv
 
 # ==============================================================================
