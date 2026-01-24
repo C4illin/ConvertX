@@ -8,6 +8,7 @@
 [![GitHub Release](https://img.shields.io/github/v/release/pi-docket/ConvertX-CN)](https://github.com/pi-docket/ConvertX-CN/releases)
 ![License AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)
 ![Source Available](https://img.shields.io/badge/source-available-green)
+![Docker Image Size (Latest Lite)](<https://img.shields.io/docker/image-size/convertx/convertx-cn/latest-lite?label=image%20size%20(latest-lite)>)
 
 ---
 
@@ -153,26 +154,26 @@ docker compose up -d
 
 ConvertX-CN 提供三個版本，滿足不同需求：
 
-| 特性            | Lite 版       | 一般版（推薦） | Full 版        |
-| --------------- | ------------- | -------------- | -------------- |
-| **Image 大小**  | 約 1.5-2.5 GB | 約 8-12 GB     | 約 12-15+ GB   |
-| **部署速度**    | 最快          | 中等           | 較慢           |
-| **適用對象**    | 輕量使用者    | 一般使用者     | 進階/多語言    |
-| **基本轉檔**    | ✅            | ✅             | ✅             |
-| **OCR（7語言）**| ❌            | ✅             | ✅             |
-| **PDF 翻譯**    | ❌            | ✅             | ✅             |
-| **MinerU AI**   | ❌            | ✅             | ✅             |
-| **OCR（65語言）**| ❌           | ❌             | ✅             |
-| **完整 TexLive**| ❌            | ❌             | ✅             |
+| 特性              | Lite 版                                                                                                                              | 一般版（推薦）                                                                                                   | Full 版      |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ------------ |
+| **Image 大小**    | ![Docker Image Size (Lite)](<https://img.shields.io/docker/image-size/convertx/convertx-cn/latest-lite?label=image%20size%20(lite)>) | ![Docker Image Size](https://img.shields.io/docker/image-size/convertx/convertx-cn/latest?label=image%20size%20) | 約 12-15+ GB |
+| **部署速度**      | 最快                                                                                                                                 | 中等                                                                                                             | 較慢         |
+| **適用對象**      | 輕量使用者                                                                                                                           | 一般使用者                                                                                                       | 進階/多語言  |
+| **基本轉檔**      | ✅                                                                                                                                   | ✅                                                                                                               | ✅           |
+| **OCR（7語言）**  | ❌                                                                                                                                   | ✅                                                                                                               | ✅           |
+| **PDF 翻譯**      | ❌                                                                                                                                   | ✅                                                                                                               | ✅           |
+| **MinerU AI**     | ❌                                                                                                                                   | ✅                                                                                                               | ✅           |
+| **OCR（65語言）** | ❌                                                                                                                                   | ❌                                                                                                               | ✅           |
+| **完整 TexLive**  | ❌                                                                                                                                   | ❌                                                                                                               | ✅           |
 
 ### 版本標籤
 
-| Tag                    | 說明                |
-| ---------------------- | ------------------- |
-| `latest`               | 一般版最新穩定版    |
-| `latest-lite`          | Lite 版最新穩定版   |
-| `0.1.15`               | 一般版指定版本      |
-| `0.1.15-lite`          | Lite 版指定版本     |
+| Tag           | 說明              |
+| ------------- | ----------------- |
+| `latest`      | 一般版最新穩定版  |
+| `latest-lite` | Lite 版最新穩定版 |
+| `0.1.15`      | 一般版指定版本    |
+| `0.1.15-lite` | Lite 版指定版本   |
 
 ### Lite 版快速啟動
 
