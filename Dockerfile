@@ -401,7 +401,7 @@ ENV PDF_SIGN_CONTACT="convertx-cn@localhost"
 # 當 CACHE_BUST 改變時，後續所有層都會重新執行
 # 這確保模型下載不會被損壞的 cache 跳過
 # ==============================================================================
-ARG CACHE_BUST=1
+ARG CACHE_BUST=2
 RUN echo "Cache bust: ${CACHE_BUST}" && \
   set -eu && \
   echo "===========================================================" && \
@@ -448,8 +448,9 @@ RUN echo "Cache bust: ${CACHE_BUST}" && \
   # [5/8] 安裝 mineru（MinerU 引擎）
   # ⬇️ Docker build 階段安裝
   # ⚠️ 模型將在後續步驟顯式下載，此處僅安裝程式
-  # ⚠️ amd64: 必須成功安裝（多重嘗試）
-  #    arm64: 允許失敗（不支援）
+  # ⚠️ amd64: 必須成功安裝（使用官方推薦的 uv 安裝）
+  #    arm64: 跳過（不支援）
+  # 📝 官方推薦：pip install uv && uv pip install -U "mineru[all]"
   # ========================================
   echo "" && \
   echo "📦 [5/8] 安裝 mineru[all]..." && \
@@ -458,23 +459,51 @@ RUN echo "Cache bust: ${CACHE_BUST}" && \
   echo "   ⚠️ ARM64 架構：MinerU 不支援，跳過安裝"; \
   else \
   echo "   正在安裝 MinerU（amd64）..." && \
+  echo "   📝 步驟 1: 安裝 uv（Python 套件管理器，官方推薦）..." && \
+  pip3 install --no-cache-dir --break-system-packages uv && \
   MINERU_INSTALLED=0 && \
   \
-  # 方法 1: pipx install（標準方式）
-  echo "   [嘗試 1/3] pipx install mineru[all]..." && \
-  (pipx install "mineru[all]" && MINERU_INSTALLED=1) || echo "   ⚠️ 方法 1 失敗，等待 15 秒後重試..." && \
-  \
-  # 方法 2: pipx install 重試（等待後重試）
-  if [ "$MINERU_INSTALLED" != "1" ]; then \
-  sleep 15 && \
-  echo "   [嘗試 2/3] pipx install mineru[all]（重試）..." && \
-  (pipx install "mineru[all]" && MINERU_INSTALLED=1) || echo "   ⚠️ 方法 2 失敗，嘗試 pip 安裝..."; \
+  # 方法 1: uv pip install（官方推薦方式）
+  echo "   [嘗試 1/4] uv pip install mineru[all]...（官方推薦）" && \
+  if uv pip install --system -U "mineru[all]" 2>&1; then \
+  MINERU_INSTALLED=1 && \
+  echo "   ✅ 方法 1 成功"; \
+  else \
+  echo "   ⚠️ 方法 1 失敗，等待 15 秒後重試..."; \
   fi && \
   \
-  # 方法 3: pip install（備用方式）
+  # 方法 2: uv pip install 重試（等待後重試）
   if [ "$MINERU_INSTALLED" != "1" ]; then \
-  echo "   [嘗試 3/3] pip3 install mineru[all]..." && \
-  (pip3 install --no-cache-dir --break-system-packages "mineru[all]" && MINERU_INSTALLED=1) || echo "   ⚠️ 方法 3 也失敗"; \
+  sleep 15 && \
+  echo "   [嘗試 2/4] uv pip install mineru[all]（重試）..." && \
+  if uv pip install --system -U "mineru[all]" 2>&1; then \
+  MINERU_INSTALLED=1 && \
+  echo "   ✅ 方法 2 成功"; \
+  else \
+  echo "   ⚠️ 方法 2 失敗，嘗試 pipx 安裝..."; \
+  fi; \
+  fi && \
+  \
+  # 方法 3: pipx install（備用方式）
+  if [ "$MINERU_INSTALLED" != "1" ]; then \
+  echo "   [嘗試 3/4] pipx install mineru[all]..." && \
+  if pipx install "mineru[all]" 2>&1; then \
+  MINERU_INSTALLED=1 && \
+  echo "   ✅ 方法 3 成功"; \
+  else \
+  echo "   ⚠️ 方法 3 失敗，嘗試 pip 安裝..."; \
+  fi; \
+  fi && \
+  \
+  # 方法 4: pip install（最後備用）
+  if [ "$MINERU_INSTALLED" != "1" ]; then \
+  echo "   [嘗試 4/4] pip3 install mineru[all]..." && \
+  if pip3 install --no-cache-dir --break-system-packages "mineru[all]" 2>&1; then \
+  MINERU_INSTALLED=1 && \
+  echo "   ✅ 方法 4 成功"; \
+  else \
+  echo "   ⚠️ 方法 4 也失敗"; \
+  fi; \
   fi && \
   \
   # 驗證安裝結果
@@ -484,6 +513,11 @@ RUN echo "Cache bust: ${CACHE_BUST}" && \
   mineru --version 2>/dev/null || true; \
   else \
   echo "   ❌ MinerU 安裝失敗（所有方法都失敗）" && \
+  echo "   📋 診斷資訊：" && \
+  echo "   Python 版本：$(python3 --version)" && \
+  echo "   pip 版本：$(pip3 --version)" && \
+  echo "   uv 版本：$(uv --version 2>/dev/null || echo '未安裝')" && \
+  echo "   PATH：$PATH" && \
   echo "   請檢查網路連接或 Python 環境" && \
   exit 1; \
   fi; \
