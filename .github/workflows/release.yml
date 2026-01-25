@@ -360,11 +360,34 @@ jobs:
   # ==============================================================================
   verify-image:
     name: Verify Docker Image
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: create-manifest
     timeout-minutes: 45
 
     steps:
+      # ========================================
+      # 🔥 磁碟清理（拉取大型 image 需要空間）
+      # ========================================
+      - name: Free disk space for image pull
+        run: |
+          echo "🧹 清理磁碟空間以拉取大型 Docker image..."
+          df -h /
+          
+          # 移除大型預裝軟體
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc || true
+          sudo rm -rf /opt/hostedtoolcache /usr/share/swift /opt/microsoft || true
+          sudo rm -rf /usr/local/aws-* /usr/local/julia* /usr/share/az_* || true
+          sudo rm -rf /usr/lib/google-cloud-sdk /usr/local/share/powershell || true
+          sudo rm -rf /usr/share/miniconda /usr/local/go ~/go || true
+          sudo rm -rf /usr/share/rust ~/.rustup ~/.cargo || true
+          
+          # 清理 apt cache
+          sudo apt-get clean || true
+          sudo rm -rf /var/lib/apt/lists/* || true
+          
+          echo "📊 清理後磁碟空間："
+          df -h /
+
       - name: Get tag name
         id: tag
         run: |
