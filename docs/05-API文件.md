@@ -27,21 +27,21 @@ docker compose --profile api up -d
 
 ### 服務端口
 
-| 服務 | 端口 | 說明 |
-|------|------|------|
-| Web UI | 3000 | 網頁介面 |
+| 服務       | 端口 | 說明           |
+| ---------- | ---- | -------------- |
+| Web UI     | 3000 | 網頁介面       |
 | API Server | 3001 | REST & GraphQL |
 
 ### 環境變數
 
-| 變數 | 說明 | 預設值 |
-|------|------|--------|
-| `API_HOST` | 監聽地址 | `0.0.0.0` |
-| `API_PORT` | 監聽埠 | `3001` |
-| `JWT_SECRET` | JWT 驗證密鑰 | （需自行設定） |
-| `UPLOAD_DIR` | 上傳目錄 | `./data/uploads` |
-| `OUTPUT_DIR` | 輸出目錄 | `./data/output` |
-| `MAX_FILE_SIZE` | 最大檔案大小（bytes） | `104857600` |
+| 變數            | 說明                  | 預設值           |
+| --------------- | --------------------- | ---------------- |
+| `API_HOST`      | 監聽地址              | `0.0.0.0`        |
+| `API_PORT`      | 監聽埠                | `3001`           |
+| `JWT_SECRET`    | JWT 驗證密鑰          | （需自行設定）   |
+| `UPLOAD_DIR`    | 上傳目錄              | `./data/uploads` |
+| `OUTPUT_DIR`    | 輸出目錄              | `./data/output`  |
+| `MAX_FILE_SIZE` | 最大檔案大小（bytes） | `104857600`      |
 
 ---
 
@@ -358,11 +358,7 @@ query {
 
 ```graphql
 mutation {
-  convert(input: {
-    fileId: "abc123"
-    outputFormat: "pdf"
-    options: { quality: "high" }
-  }) {
+  convert(input: { fileId: "abc123", outputFormat: "pdf", options: { quality: "high" } }) {
     jobId
     status
   }
@@ -375,17 +371,17 @@ mutation {
 
 ### HTTP 狀態碼
 
-| 狀態碼 | 說明 | 常見原因 |
-|--------|------|---------|
-| 200 | 成功 | 請求正常處理 |
-| 400 | 錯誤請求 | 參數錯誤、格式不支援 |
-| 401 | 未授權 | Token 無效或過期 |
-| 403 | 禁止存取 | 權限不足 |
-| 404 | 找不到 | 檔案或任務不存在 |
-| 413 | 檔案太大 | 超過上傳限制 |
-| 415 | 格式不支援 | 不支援的檔案類型 |
-| 500 | 伺服器錯誤 | 內部錯誤 |
-| 503 | 服務不可用 | 伺服器過載 |
+| 狀態碼 | 說明       | 常見原因             |
+| ------ | ---------- | -------------------- |
+| 200    | 成功       | 請求正常處理         |
+| 400    | 錯誤請求   | 參數錯誤、格式不支援 |
+| 401    | 未授權     | Token 無效或過期     |
+| 403    | 禁止存取   | 權限不足             |
+| 404    | 找不到     | 檔案或任務不存在     |
+| 413    | 檔案太大   | 超過上傳限制         |
+| 415    | 格式不支援 | 不支援的檔案類型     |
+| 500    | 伺服器錯誤 | 內部錯誤             |
+| 503    | 服務不可用 | 伺服器過載           |
 
 ### 錯誤回應格式
 
@@ -405,15 +401,15 @@ mutation {
 
 ### 常見錯誤碼
 
-| 錯誤碼 | 說明 | 解決方法 |
-|--------|------|---------|
-| `INVALID_TOKEN` | Token 無效 | 重新取得有效 Token |
-| `TOKEN_EXPIRED` | Token 過期 | 刷新 Token |
-| `FILE_NOT_FOUND` | 檔案不存在 | 確認檔案 ID 正確 |
-| `UNSUPPORTED_FORMAT` | 格式不支援 | 查看支援格式列表 |
-| `FILE_TOO_LARGE` | 檔案過大 | 壓縮或分割檔案 |
-| `CONVERSION_FAILED` | 轉換失敗 | 檢查檔案是否損壞 |
-| `RATE_LIMITED` | 請求過頻繁 | 降低請求頻率 |
+| 錯誤碼               | 說明       | 解決方法           |
+| -------------------- | ---------- | ------------------ |
+| `INVALID_TOKEN`      | Token 無效 | 重新取得有效 Token |
+| `TOKEN_EXPIRED`      | Token 過期 | 刷新 Token         |
+| `FILE_NOT_FOUND`     | 檔案不存在 | 確認檔案 ID 正確   |
+| `UNSUPPORTED_FORMAT` | 格式不支援 | 查看支援格式列表   |
+| `FILE_TOO_LARGE`     | 檔案過大   | 壓縮或分割檔案     |
+| `CONVERSION_FAILED`  | 轉換失敗   | 檢查檔案是否損壞   |
+| `RATE_LIMITED`       | 請求過頻繁 | 降低請求頻率       |
 
 ---
 
@@ -494,49 +490,49 @@ with open("output.pdf", "wb") as f:
 ### JavaScript 範例
 
 ```javascript
-const BASE_URL = 'http://localhost:3001/api/v1';
-const TOKEN = 'your-jwt-token';
+const BASE_URL = "http://localhost:3001/api/v1";
+const TOKEN = "your-jwt-token";
 
 async function convertFile(file, outputFormat) {
   // 上傳檔案
   const formData = new FormData();
-  formData.append('file', file);
-  
+  formData.append("file", file);
+
   const uploadResponse = await fetch(`${BASE_URL}/upload`, {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${TOKEN}` },
-    body: formData
+    method: "POST",
+    headers: { Authorization: `Bearer ${TOKEN}` },
+    body: formData,
   });
   const { fileId } = await uploadResponse.json();
-  
+
   // 開始轉換
   const convertResponse = await fetch(`${BASE_URL}/convert`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${TOKEN}`,
-      'Content-Type': 'application/json'
+      Authorization: `Bearer ${TOKEN}`,
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify({ fileId, outputFormat })
+    body: JSON.stringify({ fileId, outputFormat }),
   });
   const { jobId } = await convertResponse.json();
-  
+
   // 輪詢狀態
   let result;
   while (true) {
     const statusResponse = await fetch(`${BASE_URL}/jobs/${jobId}`, {
-      headers: { 'Authorization': `Bearer ${TOKEN}` }
+      headers: { Authorization: `Bearer ${TOKEN}` },
     });
     const job = await statusResponse.json();
-    if (job.status === 'completed') {
+    if (job.status === "completed") {
       result = job.result;
       break;
     }
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
   }
-  
+
   // 下載結果
   const downloadResponse = await fetch(`${BASE_URL}/download/${result.fileId}`, {
-    headers: { 'Authorization': `Bearer ${TOKEN}` }
+    headers: { Authorization: `Bearer ${TOKEN}` },
   });
   return await downloadResponse.blob();
 }
