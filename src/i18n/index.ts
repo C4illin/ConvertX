@@ -228,7 +228,7 @@ export const supportedLocales: LocaleConfig[] = [
 ];
 
 // Default to zh-TW, fallback to en
-export const defaultLocale: SupportedLocale = "zh-TW";
+export const defaultLocale: SupportedLocale = "zh-CN";
 export const fallbackLocale: SupportedLocale = "en";
 
 // Type definitions for translation keys

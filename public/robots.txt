@@ -1,2 +1,14 @@
+# ConvertX-CN robots.txt
+# 允許所有搜尋引擎爬蟲抓取網站內容
+
 User-agent: *
-Disallow: /
+Allow: /
+
+# 禁止抓取的路徑（API 端點與內部資源）
+Disallow: /api/
+Disallow: /data/
+Disallow: /uploads/
+Disallow: /output/
+
+# Sitemap 位置
+Sitemap: https://convertx-cn.bioailab.qzz.io/sitemap.xml

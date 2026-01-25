@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <!-- 首頁 -->
+  <url>
+    <loc>https://convertx-cn.bioailab.qzz.io/</loc>
+    <lastmod>2026-01-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://convertx-cn.bioailab.qzz.io/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://convertx-cn.bioailab.qzz.io/"/>
+  </url>
+  
+  <!-- 登入頁面 -->
+  <url>
+    <loc>https://convertx-cn.bioailab.qzz.io/login</loc>
+    <lastmod>2026-01-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- 註冊頁面 -->
+  <url>
+    <loc>https://convertx-cn.bioailab.qzz.io/register</loc>
+    <lastmod>2026-01-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+</urlset>
