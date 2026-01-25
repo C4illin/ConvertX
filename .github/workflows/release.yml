@@ -23,7 +23,6 @@ jobs:
   # ==============================================================================
   build-amd64:
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
     permissions:
       contents: read
       packages: write
@@ -117,28 +116,36 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push AMD64 image
+      - name: "🐳 Build and push AMD64 image"
         uses: docker/build-push-action@v6
-        timeout-minutes: 90
         with:
           context: .
           file: Dockerfile
           push: true
           tags: ${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}-amd64
           platforms: linux/amd64
+          # 只使用 cache-from，不使用 cache-to（避免額外上傳時間）
           cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache-amd64
-          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache-amd64,mode=max,compression=zstd
           provenance: false
           sbom: false
           build-args: |
             BUILDKIT_INLINE_CACHE=1
+
+      - name: "✅ AMD64 Image 構建完成"
+        run: |
+          echo "========================================"
+          echo "🚀 AMD64 Image 已成功推送到 Docker Hub"
+          echo "========================================"
+          echo "Image: ${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}-amd64"
+          echo "Platform: linux/amd64"
+          echo "Time: $(date)"
+          echo "========================================"
 
   # ==============================================================================
   # 🐳 Build ARM64 Image（分開構建解決空間不足問題）
   # ==============================================================================
   build-arm64:
     runs-on: ubuntu-24.04
-    timeout-minutes: 180
     permissions:
       contents: read
       packages: write
@@ -235,21 +242,30 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push ARM64 image
+      - name: "🐳 Build and push ARM64 image"
         uses: docker/build-push-action@v6
-        timeout-minutes: 150
         with:
           context: .
           file: Dockerfile
           push: true
           tags: ${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}-arm64
           platforms: linux/arm64
+          # 只使用 cache-from，不使用 cache-to（避免額外上傳時間）
           cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache-arm64
-          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache-arm64,mode=max,compression=zstd
           provenance: false
           sbom: false
           build-args: |
             BUILDKIT_INLINE_CACHE=1
+
+      - name: "✅ ARM64 Image 構建完成"
+        run: |
+          echo "========================================"
+          echo "🚀 ARM64 Image 已成功推送到 Docker Hub"
+          echo "========================================"
+          echo "Image: ${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}-arm64"
+          echo "Platform: linux/arm64"
+          echo "Time: $(date)"
+          echo "========================================"
 
   # ==============================================================================
   # 🐳 Create Multi-Arch Manifest（合併兩個架構）
