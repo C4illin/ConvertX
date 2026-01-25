@@ -22,39 +22,74 @@ jobs:
   # 🐳 Build AMD64 Image（分開構建解決空間不足問題）
   # ==============================================================================
   build-amd64:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
 
     steps:
+      # ========================================
+      # 🔥 第一步就清理磁碟（在 checkout 之前！）
+      # ========================================
+      - name: Maximize disk space (before checkout)
+        run: |
+          echo "🧹 極限磁碟清理（在 checkout 之前）..."
+          echo "========================================"
+          echo "📊 初始磁碟空間："
+          df -h /
+          echo "========================================"
+
+          # 停止不需要的服務
+          sudo systemctl stop docker || true
+
+          # 移除大型預裝軟體（最關鍵！）
+          sudo rm -rf /usr/share/dotnet || true              # ~6GB
+          sudo rm -rf /usr/local/lib/android || true         # ~10GB
+          sudo rm -rf /opt/ghc || true                       # ~2GB
+          sudo rm -rf /opt/hostedtoolcache || true           # ~8GB
+          sudo rm -rf /usr/share/swift || true               # ~1.5GB
+          sudo rm -rf /usr/local/share/boost || true         # ~500MB
+          sudo rm -rf /opt/microsoft || true                 # ~1GB
+          sudo rm -rf /usr/local/aws-* || true
+          sudo rm -rf /usr/local/julia* || true
+          sudo rm -rf /usr/share/az_* /opt/az || true
+          sudo rm -rf /usr/lib/google-cloud-sdk || true
+          sudo rm -rf /usr/local/share/powershell || true
+          sudo rm -rf /usr/share/miniconda || true
+          sudo rm -rf /usr/local/go ~/go || true
+          sudo rm -rf /usr/share/rust ~/.rustup ~/.cargo || true
+          sudo rm -rf /usr/share/R /usr/lib/R || true
+
+          # 移除預裝資料庫
+          sudo rm -rf /var/lib/mysql || true
+          sudo rm -rf /var/lib/postgresql || true
+          sudo rm -rf /var/lib/mongodb || true
+
+          # 移除文檔
+          sudo rm -rf /usr/share/doc || true
+          sudo rm -rf /usr/share/man || true
+          sudo rm -rf /usr/share/locale || true
+          sudo rm -rf /usr/share/icons || true
+
+          # 清理 APT
+          sudo apt-get clean || true
+          sudo rm -rf /var/lib/apt/lists/* || true
+          sudo rm -rf /var/cache/apt/archives || true
+
+          # 清理 Docker（完全重置）
+          sudo rm -rf /var/lib/docker || true
+          sudo mkdir -p /var/lib/docker
+
+          # 重啟 Docker
+          sudo systemctl start docker || true
+
+          echo "========================================"
+          echo "📊 清理後磁碟空間："
+          df -h /
+          echo "========================================"
+
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # ========================================
-      # 🔥 極限磁碟清理（釋放 50-60GB 空間）
-      # ========================================
-      - name: Free disk space (maximum)
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: true
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: true
-
-      - name: Additional disk cleanup
-        run: |
-          echo "🧹 額外磁碟清理..."
-          df -h /
-          sudo rm -rf /usr/share/swift /var/lib/mysql /var/lib/postgresql || true
-          sudo rm -rf /usr/share/doc /usr/share/man /usr/share/locale || true
-          sudo rm -rf /usr/local/go ~/go /usr/local/julia* || true
-          sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/* || true
-          docker system prune -af --volumes || true
-          df -h /
 
       - name: Get tag name
         id: tag
@@ -93,36 +128,74 @@ jobs:
   # 🐳 Build ARM64 Image（分開構建解決空間不足問題）
   # ==============================================================================
   build-arm64:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
 
     steps:
+      # ========================================
+      # 🔥 第一步就清理磁碟（在 checkout 之前！）
+      # ========================================
+      - name: Maximize disk space (before checkout)
+        run: |
+          echo "🧹 極限磁碟清理（在 checkout 之前）..."
+          echo "========================================"
+          echo "📊 初始磁碟空間："
+          df -h /
+          echo "========================================"
+
+          # 停止不需要的服務
+          sudo systemctl stop docker || true
+
+          # 移除大型預裝軟體（最關鍵！）
+          sudo rm -rf /usr/share/dotnet || true              # ~6GB
+          sudo rm -rf /usr/local/lib/android || true         # ~10GB
+          sudo rm -rf /opt/ghc || true                       # ~2GB
+          sudo rm -rf /opt/hostedtoolcache || true           # ~8GB
+          sudo rm -rf /usr/share/swift || true               # ~1.5GB
+          sudo rm -rf /usr/local/share/boost || true         # ~500MB
+          sudo rm -rf /opt/microsoft || true                 # ~1GB
+          sudo rm -rf /usr/local/aws-* || true
+          sudo rm -rf /usr/local/julia* || true
+          sudo rm -rf /usr/share/az_* /opt/az || true
+          sudo rm -rf /usr/lib/google-cloud-sdk || true
+          sudo rm -rf /usr/local/share/powershell || true
+          sudo rm -rf /usr/share/miniconda || true
+          sudo rm -rf /usr/local/go ~/go || true
+          sudo rm -rf /usr/share/rust ~/.rustup ~/.cargo || true
+          sudo rm -rf /usr/share/R /usr/lib/R || true
+
+          # 移除預裝資料庫
+          sudo rm -rf /var/lib/mysql || true
+          sudo rm -rf /var/lib/postgresql || true
+          sudo rm -rf /var/lib/mongodb || true
+
+          # 移除文檔
+          sudo rm -rf /usr/share/doc || true
+          sudo rm -rf /usr/share/man || true
+          sudo rm -rf /usr/share/locale || true
+          sudo rm -rf /usr/share/icons || true
+
+          # 清理 APT
+          sudo apt-get clean || true
+          sudo rm -rf /var/lib/apt/lists/* || true
+          sudo rm -rf /var/cache/apt/archives || true
+
+          # 清理 Docker（完全重置）
+          sudo rm -rf /var/lib/docker || true
+          sudo mkdir -p /var/lib/docker
+
+          # 重啟 Docker
+          sudo systemctl start docker || true
+
+          echo "========================================"
+          echo "📊 清理後磁碟空間："
+          df -h /
+          echo "========================================"
+
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Free disk space (maximum)
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: true
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: true
-
-      - name: Additional disk cleanup
-        run: |
-          echo "🧹 額外磁碟清理..."
-          df -h /
-          sudo rm -rf /usr/share/swift /var/lib/mysql /var/lib/postgresql || true
-          sudo rm -rf /usr/share/doc /usr/share/man /usr/share/locale || true
-          sudo rm -rf /usr/local/go ~/go /usr/local/julia* || true
-          sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/* || true
-          docker system prune -af --volumes || true
-          df -h /
 
       - name: Get tag name
         id: tag

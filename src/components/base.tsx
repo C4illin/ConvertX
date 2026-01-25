@@ -16,20 +16,23 @@ export const BaseHtml = ({
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      
+
       {/* SEO 核心設定 - 允許搜尋引擎索引 */}
-      <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+      <meta
+        name="robots"
+        content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      />
       <meta name="googlebot" content="index, follow" />
       <meta name="bingbot" content="index, follow" />
       <meta http-equiv="content-language" content="zh-CN" />
-      
+
       {/* Canonical URL */}
       <link rel="canonical" href="https://convertx-cn.bioailab.qzz.io/" />
-      
+
       {/* 多語言替代連結 */}
       <link rel="alternate" hreflang="zh-CN" href="https://convertx-cn.bioailab.qzz.io/" />
       <link rel="alternate" hreflang="x-default" href="https://convertx-cn.bioailab.qzz.io/" />
-      
+
       {/* 應用程式資訊 */}
       <meta name="webroot" content={webroot} />
       <meta name="locale" content={locale} />
@@ -37,25 +40,37 @@ export const BaseHtml = ({
       <meta name="apple-mobile-web-app-title" content="ConvertX-CN" />
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta name="mobile-web-app-capable" content="yes" />
-      
+
       {/* SEO 描述與關鍵字 */}
-      <meta name="description" content="ConvertX-CN 是免費的線上檔案轉換工具，支援 PDF、Word、Excel、圖片、影片等 100+ 種格式互轉。無需安裝軟體，自架部署保護隱私。" />
-      <meta name="keywords" content="檔案轉換,PDF轉換,Word轉PDF,圖片轉換,格式轉換,線上轉換,免費工具,ConvertX" />
+      <meta
+        name="description"
+        content="ConvertX-CN 是免費的線上檔案轉換工具，支援 PDF、Word、Excel、圖片、影片等 100+ 種格式互轉。無需安裝軟體，自架部署保護隱私。"
+      />
+      <meta
+        name="keywords"
+        content="檔案轉換,PDF轉換,Word轉PDF,圖片轉換,格式轉換,線上轉換,免費工具,ConvertX"
+      />
       <meta name="author" content="ConvertX-CN" />
-      
+
       {/* Open Graph / 社交媒體分享 */}
       <meta property="og:type" content="website" />
       <meta property="og:url" content="https://convertx-cn.bioailab.qzz.io/" />
       <meta property="og:title" content="ConvertX-CN - 免費線上檔案轉換工具" />
-      <meta property="og:description" content="支援 PDF、Word、Excel、圖片、影片等 100+ 種格式互轉，自架部署保護隱私。" />
+      <meta
+        property="og:description"
+        content="支援 PDF、Word、Excel、圖片、影片等 100+ 種格式互轉，自架部署保護隱私。"
+      />
       <meta property="og:locale" content="zh_CN" />
       <meta property="og:site_name" content="ConvertX-CN" />
-      
+
       {/* Twitter Card */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="ConvertX-CN - 免費線上檔案轉換工具" />
-      <meta name="twitter:description" content="支援 PDF、Word、Excel、圖片、影片等 100+ 種格式互轉" />
-      
+      <meta
+        name="twitter:description"
+        content="支援 PDF、Word、Excel、圖片、影片等 100+ 種格式互轉"
+      />
+
       <meta name="theme-color" content="#a5d601" />
       <title safe>{title}</title>
       <link rel="stylesheet" href={`${webroot}/generated.css`} />
