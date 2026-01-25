@@ -209,9 +209,9 @@ function runBabelDoc(
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     // babeldoc CLI 參數：
-    // -i <input>: 輸入 PDF
-    // -o <output>: 輸出檔案
-    // -l <lang>: 目標語言
+    // -i <input>: 輸入 PDF（縮寫不衝突，可以使用）
+    // -o <output>: 輸出檔案（縮寫不衝突，可以使用）
+    // --lang-out <lang>: 目標語言（注意：-l 是模糊的，會匹配 -li 和 -lo）
     // --output-format <format>: 輸出格式（pdf/md/html）
     // --service <service>: 翻譯服務（預設 google）
 
@@ -223,7 +223,7 @@ function runBabelDoc(
       inputPath,
       "-o",
       outputPath,
-      "-l",
+      "--lang-out",
       babelLang,
       "--output-format",
       outputFormat,
