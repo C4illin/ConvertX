@@ -332,59 +332,13 @@ RUN mkdir -p /opt/convertx/models/mineru && \
 # 7.2 複製預下載的 ONNX 模型
 COPY models/ /root/.cache/babeldoc/models/
 
-# 7.3 下載 MinerU Pipeline 模型（僅 AMD64）
-RUN set -ex && \
-  ARCH=$(uname -m) && \
-  if [ "$ARCH" = "aarch64" ]; then \
-  echo "⚠️ ARM64：跳過 MinerU 模型下載"; \
-  else \
-  python3 -c " \
-  from huggingface_hub import snapshot_download; \
-  import os; \
-  models_dir = os.environ.get('MINERU_MODELS_DIR', '/opt/convertx/models/mineru'); \
-  print(f'下載 PDF-Extract-Kit-1.0 到 {models_dir}...'); \
-  snapshot_download( \
-  repo_id='opendatalab/PDF-Extract-Kit-1.0', \
-  local_dir=f'{models_dir}/PDF-Extract-Kit-1.0', \
-  local_dir_use_symlinks=False, \
-  resume_download=True \
-  ); \
-  print('✅ PDF-Extract-Kit-1.0 下載完成'); \
-  "; \
-  fi
+# 7.3 複製 MinerU 模型下載腳本
+COPY scripts/download-mineru-models.sh /tmp/download-mineru-models.sh
+RUN chmod +x /tmp/download-mineru-models.sh && /tmp/download-mineru-models.sh && rm -f /tmp/download-mineru-models.sh
 
 # 7.4 產生 MinerU 配置檔
-RUN set -ex && \
-  ARCH=$(uname -m) && \
-  mkdir -p /opt/convertx && \
-  if [ "$ARCH" = "aarch64" ]; then \
-  echo '{"models-dir":{"pipeline":"","vlm":""},"model-source":"local","note":"ARM64 - MinerU not supported"}' > /opt/convertx/mineru.json && \
-  cp /opt/convertx/mineru.json /root/mineru.json && \
-  echo "⚠️ ARM64：產生空的 mineru.json"; \
-  else \
-  python3 -c " \
-  import json; \
-  import os; \
-  mineru_models_dir = os.environ.get('MINERU_MODELS_DIR', '/opt/convertx/models/mineru'); \
-  config = { \
-  'models-dir': { \
-  'pipeline': f'{mineru_models_dir}/PDF-Extract-Kit-1.0', \
-  'vlm': '' \
-  }, \
-  'model-source': 'local', \
-  'latex-delimiter-config': { \
-  'display': {'left': '@@', 'right': '@@'}, \
-  'inline': {'left': '@', 'right': '@'} \
-  } \
-  }; \
-  os.makedirs('/opt/convertx', exist_ok=True); \
-  with open('/opt/convertx/mineru.json', 'w') as f: \
-  json.dump(config, f, indent=2); \
-  with open('/root/mineru.json', 'w') as f: \
-  json.dump(config, f, indent=2); \
-  print('✅ mineru.json 已產生'); \
-  "; \
-  fi
+COPY scripts/generate-mineru-config.sh /tmp/generate-mineru-config.sh
+RUN chmod +x /tmp/generate-mineru-config.sh && /tmp/generate-mineru-config.sh && rm -f /tmp/generate-mineru-config.sh
 
 # 7.5 BabelDOC warmup
 RUN set -ex && \
@@ -396,18 +350,8 @@ RUN set -ex && \
   fi
 
 # 7.6 下載 tiktoken 編碼
-RUN python3 -c " \
-  try: \
-  import tiktoken; \
-  for enc_name in ['cl100k_base', 'p50k_base', 'r50k_base']: \
-  try: \
-  enc = tiktoken.get_encoding(enc_name); \
-  print(f'✅ tiktoken {enc_name} 已下載'); \
-  except Exception as e: \
-  print(f'⚠️ tiktoken {enc_name} 下載失敗: {e}'); \
-  except ImportError: \
-  print('⚠️ tiktoken 未安裝，跳過'); \
-  "
+COPY scripts/download-tiktoken.sh /tmp/download-tiktoken.sh
+RUN chmod +x /tmp/download-tiktoken.sh && /tmp/download-tiktoken.sh && rm -f /tmp/download-tiktoken.sh
 
 # 7.7 清理下載快取
 RUN rm -rf /tmp/hf_download_cache /root/.cache/huggingface \
