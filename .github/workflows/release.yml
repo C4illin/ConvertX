@@ -116,7 +116,22 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: "🐳 Build and push AMD64 image"
+      - name: "� 開始構建 AMD64 Image"
+        run: |
+          echo "========================================"
+          echo "📦 開始構建 AMD64 Docker Image..."
+          echo "========================================"
+          echo "Image: ${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}-amd64"
+          echo "Platform: linux/amd64"
+          echo ""
+          echo "⚠️  注意：Image 大小約 10-14GB"
+          echo "⚠️  構建 + 上傳可能需要 1-3 小時"
+          echo "⚠️  'exporting layers' 階段是上傳到 Docker Hub，請耐心等待"
+          echo "========================================"
+          echo "開始時間: $(date)"
+          echo "========================================"
+
+      - name: "�🐳 Build and push AMD64 image"
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -242,7 +257,23 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: "🐳 Build and push ARM64 image"
+      - name: "� 開始構建 ARM64 Image"
+        run: |
+          echo "========================================"
+          echo "📦 開始構建 ARM64 Docker Image..."
+          echo "========================================"
+          echo "Image: ${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.version }}-arm64"
+          echo "Platform: linux/arm64 (via QEMU emulation)"
+          echo ""
+          echo "⚠️  注意：Image 大小約 10-14GB"
+          echo "⚠️  ARM64 使用 QEMU 模擬，構建時間更長"
+          echo "⚠️  構建 + 上傳可能需要 2-4 小時"
+          echo "⚠️  'exporting layers' 階段是上傳到 Docker Hub，請耐心等待"
+          echo "========================================"
+          echo "開始時間: $(date)"
+          echo "========================================"
+
+      - name: "�🐳 Build and push ARM64 image"
         uses: docker/build-push-action@v6
         with:
           context: .
