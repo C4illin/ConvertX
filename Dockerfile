@@ -231,8 +231,10 @@ RUN apt-get update --fix-missing && \
   apt-get install -y --no-install-recommends \
   tesseract-ocr tesseract-ocr-eng tesseract-ocr-chi-tra \
   tesseract-ocr-chi-sim tesseract-ocr-jpn tesseract-ocr-kor \
-  tesseract-ocr-deu tesseract-ocr-fra ocrmypdf && \
+  tesseract-ocr-deu tesseract-ocr-fra && \
   rm -rf /var/lib/apt/lists/*
+
+# 注意：ocrmypdf 改在 python-tools stage 用 pip 安裝，避免 pikepdf 版本衝突
 
 # ==============================================================================
 # Stage 5: Fonts（拆分安裝）
@@ -293,14 +295,18 @@ RUN apt-get update --fix-missing && \
 # 6.5 markitdown
 RUN uv pip install --system --break-system-packages --no-cache "markitdown[all]"
 
-# 6.6 pdf2zh（PDFMathTranslate）
+# 6.6 ocrmypdf（用 pip 安裝以確保 pikepdf 版本相容）
+# 注意：不從 apt 安裝，避免與其他 Python 套件的 pikepdf 衝突
+RUN uv pip install --system --break-system-packages --no-cache ocrmypdf
+
+# 6.7 pdf2zh（PDFMathTranslate）
 RUN uv pip install --system --break-system-packages --no-cache pdf2zh
 
-# 6.7 babeldoc
+# 6.8 babeldoc
 RUN uv pip install --system --break-system-packages --no-cache babeldoc || \
   echo "⚠️ babeldoc 安裝可能有警告"
 
-# 6.8 MinerU（僅 AMD64，CPU-only 模式）
+# 6.9 MinerU（僅 AMD64，CPU-only 模式）
 # 💡 使用 mineru（不含 [all]）避免安裝 PyTorch CUDA（節省 ~5-8GB）
 # 💡 MinerU 會自動使用 pipeline backend 在純 CPU 環境運行
 RUN set -ex && \
@@ -311,7 +317,7 @@ RUN set -ex && \
   uv pip install --system --break-system-packages --no-cache -U mineru; \
   fi
 
-# 6.9 tiktoken
+# 6.10 tiktoken
 RUN uv pip install --system --break-system-packages --no-cache tiktoken
 
 # 設定 PATH
