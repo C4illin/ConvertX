@@ -37,74 +37,84 @@ jobs:
       # 🔥 GitHub Actions Runner 只有約 14GB 可用空間
       #    大型模型 + Multi-Arch build 需要清理更多預裝軟體
       # ========================================
-      - name: Free disk space (aggressive)
+      # ========================================
+      # 🔥 極限磁碟清理（釋放 50-60GB 空間）
+      # ========================================
+      - name: Free disk space (maximum)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - name: Additional disk cleanup
         run: |
-          echo "🧹 Aggressive disk cleanup for large model builds..."
+          echo "🧹 額外磁碟清理..."
           echo "========================================"
           echo "📊 初始磁碟空間："
           df -h /
           echo "========================================"
 
           # ========================================
-          # 移除大型預裝軟體（約可釋放 30-40GB）
+          # 移除額外大型軟體
           # ========================================
-          echo "🗑️ 移除預裝開發工具..."
-
-          # .NET SDK（約 2-3GB）
-          sudo rm -rf /usr/share/dotnet || true
-
-          # Android SDK（約 10-15GB）- 最大宗！
-          sudo rm -rf /usr/local/lib/android || true
-
-          # Haskell/GHC（約 1GB）
-          sudo rm -rf /opt/ghc || true
-
-          # CodeQL（約 1GB）
-          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
-
-          # Boost（約 500MB）
-          sudo rm -rf /usr/local/share/boost || true
+          echo "🗑️ 移除額外預裝軟體..."
 
           # Swift（約 1.5GB）
           sudo rm -rf /usr/share/swift || true
 
-          # Hosted Tool Cache（約 5-8GB）
-          sudo rm -rf /opt/hostedtoolcache || true
+          # 移除預裝資料庫
+          sudo rm -rf /var/lib/mysql || true
+          sudo rm -rf /var/lib/postgresql || true
 
-          # Azure CLI（約 500MB）
-          sudo rm -rf /usr/share/az_* || true
-          sudo rm -rf /opt/az || true
+          # 移除預裝瀏覽器
+          sudo rm -rf /usr/local/share/chromium || true
+          sudo rm -rf /usr/local/share/chrome || true
 
-          # Google Cloud SDK（約 500MB）
-          sudo rm -rf /usr/lib/google-cloud-sdk || true
+          # 移除文件和 man pages
+          sudo rm -rf /usr/share/doc || true
+          sudo rm -rf /usr/share/man || true
+          sudo rm -rf /usr/share/locale || true
 
-          # PowerShell（約 200MB）
-          sudo rm -rf /usr/local/share/powershell || true
+          # 移除 Rust 工具鏈
+          sudo rm -rf /usr/share/rust || true
+          sudo rm -rf ~/.rustup || true
+          sudo rm -rf ~/.cargo || true
 
-          # Miniconda（約 500MB）
-          sudo rm -rf /usr/share/miniconda || true
+          # 移除 Go
+          sudo rm -rf /usr/local/go || true
+          sudo rm -rf ~/go || true
 
-          # ========================================
-          # 清理系統 cache
-          # ========================================
-          echo "🗑️ 清理系統 cache..."
+          # 移除 Julia
+          sudo rm -rf /usr/local/julia* || true
 
-          # apt cache
+          # 移除 R
+          sudo rm -rf /usr/share/R || true
+          sudo rm -rf /usr/lib/R || true
+
+          # 清理 apt
           sudo apt-get clean || true
           sudo apt-get autoremove -y || true
           sudo rm -rf /var/lib/apt/lists/* || true
+          sudo rm -rf /var/cache/apt/archives || true
 
-          # npm/yarn global cache
+          # 清理 npm/yarn
           sudo rm -rf /usr/local/share/.cache || true
+          sudo rm -rf ~/.npm || true
 
-          # ========================================
-          # 清理 Docker 舊資料
-          # ========================================
-          echo "🗑️ 清理 Docker cache..."
+          # 清理 pip cache
+          sudo rm -rf ~/.cache/pip || true
+
+          # 清理 Docker（確保乾淨）
           docker system prune -af --volumes || true
-
-          # 清理 BuildKit cache
           sudo rm -rf /var/lib/docker/buildkit || true
+
+          # 清理 tmp
+          sudo rm -rf /tmp/* || true
 
           echo "========================================"
           echo "📊 清理後磁碟空間："
@@ -156,6 +166,7 @@ jobs:
       #   - Multi-arch build 需要更多磁碟空間，已在上方清理
       #   - 明確指定 file: Dockerfile 避免與 Lite 版混淆
       #   - 使用 CACHE_BUST 強制重新下載模型
+      #   - 🔥 禁用 provenance 減少磁碟使用
       # ========================================
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
@@ -170,8 +181,9 @@ jobs:
           # 使用 registry cache（已手動刪除 Docker Hub 上的 buildcache tag）
           cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache-full
           cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache-full,mode=max,compression=zstd
-          # 啟用壓縮減少 image 大小
-          outputs: type=image,compression=zstd,compression-level=3
+          # 🔥 禁用 provenance 和 sbom 減少磁碟和記憶體使用
+          provenance: false
+          sbom: false
           # 設定 build 參數（使用時間戳強制重新下載模型層）
           build-args: |
             BUILDKIT_INLINE_CACHE=1
