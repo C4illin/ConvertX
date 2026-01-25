@@ -296,15 +296,27 @@ ENV PATH="/root/.local/bin:/usr/local/bin:${PATH}"
 FROM python-base AS python-tools
 
 # 階段 6.1：安裝 huggingface_hub + endesive（PDF 簽章）
+# ⚠️ pykcs11 需要 python3-dev 提供 Python.h
 RUN echo "📦 [Stage 6.1] 安裝 huggingface_hub + endesive..." && \
-  apt-get update && apt-get install -y --no-install-recommends \
-  build-essential \
-  swig \
-  libpcsclite-dev \
+    apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    swig \
+    libpcsclite-dev \
+    python3-dev \
     && uv pip install --system --break-system-packages --no-cache huggingface_hub endesive && \
+    apt-get remove -y build-essential swig python3-dev && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+
+# 階段 6.2：安裝 markitdown
+RUN echo "📦 [Stage 6.2] 安裝 markitdown..." && \
     uv pip install --system --break-system-packages --no-cache "markitdown[all]"
+
+# 階段 6.3：安裝 pdf2zh
 RUN echo "📦 [Stage 6.3] 安裝 pdf2zh..." && \
     uv pip install --system --break-system-packages --no-cache pdf2zh
+
+# 階段 6.4：安裝 babeldoc
 RUN echo "📦 [Stage 6.4] 安裝 babeldoc..." && \
     uv pip install --system --break-system-packages --no-cache babeldoc || echo "⚠️ babeldoc 安裝可能有警告"
 
