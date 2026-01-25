@@ -6,8 +6,7 @@
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/convertx/convertx-cn?style=flat&logo=docker)](https://hub.docker.com/r/convertx/convertx-cn)
 [![GitHub Release](https://img.shields.io/github/v/release/pi-docket/ConvertX-CN)](https://github.com/pi-docket/ConvertX-CN/releases)
-![License AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)
-![Source Available](https://img.shields.io/badge/source-available-green)
+[![License AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 ![Docker Image Size (Latest Lite)](<https://img.shields.io/docker/image-size/convertx/convertx-cn/latest-lite?label=image%20size%20(latest-lite)>)
 
 ---
@@ -17,7 +16,7 @@
 | 特色              | 說明                                    |
 | ----------------- | --------------------------------------- |
 | 📁 **1000+ 格式** | 文件、圖片、影音、電子書一次搞定        |
-| 🔧 **20+ 引擎**   | LibreOffice、FFmpeg、Pandoc 全到位      |
+| 🔧 **25+ 引擎**   | LibreOffice、FFmpeg、Pandoc 全到位      |
 | 🈶 **中文優化**   | 內建中日韓字型與 OCR，告別亂碼          |
 | 🌐 **65 種語言**  | 跨國團隊無障礙使用                      |
 | 📊 **PDF 翻譯**   | PDFMathTranslate + BabelDOC 雙引擎      |
@@ -25,18 +24,21 @@
 
 ---
 
-## 📚 文件
+## 📚 文件目錄
 
-完整文件請參閱 **[文件中心](docs/README.md)**
+完整文件請參閱 **[專案總覽](docs/00-專案總覽.md)**
 
-| 分類        | 連結                                                                                                     |
-| ----------- | -------------------------------------------------------------------------------------------------------- |
-| 🚀 快速入門 | [概覽](docs/快速入門/概覽.md) · [快速開始](docs/快速入門/快速開始.md) · [FAQ](docs/快速入門/常見問題.md) |
-| 🐳 部署指南 | [Docker](docs/部署指南/Docker.md) · [反向代理](docs/部署指南/反向代理.md)                                |
-| ⚙️ 配置設定 | [環境變數](docs/配置設定/環境變數.md) · [安全性](docs/配置設定/安全性.md)                                |
-| 🔌 功能說明 | [轉換器](docs/功能說明/轉換器.md) · [OCR](docs/功能說明/OCR.md) · [翻譯](docs/功能說明/翻譯.md)          |
-| 🔗 API      | [API 總覽](docs/API/總覽.md) · [端點說明](docs/API/端點.md)                                              |
-| 👩‍💻 開發     | [專案結構](docs/開發指南/專案結構.md) · [貢獻指南](docs/開發指南/貢獻指南.md)                            |
+| 章節 | 說明 | 連結 |
+| ---- | ---- | ---- |
+| 📖 **00 專案總覽** | 專案定位、功能特色、版本比較 | [查看](docs/00-專案總覽.md) |
+| 🚀 **01 快速開始** | 5 分鐘部署完成 | [查看](docs/01-快速開始.md) |
+| 🐳 **02 部署指南** | Docker 設定、反向代理、HTTPS | [查看](docs/02-部署指南.md) |
+| ⚙️ **03 環境變數** | 所有可用設定與推薦值 | [查看](docs/03-環境變數與設定.md) |
+| 🔌 **04 功能總覽** | 轉換器、OCR、PDF 翻譯 | [查看](docs/04-功能總覽.md) |
+| 🔗 **05 API 文件** | REST & GraphQL API | [查看](docs/05-API文件.md) |
+| 🔧 **06 錯誤排查** | 常見問題與解決方案 | [查看](docs/06-錯誤排查與支援.md) |
+| 👩‍💻 **07 開發指南** | 專案結構、貢獻規範 | [查看](docs/07-開發與貢獻指南.md) |
+| 📄 **08 授權說明** | AGPL-3.0 授權 | [查看](docs/08-授權說明.md) |
 
 ---
 
@@ -190,38 +192,40 @@ docker run -d \
   convertx/convertx-cn:latest-lite
 ```
 
-> 📖 詳細說明請參閱 [Lite 版部署指南](docs/部署指南/Docker-Lite.md)
+> 📖 詳細說明請參閱 [部署指南](docs/02-部署指南.md)
 
 ---
 
-## 📄 License Overview
+## 📄 授權
 
-**This is a Mixed License / Source-Available Project.**
+本專案採用 **[GNU Affero General Public License v3.0 (AGPL-3.0)](LICENSE)** 授權。
 
-### 1. Upstream Components
+### 授權摘要
 
-Core components derived from [C4illin/ConvertX](https://github.com/C4illin/ConvertX) are licensed under **[GNU AGPL v3.0](LICENSE)**.
+| 權利 | 說明 |
+|------|------|
+| ✅ 自由使用 | 個人、商業、教育用途均可 |
+| ✅ 自由修改 | 可修改原始碼 |
+| ✅ 自由分發 | 可重新分發 |
 
-- Any modifications to these files are open source under AGPL-3.0.
+### 義務
 
-### 2. Author Original Components
+- 分發時需保留授權聲明
+- 修改後需公開原始碼
+- 網路服務需提供原始碼取得方式
+- 衍生作品需使用相同授權
 
-Original modules, UI, i18n, and new features created by the ConvertX-CN author are licensed under **[Custom Non-Commercial License](LICENSE-AUTHOR)**.
+> 📖 詳細說明請參閱 [授權說明](docs/08-授權說明.md)
 
-| 使用情境        | 是否允許  |
-| --------------- | --------- |
-| 個人使用        | ✅ 允許   |
-| 教育/研究       | ✅ 允許   |
-| 商業使用 / SaaS | ❌ 需授權 |
+---
 
-### 📞 商業授權聯繫
+## 🙏 致謝
 
-如需商業授權，請透過以下方式聯繫：
+本專案基於 [C4illin/ConvertX](https://github.com/C4illin/ConvertX) 開發，感謝原作者的貢獻。
 
-- **GitHub Issues**: [建立 Issue](https://github.com/pi-docket/ConvertX-CN/issues) (標題請加上 `[Commercial License Request]`)
+---
+
+## 📞 聯繫方式
+
+- **GitHub Issues**: [建立 Issue](https://github.com/pi-docket/ConvertX-CN/issues)
 - **GitHub Discussions**: [社群討論](https://github.com/pi-docket/ConvertX-CN/discussions)
-- **GitHub Profile**: [@pi-docket](https://github.com/pi-docket)
-
-> ⚠️ **Commercial Usage**: If you plan to use this project in a commercial product, SaaS, or revenue-generating service, you **must contact the author** for a license exception regarding the custom components. The AGPL obligations (sharing source code) still apply to the upstream portions.
-
-📄 完整授權說明 → [LICENSE-OVERVIEW.md](LICENSE-OVERVIEW.md)
