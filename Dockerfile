@@ -401,17 +401,28 @@ ENV PDF_SIGN_CONTACT="convertx-cn@localhost"
 # 當 CACHE_BUST 改變時，後續所有層都會重新執行
 # 這確保模型下載不會被損壞的 cache 跳過
 # ==============================================================================
-ARG CACHE_BUST=4
+ARG CACHE_BUST=5
 
 # ==============================================================================
 # 階段 12A：安裝 huggingface_hub + endesive
 # ==============================================================================
+# ⚠️ endesive 依賴 pykcs11，需要 C++ 編譯器和 SWIG
 RUN echo "Cache bust: ${CACHE_BUST}" && \
   set -eu && \
   echo "===========================================================" && \
   echo "📦 [1/8] 安裝 huggingface_hub + endesive（PDF 簽章）..." && \
   echo "===========================================================" && \
+  # 安裝 pykcs11 編譯依賴
+  apt-get update && \
+  apt-get install -y --no-install-recommends \
+    build-essential \
+    swig \
+    libpcsclite-dev && \
   pip3 install --no-cache-dir --break-system-packages huggingface_hub endesive && \
+  # 清理編譯依賴（保留 libpcsclite-dev runtime 需要）
+  apt-get remove -y build-essential swig && \
+  apt-get autoremove -y && \
+  rm -rf /var/lib/apt/lists/* && \
   echo "✅ huggingface_hub + endesive 安裝完成"
 
 # ==============================================================================
@@ -457,53 +468,53 @@ RUN set -eu && \
   echo "===========================================================" && \
   ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
-    echo "⚠️ ARM64 架構：MinerU 不支援，跳過安裝"; \
+  echo "⚠️ ARM64 架構：MinerU 不支援，跳過安裝"; \
   else \
-    echo "🔧 安裝 MinerU（amd64）..." && \
-    echo "" && \
-    # 先安裝 uv（官方推薦的套件管理器）
-    echo "📝 步驟 1: 安裝 uv（Python 套件管理器）..." && \
-    pip3 install --no-cache-dir --break-system-packages uv && \
-    echo "✅ uv 安裝完成，版本：$(uv --version 2>/dev/null || echo '未知')" && \
-    echo "" && \
-    # 方法 1: uv pip install（官方推薦）
-    echo "[嘗試 1/3] uv pip install mineru[all]...（官方推薦）" && \
-    if uv pip install --system -U "mineru[all]"; then \
-      echo "✅ 方法 1（uv pip）成功"; \
-    else \
-      echo "⚠️ 方法 1 失敗，等待 15 秒後重試..." && \
-      sleep 15 && \
-      # 方法 2: uv pip install 重試
-      echo "[嘗試 2/3] uv pip install mineru[all]（重試）..." && \
-      if uv pip install --system -U "mineru[all]"; then \
-        echo "✅ 方法 2（uv pip 重試）成功"; \
-      else \
-        echo "⚠️ 方法 2 失敗，嘗試 pip3 直接安裝..." && \
-        # 方法 3: pip3 install（最後備用）
-        echo "[嘗試 3/3] pip3 install mineru[all]..." && \
-        pip3 install --no-cache-dir --break-system-packages "mineru[all]" && \
-        echo "✅ 方法 3（pip3）成功"; \
-      fi; \
-    fi && \
-    echo "" && \
-    # 驗證安裝結果
-    echo "📋 驗證 MinerU 安裝..." && \
-    echo "PATH: $PATH" && \
-    echo "檢查 /usr/local/bin/mineru..." && \
-    ls -la /usr/local/bin/mineru* 2>/dev/null || echo "(無 mineru 檔案)" && \
-    if command -v mineru >/dev/null 2>&1; then \
-      echo "✅ MinerU 安裝成功" && \
-      echo "路徑：$(command -v mineru)" && \
-      mineru --version 2>/dev/null || echo "(版本資訊不可用)"; \
-    else \
-      echo "❌ MinerU 安裝失敗" && \
-      echo "診斷資訊：" && \
-      echo "  Python: $(python3 --version)" && \
-      echo "  pip: $(pip3 --version)" && \
-      echo "  which python3: $(which python3)" && \
-      python3 -c "import magic_pdf; print('magic_pdf 模組可用')" 2>/dev/null || echo "  magic_pdf 模組不可用" && \
-      exit 1; \
-    fi; \
+  echo "🔧 安裝 MinerU（amd64）..." && \
+  echo "" && \
+  # 先安裝 uv（官方推薦的套件管理器）
+  echo "📝 步驟 1: 安裝 uv（Python 套件管理器）..." && \
+  pip3 install --no-cache-dir --break-system-packages uv && \
+  echo "✅ uv 安裝完成，版本：$(uv --version 2>/dev/null || echo '未知')" && \
+  echo "" && \
+  # 方法 1: uv pip install（官方推薦）
+  echo "[嘗試 1/3] uv pip install mineru[all]...（官方推薦）" && \
+  if uv pip install --system -U "mineru[all]"; then \
+  echo "✅ 方法 1（uv pip）成功"; \
+  else \
+  echo "⚠️ 方法 1 失敗，等待 15 秒後重試..." && \
+  sleep 15 && \
+  # 方法 2: uv pip install 重試
+  echo "[嘗試 2/3] uv pip install mineru[all]（重試）..." && \
+  if uv pip install --system -U "mineru[all]"; then \
+  echo "✅ 方法 2（uv pip 重試）成功"; \
+  else \
+  echo "⚠️ 方法 2 失敗，嘗試 pip3 直接安裝..." && \
+  # 方法 3: pip3 install（最後備用）
+  echo "[嘗試 3/3] pip3 install mineru[all]..." && \
+  pip3 install --no-cache-dir --break-system-packages "mineru[all]" && \
+  echo "✅ 方法 3（pip3）成功"; \
+  fi; \
+  fi && \
+  echo "" && \
+  # 驗證安裝結果
+  echo "📋 驗證 MinerU 安裝..." && \
+  echo "PATH: $PATH" && \
+  echo "檢查 /usr/local/bin/mineru..." && \
+  ls -la /usr/local/bin/mineru* 2>/dev/null || echo "(無 mineru 檔案)" && \
+  if command -v mineru >/dev/null 2>&1; then \
+  echo "✅ MinerU 安裝成功" && \
+  echo "路徑：$(command -v mineru)" && \
+  mineru --version 2>/dev/null || echo "(版本資訊不可用)"; \
+  else \
+  echo "❌ MinerU 安裝失敗" && \
+  echo "診斷資訊：" && \
+  echo "  Python: $(python3 --version)" && \
+  echo "  pip: $(pip3 --version)" && \
+  echo "  which python3: $(which python3)" && \
+  python3 -c "import magic_pdf; print('magic_pdf 模組可用')" 2>/dev/null || echo "  magic_pdf 模組不可用" && \
+  exit 1; \
+  fi; \
   fi && \
   echo "✅ MinerU 安裝步驟完成"
 
@@ -518,11 +529,11 @@ RUN set -eu && \
   mkdir -p /root/.cache/babeldoc/cmap && \
   mkdir -p /root/.cache/babeldoc/tiktoken && \
   if command -v babeldoc >/dev/null 2>&1; then \
-    echo "使用 babeldoc --warmup 下載資源..." && \
-    (babeldoc --warmup 2>&1 || echo "⚠️ babeldoc --warmup 執行完成（可能有警告）") && \
-    echo "✅ BabelDOC warmup 完成"; \
+  echo "使用 babeldoc --warmup 下載資源..." && \
+  (babeldoc --warmup 2>&1 || echo "⚠️ babeldoc --warmup 執行完成（可能有警告）") && \
+  echo "✅ BabelDOC warmup 完成"; \
   else \
-    echo "⚠️ babeldoc 不可用，跳過 warmup"; \
+  echo "⚠️ babeldoc 不可用，跳過 warmup"; \
   fi && \
   echo "驗證 BabelDOC 資源..." && \
   ls -lh /root/.cache/babeldoc/models/ 2>/dev/null || echo "(models 目錄)" && \
@@ -533,24 +544,41 @@ RUN set -eu && \
 # ==============================================================================
 # 階段 12G：MinerU 模型下載
 # ==============================================================================
+# ⚠️ 關鍵：模型必須移動到固定目錄，不能依賴 HF cache
+#    否則後續清理 HF cache 會導致 runtime 炸掉
 RUN set -eu && \
   echo "===========================================================" && \
   echo "📥 [7/8] 下載 MinerU Pipeline 模型..." && \
   echo "===========================================================" && \
   ARCH=$(uname -m) && \
+  MINERU_MODELS_DIR="/opt/mineru/models" && \
   if [ "$ARCH" = "aarch64" ]; then \
     echo "⚠️ ARM64 架構：MinerU 不支援，跳過模型下載"; \
   else \
+    mkdir -p "$MINERU_MODELS_DIR" && \
+    echo "目標目錄：$MINERU_MODELS_DIR" && \
+    # 嘗試使用 mineru-models-download CLI
     if command -v mineru-models-download >/dev/null 2>&1; then \
       echo "使用 mineru-models-download CLI..." && \
-      (mineru-models-download -s huggingface -m pipeline 2>&1 || echo "⚠️ mineru-models-download 失敗，嘗試手動下載...") && \
-      cat /root/mineru.json 2>/dev/null || echo "(mineru.json 未生成)"; \
+      mineru-models-download -s huggingface -m pipeline && \
+      # mineru-models-download 會建立 /root/mineru.json 並下載到 HF cache
+      # 需要讀取 mineru.json 找到模型位置並移動
+      if [ -f /root/mineru.json ]; then \
+        DOWNLOADED_DIR=$(python3 -c "import json; f=open('/root/mineru.json'); d=json.load(f); print(d.get('models-dir',{}).get('pipeline',''))" 2>/dev/null || echo "") && \
+        if [ -n "$DOWNLOADED_DIR" ] && [ -d "$DOWNLOADED_DIR" ]; then \
+          echo "移動模型從 $DOWNLOADED_DIR 到 $MINERU_MODELS_DIR/PDF-Extract-Kit-1.0" && \
+          mv "$DOWNLOADED_DIR" "$MINERU_MODELS_DIR/PDF-Extract-Kit-1.0"; \
+        fi; \
+      fi; \
     else \
       echo "mineru-models-download 不可用，使用顯式 HuggingFace 下載..." && \
-      mkdir -p /root/.cache/mineru/models && \
-      (python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='opendatalab/PDF-Extract-Kit-1.0', local_dir='/root/.cache/mineru/models/PDF-Extract-Kit-1.0', local_dir_use_symlinks=False); print('PDF-Extract-Kit-1.0 downloaded')" || echo "⚠️ MinerU model download failed") && \
-      python3 -c "import json; config={'models-dir':{'pipeline':'/root/.cache/mineru/models/PDF-Extract-Kit-1.0','vlm':''},'model-source':'local','latex-delimiter-config':{'display':{'left':'@@','right':'@@'},'inline':{'left':'@','right':'@'}}}; f=open('/root/mineru.json','w'); json.dump(config,f,indent=2); f.close(); print('mineru.json generated')"; \
-    fi; \
+      python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='opendatalab/PDF-Extract-Kit-1.0', local_dir='$MINERU_MODELS_DIR/PDF-Extract-Kit-1.0', local_dir_use_symlinks=False); print('PDF-Extract-Kit-1.0 downloaded')"; \
+    fi && \
+    # 產生/更新 mineru.json 指向固定目錄
+    python3 -c "import json; config={'models-dir':{'pipeline':'$MINERU_MODELS_DIR/PDF-Extract-Kit-1.0','vlm':''},'model-source':'local','latex-delimiter-config':{'display':{'left':'@@','right':'@@'},'inline':{'left':'@','right':'@'}}}; f=open('/root/mineru.json','w'); json.dump(config,f,indent=2); f.close(); print('mineru.json updated')" && \
+    echo "驗證模型目錄：" && \
+    ls -la "$MINERU_MODELS_DIR/" && \
+    du -sh "$MINERU_MODELS_DIR/PDF-Extract-Kit-1.0" 2>/dev/null || echo "(無法計算大小)"; \
   fi && \
   echo "✅ MinerU 模型下載步驟完成"
 
@@ -588,20 +616,16 @@ RUN set -eu && \
   echo "   ⏭️ 跳過驗證（字型將透過 COPY fonts/ 指令複製）" && \
   \
   echo "🔍 驗證 MinerU 安裝..." && \
+  MINERU_MODELS_DIR="/opt/mineru/models" && \
   if [ "$ARCH" = "aarch64" ]; then \
     echo "   ⚠️ ARM64 架構：跳過 MinerU 驗證"; \
   elif command -v mineru >/dev/null 2>&1; then \
     echo "   ✅ MinerU 已安裝: $(command -v mineru)" && \
-    if [ -f /root/mineru.json ]; then \
-      MINERU_DIR=$(python3 -c "import json; f=open('/root/mineru.json'); d=json.load(f); print(d.get('models-dir',{}).get('pipeline',''))" 2>/dev/null || echo "") && \
-      if [ -n "$MINERU_DIR" ] && [ -d "$MINERU_DIR" ]; then \
-        MINERU_SIZE=$(du -sb "$MINERU_DIR" 2>/dev/null | cut -f1 || echo "0") && \
-        echo "   ✅ MinerU 模型存在 ($((MINERU_SIZE/1024/1024)) MB)"; \
-      else \
-        echo "   ⚠️ MinerU 模型目錄不存在（模型將在首次使用時下載）"; \
-      fi; \
+    if [ -d "$MINERU_MODELS_DIR/PDF-Extract-Kit-1.0" ]; then \
+      MINERU_SIZE=$(du -sb "$MINERU_MODELS_DIR/PDF-Extract-Kit-1.0" 2>/dev/null | cut -f1 || echo "0") && \
+      echo "   ✅ MinerU 模型存在於固定目錄 ($((MINERU_SIZE/1024/1024)) MB)"; \
     else \
-      echo "   ⚠️ mineru.json 不存在（模型將在首次使用時下載）"; \
+      echo "   ⚠️ MinerU 模型目錄不存在（模型將在首次使用時下載）"; \
     fi; \
   else \
     echo "   ❌ MinerU 未安裝（amd64 必須安裝）" && \
@@ -610,10 +634,10 @@ RUN set -eu && \
   \
   echo "" && \
   if [ "$VALIDATION_FAILED" -eq 1 ]; then \
-    echo "❌ 模型驗證失敗！Image 不應發布。" && \
-    exit 1; \
+  echo "❌ 模型驗證失敗！Image 不應發布。" && \
+  exit 1; \
   else \
-    echo "✅ 所有必要模型驗證通過！"; \
+  echo "✅ 所有必要模型驗證通過！"; \
   fi && \
   echo "" && \
   echo "===========================================================" && \
