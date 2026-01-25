@@ -130,7 +130,7 @@ else
     check_command "mineru" "MinerU CLI"
     
     # 檢查模型目錄
-    MINERU_MODELS="/opt/mineru/models/PDF-Extract-Kit-1.0"
+    MINERU_MODELS="/opt/convertx/models/mineru/PDF-Extract-Kit-1.0"
     check_dir "$MINERU_MODELS" "MinerU Pipeline 模型" "true"
     
     # 檢查配置檔

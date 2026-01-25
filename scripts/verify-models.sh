@@ -1,17 +1,18 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # ==============================================================================
-# ConvertX-CN 模型驗證腳本 v2.0
+# ConvertX-CN 模型驗證腳本 v3.0
 # ==============================================================================
 #
 # 用途：驗證 Docker Image 中的預下載模型是否完整
 # 執行：docker exec <container> /app/scripts/verify-models.sh
 #
+# 版本：v3.0 - 適配重構後的目錄結構
 # ==============================================================================
 
-set -e
+set -euo pipefail
 
 echo "========================================"
-echo "🔍 ConvertX-CN 模型驗證 v2.0"
+echo "🔍 ConvertX-CN 模型驗證 v3.0"
 echo "========================================"
 echo ""
 
@@ -21,12 +22,18 @@ FAIL=0
 WARN=0
 ARCH=$(uname -m)
 
+# 新的模型目錄結構
+MODELS_BASE_DIR="/opt/convertx/models"
+MINERU_MODELS_DIR="${MODELS_BASE_DIR}/mineru"
+BABELDOC_CACHE_DIR="/root/.cache/babeldoc"
+
 # 檢查函數
 check_file() {
     local path="$1"
     local name="$2"
     if [ -f "$path" ]; then
-        local size=$(ls -lh "$path" | awk '{print $5}')
+        local size
+        size=$(ls -lh "$path" | awk '{print $5}')
         echo "✅ $name: $path ($size)"
         ((PASS++))
     else
@@ -40,7 +47,8 @@ check_dir() {
     local name="$2"
     local required="${3:-false}"
     if [ -d "$path" ]; then
-        local size=$(du -sh "$path" 2>/dev/null | awk '{print $1}')
+        local size
+        size=$(du -sh "$path" 2>/dev/null | awk '{print $1}')
         echo "✅ $name: $path ($size)"
         ((PASS++))
     else
@@ -59,7 +67,7 @@ check_dir() {
 # ==============================================================================
 echo "📦 PDFMathTranslate / BabelDOC 模型"
 echo "----------------------------------------"
-check_file "/root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx" "DocLayout-YOLO ONNX"
+check_file "${BABELDOC_CACHE_DIR}/models/doclayout_yolo_docstructbench_imgsz1024.onnx" "DocLayout-YOLO ONNX"
 echo ""
 
 # ==============================================================================
@@ -72,10 +80,11 @@ check_file "/usr/share/fonts/truetype/custom/SourceHanSerifCN-Regular.ttf" "思�
 check_file "/usr/share/fonts/truetype/custom/SourceHanSerifTW-Regular.ttf" "思源宋體（繁體）"
 check_file "/usr/share/fonts/truetype/custom/SourceHanSerifJP-Regular.ttf" "思源宋體（日文）"
 check_file "/usr/share/fonts/truetype/custom/SourceHanSerifKR-Regular.ttf" "思源宋體（韓文）"
+check_file "/usr/share/fonts/truetype/custom/BiauKai.ttf" "標楷體"
 echo ""
 
 # ==============================================================================
-# 3. MinerU 模型（新路徑：/opt/mineru）
+# 3. MinerU 模型（新路徑：/opt/convertx/models/mineru）
 # ==============================================================================
 echo "📦 MinerU 模型"
 echo "----------------------------------------"
@@ -83,8 +92,9 @@ if [ "$ARCH" = "aarch64" ]; then
     echo "⚠️ ARM64 架構：MinerU 不支援，跳過驗證"
     ((WARN++))
 else
-    check_dir "/opt/mineru/models/PDF-Extract-Kit-1.0" "PDF-Extract-Kit-1.0 Pipeline" "true"
+    check_dir "${MINERU_MODELS_DIR}/PDF-Extract-Kit-1.0" "PDF-Extract-Kit-1.0 Pipeline" "true"
     check_file "/root/mineru.json" "MinerU 配置檔"
+    check_file "/opt/convertx/mineru.json" "MinerU 配置檔（備份）"
 fi
 echo ""
 
@@ -93,9 +103,9 @@ echo ""
 # ==============================================================================
 echo "📦 BabelDOC 快取"
 echo "----------------------------------------"
-check_dir "/root/.cache/babeldoc" "BabelDOC 快取"
-check_dir "/root/.cache/babeldoc/models" "BabelDOC Models"
-check_dir "/root/.cache/babeldoc/fonts" "BabelDOC Fonts"
+check_dir "${BABELDOC_CACHE_DIR}" "BabelDOC 快取"
+check_dir "${BABELDOC_CACHE_DIR}/models" "BabelDOC Models"
+check_dir "${BABELDOC_CACHE_DIR}/fonts" "BabelDOC Fonts"
 echo ""
 
 # ==============================================================================
