@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.1.17](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.17) (2026-01-25)
+
+CPU-only 輕量版，大幅減小 Docker Image 大小。
+
+### ✨ Features
+
+- **CPU-only 輕量版**：將預設 Docker Image 改為 CPU-only 模式
+  - 移除 PyTorch CUDA 依賴（`libtorch_cuda.so` ~5-8GB）
+  - Image 大小從 ~18GB 降至 ~3-5GB
+  - MinerU 仍可正常運行，使用 `pipeline` backend 在純 CPU 環境執行
+
+- **GPU 加速可選**：在 `Dockerfile.full` 中新增 GPU 加速選項
+  - 用戶可取消註解以安裝 PyTorch CUDA
+  - 適合有 NVIDIA GPU 且需要高速 PDF 解析的使用者
+
+### 📦 Build
+
+- **Dockerfile 改進**：
+  - 將 `mineru[all]` 改為 `mineru`，避免安裝 PyTorch CUDA
+  - 更新注釋說明 CPU-only 設計理念
+- **Dockerfile.full 更新**：
+  - 新增 GPU 加速區塊（註解狀態，用戶可自行啟用）
+  - 更新擴充功能總覽表
+
+### 📝 Notes
+
+- 需要 GPU 加速的用戶請使用 `Dockerfile.full` 並啟用 PyTorch CUDA 區塊
+- CPU 模式下 MinerU 速度較慢，但功能完整
+
+---
+
 ## [0.1.16](https://github.com/pi-docket/ConvertX-CN/releases/tag/v0.1.16) (2026-01-24)
 
 一般版 Docker Image 修復版本，確保開箱即用。
