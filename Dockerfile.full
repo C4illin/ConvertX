@@ -1,12 +1,12 @@
 # ==============================================================================
 # ConvertX-CN Full 擴充版 Dockerfile
-# 版本：v0.1.15
+# 版本：v0.1.16
 # ==============================================================================
 #
 # 📦 Image 說明：
-#   - 基於 ConvertX-CN 官方 Image（一般版）進行擴充
-#   - 適合需要更多語言 OCR 或完整 TexLive 的進階使用者
-#   - ⚠️ 體積較大（可能超過 10GB）
+#   - 基於 ConvertX-CN 官方 Image（CPU-only 版）進行擴充
+#   - 適合需要 GPU 加速、更多語言 OCR 或完整 TexLive 的進階使用者
+#   - ⚠️ 體積較大（啟用 GPU 後可能超過 10GB）
 #
 # 🎯 適用場景：
 #   - 需要 65 種 OCR 語言全支援
@@ -29,7 +29,17 @@
 FROM convertx/convertx-cn:latest
 
 # ==============================================================================
-# 📚 完整 TexLive（約 +3GB）
+# 🚀 GPU 加速支援 - PyTorch CUDA（約 +5-8GB）
+# ==============================================================================
+# 說明：安裝 PyTorch CUDA 以啟用 MinerU GPU 加速
+# 風險：Image 體積大幅增加（+5-8GB）
+# 適用：有 NVIDIA GPU 且需要高速 PDF 解析的使用者
+# ------------------------------------------------------------------------------
+# RUN pip3 install --no-cache-dir --break-system-packages \
+#   torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# ==============================================================================
+#  完整 TexLive（約 +3GB）
 # ==============================================================================
 # 說明：完整 LaTeX 支援，適合需要特殊 LaTeX 套件的使用者
 # 風險：Image 體積大幅增加
@@ -234,17 +244,18 @@ FROM convertx/convertx-cn:latest
 # 📋 擴充功能總覽
 # ==============================================================================
 #
-# ℹ️ 一般版已內建功能：
+# ℹ️ 一般版已內建功能（CPU-only，約 3-5GB）：
 #   - 核心轉換：LibreOffice, FFmpeg, ImageMagick, Pandoc, Inkscape
 #   - OCR：Tesseract（7 種語言）
 #   - PDF 翻譯：PDFMathTranslate, BabelDOC
-#   - PDF 轉 MD：MinerU
+#   - PDF 轉 MD：MinerU（CPU 模式，使用 pipeline backend）
 #   - 字型：Noto CJK, Liberation, 標楷體
 #   - TexLive：基礎 + CJK + 德法
 #   - OpenCV, libavcodec-extra
 #
 # | 功能                    | 預估大小  | 風險等級 |
 # |-------------------------|----------|----------|
+# | 🚀 GPU 加速 (PyTorch)   | +5-8GB   | 高       |
 # | 完整 TexLive            | +3GB     | 高       |
 # | 全部 OCR 語言           | +2GB     | 高       |
 # | 歐洲 OCR（西歐）        | +150MB   | 低       |

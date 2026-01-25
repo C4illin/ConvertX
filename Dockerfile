@@ -1,12 +1,14 @@
 # ==============================================================================
 # ConvertX-CN 官方 Docker Image
-# 版本：v0.1.16 - 完整重構版
+# 版本：v0.1.16 - CPU-only 輕量版
 # ==============================================================================
 #
 # 📦 Image 說明：
 #   - 這是 ConvertX-CN 官方 Docker Hub Image 的生產 Dockerfile
 #   - ⚠️ 所有模型、字型、tokenizer 已在 build 階段完整預下載
 #   - ⚠️ Runtime 完全離線運行（僅翻譯服務允許連網）
+#   - 💡 此版本為 CPU-only，不含 PyTorch CUDA（Image 約 3-5GB）
+#   - 🚀 需要 GPU 加速？請使用 Dockerfile.full 或自行安裝 PyTorch CUDA
 #
 # 🔒 Offline-first 設計原則：
 #   1. Runtime（docker run 後）：
@@ -36,7 +38,7 @@
 #   - linux/amd64: 功能完整
 #   - linux/arm64: 安全降級（不支援的工具會跳過）
 #
-# 📊 Image 大小：約 10-14 GB（含完整模型）
+# 📊 Image 大小：約 3-5 GB（CPU-only，不含 PyTorch CUDA）
 #
 # ==============================================================================
 
@@ -298,13 +300,15 @@ RUN uv pip install --system --break-system-packages --no-cache pdf2zh
 RUN uv pip install --system --break-system-packages --no-cache babeldoc || \
   echo "⚠️ babeldoc 安裝可能有警告"
 
-# 6.8 MinerU（僅 AMD64）
+# 6.8 MinerU（僅 AMD64，CPU-only 模式）
+# 💡 使用 mineru（不含 [all]）避免安裝 PyTorch CUDA（節省 ~5-8GB）
+# 💡 MinerU 會自動使用 pipeline backend 在純 CPU 環境運行
 RUN set -ex && \
   ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
   echo "⚠️ ARM64：MinerU 不支援，跳過安裝"; \
   else \
-  uv pip install --system --break-system-packages --no-cache -U "mineru[all]"; \
+  uv pip install --system --break-system-packages --no-cache -U mineru; \
   fi
 
 # 6.9 tiktoken
