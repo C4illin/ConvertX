@@ -57,32 +57,32 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # 配置 APT 重試機制
 RUN echo 'Acquire::Retries "5";' > /etc/apt/apt.conf.d/80-retries \
-    && echo 'Acquire::http::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
-    && echo 'Acquire::https::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
-    && echo 'Acquire::ftp::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
-    && echo 'DPkg::Lock::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries
+  && echo 'Acquire::http::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'Acquire::https::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'Acquire::ftp::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'DPkg::Lock::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries
 
 # 安裝基礎工具
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    unzip \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+  curl \
+  unzip \
+  ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
 # 安裝 Bun（根據架構選擇版本）
 RUN ARCH=$(uname -m) && \
-    if [ "$ARCH" = "aarch64" ]; then \
-        curl -fsSL --retry 3 --retry-delay 5 --retry-all-errors \
-            -o bun-linux-aarch64.zip \
-            https://github.com/oven-sh/bun/releases/download/bun-v1.3.6/bun-linux-aarch64.zip; \
-    else \
-        curl -fsSL --retry 3 --retry-delay 5 --retry-all-errors \
-            -o bun-linux-x64-baseline.zip \
-            https://github.com/oven-sh/bun/releases/download/bun-v1.3.6/bun-linux-x64-baseline.zip; \
-    fi && \
-    unzip -j bun-linux-*.zip -d /usr/local/bin && \
-    rm bun-linux-*.zip && \
-    chmod +x /usr/local/bin/bun
+  if [ "$ARCH" = "aarch64" ]; then \
+  curl -fsSL --retry 3 --retry-delay 5 --retry-all-errors \
+  -o bun-linux-aarch64.zip \
+  https://github.com/oven-sh/bun/releases/download/bun-v1.3.6/bun-linux-aarch64.zip; \
+  else \
+  curl -fsSL --retry 3 --retry-delay 5 --retry-all-errors \
+  -o bun-linux-x64-baseline.zip \
+  https://github.com/oven-sh/bun/releases/download/bun-v1.3.6/bun-linux-x64-baseline.zip; \
+  fi && \
+  unzip -j bun-linux-*.zip -d /usr/local/bin && \
+  rm bun-linux-*.zip && \
+  chmod +x /usr/local/bin/bun
 
 # ===================================
 # Stage 2: Install - Node Dependencies
@@ -115,154 +115,154 @@ FROM base AS system-tools
 
 # 配置 APT
 RUN echo 'Acquire::Retries "5";' > /etc/apt/apt.conf.d/80-retries \
-    && echo 'Acquire::http::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
-    && echo 'Acquire::https::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
-    && echo 'Acquire::ftp::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
-    && echo 'APT::Get::Assume-Yes "true";' >> /etc/apt/apt.conf.d/80-retries \
-    && echo 'DPkg::Lock::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries
+  && echo 'Acquire::http::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'Acquire::https::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'Acquire::ftp::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'APT::Get::Assume-Yes "true";' >> /etc/apt/apt.conf.d/80-retries \
+  && echo 'DPkg::Lock::Timeout "120";' >> /etc/apt/apt.conf.d/80-retries
 
 # 階段 4.1：基礎系統工具 + Locale
 RUN echo "📦 [Stage 4.1] 安裝基礎系統工具..." && \
-    apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-    locales \
-    ca-certificates \
-    curl \
-    openssl \
-    git \
-    && rm -rf /var/lib/apt/lists/*
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  locales \
+  ca-certificates \
+  curl \
+  openssl \
+  git \
+  && rm -rf /var/lib/apt/lists/*
 
 # 階段 4.2：核心轉換工具（輕量）
 RUN echo "📦 [Stage 4.2] 安裝核心轉換工具..." && \
-    apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-    assimp-utils \
-    dcraw \
-    dvisvgm \
-    ghostscript \
-    graphicsmagick \
-    mupdf-tools \
-    poppler-utils \
-    potrace \
-    qpdf \
-    && rm -rf /var/lib/apt/lists/*
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  assimp-utils \
+  dcraw \
+  dvisvgm \
+  ghostscript \
+  graphicsmagick \
+  mupdf-tools \
+  poppler-utils \
+  potrace \
+  qpdf \
+  && rm -rf /var/lib/apt/lists/*
 
 # 階段 4.3：安裝 dasel（從 GitHub 二進位）
 RUN echo "📦 [Stage 4.3] 安裝 dasel..." && \
-    ARCH=$(uname -m) && \
-    if [ "$ARCH" = "aarch64" ]; then DASEL_ARCH="linux_arm64"; \
-    else DASEL_ARCH="linux_amd64"; fi && \
-    curl -sSLf --retry 3 --retry-delay 5 --retry-all-errors \
-        "https://github.com/TomWright/dasel/releases/download/v2.8.1/dasel_${DASEL_ARCH}" \
-        -o /usr/local/bin/dasel && \
-    chmod +x /usr/local/bin/dasel
+  ARCH=$(uname -m) && \
+  if [ "$ARCH" = "aarch64" ]; then DASEL_ARCH="linux_arm64"; \
+  else DASEL_ARCH="linux_amd64"; fi && \
+  curl -sSLf --retry 3 --retry-delay 5 --retry-all-errors \
+  "https://github.com/TomWright/dasel/releases/download/v2.8.1/dasel_${DASEL_ARCH}" \
+  -o /usr/local/bin/dasel && \
+  chmod +x /usr/local/bin/dasel
 
 # 階段 4.4：安裝 resvg（僅 x86_64）
 RUN echo "📦 [Stage 4.4] 安裝 resvg..." && \
-    ARCH=$(uname -m) && \
-    if [ "$ARCH" = "aarch64" ]; then \
-        echo "⚠️ resvg 無 ARM64 版本，跳過"; \
-    else \
-        curl -sSLf --retry 3 --retry-delay 5 --retry-all-errors \
-            "https://github.com/linebender/resvg/releases/download/v0.44.0/resvg-linux-x86_64.tar.gz" \
-            -o /tmp/resvg.tar.gz && \
-        tar -xzf /tmp/resvg.tar.gz -C /tmp/ && \
-        mv /tmp/resvg /usr/local/bin/resvg && \
-        chmod +x /usr/local/bin/resvg && \
-        rm -rf /tmp/resvg.tar.gz; \
-    fi
+  ARCH=$(uname -m) && \
+  if [ "$ARCH" = "aarch64" ]; then \
+  echo "⚠️ resvg 無 ARM64 版本，跳過"; \
+  else \
+  curl -sSLf --retry 3 --retry-delay 5 --retry-all-errors \
+  "https://github.com/linebender/resvg/releases/download/v0.44.0/resvg-linux-x86_64.tar.gz" \
+  -o /tmp/resvg.tar.gz && \
+  tar -xzf /tmp/resvg.tar.gz -C /tmp/ && \
+  mv /tmp/resvg /usr/local/bin/resvg && \
+  chmod +x /usr/local/bin/resvg && \
+  rm -rf /tmp/resvg.tar.gz; \
+  fi
 
 # 階段 4.5：編譯安裝 deark
 RUN echo "📦 [Stage 4.5] 編譯 deark..." && \
-    apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-    build-essential \
-    && cd /tmp && \
-    git clone --depth 1 https://github.com/jsummers/deark.git && \
-    cd deark && make -j$(nproc) && \
-    cp deark /usr/local/bin/deark && \
-    chmod +x /usr/local/bin/deark && \
-    cd / && rm -rf /tmp/deark && \
-    apt-get remove -y build-essential && \
-    apt-get autoremove -y && \
-    rm -rf /var/lib/apt/lists/*
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  build-essential \
+  && cd /tmp && \
+  git clone --depth 1 https://github.com/jsummers/deark.git && \
+  cd deark && make -j$(nproc) && \
+  cp deark /usr/local/bin/deark && \
+  chmod +x /usr/local/bin/deark && \
+  cd / && rm -rf /tmp/deark && \
+  apt-get remove -y build-essential && \
+  apt-get autoremove -y && \
+  rm -rf /var/lib/apt/lists/*
 
 # 階段 4.6：影音處理工具
 RUN echo "📦 [Stage 4.6] 安裝 FFmpeg..." && \
-    apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-    ffmpeg \
-    libavcodec-extra \
-    libva2 \
-    && rm -rf /var/lib/apt/lists/*
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  ffmpeg \
+  libavcodec-extra \
+  libva2 \
+  && rm -rf /var/lib/apt/lists/*
 
 # 階段 4.7：圖像處理工具（含 ImageMagick）
 # ⚠️ 修復：確保 ImageMagick 已安裝
 RUN echo "📦 [Stage 4.7] 安裝圖像處理工具（含 ImageMagick）..." && \
-    apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-    imagemagick \
-    inkscape \
-    libheif-examples \
-    libjxl-tools \
-    libvips-tools \
-    xauth \
-    xvfb \
-    && rm -rf /var/lib/apt/lists/*
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  imagemagick \
+  inkscape \
+  libheif-examples \
+  libjxl-tools \
+  libvips-tools \
+  xauth \
+  xvfb \
+  && rm -rf /var/lib/apt/lists/*
 
 # 階段 4.8：文件處理工具
 RUN echo "📦 [Stage 4.8] 安裝 Calibre + Pandoc..." && \
-    apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-    calibre \
-    libemail-outlook-message-perl \
-    pandoc \
-    && rm -rf /var/lib/apt/lists/*
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  calibre \
+  libemail-outlook-message-perl \
+  pandoc \
+  && rm -rf /var/lib/apt/lists/*
 
 # 階段 4.9：LibreOffice
 RUN echo "📦 [Stage 4.9] 安裝 LibreOffice（需數分鐘）..." && \
-    apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-    libreoffice \
-    && rm -rf /var/lib/apt/lists/*
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  libreoffice \
+  && rm -rf /var/lib/apt/lists/*
 
 # 階段 4.10：TexLive 基礎
 RUN echo "📦 [Stage 4.10] 安裝 TexLive 基礎..." && \
-    apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-    texlive-base \
-    texlive-latex-base \
-    texlive-latex-recommended \
-    texlive-fonts-recommended \
-    texlive-xetex \
-    latexmk \
-    lmodern \
-    && rm -rf /var/lib/apt/lists/*
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  texlive-base \
+  texlive-latex-base \
+  texlive-latex-recommended \
+  texlive-fonts-recommended \
+  texlive-xetex \
+  latexmk \
+  lmodern \
+  && rm -rf /var/lib/apt/lists/*
 
 # 階段 4.11：TexLive 語言包
 RUN echo "📦 [Stage 4.11] 安裝 TexLive 語言包..." && \
-    apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-    texlive-lang-cjk \
-    texlive-lang-german \
-    texlive-lang-french \
-    texlive-lang-arabic \
-    texlive-lang-other \
-    && rm -rf /var/lib/apt/lists/*
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  texlive-lang-cjk \
+  texlive-lang-german \
+  texlive-lang-french \
+  texlive-lang-arabic \
+  texlive-lang-other \
+  && rm -rf /var/lib/apt/lists/*
 
 # 階段 4.12：OCR 支援
 RUN echo "📦 [Stage 4.12] 安裝 Tesseract OCR..." && \
-    apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-    tesseract-ocr \
-    tesseract-ocr-eng \
-    tesseract-ocr-chi-tra \
-    tesseract-ocr-chi-sim \
-    tesseract-ocr-jpn \
-    tesseract-ocr-kor \
-    tesseract-ocr-deu \
-    tesseract-ocr-fra \
-    ocrmypdf \
-    && rm -rf /var/lib/apt/lists/*
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  tesseract-ocr \
+  tesseract-ocr-eng \
+  tesseract-ocr-chi-tra \
+  tesseract-ocr-chi-sim \
+  tesseract-ocr-jpn \
+  tesseract-ocr-kor \
+  tesseract-ocr-deu \
+  tesseract-ocr-fra \
+  ocrmypdf \
+  && rm -rf /var/lib/apt/lists/*
 
 # 階段 4.13：字型
 RUN echo "📦 [Stage 4.13] 安裝系統字型..." && \
-    apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-    fonts-noto-cjk \
-    fonts-noto-core \
-    fonts-noto-color-emoji \
-    fonts-liberation \
-    && rm -rf /var/lib/apt/lists/*
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  fonts-noto-cjk \
+  fonts-noto-core \
+  fonts-noto-color-emoji \
+  fonts-liberation \
+  && rm -rf /var/lib/apt/lists/*
 
 # ===================================
 # Stage 5: Python Base
@@ -271,21 +271,21 @@ FROM system-tools AS python-base
 
 # 階段 5.1：Python 基礎 + uv
 RUN echo "📦 [Stage 5.1] 安裝 Python 基礎..." && \
-    apt-get update --fix-missing && apt-get install -y --no-install-recommends \
-    python3 \
-    python3-pip \
-    python3-venv \
-    python3-numpy \
-    python3-tinycss2 \
-    python3-opencv \
-    python3-img2pdf \
-    && rm -rf /var/lib/apt/lists/*
+  apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+  python3 \
+  python3-pip \
+  python3-venv \
+  python3-numpy \
+  python3-tinycss2 \
+  python3-opencv \
+  python3-img2pdf \
+  && rm -rf /var/lib/apt/lists/*
 
 # 階段 5.2：安裝 uv（Python 套件管理器）
 # ⚠️ 重要：使用 uv 作為主要安裝方式，確保一致性
 RUN echo "📦 [Stage 5.2] 安裝 uv..." && \
-    pip3 install --no-cache-dir --break-system-packages uv && \
-    uv --version
+  pip3 install --no-cache-dir --break-system-packages uv && \
+  uv --version
 
 # 設定 PATH
 ENV PATH="/root/.local/bin:/usr/local/bin:${PATH}"
@@ -297,26 +297,16 @@ FROM python-base AS python-tools
 
 # 階段 6.1：安裝 huggingface_hub + endesive（PDF 簽章）
 RUN echo "📦 [Stage 6.1] 安裝 huggingface_hub + endesive..." && \
-    apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    swig \
-    libpcsclite-dev \
-    && uv pip install --system --no-cache huggingface_hub endesive && \
-    apt-get remove -y build-essential swig && \
-    apt-get autoremove -y && \
-    rm -rf /var/lib/apt/lists/*
-
-# 階段 6.2：安裝 markitdown
-RUN echo "📦 [Stage 6.2] 安裝 markitdown..." && \
-    uv pip install --system --no-cache "markitdown[all]"
-
-# 階段 6.3：安裝 pdf2zh
+  apt-get update && apt-get install -y --no-install-recommends \
+  build-essential \
+  swig \
+  libpcsclite-dev \
+    && uv pip install --system --break-system-packages --no-cache huggingface_hub endesive && \
+    uv pip install --system --break-system-packages --no-cache "markitdown[all]"
 RUN echo "📦 [Stage 6.3] 安裝 pdf2zh..." && \
-    uv pip install --system --no-cache pdf2zh
-
-# 階段 6.4：安裝 babeldoc
+    uv pip install --system --break-system-packages --no-cache pdf2zh
 RUN echo "📦 [Stage 6.4] 安裝 babeldoc..." && \
-    uv pip install --system --no-cache babeldoc || echo "⚠️ babeldoc 安裝可能有警告"
+    uv pip install --system --break-system-packages --no-cache babeldoc || echo "⚠️ babeldoc 安裝可能有警告"
 
 # 階段 6.5：安裝 MinerU（⚠️ 關鍵修復）
 # ⚠️ 只使用 system-level 安裝（uv pip install --system）
@@ -327,7 +317,7 @@ RUN echo "📦 [Stage 6.5] 安裝 MinerU（system-level only）..." && \
         echo "⚠️ ARM64：MinerU 不支援，跳過"; \
     else \
         echo "🔧 使用 uv pip install --system（官方推薦）..." && \
-        uv pip install --system --no-cache -U "mineru[all]" && \
+        uv pip install --system --break-system-packages --no-cache -U "mineru[all]" && \
         echo "✅ 驗證 MinerU 安裝..." && \
         which mineru && \
         mineru --version || echo "(版本資訊可能不可用)"; \
@@ -345,10 +335,10 @@ ENV HF_HOME="/tmp/hf_download_cache"
 
 # 階段 7.1：創建目錄結構
 RUN mkdir -p "${MINERU_MODELS_DIR}" && \
-    mkdir -p "${BABELDOC_CACHE_DIR}/models" && \
-    mkdir -p "${BABELDOC_CACHE_DIR}/fonts" && \
-    mkdir -p "${BABELDOC_CACHE_DIR}/cmap" && \
-    mkdir -p "${BABELDOC_CACHE_DIR}/tiktoken"
+  mkdir -p "${BABELDOC_CACHE_DIR}/models" && \
+  mkdir -p "${BABELDOC_CACHE_DIR}/fonts" && \
+  mkdir -p "${BABELDOC_CACHE_DIR}/cmap" && \
+  mkdir -p "${BABELDOC_CACHE_DIR}/tiktoken"
 
 # 階段 7.2：下載 MinerU Pipeline 模型
 # ⚠️ 關鍵修復：使用顯式下載，存放到固定目錄
@@ -416,16 +406,16 @@ EOF
 # 階段 7.4：BabelDOC warmup + 資源下載
 # ⚠️ 關鍵修復：完整 warmup，確保所有資源已下載
 RUN echo "📥 [Stage 7.4] BabelDOC warmup..." && \
-    export BABELDOC_CACHE_PATH="${BABELDOC_CACHE_DIR}" && \
-    if command -v babeldoc >/dev/null 2>&1; then \
-        echo "執行 babeldoc --warmup..." && \
-        babeldoc --warmup 2>&1 || echo "⚠️ warmup 可能有警告" && \
-        echo "驗證 BabelDOC 資源..." && \
-        ls -la "${BABELDOC_CACHE_DIR}/" && \
-        du -sh "${BABELDOC_CACHE_DIR}/" || true; \
-    else \
-        echo "⚠️ babeldoc 不可用，跳過 warmup"; \
-    fi
+  export BABELDOC_CACHE_PATH="${BABELDOC_CACHE_DIR}" && \
+  if command -v babeldoc >/dev/null 2>&1; then \
+  echo "執行 babeldoc --warmup..." && \
+  babeldoc --warmup 2>&1 || echo "⚠️ warmup 可能有警告" && \
+  echo "驗證 BabelDOC 資源..." && \
+  ls -la "${BABELDOC_CACHE_DIR}/" && \
+  du -sh "${BABELDOC_CACHE_DIR}/" || true; \
+  else \
+  echo "⚠️ babeldoc 不可用，跳過 warmup"; \
+  fi
 
 # 階段 7.5：下載 tiktoken 編碼（BabelDOC 依賴）
 RUN <<EOF
@@ -446,12 +436,12 @@ EOF
 
 # 階段 7.6：清理下載 cache（保留實際模型）
 RUN echo "🧹 [Stage 7.6] 清理下載 cache..." && \
-    rm -rf /tmp/hf_download_cache && \
-    rm -rf /root/.cache/huggingface && \
-    rm -rf /root/.cache/pip && \
-    rm -rf /root/.cache/uv && \
-    find /usr -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true && \
-    echo "✅ Cache 清理完成"
+  rm -rf /tmp/hf_download_cache && \
+  rm -rf /root/.cache/huggingface && \
+  rm -rf /root/.cache/pip && \
+  rm -rf /root/.cache/uv && \
+  find /usr -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true && \
+  echo "✅ Cache 清理完成"
 
 # ===================================
 # Stage 8: Final Image
@@ -481,16 +471,16 @@ COPY models/ /root/.cache/babeldoc/models/
 
 # 複製字型到 BabelDOC 目錄
 RUN mkdir -p /root/.cache/babeldoc/fonts && \
-    cp /usr/share/fonts/truetype/custom/GoNotoKurrent-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
-    cp /usr/share/fonts/truetype/custom/SourceHanSerifCN-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
-    cp /usr/share/fonts/truetype/custom/SourceHanSerifTW-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
-    cp /usr/share/fonts/truetype/custom/SourceHanSerifJP-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
-    cp /usr/share/fonts/truetype/custom/SourceHanSerifKR-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true
+  cp /usr/share/fonts/truetype/custom/GoNotoKurrent-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
+  cp /usr/share/fonts/truetype/custom/SourceHanSerifCN-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
+  cp /usr/share/fonts/truetype/custom/SourceHanSerifTW-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
+  cp /usr/share/fonts/truetype/custom/SourceHanSerifJP-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true && \
+  cp /usr/share/fonts/truetype/custom/SourceHanSerifKR-Regular.ttf /root/.cache/babeldoc/fonts/ 2>/dev/null || true
 
 # 同步 BabelDOC cache 從固定目錄
 RUN if [ -d /opt/babeldoc/cache ]; then \
-        cp -r /opt/babeldoc/cache/* /root/.cache/babeldoc/ 2>/dev/null || true; \
-    fi
+  cp -r /opt/babeldoc/cache/* /root/.cache/babeldoc/ 2>/dev/null || true; \
+  fi
 
 # 更新字型 cache
 RUN fc-cache -fv
@@ -499,56 +489,56 @@ RUN fc-cache -fv
 # PDF 簽章憑證
 # ==============================================================================
 RUN mkdir -p /app/certs && \
-    openssl req -x509 -newkey rsa:2048 \
-        -keyout /tmp/key.pem -out /tmp/cert.pem \
-        -days 3650 -nodes \
-        -subj "/CN=PDF Packager Default/O=ConvertX-CN/C=TW" && \
-    openssl pkcs12 -export \
-        -inkey /tmp/key.pem -in /tmp/cert.pem \
-        -out /app/certs/default.p12 \
-        -passout pass: && \
-    rm -f /tmp/key.pem /tmp/cert.pem && \
-    chmod 644 /app/certs/default.p12
+  openssl req -x509 -newkey rsa:2048 \
+  -keyout /tmp/key.pem -out /tmp/cert.pem \
+  -days 3650 -nodes \
+  -subj "/CN=PDF Packager Default/O=ConvertX-CN/C=TW" && \
+  openssl pkcs12 -export \
+  -inkey /tmp/key.pem -in /tmp/cert.pem \
+  -out /app/certs/default.p12 \
+  -passout pass: && \
+  rm -f /tmp/key.pem /tmp/cert.pem && \
+  chmod 644 /app/certs/default.p12
 
 # ==============================================================================
 # VTracer
 # ==============================================================================
 RUN ARCH=$(uname -m) && \
-    if [ "$ARCH" = "aarch64" ]; then \
-        VTRACER_ASSET="vtracer-aarch64-unknown-linux-musl.tar.gz"; \
-    else \
-        VTRACER_ASSET="vtracer-x86_64-unknown-linux-musl.tar.gz"; \
-    fi && \
-    curl -L --retry 3 --retry-delay 5 --retry-all-errors \
-        -o /tmp/vtracer.tar.gz \
-        "https://github.com/visioncortex/vtracer/releases/download/0.6.4/${VTRACER_ASSET}" && \
-    tar -xzf /tmp/vtracer.tar.gz -C /tmp/ && \
-    mv /tmp/vtracer /usr/local/bin/vtracer && \
-    chmod +x /usr/local/bin/vtracer && \
-    rm /tmp/vtracer.tar.gz
+  if [ "$ARCH" = "aarch64" ]; then \
+  VTRACER_ASSET="vtracer-aarch64-unknown-linux-musl.tar.gz"; \
+  else \
+  VTRACER_ASSET="vtracer-x86_64-unknown-linux-musl.tar.gz"; \
+  fi && \
+  curl -L --retry 3 --retry-delay 5 --retry-all-errors \
+  -o /tmp/vtracer.tar.gz \
+  "https://github.com/visioncortex/vtracer/releases/download/0.6.4/${VTRACER_ASSET}" && \
+  tar -xzf /tmp/vtracer.tar.gz -C /tmp/ && \
+  mv /tmp/vtracer /usr/local/bin/vtracer && \
+  chmod +x /usr/local/bin/vtracer && \
+  rm /tmp/vtracer.tar.gz
 
 # ==============================================================================
 # Locale 設定
 # ==============================================================================
 RUN sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
-    sed -i 's/# zh_TW.UTF-8 UTF-8/zh_TW.UTF-8 UTF-8/' /etc/locale.gen && \
-    sed -i 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/' /etc/locale.gen && \
-    sed -i 's/# ja_JP.UTF-8 UTF-8/ja_JP.UTF-8 UTF-8/' /etc/locale.gen && \
-    sed -i 's/# ko_KR.UTF-8 UTF-8/ko_KR.UTF-8 UTF-8/' /etc/locale.gen && \
-    sed -i 's/# de_DE.UTF-8 UTF-8/de_DE.UTF-8 UTF-8/' /etc/locale.gen && \
-    sed -i 's/# fr_FR.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen && \
-    locale-gen
+  sed -i 's/# zh_TW.UTF-8 UTF-8/zh_TW.UTF-8 UTF-8/' /etc/locale.gen && \
+  sed -i 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/' /etc/locale.gen && \
+  sed -i 's/# ja_JP.UTF-8 UTF-8/ja_JP.UTF-8 UTF-8/' /etc/locale.gen && \
+  sed -i 's/# ko_KR.UTF-8 UTF-8/ko_KR.UTF-8 UTF-8/' /etc/locale.gen && \
+  sed -i 's/# de_DE.UTF-8 UTF-8/de_DE.UTF-8 UTF-8/' /etc/locale.gen && \
+  sed -i 's/# fr_FR.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen && \
+  locale-gen
 
 # ==============================================================================
 # 最終清理
 # ==============================================================================
 RUN rm -rf /usr/share/doc/texlive* \
-    && rm -rf /usr/share/texlive/texmf-dist/doc \
-    && rm -rf /usr/share/doc/* \
-    && rm -rf /usr/share/man/* \
-    && rm -rf /usr/share/info/* \
-    && rm -rf /tmp/* \
-    && rm -rf /var/tmp/*
+  && rm -rf /usr/share/texlive/texmf-dist/doc \
+  && rm -rf /usr/share/doc/* \
+  && rm -rf /usr/share/man/* \
+  && rm -rf /usr/share/info/* \
+  && rm -rf /tmp/* \
+  && rm -rf /var/tmp/*
 
 # 複製驗證腳本
 COPY scripts/verify-models.sh /app/scripts/verify-models.sh
@@ -563,77 +553,77 @@ RUN mkdir -p data
 # ⚠️ 此步驟模擬斷網環境，驗證所有工具可離線執行
 # ==============================================================================
 RUN echo "======================================" && \
-    echo "🔒 Runtime 離線驗證" && \
-    echo "======================================" && \
-    ARCH=$(uname -m) && \
-    VALIDATION_PASSED=true && \
-    \
-    # 驗證 MinerU
-    echo "🔍 驗證 MinerU..." && \
-    if [ "$ARCH" != "aarch64" ]; then \
-        if command -v mineru >/dev/null 2>&1; then \
-            echo "  ✅ mineru 可執行: $(which mineru)"; \
-        else \
-            echo "  ❌ mineru 不可執行" && VALIDATION_PASSED=false; \
-        fi && \
-        if [ -d "/opt/mineru/models/PDF-Extract-Kit-1.0" ]; then \
-            echo "  ✅ MinerU 模型目錄存在"; \
-        else \
-            echo "  ❌ MinerU 模型目錄不存在" && VALIDATION_PASSED=false; \
-        fi && \
-        if [ -f "/root/mineru.json" ]; then \
-            echo "  ✅ mineru.json 存在"; \
-        else \
-            echo "  ❌ mineru.json 不存在" && VALIDATION_PASSED=false; \
-        fi; \
-    else \
-        echo "  ⚠️ ARM64：跳過 MinerU 驗證"; \
-    fi && \
-    \
-    # 驗證 BabelDOC
-    echo "🔍 驗證 BabelDOC..." && \
-    if command -v babeldoc >/dev/null 2>&1; then \
-        babeldoc --help >/dev/null 2>&1 && echo "  ✅ babeldoc --help 成功" || echo "  ⚠️ babeldoc --help 有警告"; \
-    else \
-        echo "  ⚠️ babeldoc 不可用"; \
-    fi && \
-    \
-    # 驗證 pdf2zh
-    echo "🔍 驗證 pdf2zh..." && \
-    if command -v pdf2zh >/dev/null 2>&1; then \
-        pdf2zh --help >/dev/null 2>&1 && echo "  ✅ pdf2zh --help 成功" || echo "  ⚠️ pdf2zh --help 有警告"; \
-    else \
-        echo "  ⚠️ pdf2zh 不可用"; \
-    fi && \
-    \
-    # 驗證 ImageMagick
-    echo "🔍 驗證 ImageMagick..." && \
-    if command -v convert >/dev/null 2>&1; then \
-        echo "  ✅ ImageMagick 已安裝: $(convert --version | head -1)"; \
-    else \
-        echo "  ❌ ImageMagick 未安裝" && VALIDATION_PASSED=false; \
-    fi && \
-    \
-    # 驗證模型檔案
-    echo "🔍 驗證 ONNX 模型..." && \
-    if [ -f "/root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx" ]; then \
-        echo "  ✅ DocLayout-YOLO ONNX 存在"; \
-    else \
-        echo "  ⚠️ DocLayout-YOLO ONNX 不存在（將使用 COPY 複製）"; \
-    fi && \
-    \
-    # 驗證字型
-    echo "🔍 驗證字型..." && \
-    FONTS_COUNT=$(ls /usr/share/fonts/truetype/custom/*.ttf 2>/dev/null | wc -l) && \
-    echo "  ✅ 自訂字型數量: ${FONTS_COUNT}" && \
-    \
-    echo "======================================" && \
-    if [ "$VALIDATION_PASSED" = "true" ]; then \
-        echo "✅ 離線驗證通過！"; \
-    else \
-        echo "❌ 離線驗證失敗！" && exit 1; \
-    fi && \
-    echo "======================================"
+  echo "🔒 Runtime 離線驗證" && \
+  echo "======================================" && \
+  ARCH=$(uname -m) && \
+  VALIDATION_PASSED=true && \
+  \
+  # 驗證 MinerU
+  echo "🔍 驗證 MinerU..." && \
+  if [ "$ARCH" != "aarch64" ]; then \
+  if command -v mineru >/dev/null 2>&1; then \
+  echo "  ✅ mineru 可執行: $(which mineru)"; \
+  else \
+  echo "  ❌ mineru 不可執行" && VALIDATION_PASSED=false; \
+  fi && \
+  if [ -d "/opt/mineru/models/PDF-Extract-Kit-1.0" ]; then \
+  echo "  ✅ MinerU 模型目錄存在"; \
+  else \
+  echo "  ❌ MinerU 模型目錄不存在" && VALIDATION_PASSED=false; \
+  fi && \
+  if [ -f "/root/mineru.json" ]; then \
+  echo "  ✅ mineru.json 存在"; \
+  else \
+  echo "  ❌ mineru.json 不存在" && VALIDATION_PASSED=false; \
+  fi; \
+  else \
+  echo "  ⚠️ ARM64：跳過 MinerU 驗證"; \
+  fi && \
+  \
+  # 驗證 BabelDOC
+  echo "🔍 驗證 BabelDOC..." && \
+  if command -v babeldoc >/dev/null 2>&1; then \
+  babeldoc --help >/dev/null 2>&1 && echo "  ✅ babeldoc --help 成功" || echo "  ⚠️ babeldoc --help 有警告"; \
+  else \
+  echo "  ⚠️ babeldoc 不可用"; \
+  fi && \
+  \
+  # 驗證 pdf2zh
+  echo "🔍 驗證 pdf2zh..." && \
+  if command -v pdf2zh >/dev/null 2>&1; then \
+  pdf2zh --help >/dev/null 2>&1 && echo "  ✅ pdf2zh --help 成功" || echo "  ⚠️ pdf2zh --help 有警告"; \
+  else \
+  echo "  ⚠️ pdf2zh 不可用"; \
+  fi && \
+  \
+  # 驗證 ImageMagick
+  echo "🔍 驗證 ImageMagick..." && \
+  if command -v convert >/dev/null 2>&1; then \
+  echo "  ✅ ImageMagick 已安裝: $(convert --version | head -1)"; \
+  else \
+  echo "  ❌ ImageMagick 未安裝" && VALIDATION_PASSED=false; \
+  fi && \
+  \
+  # 驗證模型檔案
+  echo "🔍 驗證 ONNX 模型..." && \
+  if [ -f "/root/.cache/babeldoc/models/doclayout_yolo_docstructbench_imgsz1024.onnx" ]; then \
+  echo "  ✅ DocLayout-YOLO ONNX 存在"; \
+  else \
+  echo "  ⚠️ DocLayout-YOLO ONNX 不存在（將使用 COPY 複製）"; \
+  fi && \
+  \
+  # 驗證字型
+  echo "🔍 驗證字型..." && \
+  FONTS_COUNT=$(ls /usr/share/fonts/truetype/custom/*.ttf 2>/dev/null | wc -l) && \
+  echo "  ✅ 自訂字型數量: ${FONTS_COUNT}" && \
+  \
+  echo "======================================" && \
+  if [ "$VALIDATION_PASSED" = "true" ]; then \
+  echo "✅ 離線驗證通過！"; \
+  else \
+  echo "❌ 離線驗證失敗！" && exit 1; \
+  fi && \
+  echo "======================================"
 
 # ==============================================================================
 # 🔐 Runtime 環境變數（強制離線模式）
