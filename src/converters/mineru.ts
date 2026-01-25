@@ -87,9 +87,12 @@ export async function convert(
   const runMinerU = (useTableMode: boolean): Promise<void> => {
     return new Promise((resolve, reject) => {
       // Build MinerU command arguments
-      // MinerU CLI: mineru -p <input> -o <output_dir> -m pipeline
-      // 注意：使用 pipeline 模式而非 auto，避免 VLM 模型未配置的問題
-      const args = ["-p", filePath, "-o", mineruOutputDir, "-m", "pipeline"];
+      // MinerU CLI: mineru -p <input> -o <output_dir> -m <method>
+      // 注意：MinerU 2.7+ 版本 -m/--method 有效值為 'auto', 'txt', 'ocr'
+      // - auto: 自動偵測（推薦，會根據 PDF 類型選擇最佳方法）
+      // - txt: 直接提取文字（適用於有文字層的 PDF）
+      // - ocr: 強制使用 OCR（適用於掃描版 PDF）
+      const args = ["-p", filePath, "-o", mineruOutputDir, "-m", "auto"];
 
       // 表格模式支援（可能與某些 vLLM 版本不相容）
       if (useTableMode) {
