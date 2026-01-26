@@ -19,7 +19,6 @@
         "@tailwindcss/postcss": "^4.1.18",
         "@types/bun": "latest",
         "@types/node": "^24.10.9",
-        "@typescript-eslint/parser": "^8.54.0",
         "eslint": "^9.39.2",
         "eslint-plugin-better-tailwindcss": "^4.0.2",
         "globals": "^17.1.0",
