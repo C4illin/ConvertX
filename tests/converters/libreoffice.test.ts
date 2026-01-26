@@ -63,7 +63,7 @@ test("invokes soffice with --headless and outdir derived from targetPath", async
   expect(cmd).toBe("soffice");
   expect(args).toEqual([
     "--headless",
-    `--infilter=MS Word 2007 XML`,
+    "--infilter=MS Word 2007 XML",
     "--convert-to",
     "odt:writer8",
     "--outdir",
