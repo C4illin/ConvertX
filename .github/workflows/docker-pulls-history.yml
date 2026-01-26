@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   track:
@@ -15,6 +16,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Fetch Docker Hub pull count
         run: |
@@ -115,10 +118,17 @@ jobs:
           fs.writeFileSync(outPath, svg.trim());
           EOF
 
-      - name: Commit and push
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git add metrics
-          git commit -m "chore(metrics): update docker pull history" || exit 0
-          git push
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: chore/update-docker-pulls-metrics
+          delete-branch: true
+          commit-message: "chore(metrics): update docker pull history"
+          title: "chore(metrics): update docker pull history"
+          body: |
+            自動更新 Docker Pull 統計資料
+
+            - 更新 `metrics/docker-pulls.csv`
+            - 更新 `metrics/docker-pulls-history.svg`
+          labels: automated,metrics
