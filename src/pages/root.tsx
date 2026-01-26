@@ -126,8 +126,9 @@ export const root = new Elysia().use(userService).get(
                 <table
                   id="file-list"
                   class={`
-                    w-full table-auto rounded bg-neutral-900
-                    [&_td]:p-4 [&_td]:first:max-w-[30vw] [&_td]:first:truncate
+                    w-full table-auto rounded-sm bg-neutral-900
+                    [&_td]:p-4
+                    [&_td]:first:max-w-[30vw] [&_td]:first:truncate
                     [&_tr]:rounded-sm [&_tr]:border-b [&_tr]:border-neutral-800
                   `}
                 />
@@ -135,8 +136,8 @@ export const root = new Elysia().use(userService).get(
               <div
                 id="dropzone"
                 class={`
-                  relative flex h-48 w-full items-center justify-center rounded border border-dashed
-                  border-neutral-700 transition-all
+                  relative flex h-48 w-full items-center justify-center rounded-sm border
+                  border-dashed border-neutral-700 transition-all
                   hover:border-neutral-600
                   [&.dragover]:border-4 [&.dragover]:border-neutral-500
                 `}
@@ -170,7 +171,7 @@ export const root = new Elysia().use(userService).get(
                   <article
                     class={`
                       convert_to_popup absolute z-2 m-0 hidden h-[30vh] max-h-[50vh] w-full flex-col
-                      overflow-x-hidden overflow-y-auto rounded bg-neutral-800
+                      overflow-x-hidden overflow-y-auto rounded-sm bg-neutral-800
                       sm:h-[30vh]
                     `}
                   >
@@ -190,7 +191,7 @@ export const root = new Elysia().use(userService).get(
                               // https://stackoverflow.com/questions/121499/when-a-blur-event-occurs-how-can-i-find-out-which-element-focus-went-to#comment82388679_33325953
                               tabindex={0}
                               class={`
-                                target rounded bg-neutral-700 p-1 text-base
+                                target rounded-sm bg-neutral-700 p-1 text-base
                                 hover:bg-neutral-600
                               `}
                               data-value={`${target},${converter}`}

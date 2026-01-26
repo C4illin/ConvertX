@@ -67,7 +67,7 @@ export const history = new Elysia().use(userService).get(
               </div>
               <table
                 class={`
-                  w-full table-auto overflow-y-auto rounded bg-neutral-900 text-left
+                  w-full table-auto overflow-y-auto rounded-sm bg-neutral-900 text-left
                   [&_td]:p-4
                   [&_tr]:rounded-sm [&_tr]:border-b [&_tr]:border-neutral-800
                 `}
@@ -76,20 +76,20 @@ export const history = new Elysia().use(userService).get(
                   <tr>
                     <th
                       class={`
-                        px-2 py-2
+                        p-2
                         sm:px-4
                       `}
                     >
                       <input
                         type="checkbox"
                         id="select-all"
-                        class="h-4 w-4 cursor-pointer"
+                        class="size-4 cursor-pointer"
                         title="Select all"
                       />
                     </th>
                     <th
                       class={`
-                        px-2 py-2
+                        p-2
                         sm:px-4
                       `}
                     >
@@ -97,7 +97,7 @@ export const history = new Elysia().use(userService).get(
                     </th>
                     <th
                       class={`
-                        px-2 py-2
+                        p-2
                         sm:px-4
                       `}
                     >
@@ -105,7 +105,7 @@ export const history = new Elysia().use(userService).get(
                     </th>
                     <th
                       class={`
-                        px-2 py-2
+                        p-2
                         sm:px-4
                       `}
                     >
@@ -113,7 +113,7 @@ export const history = new Elysia().use(userService).get(
                     </th>
                     <th
                       class={`
-                        px-2 py-2
+                        p-2
                         max-sm:hidden
                         sm:px-4
                       `}
@@ -122,7 +122,7 @@ export const history = new Elysia().use(userService).get(
                     </th>
                     <th
                       class={`
-                        px-2 py-2
+                        p-2
                         sm:px-4
                       `}
                     >
@@ -130,7 +130,7 @@ export const history = new Elysia().use(userService).get(
                     </th>
                     <th
                       class={`
-                        px-2 py-2
+                        p-2
                         sm:px-4
                       `}
                     >
@@ -145,7 +145,7 @@ export const history = new Elysia().use(userService).get(
                         <td>
                           <input
                             type="checkbox"
-                            class="h-4 w-4 cursor-pointer"
+                            class="size-4 cursor-pointer"
                             data-checkbox-type="job"
                             data-job-id={job.id}
                           />
@@ -158,7 +158,7 @@ export const history = new Elysia().use(userService).get(
                             viewBox="0 0 24 24"
                             stroke-width="1.5"
                             stroke="currentColor"
-                            class="inline-block h-4 w-4"
+                            class="inline-block size-4"
                           >
                             <path
                               stroke-linecap="round"
@@ -209,7 +209,7 @@ export const history = new Elysia().use(userService).get(
                                   xmlns="http://www.w3.org/2000/svg"
                                   viewBox="0 0 20 20"
                                   fill="currentColor"
-                                  class={`mx-2 inline-block h-4 w-4 text-neutral-500`}
+                                  class={`mx-2 inline-block size-4 text-neutral-500`}
                                 >
                                   <path
                                     fill-rule="evenodd"

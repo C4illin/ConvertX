@@ -22,7 +22,7 @@ export const listConverters = new Elysia().use(userService).get(
               <h1 class="mb-4 text-xl">Converters</h1>
               <table
                 class={`
-                  w-full table-auto rounded bg-neutral-900 text-left
+                  w-full table-auto rounded-sm bg-neutral-900 text-left
                   [&_td]:p-4
                   [&_tr]:rounded-sm [&_tr]:border-b [&_tr]:border-neutral-800
                   [&_ul]:list-inside [&_ul]:list-disc

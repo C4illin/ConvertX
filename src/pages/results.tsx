@@ -51,15 +51,15 @@ function ResultsArticle({
         class={`
           mb-4 inline-block h-2 w-full appearance-none overflow-hidden rounded-full border-0
           bg-neutral-700 bg-none text-accent-500 accent-accent-500
-          [&::-moz-progress-bar]:bg-accent-500 [&::-webkit-progress-value]:rounded-full
-          [&::-webkit-progress-value]:[background:none]
+          [&::-moz-progress-bar]:bg-accent-500
+          [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:[background:none]
           [&[value]::-webkit-progress-value]:bg-accent-500
           [&[value]::-webkit-progress-value]:transition-[inline-size]
         `}
       />
       <table
         class={`
-          w-full table-auto rounded bg-neutral-900 text-left
+          w-full table-auto rounded-sm bg-neutral-900 text-left
           [&_td]:p-4
           [&_tr]:rounded-sm [&_tr]:border-b [&_tr]:border-neutral-800
         `}
@@ -68,7 +68,7 @@ function ResultsArticle({
           <tr>
             <th
               class={`
-                px-2 py-2
+                p-2
                 sm:px-4
               `}
             >
@@ -76,7 +76,7 @@ function ResultsArticle({
             </th>
             <th
               class={`
-                px-2 py-2
+                p-2
                 sm:px-4
               `}
             >
@@ -84,7 +84,7 @@ function ResultsArticle({
             </th>
             <th
               class={`
-                px-2 py-2
+                p-2
                 sm:px-4
               `}
             >
