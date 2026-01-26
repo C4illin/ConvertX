@@ -49,7 +49,7 @@ export default tseslint.config(
           printWidth: 100,
         },
       ],
-      "better-tailwindcss/no-unregistered-classes": [
+      "better-tailwindcss/no-unknown-classes": [
         "warn",
         {
           ignore: [
