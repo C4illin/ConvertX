@@ -10,7 +10,7 @@ export const chooseConverter = new Elysia().use(userService).post(
         <article
           class={`
             convert_to_popup absolute z-2 m-0 hidden h-[50vh] max-h-[50vh] w-full flex-col
-            overflow-x-hidden overflow-y-auto rounded bg-neutral-800
+            overflow-x-hidden overflow-y-auto rounded-sm bg-neutral-800
             sm:h-[30vh]
           `}
         >
@@ -28,7 +28,7 @@ export const chooseConverter = new Elysia().use(userService).post(
                     // https://stackoverflow.com/questions/121499/when-a-blur-event-occurs-how-can-i-find-out-which-element-focus-went-to#comment82388679_33325953
                     tabindex={0}
                     class={`
-                      target rounded bg-neutral-700 p-1 text-base
+                      target rounded-sm bg-neutral-700 p-1 text-base
                       hover:bg-neutral-600
                     `}
                     data-value={`${target},${converter}`}
