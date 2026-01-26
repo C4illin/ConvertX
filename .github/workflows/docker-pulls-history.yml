@@ -1,0 +1,76 @@
+name: Docker Pulls History
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # 每天 UTC 00:00（台灣 08:00）
+  workflow_dispatch:
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Fetch Docker Hub pull count
+        run: |
+          set -e
+          DATE=$(date -u +"%Y-%m-%d")
+          PULLS=$(curl -s https://hub.docker.com/v2/repositories/convertx/convertx-cn/ | jq '.pull_count')
+          echo "$DATE,$PULLS" >> metrics/docker-pulls.csv
+
+      - name: Generate SVG chart
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+
+          const csv = fs.readFileSync('metrics/docker-pulls.csv', 'utf8')
+            .trim()
+            .split('\n')
+            .slice(1);
+
+          const dates = csv.map(r => r.split(',')[0]);
+          const pulls = csv.map(r => Number(r.split(',')[1]));
+
+          const svg = `
+          <svg width="800" height="400" viewBox="0 0 800 400"
+               xmlns="http://www.w3.org/2000/svg">
+            <style>
+              text { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial; }
+            </style>
+
+            <rect width="100%" height="100%" fill="#ffffff"/>
+
+            <text x="400" y="30" text-anchor="middle"
+                  font-size="20" font-weight="600">
+              Docker Pull History – convertx/convertx-cn
+            </text>
+
+            ${pulls.map((v, i) => {
+              if (i === 0) return '';
+              const x1 = 60 + (i - 1) * (680 / (pulls.length - 1));
+              const y1 = 340 - (pulls[i - 1] / Math.max(...pulls)) * 260;
+              const x2 = 60 + i * (680 / (pulls.length - 1));
+              const y2 = 340 - (v / Math.max(...pulls)) * 260;
+              return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
+                            stroke="#2f80ed" stroke-width="2"/>`;
+            }).join('')}
+
+            <text x="60" y="360" font-size="12">${dates[0]}</text>
+            <text x="740" y="360" font-size="12" text-anchor="end">${dates[dates.length - 1]}</text>
+
+            <text x="60" y="80" font-size="12">${Math.max(...pulls).toLocaleString()}</text>
+          </svg>
+          `;
+
+          fs.writeFileSync('metrics/docker-pulls-history.svg', svg);
+          EOF
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add metrics
+          git commit -m "chore(metrics): update docker pull history" || exit 0
+          git push
