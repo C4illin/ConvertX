@@ -1,33 +1,25 @@
 import js from "@eslint/js";
-import eslintParserTypeScript from "@typescript-eslint/parser";
 import eslintPluginBetterTailwindcss from "eslint-plugin-better-tailwindcss";
+import { defineConfig } from "eslint/config";
 import globals from "globals";
-import tseslint from "typescript-eslint";
-import path from "path";
-import { fileURLToPath } from "url";
+import tseslint, { parser as eslintParserTypeScript } from "typescript-eslint";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-export default tseslint.config(
+export default defineConfig(
   {
-    ignores: ["**/node_modules/**", "eslint.config.ts", "dist/**"],
+    ignores: ["**/node_modules/**", "dist/**"],
   },
   js.configs.recommended,
   tseslint.configs.recommended,
   {
-    files: ["**/*.{tsx,ts}"],
-    plugins: {
-      "better-tailwindcss": eslintPluginBetterTailwindcss,
-    },
+    files: ["**/*.{ts,tsx,cts,mts}"],
+    extends: [
+      eslintPluginBetterTailwindcss.configs.recommended,
+      eslintPluginBetterTailwindcss.configs.stylistic,
+    ],
     languageOptions: {
       parser: eslintParserTypeScript,
       parserOptions: {
         project: "./tsconfig.eslint.json",
-        tsconfigRootDir: __dirname,
-        ecmaFeatures: {
-          jsx: true,
-        },
       },
       globals: {
         ...globals.node,
@@ -39,9 +31,6 @@ export default tseslint.config(
       },
     },
     rules: {
-      ...(eslintPluginBetterTailwindcss.configs["recommended-warn"] ?? {}).rules,
-      ...(eslintPluginBetterTailwindcss.configs["stylistic-warn"] ?? {}).rules,
-      // "tailwindcss/classnames-order": "off",
       "better-tailwindcss/enforce-consistent-line-wrapping": [
         "warn",
         {
@@ -64,6 +53,16 @@ export default tseslint.config(
           ],
         },
       ],
+    },
+  },
+  {
+    files: ["**/*.{jsx,tsx}"],
+    languageOptions: {
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
     },
   },
   {
