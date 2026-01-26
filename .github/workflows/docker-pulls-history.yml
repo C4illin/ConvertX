@@ -5,6 +5,9 @@ on:
     - cron: "0 0 * * *" # 每天 UTC 00:00（台灣 08:00）
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   track:
     runs-on: ubuntu-latest
@@ -16,55 +19,100 @@ jobs:
       - name: Fetch Docker Hub pull count
         run: |
           set -e
+
+          # 1️⃣ 確保 metrics 資料夾存在（runner 是全新的）
+          mkdir -p metrics
+
+          # 2️⃣ 若 CSV 不存在，建立並寫入 header
+          if [ ! -f metrics/docker-pulls.csv ]; then
+            echo "date,pulls" > metrics/docker-pulls.csv
+          fi
+
+          # 3️⃣ 抓 Docker Hub 總下載數（不限版本）
           DATE=$(date -u +"%Y-%m-%d")
           PULLS=$(curl -s https://hub.docker.com/v2/repositories/convertx/convertx-cn/ | jq '.pull_count')
-          echo "$DATE,$PULLS" >> metrics/docker-pulls.csv
 
-      - name: Generate SVG chart
+          # 4️⃣ 避免同一天重複寫入
+          if ! grep -q "^$DATE," metrics/docker-pulls.csv; then
+            echo "$DATE,$PULLS" >> metrics/docker-pulls.csv
+          fi
+
+      - name: Generate SVG chart (star-history style)
         run: |
           node <<'EOF'
           const fs = require('fs');
 
-          const csv = fs.readFileSync('metrics/docker-pulls.csv', 'utf8')
+          const csvPath = 'metrics/docker-pulls.csv';
+          const outPath = 'metrics/docker-pulls-history.svg';
+
+          const rows = fs.readFileSync(csvPath, 'utf8')
             .trim()
             .split('\n')
-            .slice(1);
+            .slice(1)
+            .map(r => {
+              const [d, p] = r.split(',');
+              return { date: d, pulls: Number(p) };
+            });
 
-          const dates = csv.map(r => r.split(',')[0]);
-          const pulls = csv.map(r => Number(r.split(',')[1]));
+          const dates = rows.map(r => r.date);
+          const pulls = rows.map(r => r.pulls);
+
+          const max = Math.max(...pulls);
+          const w = 800, h = 400;
+          const padX = 60, padY = 60;
+          const plotW = w - padX * 2;
+          const plotH = h - padY * 2;
+
+          const points = pulls.map((v, i) => {
+            const x = padX + (i / (pulls.length - 1)) * plotW;
+            const y = h - padY - (v / max) * plotH;
+            return `${x},${y}`;
+          }).join(' ');
 
           const svg = `
-          <svg width="800" height="400" viewBox="0 0 800 400"
+          <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"
                xmlns="http://www.w3.org/2000/svg">
             <style>
-              text { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial; }
+              text {
+                font-family: -apple-system, BlinkMacSystemFont,
+                             Segoe UI, Helvetica, Arial;
+                fill: #24292f;
+              }
             </style>
 
             <rect width="100%" height="100%" fill="#ffffff"/>
 
-            <text x="400" y="30" text-anchor="middle"
-                  font-size="20" font-weight="600">
-              Docker Pull History – convertx/convertx-cn
+            <text x="${w/2}" y="28" text-anchor="middle"
+                  font-size="18" font-weight="600">
+              Docker Pull History · convertx/convertx-cn
             </text>
 
-            ${pulls.map((v, i) => {
-              if (i === 0) return '';
-              const x1 = 60 + (i - 1) * (680 / (pulls.length - 1));
-              const y1 = 340 - (pulls[i - 1] / Math.max(...pulls)) * 260;
-              const x2 = 60 + i * (680 / (pulls.length - 1));
-              const y2 = 340 - (v / Math.max(...pulls)) * 260;
-              return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
-                            stroke="#2f80ed" stroke-width="2"/>`;
-            }).join('')}
+            <!-- grid -->
+            <line x1="${padX}" y1="${h-padY}" x2="${w-padX}" y2="${h-padY}"
+                  stroke="#d0d7de"/>
+            <line x1="${padX}" y1="${padY}" x2="${padX}" y2="${h-padY}"
+                  stroke="#d0d7de"/>
 
-            <text x="60" y="360" font-size="12">${dates[0]}</text>
-            <text x="740" y="360" font-size="12" text-anchor="end">${dates[dates.length - 1]}</text>
+            <!-- line -->
+            <polyline fill="none" stroke="#2f81f7"
+                      stroke-width="2"
+                      points="${points}" />
 
-            <text x="60" y="80" font-size="12">${Math.max(...pulls).toLocaleString()}</text>
+            <!-- labels -->
+            <text x="${padX}" y="${h-20}" font-size="12">
+              ${dates[0]}
+            </text>
+            <text x="${w-padX}" y="${h-20}" font-size="12" text-anchor="end">
+              ${dates[dates.length - 1]}
+            </text>
+
+            <text x="${padX}" y="${padY-10}" font-size="12">
+              ${max.toLocaleString()}
+            </text>
           </svg>
           `;
 
-          fs.writeFileSync('metrics/docker-pulls-history.svg', svg);
+          fs.writeFileSync(outPath, svg.trim());
           EOF
 
       - name: Commit and push
