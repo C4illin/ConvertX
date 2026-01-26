@@ -197,6 +197,12 @@ docker run -d \
 
 ---
 
+## 📈 Docker Adoption History
+
+![Docker Pull History](https://raw.githubusercontent.com/pi-docket/ConvertX-CN/main/metrics/docker-pulls-history.svg)
+
+---
+
 ## 🙏 致謝
 
 本專案基於 [C4illin/ConvertX](https://github.com/C4illin/ConvertX) 開發，感謝原作者的貢獻。
