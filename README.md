@@ -152,6 +152,20 @@ Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#summar
   <img src="https://contrib.rocks/image?repo=C4illin/ConvertX" alt="Image with all contributors"/>
 </a>
 
+## Files updated:
+
+src/db/types.ts
+src/db/db.ts
+src/pages/root.tsx
+src/pages/user.tsx
+src/pages/upload.tsx
+src/pages/antivirus.tsx
+src/components/base.tsx
+public/script.js
+public/theme-init.js
+public/theme.css
+src/main.css
+
 ![Alt](https://repobeats.axiom.co/api/embed/dcdabd0564fcdcccbf5680c1bdc2efad54a3d4d9.svg "Repobeats analytics image")
 
 ## Star History
