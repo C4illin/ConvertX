@@ -1,16 +1,19 @@
 /**
- * 自動格式推斷前端模組
+ * 智慧搜尋代理 - 前端模組
  *
- * 在使用者上傳檔案後，自動推斷最可能的目標格式並填入搜尋欄
+ * 在使用者上傳檔案後，自動推斷最可能的目標格式
+ * 並模擬使用者在搜尋欄輸入 token (prefix matching)
+ *
+ * UI 行為完全等同真人輸入
  */
 
 // @ts-check
 
 /**
  * @typedef {Object} FormatPrediction
- * @property {string} search_format - 預測的搜尋格式
+ * @property {string} search_token - 預測的搜尋 token (用於 prefix matching)
  * @property {number} confidence - 預測信心度 (0-1)
- * @property {Array<{format: string, score: number}>} top_k - Top-K 候選格式
+ * @property {Array<{token: string, score: number}>} top_k - Top-K 候選 token
  * @property {string[]} reason_codes - 預測原因碼
  */
 
@@ -39,7 +42,7 @@ const inferenceWebroot = inferenceWebrootMeta
 // 狀態追蹤
 let inferenceEnabled = true;
 /** @type {string|null} */
-let lastInferredFormat = null;
+let lastInferredToken = null;
 /** @type {string|null} */
 let lastInferredEngine = null;
 let isInferredValue = false;
@@ -119,10 +122,11 @@ async function cancelWarmup() {
 
 /**
  * 自動填入推斷的格式
- * @param {string} format - 推斷的格式
+ * UI 行為完全等同使用者手動輸入
+ * @param {string} token - 推斷的 search token
  * @param {string} [engine] - 推斷的引擎
  */
-function autoFillInferredFormat(format, engine) {
+function autoFillInferredFormat(token, engine) {
   /** @type {HTMLInputElement|null} */
   const searchInput = document.querySelector("input[name='convert_to_search']");
   const convertToPopup = document.querySelector(".convert_to_popup");
@@ -133,30 +137,20 @@ function autoFillInferredFormat(format, engine) {
   }
 
   // 儲存推斷值
-  lastInferredFormat = format;
+  lastInferredToken = token;
   lastInferredEngine = engine || null;
   isInferredValue = true;
 
-  // 填入搜尋欄
-  searchInput.value = format;
+  // 填入搜尋欄 - UI 行為完全等同使用者輸入
+  searchInput.value = token;
 
   // 觸發 input 事件以過濾結果
   const inputEvent = new Event("input", { bubbles: true });
   searchInput.dispatchEvent(inputEvent);
 
-  // 添加視覺提示 (使用淡色邊框)
-  searchInput.style.borderColor = "#22c55e";
-  searchInput.style.borderWidth = "2px";
+  // 不修改任何 UI 樣式 - 純粹模擬使用者輸入
 
-  // 3秒後恢復原樣
-  setTimeout(() => {
-    if (isInferredValue && searchInput.value === format) {
-      searchInput.style.borderColor = "";
-      searchInput.style.borderWidth = "";
-    }
-  }, 3000);
-
-  console.log(`🎯 Auto-filled format: ${format}${engine ? ` (engine: ${engine})` : ""}`);
+  console.log(`🎯 Auto-filled search token: ${token}${engine ? ` (engine: ${engine})` : ""}`);
 }
 
 /**
@@ -164,19 +158,19 @@ function autoFillInferredFormat(format, engine) {
  * @param {string} inputExt - 輸入副檔名
  */
 function handleSearchClear(inputExt) {
-  if (isInferredValue && lastInferredFormat) {
+  if (isInferredValue && lastInferredToken) {
     // 記錄為負樣本
-    logDismissEvent(inputExt, lastInferredFormat, lastInferredEngine || undefined);
+    logDismissEvent(inputExt, lastInferredToken, lastInferredEngine || undefined);
 
     // 取消預調用
     cancelWarmup();
 
-    console.log(`❌ User dismissed inference: ${lastInferredFormat}`);
+    console.log(`❌ User dismissed inference: ${lastInferredToken}`);
   }
 
   // 重置狀態
   isInferredValue = false;
-  lastInferredFormat = null;
+  lastInferredToken = null;
   lastInferredEngine = null;
 }
 
@@ -188,14 +182,6 @@ function handleManualInput() {
     // 使用者手動修改，取消預調用
     cancelWarmup();
     isInferredValue = false;
-
-    // 恢復邊框樣式
-    /** @type {HTMLInputElement|null} */
-    const searchInput = document.querySelector("input[name='convert_to_search']");
-    if (searchInput) {
-      searchInput.style.borderColor = "";
-      searchInput.style.borderWidth = "";
-    }
   }
 }
 
@@ -221,7 +207,7 @@ function initInferenceModule() {
       // 如果是程式設定的值，不處理
       if (e.isTrusted && isInferredValue) {
         const currentValue = searchInput.value;
-        if (currentValue !== lastInferredFormat) {
+        if (currentValue !== lastInferredToken) {
           handleManualInput();
         }
       }

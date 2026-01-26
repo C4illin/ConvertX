@@ -439,15 +439,15 @@ async function triggerFormatInference(ext, fileSize) {
     const result = await window.inferenceModule.requestFormatInference(ext, fileSizeKb);
 
     if (result && result.should_auto_fill && result.format) {
-      // 自動填入推斷的格式
+      // 自動填入推斷的 search token (模擬使用者輸入)
       window.inferenceModule.autoFillInferredFormat(
-        result.format.search_format,
+        result.format.search_token,
         result.engine?.engine,
       );
 
       // 嘗試自動選擇對應的引擎選項
       if (result.engine) {
-        autoSelectEngine(result.format.search_format, result.engine.engine);
+        autoSelectEngine(result.format.search_token, result.engine.engine);
       }
     }
   } catch (error) {

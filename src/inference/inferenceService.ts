@@ -181,7 +181,7 @@ export class InferenceService {
     let enginePrediction: EnginePrediction | null = null;
     if (formatPrediction) {
       enginePrediction = this.engineModel.predict(
-        formatPrediction.search_format,
+        formatPrediction.search_token,
         features,
         userProfile,
         availableEngines,

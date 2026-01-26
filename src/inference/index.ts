@@ -2,6 +2,7 @@
  * 推斷模組統一導出
  */
 
+export * from "./tokenLexicon";
 export * from "./featureExtraction";
 export * from "./formatCandidateRules";
 export * from "./formatPredictionModel";

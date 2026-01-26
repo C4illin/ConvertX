@@ -2,10 +2,11 @@
  * 格式預測模型
  *
  * 基於使用者行為歷史和檔案特徵預測最可能的目標格式
- * 使用輕量級的邏輯回歸模型 + 規則融合
+ * 輸出 search_token 用於 prefix matching 搜尋
  */
 
 import { generateCandidates } from "./formatCandidateRules";
+import { normalizeToken } from "./tokenLexicon";
 import type { FileFeatures } from "./featureExtraction";
 import type { UserProfile, FormatConversionStats } from "./behaviorStore";
 
@@ -13,12 +14,12 @@ import type { UserProfile, FormatConversionStats } from "./behaviorStore";
  * 格式預測結果
  */
 export interface FormatPrediction {
-  /** 預測的搜尋格式 */
-  search_format: string;
+  /** 預測的搜尋 token (用於 prefix matching) */
+  search_token: string;
   /** 預測信心度 (0-1) */
   confidence: number;
-  /** Top-K 候選格式 */
-  top_k: Array<{ format: string; score: number }>;
+  /** Top-K 候選 token */
+  top_k: Array<{ token: string; score: number }>;
   /** 預測原因碼 */
   reason_codes: string[];
 }
@@ -76,15 +77,18 @@ export class FormatPredictionModel {
   private weights: ModelWeights;
   private globalPopularity: Record<string, number>;
   private minConfidenceThreshold: number;
+  private coldStartThreshold: number;
 
   constructor(
     weights: Partial<ModelWeights> = {},
     globalPopularity: Record<string, number> = DEFAULT_GLOBAL_POPULARITY,
-    minConfidenceThreshold = 0.4,
+    minConfidenceThreshold = 0.35,
+    coldStartThreshold = 0.15,
   ) {
     this.weights = { ...DEFAULT_WEIGHTS, ...weights };
     this.globalPopularity = globalPopularity;
     this.minConfidenceThreshold = minConfidenceThreshold;
+    this.coldStartThreshold = coldStartThreshold;
   }
 
   /**
@@ -171,7 +175,7 @@ export class FormatPredictionModel {
     // 排序並取 Top-K
     scoredFormats.sort((a, b) => b.score - a.score);
     const topK = scoredFormats.slice(0, 5).map((s) => ({
-      format: s.format,
+      token: normalizeToken(s.format),
       score: Math.round(s.score * 100) / 100,
     }));
 
@@ -184,13 +188,20 @@ export class FormatPredictionModel {
     // 計算信心度 (使用 softmax 正規化後的相對優勢)
     const confidence = this.calculateConfidence(scoredFormats);
 
+    // 根據是否有使用者歷史選擇不同的閾值
+    // 冷啟動時使用較低閾值，讓系統可以開始學習
+    const hasUserHistory = userProfile && Object.keys(userProfile.format_preferences).length > 0;
+    const effectiveThreshold = hasUserHistory
+      ? this.minConfidenceThreshold
+      : this.coldStartThreshold;
+
     // 如果信心度低於閾值，不推薦
-    if (confidence < this.minConfidenceThreshold) {
+    if (confidence < effectiveThreshold) {
       return null;
     }
 
     return {
-      search_format: topFormat.format,
+      search_token: normalizeToken(topFormat.format),
       confidence: Math.round(confidence * 100) / 100,
       top_k: topK,
       reason_codes: matched_rules,
