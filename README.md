@@ -19,6 +19,7 @@
 | 🔧 **25+ 引擎**   | LibreOffice、FFmpeg、Pandoc 全到位      |
 | 🈶 **中文優化**   | 內建中日韓字型與 OCR，告別亂碼          |
 | 🌐 **65 種語言**  | 跨國團隊無障礙使用                      |
+| 🎯 **智能推斷**   | 自動預測目標格式與引擎，越用越懂你      |
 | 📊 **PDF 翻譯**   | PDFMathTranslate + BabelDOC 雙引擎      |
 | 📄 **PDF 轉 MD**  | MinerU 智能擷取（保留表格、公式、圖片） |
 

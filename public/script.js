@@ -100,6 +100,9 @@ function handleFile(file) {
       .then((html) => {
         selectContainer.innerHTML = html;
         updateSearchBar();
+
+        // 🎯 觸發格式推斷
+        triggerFormatInference(fileType, file.size);
       })
       .catch(console.error);
   }
@@ -415,3 +418,88 @@ formConvert.addEventListener("submit", () => {
 });
 
 updateSearchBar();
+
+// ==================== 格式推斷功能 ====================
+
+/**
+ * 觸發格式推斷
+ * @param {string} ext - 檔案副檔名
+ * @param {number} fileSize - 檔案大小 (bytes)
+ */
+async function triggerFormatInference(ext, fileSize) {
+  // 檢查推斷模組是否可用
+  if (!window.inferenceModule) {
+    console.warn("Inference module not loaded");
+    return;
+  }
+
+  const fileSizeKb = Math.round(fileSize / 1024);
+
+  try {
+    const result = await window.inferenceModule.requestFormatInference(ext, fileSizeKb);
+
+    if (result && result.should_auto_fill && result.format) {
+      // 自動填入推斷的格式
+      window.inferenceModule.autoFillInferredFormat(
+        result.format.search_format,
+        result.engine?.engine,
+      );
+
+      // 嘗試自動選擇對應的引擎選項
+      if (result.engine) {
+        autoSelectEngine(result.format.search_format, result.engine.engine);
+      }
+    }
+  } catch (error) {
+    console.warn("Format inference failed:", error);
+  }
+}
+
+/**
+ * 自動選擇推薦的引擎
+ * @param {string} format - 目標格式
+ * @param {string} engine - 推薦引擎
+ */
+function autoSelectEngine(format, engine) {
+  // 尋找對應的目標按鈕
+  const targetButtons = document.querySelectorAll(".target");
+
+  for (const button of targetButtons) {
+    const targetFormat = button.dataset.target;
+    const converter = button.dataset.converter;
+
+    // 優先匹配格式和引擎
+    if (
+      targetFormat === format &&
+      converter &&
+      converter.toLowerCase().includes(engine.toLowerCase())
+    ) {
+      // 模擬點擊
+      button.click();
+      console.log(`🎯 Auto-selected: ${format} using ${converter}`);
+      return;
+    }
+  }
+
+  // 如果沒有精確匹配，只匹配格式
+  for (const button of targetButtons) {
+    const targetFormat = button.dataset.target;
+
+    if (targetFormat === format) {
+      button.click();
+      console.log(`🎯 Auto-selected format: ${format}`);
+      return;
+    }
+  }
+}
+
+// 將 fileType 暴露給推斷模組
+window.fileType = fileType;
+
+// 監聽 fileType 變化
+Object.defineProperty(window, "fileType", {
+  get: () => fileType,
+  set: (value) => {
+    fileType = value;
+  },
+});

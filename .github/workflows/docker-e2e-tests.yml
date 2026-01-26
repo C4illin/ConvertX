@@ -51,15 +51,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Free disk space
+      # 使用專門的 action 進行激進的磁碟清理
+      - name: Free disk space (aggressive)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - name: Additional disk cleanup
         run: |
-          echo "🧹 Cleaning disk space..."
-          sudo rm -rf /usr/share/dotnet || true
-          sudo rm -rf /usr/local/lib/android || true
-          sudo rm -rf /opt/ghc || true
-          sudo rm -rf /opt/hostedtoolcache || true
+          echo "🧹 Additional disk cleanup..."
+          sudo rm -rf /usr/local/share/boost || true
+          sudo rm -rf /usr/share/swift || true
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
           docker system prune -af --volumes || true
-          echo "📊 Available space:"
+          echo "📊 Available space after cleanup:"
           df -h /
 
       - name: Set up Docker Buildx
@@ -159,11 +170,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Free disk space
-        run: |
-          sudo rm -rf /usr/share/dotnet || true
-          sudo rm -rf /usr/local/lib/android || true
-          docker system prune -af --volumes || true
+      - name: Free disk space (aggressive)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: false
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -368,8 +384,9 @@ jobs:
       - name: Download test results
         uses: actions/download-artifact@v4
         with:
-          name: e2e-test-results
+          pattern: "*-test-results"
           path: test-results/
+          merge-multiple: true
         continue-on-error: true
 
       - name: Check downloaded results

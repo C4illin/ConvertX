@@ -8,6 +8,7 @@ import { Jobs } from "../db/types";
 import { WEBROOT } from "../helpers/env";
 import { normalizeFiletype } from "../helpers/normalizeFiletype";
 import { userService } from "./user";
+import { inferenceService } from "../inference";
 
 export const convert = new Elysia().use(userService).post(
   "/convert",
@@ -67,6 +68,12 @@ export const convert = new Elysia().use(userService).post(
     );
 
     // Start the conversion process in the background
+    // 記錄轉檔開始時間
+    const conversionStartTime = Date.now();
+
+    // 取得輸入檔案的副檔名 (從第一個檔案)
+    const inputExt = fileNames[0]?.split(".").pop()?.toLowerCase() ?? "";
+
     handleConvert(fileNames, userUploadsDir, userOutputDir, convertTo, converterName, jobId)
       .then(() => {
         // All conversions are done, update the job status to 'completed'
@@ -74,11 +81,41 @@ export const convert = new Elysia().use(userService).post(
           db.query("UPDATE jobs SET status = 'completed' WHERE id = ?1").run(jobId.value);
         }
 
+        // 記錄轉檔行為 (用於推斷學習)
+        try {
+          const durationMs = Date.now() - conversionStartTime;
+          inferenceService.logConversion({
+            userId: parseInt(user.id, 10),
+            inputExt: inputExt,
+            searchedFormat: convertTo,
+            selectedEngine: converterName,
+            success: true,
+            durationMs: durationMs,
+          });
+        } catch (logError) {
+          console.warn("Failed to log conversion event:", logError);
+        }
+
         // Delete all uploaded files in userUploadsDir
         // rmSync(userUploadsDir, { recursive: true, force: true });
       })
       .catch((error) => {
         console.error("Error in conversion process:", error);
+
+        // 記錄失敗的轉檔
+        try {
+          const durationMs = Date.now() - conversionStartTime;
+          inferenceService.logConversion({
+            userId: parseInt(user.id, 10),
+            inputExt: inputExt,
+            searchedFormat: convertTo,
+            selectedEngine: converterName,
+            success: false,
+            durationMs: durationMs,
+          });
+        } catch (logError) {
+          console.warn("Failed to log conversion event:", logError);
+        }
       });
 
     // Redirect the client immediately

@@ -20,6 +20,8 @@ import { upload } from "./pages/upload";
 import { uploadChunk, uploadInfo } from "./pages/uploadChunk";
 import { user } from "./pages/user";
 import { healthcheck } from "./pages/healthcheck";
+import { inferenceApi } from "./pages/inference";
+import { inferenceService } from "./inference";
 
 export const uploadsDir = "./data/uploads/";
 export const outputDir = "./data/output/";
@@ -55,6 +57,7 @@ const app = new Elysia({
   .use(listConverters)
   .use(chooseConverter)
   .use(healthcheck)
+  .use(inferenceApi)
   .onError(({ error }) => {
     console.error(error);
   });
@@ -73,6 +76,11 @@ if (process.env.NODE_ENV !== "production") {
 app.listen(3000);
 
 console.log(`🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}${WEBROOT}`);
+
+// 初始化推斷服務
+inferenceService.initialize().catch((error) => {
+  console.error("Failed to initialize inference service:", error);
+});
 
 const clearJobs = () => {
   const jobs = db
