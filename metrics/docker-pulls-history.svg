@@ -1,0 +1,40 @@
+<svg width="800" height="400" viewBox="0 0 800 400"
+     xmlns="http://www.w3.org/2000/svg">
+  <style>
+    text {
+      font-family: -apple-system, BlinkMacSystemFont,
+                   Segoe UI, Helvetica, Arial;
+      fill: #24292f;
+    }
+  </style>
+
+  <rect width="100%" height="100%" fill="#ffffff"/>
+
+  <text x="400" y="28" text-anchor="middle"
+        font-size="18" font-weight="600">
+    Docker Pull History · convertx/convertx-cn
+  </text>
+
+  <!-- grid -->
+  <line x1="60" y1="340" x2="740" y2="340"
+        stroke="#d0d7de"/>
+  <line x1="60" y1="60" x2="60" y2="340"
+        stroke="#d0d7de"/>
+
+  <!-- line -->
+  <polyline fill="none" stroke="#2f81f7"
+            stroke-width="2"
+            points="NaN,60" />
+
+  <!-- labels -->
+  <text x="60" y="380" font-size="12">
+    2026-01-26
+  </text>
+  <text x="740" y="380" font-size="12" text-anchor="end">
+    2026-01-26
+  </text>
+
+  <text x="60" y="50" font-size="12">
+    4,713
+  </text>
+</svg>
