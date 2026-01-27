@@ -150,7 +150,7 @@ export function convert(
   const [inFilter, outFilter] = getFilters(fileType, convertTo);
 
   if (inFilter) {
-    args.push("--infilter=${inFilter}");
+    args.push(`--infilter=${inFilter}`);
   }
 
   if (outFilter) {
