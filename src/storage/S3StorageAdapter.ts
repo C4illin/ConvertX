@@ -9,10 +9,16 @@ export class S3StorageAdapter implements IStorageAdapter {
   }
 
   async save(key: string, data: Buffer): Promise<string> {
-    const file: S3File = s3.file(key, {
+    const opts: Record<string, unknown> = {
       bucket: this.bucket,
-      acl: "private",
-    });
+    };
+
+    if (process.env.S3_USE_ACL === "true") {
+      const aclValue = process.env.S3_ACL_VALUE || "private";
+      opts.acl = aclValue;
+    }
+
+    const file: S3File = s3.file(key, opts);
 
     await file.write(data);
     return key;
