@@ -6,9 +6,9 @@ const db = new Database("./data/mydb.sqlite", { create: true });
 
 function getTableInfo(tableName: string) {
   try {
-    return db.query(`PRAGMA table_info('${tableName}')`).all() as Array<{ name: string}>;
+    return db.query(`PRAGMA table_info('${tableName}')`).all() as Array<{ name: string }>;
   } catch (error) {
-    console.error(`Error getting table info for ${tableName}:`, error)
+    console.error(`Error getting table info for ${tableName}:`, error);
     return [];
   }
 }
@@ -64,7 +64,9 @@ try {
     console.log("Added column file_names.storage_key");
   }
 
-  const currentVersion = (db.query("PRAGMA user_version").get() as { user_version?: number}).user_version ?? 0;
+  const currentVersion =
+    (db.query("PRAGMA user_version").get() as { user_version?: number }).user_version ?? 0;
+
   if (currentVersion < 2) {
     db.exec("PRAGMA user_version = 2;");
     console.log(`Updated database to version 2 (was ${currentVersion}).`);

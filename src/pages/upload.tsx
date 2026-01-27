@@ -31,10 +31,12 @@ export const upload = new Elysia().use(userService).post(
       const buffer = Buffer.from(await file.arrayBuffer());
       await storage.save(storageKey, buffer);
 
-      db.query(`
+      db.query(
+        `
         INSERT INTO file_names (job_id, file_name, storage_key)
         VALUES (?, ?, ?)
-        `).run(jobIdValue, sanitizedFileName, storageKey);
+        `,
+      ).run(jobIdValue, sanitizedFileName, storageKey);
     };
 
     if (body?.file) {
@@ -43,7 +45,7 @@ export const upload = new Elysia().use(userService).post(
           await saveFile(file);
         }
       } else {
-          await saveFile(body.file);;
+        await saveFile(body.file);
       }
     }
 

@@ -2,43 +2,43 @@ import { s3, S3File } from "bun";
 import { IStorageAdapter } from "./index";
 
 export class S3StorageAdapter implements IStorageAdapter {
-    private bucket: string;
+  private bucket: string;
 
-    constructor(bucket: string) {
-        this.bucket = bucket;
-    }
+  constructor(bucket: string) {
+    this.bucket = bucket;
+  }
 
-    async save(key: string, data: Buffer): Promise<string> {
-        const file: S3File = s3.file(key, {
-            bucket: this.bucket,
-            acl: "private",
-        });
-        
-        await file.write(data);
-        return key;
-    }
+  async save(key: string, data: Buffer): Promise<string> {
+    const file: S3File = s3.file(key, {
+      bucket: this.bucket,
+      acl: "private",
+    });
 
-    async get(key: string): Promise<Buffer> {
-        const file: S3File = s3.file(key, {
-            bucket: this.bucket,
-        });
+    await file.write(data);
+    return key;
+  }
 
-        const buf = await file.bytes();
-        return Buffer.from(buf);
-    }
+  async get(key: string): Promise<Buffer> {
+    const file: S3File = s3.file(key, {
+      bucket: this.bucket,
+    });
 
-    async delete(key: string): Promise<void> {
-        const file: S3File = s3.file(key, {
-            bucket: this.bucket,
-        })
+    const buf = await file.bytes();
+    return Buffer.from(buf);
+  }
 
-        await file.delete();
-    }
+  async delete(key: string): Promise<void> {
+    const file: S3File = s3.file(key, {
+      bucket: this.bucket,
+    });
 
-    getStream(key: string): ReadableStream<Uint8Array> {
-        const file: S3File = s3.file(key, {
-            bucket: this.bucket 
-        });
-        return file.stream();
-    }
+    await file.delete();
+  }
+
+  getStream(key: string): ReadableStream<Uint8Array> {
+    const file: S3File = s3.file(key, {
+      bucket: this.bucket,
+    });
+    return file.stream();
+  }
 }

@@ -20,23 +20,24 @@ export const download = new Elysia()
       if (!job) {
         return redirect(`${WEBROOT}/results`, 302);
       }
-      
+
       const fileName = sanitize(decodeURIComponent(params.fileName));
 
       const fileRow = db
-        .query(`
+        .query(
+          `
           SELECT storage_key, file_name 
           FROM file_names
           WHERE job_id = ? AND file_name = ?
         `,
-      )
-      .get(params.jobId, fileName) as { storage_key?: string; file_name?: string } | undefined;
+        )
+        .get(params.jobId, fileName) as { storage_key?: string; file_name?: string } | undefined;
       if (!fileRow) {
         return redirect(`${WEBROOT}/results`, 302);
       }
 
       const storage = getStorage();
-      const stream = await storage.getStream(fileRow.storage_key!);
+      const stream = storage.getStream(fileRow.storage_key!);
 
       return new Response(stream, {
         headers: {
@@ -57,7 +58,7 @@ export const download = new Elysia()
         .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
         .get(user.id, params.jobId);
 
-      if(!job) {
+      if (!job) {
         return redirect(`${WEBROOT}/results`, 302);
       }
 
