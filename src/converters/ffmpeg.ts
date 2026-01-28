@@ -709,41 +709,25 @@ export async function convert(
   }
 
   // Parse FFMPEG_ARGS environment variable into array
-  const ffmpegArgs = process.env.FFMPEG_ARGS ? process.env.FFMPEG_ARGS.split(/\s+/) : [];
+  var ffmpegArgs = process.env.FFMPEG_ARGS ? process.env.FFMPEG_ARGS.split(/\s+/) : [];
   const ffmpegOutputArgs = process.env.FFMPEG_OUTPUT_ARGS
     ? process.env.FFMPEG_OUTPUT_ARGS.split(/\s+/)
     : [];
 
+  // Check for hardware acceleration flag
+  const has_hwa = process.env.FFMPEG_ARGS?.includes('-hwaccel');
+
+  // Determine location in array index
+  const loc_hwa = ffmpegArgs.indexOf('-hwaccel');
+
+  // Get the hardware acceleration type if present
+  // qsv, cuda, etc.
+  const which_hwa = has_hwa ? ffmpegArgs[loc_hwa+1] : "";
+
   if (convertTo.split(".").length > 1) {
     // Support av1.mkv and av1.mp4 and h265.mp4 etc.
     const split = convertTo.split(".");
-    var codec_short = split[0];
-
-  if (ffmpegArgs.includes('qsv')){
-    switch (codec_short) {
-      case "h264":
-        codec_short = "h264_qsv"
-        extraArgs.push("-c:v", codec_short);
-        break;
-      case "h265":
-        codec_short = "hevc_qsv"
-        extraArgs.push("-c:v", codec_short);
-        break;
-    }
-  }
-
-  if (ffmpegArgs.includes('cuda')){
-    switch (codec_short) {
-      case "h264":
-        codec_short = "h264_nvenc"
-        extraArgs.push("-c:v", codec_short);
-        break;
-      case "h265":
-        codec_short = "hevc_nvenc"
-        extraArgs.push("-c:v", codec_short);
-        break;
-    }
-  }
+    const codec_short = has_hwa ? split[0]+"_"+which_hwa : split[0];
 
   switch (codec_short) {
       case "av1":
@@ -758,9 +742,26 @@ export async function convert(
       case "h266":
         extraArgs.push("-c:v", "libx266");
         break;
+      case "h264_qsv":
+        extraArgs.push("-c:v", "h264_qsv");
+        break;
+      case "h265_qsv":
+        extraArgs.push("-c:v", "hevc_qsv");
+        break;
+      case "h264_cuda":
+        extraArgs.push("-c:v", "h264_qsv");
+        break;
+      case "h265_cuda":
+        extraArgs.push("-c:v", "hevc_qsv");
+        break;
     }
+  } else if(has_hwa){
+    // If hardware acceleration is specified but no codec override,
+    // remove from args
+    ffmpegArgs = ffmpegArgs.slice(loc_hwa-1, loc_hwa);
   }
 
+  // Debug: print the full ffmpeg command
   console.log(`ffmpeg ${ffmpegArgs} -i filePath ${ffmpegOutputArgs} ${extraArgs} ${targetPath}`)
 
   return new Promise((resolve, reject) => {
