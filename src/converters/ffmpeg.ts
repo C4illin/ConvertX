@@ -758,7 +758,7 @@ export async function convert(
   } else if(has_hwa){
     // If hardware acceleration is specified but no codec override,
     // remove from args
-    ffmpegArgs = ffmpegArgs.slice(loc_hwa-1, loc_hwa);
+    ffmpegArgs = ffmpegArgs.filter((_, i) => i !== loc_hwa && i !== loc_hwa + 1);
   }
 
   // Debug: print the full ffmpeg command
