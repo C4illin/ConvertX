@@ -708,12 +708,44 @@ export async function convert(
     message = "Done: resized to 256x256";
   }
 
+  // Parse FFMPEG_ARGS environment variable into array
+  const ffmpegArgs = process.env.FFMPEG_ARGS ? process.env.FFMPEG_ARGS.split(/\s+/) : [];
+  const ffmpegOutputArgs = process.env.FFMPEG_OUTPUT_ARGS
+    ? process.env.FFMPEG_OUTPUT_ARGS.split(/\s+/)
+    : [];
+
   if (convertTo.split(".").length > 1) {
     // Support av1.mkv and av1.mp4 and h265.mp4 etc.
     const split = convertTo.split(".");
-    const codec_short = split[0];
+    var codec_short = split[0];
 
+  if (ffmpegArgs.includes('qsv')){
     switch (codec_short) {
+      case "h264":
+        codec_short = "h264_qsv"
+        extraArgs.push("-c:v", codec_short);
+        break;
+      case "h265":
+        codec_short = "hevc_qsv"
+        extraArgs.push("-c:v", codec_short);
+        break;
+    }
+  }
+
+  if (ffmpegArgs.includes('cuda')){
+    switch (codec_short) {
+      case "h264":
+        codec_short = "h264_nvenc"
+        extraArgs.push("-c:v", codec_short);
+        break;
+      case "h265":
+        codec_short = "hevc_nvenc"
+        extraArgs.push("-c:v", codec_short);
+        break;
+    }
+  }
+
+  switch (codec_short) {
       case "av1":
         extraArgs.push("-c:v", "libaom-av1");
         break;
@@ -729,11 +761,7 @@ export async function convert(
     }
   }
 
-  // Parse FFMPEG_ARGS environment variable into array
-  const ffmpegArgs = process.env.FFMPEG_ARGS ? process.env.FFMPEG_ARGS.split(/\s+/) : [];
-  const ffmpegOutputArgs = process.env.FFMPEG_OUTPUT_ARGS
-    ? process.env.FFMPEG_OUTPUT_ARGS.split(/\s+/)
-    : [];
+  console.log(`ffmpeg ${ffmpegArgs} -i filePath ${ffmpegOutputArgs} ${extraArgs} ${targetPath}`)
 
   return new Promise((resolve, reject) => {
     execFile(
