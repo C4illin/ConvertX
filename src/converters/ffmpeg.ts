@@ -729,7 +729,7 @@ export async function convert(
     const split = convertTo.split(".");
     const codec_short = has_hwa ? split[0]+"_"+which_hwa : split[0];
 
-  switch (codec_short) {
+    switch (codec_short) {
       case "av1":
         extraArgs.push("-c:v", "libaom-av1");
         break;
@@ -743,7 +743,7 @@ export async function convert(
         extraArgs.push("-c:v", "libx266");
         break;
       case "h264_qsv":
-        extraArgs.push("-c:v", "h264_qsv");
+        extraArgs.push("-c:v", codec_short);
         break;
       case "h265_qsv":
         extraArgs.push("-c:v", "hevc_qsv");
