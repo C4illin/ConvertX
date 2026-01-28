@@ -749,10 +749,10 @@ export async function convert(
         extraArgs.push("-c:v", "hevc_qsv");
         break;
       case "h264_cuda":
-        extraArgs.push("-c:v", "h264_qsv");
+        extraArgs.push("-c:v", "h264_nvenc");
         break;
       case "h265_cuda":
-        extraArgs.push("-c:v", "hevc_qsv");
+        extraArgs.push("-c:v", "hevc_nvenc");
         break;
     }
   } else if(has_hwa){
