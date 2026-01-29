@@ -743,7 +743,7 @@ export async function convert(
         extraArgs.push("-c:v", "libx266");
         break;
       case "h264_qsv":
-        extraArgs.push("-c:v", codec_short);
+        extraArgs.push("-c:v", "h264_qsv");
         break;
       case "h265_qsv":
         extraArgs.push("-c:v", "hevc_qsv");
