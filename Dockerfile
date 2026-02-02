@@ -40,6 +40,59 @@ COPY . .
 # ENV NODE_ENV=production
 RUN bun run build
 
+# https://github.com/linuxserver/docker-ffmpeg/blob/master/Dockerfile#L968-L1012
+FROM lscr.io/linuxserver/ffmpeg:8.0.1 AS buildstage
+RUN \
+  echo "**** arrange files ****" && \
+  mkdir -p \
+    /buildout/usr/local/bin \
+    /buildout/usr/local/etc/fonts \
+    /buildout/usr/local/lib/libmfx-gen \
+    /buildout/usr/local/lib/mfx \
+    /buildout/usr/local/lib/x86_64-linux-gnu/dri \
+    /buildout/usr/local/share/vulkan \
+    /buildout/usr/share/fonts \
+    /buildout/usr/share/libdrm \
+    /buildout/etc/OpenCL/vendors && \
+# changed https://github.com/linuxserver/docker-ffmpeg/blob/master/Dockerfile#L992-L994
+  cp \
+    /usr/local/bin/ffmpeg \
+    /buildout/usr/local/bin && \
+  cp \
+    /usr/local/bin/ffprobe \
+    /buildout/usr/local/bin && \
+  cp -a \
+    /usr/local/etc/fonts/* \
+    /buildout/usr/local/etc/fonts/ && \
+  cp -a \
+    /usr/local/lib/lib*so* \
+    /buildout/usr/local/lib/ && \
+  cp -a \
+    /usr/local/lib/libmfx-gen/*.so \
+    /buildout/usr/local/lib/libmfx-gen/ && \
+  cp -a \
+    /usr/local/lib/mfx/*.so \
+    /buildout/usr/local/lib/mfx/ && \
+  cp -a \
+    /usr/local/lib/x86_64-linux-gnu/lib*so* \
+    /buildout/usr/local/lib/x86_64-linux-gnu/ && \
+  cp -a \
+    /usr/local/lib/x86_64-linux-gnu/dri/* \
+    /buildout/usr/local/lib/x86_64-linux-gnu/dri/ && \
+# removed https://github.com/linuxserver/docker-ffmpeg/blob/master/Dockerfile#L992-L994
+  cp -a \
+    /usr/share/libdrm/amdgpu.ids \
+    /buildout/usr/share/libdrm/ && \
+  cp -a \
+    /usr/share/fonts/* \
+    /buildout/usr/share/fonts/ && \
+  cp -a \
+    /usr/local/share/vulkan/* \
+    /buildout/usr/local/share/vulkan/ && \
+  echo \
+    'libnvidia-opencl.so.1' > \
+    /buildout/etc/OpenCL/vendors/nvidia.icd
+
 # copy production dependencies and source code into final image
 FROM base AS release
 
@@ -50,7 +103,6 @@ RUN apt-get update && apt-get install -y \
   dasel \
   dcraw \
   dvisvgm \
-  ffmpeg \
   ghostscript \
   graphicsmagick \
   imagemagick-7.q16 \
@@ -81,6 +133,52 @@ RUN apt-get update && apt-get install -y \
   --no-install-recommends \
   && pipx install "markitdown[all]" \
   && rm -rf /var/lib/apt/lists/*
+
+COPY --from=buildstage /buildout/ /
+
+ARG DEBIAN_FRONTEND="noninteractive"
+
+# https://github.com/linuxserver/docker-ffmpeg/blob/master/Dockerfile#L1023-L1027
+# hardware env
+ENV \
+  LIBVA_DRIVERS_PATH="/usr/local/lib/x86_64-linux-gnu/dri" \
+  LD_LIBRARY_PATH="/usr/local/lib" \
+  NVIDIA_DRIVER_CAPABILITIES="compute,video,utility" \
+  NVIDIA_VISIBLE_DEVICES="all"
+
+# install additional dependencies 
+RUN apt-get update && apt-get install -y \
+# start https://github.com/linuxserver/docker-ffmpeg/blob/master/Dockerfile#L1033-L1058
+  libasound2t64 \
+  libedit2 \
+  libelf1 \
+  libexpat1 \
+  libglib2.0-0 \
+  libgomp1 \
+  libllvm18 \
+  libpciaccess0 \
+  libv4l-0 \
+  libwayland-client0 \
+  libx11-6 \
+  libx11-xcb1 \
+  libxcb-dri2-0 \
+  libxcb-dri3-0 \
+  libxcb-present0 \
+  libxcb-randr0 \
+  libxcb-shape0 \
+  libxcb-shm0 \
+  libxcb-sync1 \
+  libxcb-xfixes0 \
+  libxcb1 \
+  libxext6 \
+  libxfixes3 \
+  libxshmfence1 \
+  libxml2 \
+  ocl-icd-libopencl1 && \
+  echo "**** quick test ffmpeg ****" && \
+  ldd /usr/local/bin/ffmpeg && \
+  /usr/local/bin/ffmpeg -version
+# finish https://github.com/linuxserver/docker-ffmpeg/blob/master/Dockerfile#L1033-L1058
 
 # Add pipx bin directory to PATH
 ENV PATH="/root/.local/bin:${PATH}"
