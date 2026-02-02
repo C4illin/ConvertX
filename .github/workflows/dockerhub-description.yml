@@ -1,4 +1,6 @@
 name: Update Docker Hub Description
+permissions:
+  contents: read
 
 env:
   IMAGE_NAME: ${{ github.repository }}
