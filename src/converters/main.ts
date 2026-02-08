@@ -164,13 +164,15 @@ export async function handleConvert(
     const toProcess: Promise<string>[] = [];
     for (const fileName of chunk) {
       const filePath = `${userUploadsDir}${fileName}`;
-      const fileTypeOrig = fileName.split(".").pop() ?? "";
+      const fileTypeOrig = fileName.includes(".") ? (fileName.split(".").pop() ?? "") : "";
       const fileType = normalizeFiletype(fileTypeOrig);
       const newFileExt = normalizeOutputFiletype(convertTo);
-      const newFileName = fileName.replace(
-        new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`),
-        newFileExt,
-      );
+      let newFileName: string;
+      if (fileTypeOrig === "") {
+        newFileName = `${fileName}.${newFileExt}`;
+      } else {
+        newFileName = fileName.replace(new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`), newFileExt);
+      }
       const targetPath = `${userOutputDir}${newFileName}`;
       toProcess.push(
         new Promise((resolve, reject) => {
