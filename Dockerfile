@@ -1,4 +1,4 @@
-FROM debian:trixie-slim AS base
+FROM debian:testing-slim AS base
 LABEL org.opencontainers.image.source="https://github.com/C4illin/ConvertX"
 WORKDIR /app
 
