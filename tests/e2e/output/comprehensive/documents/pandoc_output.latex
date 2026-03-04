@@ -1,0 +1,45 @@
+\section{測試文件 Test
+Document}\label{ux6e2cux8a66ux6587ux4ef6-test-document}
+
+這是一個\textbf{多語言}測試文件。
+
+\subsection{中文內容}\label{ux4e2dux6587ux5167ux5bb9}
+
+繁體中文測試：台灣、香港、澳門 簡體中文测试：北京、上海、广州
+
+\subsection{English Content}\label{english-content}
+
+This is an English paragraph for testing.
+
+\subsection{日本語コンテンツ}\label{ux65e5ux672cux8a9eux30b3ux30f3ux30c6ux30f3ux30c4}
+
+これは日本語のテスト段落です。
+
+\subsection{한국어 콘텐츠}\label{uxd55cuxad6duxc5b4-uxcf58uxd150uxce20}
+
+이것은 한국어 테스트 단락입니다.
+
+\subsubsection{表格 Table}\label{ux8868ux683c-table}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+語言 & Language & 問候 \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+中文 & Chinese & 你好 \\
+英文 & English & Hello \\
+日文 & Japanese & こんにちは \\
+韓文 & Korean & 안녕하세요 \\
+\end{longtable}
+}
+
+\subsubsection{代碼 Code}\label{ux4ee3ux78bc-code}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{console}\OperatorTok{.}\FunctionTok{log}\NormalTok{(}\StringTok{"Hello, 世界!"}\NormalTok{)}\OperatorTok{;}
+\end{Highlighting}
+\end{Shaded}

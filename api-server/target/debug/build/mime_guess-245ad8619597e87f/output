@@ -1,0 +1,1 @@
+cargo:rustc-env=MIME_TYPES_GENERATED_PATH=D:\pi\ConvertX-CN\api-server\target\debug\build\mime_guess-245ad8619597e87f\out\mime_types_generated.rs

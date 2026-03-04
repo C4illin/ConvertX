@@ -1,0 +1,2 @@
+fn(axum::extract::State<async_graphql::Schema<QueryRoot, MutationRoot, EmptySubscription>>, GraphQLRequest) -> impl std::future::Future<Output = GraphQLResponse> {graphql_handler}
+fn(axum::extract::State<async_graphql::Schema<QueryRoot, MutationRoot, EmptySubscription>>, GraphQLRequest) -> impl std::future::Future<Output = GraphQLResponse> {graphql_handler}: Handler<_, _>

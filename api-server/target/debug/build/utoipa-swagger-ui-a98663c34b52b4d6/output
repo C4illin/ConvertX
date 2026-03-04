@@ -1,0 +1,1 @@
+cargo:rerun-if-changed=res/swagger-ui-5.3.1.zip

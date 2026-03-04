@@ -1,0 +1,93 @@
+{
+  "languages": [
+    {
+      "code": "zh",
+      "name": "Simplified Chinese",
+      "nativeName": "简体中文",
+      "testPhrase": "这是一个测试"
+    },
+    {
+      "code": "zh-TW",
+      "name": "Traditional Chinese",
+      "nativeName": "繁體中文",
+      "testPhrase": "這是一個測試"
+    },
+    {
+      "code": "en",
+      "name": "English",
+      "nativeName": "English",
+      "testPhrase": "This is a test"
+    },
+    {
+      "code": "ja",
+      "name": "Japanese",
+      "nativeName": "日本語",
+      "testPhrase": "これはテストです"
+    },
+    {
+      "code": "ko",
+      "name": "Korean",
+      "nativeName": "한국어",
+      "testPhrase": "이것은 테스트입니다"
+    },
+    {
+      "code": "de",
+      "name": "German",
+      "nativeName": "Deutsch",
+      "testPhrase": "Das ist ein Test"
+    },
+    {
+      "code": "fr",
+      "name": "French",
+      "nativeName": "Français",
+      "testPhrase": "C'est un test"
+    },
+    {
+      "code": "es",
+      "name": "Spanish",
+      "nativeName": "Español",
+      "testPhrase": "Esta es una prueba"
+    },
+    {
+      "code": "ru",
+      "name": "Russian",
+      "nativeName": "Русский",
+      "testPhrase": "Это тест"
+    },
+    {
+      "code": "pt",
+      "name": "Portuguese",
+      "nativeName": "Português",
+      "testPhrase": "Isso é um teste"
+    },
+    {
+      "code": "it",
+      "name": "Italian",
+      "nativeName": "Italiano",
+      "testPhrase": "Questo è un test"
+    },
+    {
+      "code": "ar",
+      "name": "Arabic",
+      "nativeName": "العربية",
+      "testPhrase": "هذا اختبار"
+    },
+    {
+      "code": "th",
+      "name": "Thai",
+      "nativeName": "ไทย",
+      "testPhrase": "นี่คือการทดสอบ"
+    },
+    {
+      "code": "vi",
+      "name": "Vietnamese",
+      "nativeName": "Tiếng Việt",
+      "testPhrase": "Đây là một bài kiểm tra"
+    }
+  ],
+  "translators": [
+    "pdf2zh",
+    "babeldoc"
+  ],
+  "generatedAt": "2026-01-25T05:11:58.188Z"
+}

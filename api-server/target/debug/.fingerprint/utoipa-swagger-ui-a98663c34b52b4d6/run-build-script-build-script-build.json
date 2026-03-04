@@ -1,0 +1,1 @@
+{"rustc":6817557220965521185,"features":"","declared_features":"","target":0,"profile":0,"path":0,"deps":[[2516681829802334884,"build_script_build",false,8537918951062680995]],"local":[{"RerunIfChanged":{"output":"debug\\build\\utoipa-swagger-ui-a98663c34b52b4d6\\output","paths":["res/swagger-ui-5.3.1.zip"]}}],"rustflags":[],"config":0,"compile_kind":0}

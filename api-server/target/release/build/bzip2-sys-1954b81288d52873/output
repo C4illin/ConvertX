@@ -1,0 +1,76 @@
+OPT_LEVEL = Some(z)
+TARGET = Some(x86_64-pc-windows-msvc)
+CARGO_ENCODED_RUSTFLAGS = Some()
+cargo:rerun-if-env-changed=VCINSTALLDIR
+VCINSTALLDIR = None
+cargo:rerun-if-env-changed=VSTEL_MSBuildProjectFullPath
+VSTEL_MSBuildProjectFullPath = None
+cargo:rerun-if-env-changed=VCToolsVersion
+VCToolsVersion = None
+cargo:rerun-if-env-changed=VSCMD_ARG_VCVARS_SPECTRE
+VSCMD_ARG_VCVARS_SPECTRE = None
+cargo:rerun-if-env-changed=WindowsSdkDir
+WindowsSdkDir = None
+cargo:rerun-if-env-changed=WindowsSDKVersion
+WindowsSDKVersion = None
+cargo:rerun-if-env-changed=LIB
+LIB = None
+PATH = Some(D:\pi\ConvertX-CN\api-server\target\release;D:\pi\ConvertX-CN\api-server\target\release\deps;C:\Users\季邪\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\x86_64-pc-windows-msvc\lib;C:\Program Files\PowerShell\7;c:\Users\季邪\.vscode\extensions\vadimcn.vscode-lldb-1.12.1\bin;c:\Users\季邪\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\debugCommand;c:\Users\季邪\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\copilotCli;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.1\bin\x64;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.1\bin;C:\Python313\Scripts\;C:\Python313\;D:\NVIDIA\cuda12_1\NVIDIA GPU Computing Toolkit\CUDA\12.1\bin;D:\NVIDIA\cuda12_1\NVIDIA GPU Computing Toolkit\CUDA\12.1\libnvvp;C:\Program Files (x86)\VMware\VMware Workstation\bin\;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Tailscale\;C:\Users\季邪\AppData\Local\Programs\Python\Python38;C;\Users\季邪\AppData\Local\Programs\Python\Python38\Scripts;C:\Program Files\Git\cmd;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\110\Tools\Binn\;C:\Program Files (x86)\Microsoft SQL Server\120\Tools\Binn\;C:\Program Files\Microsoft SQL Server\120\Tools\Binn\;C:\Program Files\Microsoft SQL Server\120\DTS\Binn\;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Users\季邪\AppData\Local\Programs\Python\Python311;D:\vs_code\Sign_language\opencv\Scripts;C:\MinGW\bin;C:\mingw64\bin;C:\ProgramData\chocolatey\bin;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\dotnet\;C:\Users\季邪\AppData\Local\Pandoc\;C:\Program Files\GTK3-Runtime Win64\bin;C:\Program Files\PowerShell\7\;D:\Program Files\nodejs\;C:\Program Files\Go\bin;C:\Program Files\NVIDIA Corporation\Nsight Compute 2025.4.0\;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\GitHub CLI\;C:\Program Files\WiX Toolset v6.0\bin\;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64;C:\Users\季邪\.cargo\bin;C:\Users\季邪\.local\bin;C:\Users\季邪\AppData\Local\Programs\Python\Launcher\;D:\anaconda3;D:\anaconda3\Library\mingw-w64\bin;D:\anaconda3\Library\usr\bin;D:\anaconda3\Library\bin;D:\anaconda3\Scripts;C:\Users\季邪\AppData\Local\Programs\Python\Python38\Scripts\;C:\Users\季邪\AppData\Local\Programs\Python\Python38\;C:\Users\季邪\AppData\Local\Programs\Python\Python311\Scripts\;C:\Users\季邪\AppData\Local\Programs\Python\Python311\;C:\Users\季邪\AppData\Local\Microsoft\WindowsApps;C:\Users\季邪\AppData\Local\Programs\Microsoft VS Code\bin;D:\vs_code\flutter\bin;C:\Users\季邪\AppData\Local\Programs\Python\Python312\;C:\Users\季邪\AppData\Local\Programs\Python\Python312\\scripts;C:\Users\季邪\AppData\Local\Pandoc\;C:\Users\季邪\.bun\bin;C:\Users\季邪\AppData\Roaming\npm;C:\Users\季邪\AppData\Local\Microsoft\WinGet\Packages\astral-sh.uv_Microsoft.Winget.Source_8wekyb3d8bbwe;C:\Users\季邪\AppData\Local\Microsoft\WinGet\Packages\Oven-sh.Bun_Microsoft.Winget.Source_8wekyb3d8bbwe\./bun-windows-x64;C:\Users\季邪\go\bin;C:\Program Files\JetBrains\JetBrains Gateway 2025.3\bin;c:\Users\季邪\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\scripts\noConfigScripts;C:\Users\季邪\.rustup\toolchains\stable-x86_64-pc-windows-msvc\bin)
+cargo:rerun-if-env-changed=INCLUDE
+INCLUDE = None
+HOST = Some(x86_64-pc-windows-msvc)
+cargo:rerun-if-env-changed=CC_x86_64-pc-windows-msvc
+CC_x86_64-pc-windows-msvc = None
+cargo:rerun-if-env-changed=CC_x86_64_pc_windows_msvc
+CC_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=HOST_CC
+HOST_CC = None
+cargo:rerun-if-env-changed=CC
+CC = None
+cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+CRATE_CC_NO_DEFAULTS = None
+CARGO_CFG_TARGET_FEATURE = Some(cmpxchg16b,fxsr,sse,sse2,sse3)
+DEBUG = Some(false)
+cargo:rerun-if-env-changed=CFLAGS
+CFLAGS = None
+cargo:rerun-if-env-changed=HOST_CFLAGS
+HOST_CFLAGS = None
+cargo:rerun-if-env-changed=CFLAGS_x86_64_pc_windows_msvc
+CFLAGS_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=CFLAGS_x86_64-pc-windows-msvc
+CFLAGS_x86_64-pc-windows-msvc = None
+cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+huffman.c
+blocksort.c
+crctable.c
+compress.c
+decompress.c
+randtable.c
+bzlib.c
+exit code: 0
+exit code: 0
+exit code: 0
+exit code: 0
+exit code: 0
+exit code: 0
+exit code: 0
+cargo:rerun-if-env-changed=AR_x86_64-pc-windows-msvc
+AR_x86_64-pc-windows-msvc = None
+cargo:rerun-if-env-changed=AR_x86_64_pc_windows_msvc
+AR_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=HOST_AR
+HOST_AR = None
+cargo:rerun-if-env-changed=AR
+AR = None
+cargo:rerun-if-env-changed=ARFLAGS
+ARFLAGS = None
+cargo:rerun-if-env-changed=HOST_ARFLAGS
+HOST_ARFLAGS = None
+cargo:rerun-if-env-changed=ARFLAGS_x86_64_pc_windows_msvc
+ARFLAGS_x86_64_pc_windows_msvc = None
+cargo:rerun-if-env-changed=ARFLAGS_x86_64-pc-windows-msvc
+ARFLAGS_x86_64-pc-windows-msvc = None
+cargo:rustc-link-lib=static=bz2
+cargo:rustc-link-search=native=D:\pi\ConvertX-CN\api-server\target\release\build\bzip2-sys-1954b81288d52873\out\lib
+cargo:root=D:\pi\ConvertX-CN\api-server\target\release\build\bzip2-sys-1954b81288d52873\out
+cargo:include=D:\pi\ConvertX-CN\api-server\target\release\build\bzip2-sys-1954b81288d52873\out\include

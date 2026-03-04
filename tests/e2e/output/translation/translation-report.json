@@ -1,0 +1,20 @@
+{
+  "generatedAt": "2026-01-25T05:11:58.189Z",
+  "translators": {
+    "pdf2zh": {
+      "name": "pdf2zh",
+      "available": false
+    },
+    "babeldoc": {
+      "name": "babeldoc",
+      "available": false
+    }
+  },
+  "stats": {
+    "total": 6,
+    "passed": 0,
+    "failed": 0,
+    "skipped": 6,
+    "results": []
+  }
+}

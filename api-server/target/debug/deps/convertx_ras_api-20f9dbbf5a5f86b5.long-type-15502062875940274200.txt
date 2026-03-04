@@ -1,0 +1,2 @@
+fn(axum::extract::State<AppState>, HeaderMap, GraphQLRequest) -> impl futures::Future<Output = GraphQLResponse> {graphql_handler}
+fn(axum::extract::State<AppState>, HeaderMap, GraphQLRequest) -> impl futures::Future<Output = GraphQLResponse> {graphql_handler}: Handler<_, _>
