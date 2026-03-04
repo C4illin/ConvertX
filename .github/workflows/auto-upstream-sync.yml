@@ -1,0 +1,281 @@
+# ==============================================================================
+# 自動同步 Upstream Repository
+# 功能：
+#   1. 定時檢查 upstream 更新
+#   2. 自動 merge 到 dev 分支
+#   3. 產生變更摘要（Change Summary）
+#   4. 觸發後續的 build + smoke test
+# ==============================================================================
+
+name: Auto Upstream Sync
+
+on:
+  # 每 6 小時檢查一次 upstream
+  schedule:
+    - cron: "0 */6 * * *"
+  # 手動觸發
+  workflow_dispatch:
+    inputs:
+      force_sync:
+        description: "強制同步（即使無新 commit）"
+        type: boolean
+        default: false
+
+env:
+  UPSTREAM_REPO: https://github.com/C4illin/ConvertX.git
+  TARGET_BRANCH: dev
+  UPSTREAM_BRANCH: main
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  check-and-sync:
+    name: Check & Sync Upstream
+    runs-on: ubuntu-latest
+    outputs:
+      has_updates: ${{ steps.check.outputs.has_updates }}
+      new_commits: ${{ steps.check.outputs.new_commits }}
+      commit_count: ${{ steps.check.outputs.commit_count }}
+      sync_date: ${{ steps.date.outputs.date }}
+      changelog: ${{ steps.changelog.outputs.changelog }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream ${{ env.UPSTREAM_REPO }} || true
+          git fetch upstream ${{ env.UPSTREAM_BRANCH }}
+
+      - name: Check for upstream updates
+        id: check
+        run: |
+          # 取得本地 dev 分支的最後一次 upstream merge commit
+          # 我們用 upstream/main 與目前 HEAD 比較
+
+          LOCAL_HEAD=$(git rev-parse HEAD)
+          UPSTREAM_HEAD=$(git rev-parse upstream/${{ env.UPSTREAM_BRANCH }})
+
+          echo "Local HEAD: $LOCAL_HEAD"
+          echo "Upstream HEAD: $UPSTREAM_HEAD"
+
+          # 檢查 upstream 是否有新的 commits
+          MERGE_BASE=$(git merge-base HEAD upstream/${{ env.UPSTREAM_BRANCH }})
+          echo "Merge base: $MERGE_BASE"
+
+          if [ "$MERGE_BASE" = "$UPSTREAM_HEAD" ]; then
+            echo "✅ Already up to date with upstream"
+            echo "has_updates=false" >> $GITHUB_OUTPUT
+            echo "commit_count=0" >> $GITHUB_OUTPUT
+          else
+            # 計算新的 commits 數量
+            NEW_COMMITS=$(git rev-list --count $MERGE_BASE..$UPSTREAM_HEAD)
+            echo "🔄 Found $NEW_COMMITS new commits from upstream"
+            echo "has_updates=true" >> $GITHUB_OUTPUT
+            echo "commit_count=$NEW_COMMITS" >> $GITHUB_OUTPUT
+            
+            # 取得新 commits 的列表
+            COMMITS_LIST=$(git log --oneline $MERGE_BASE..$UPSTREAM_HEAD)
+            echo "new_commits<<EOF" >> $GITHUB_OUTPUT
+            echo "$COMMITS_LIST" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate changelog before merge
+        id: changelog
+        if: steps.check.outputs.has_updates == 'true' || github.event.inputs.force_sync == 'true'
+        run: |
+          MERGE_BASE=$(git merge-base HEAD upstream/${{ env.UPSTREAM_BRANCH }})
+
+          echo "## 📋 Upstream 變更摘要" > changelog.md
+          echo "" >> changelog.md
+          echo "**同步時間:** $(date +'%Y-%m-%d %H:%M:%S UTC')" >> changelog.md
+          echo "**Upstream 分支:** ${{ env.UPSTREAM_BRANCH }}" >> changelog.md
+          echo "**新 Commits 數量:** ${{ steps.check.outputs.commit_count }}" >> changelog.md
+          echo "" >> changelog.md
+
+          echo "### 📝 Commit 列表" >> changelog.md
+          echo "" >> changelog.md
+          echo "\`\`\`" >> changelog.md
+          git log --oneline --no-merges $MERGE_BASE..upstream/${{ env.UPSTREAM_BRANCH }} >> changelog.md
+          echo "\`\`\`" >> changelog.md
+          echo "" >> changelog.md
+
+          echo "### 📊 變更統計" >> changelog.md
+          echo "" >> changelog.md
+          echo "\`\`\`" >> changelog.md
+          git diff --stat $MERGE_BASE..upstream/${{ env.UPSTREAM_BRANCH }} >> changelog.md
+          echo "\`\`\`" >> changelog.md
+          echo "" >> changelog.md
+
+          echo "### 🔍 變更的檔案" >> changelog.md
+          echo "" >> changelog.md
+          git diff --name-status $MERGE_BASE..upstream/${{ env.UPSTREAM_BRANCH }} | while read line; do
+            STATUS=$(echo "$line" | awk '{print $1}')
+            FILE=$(echo "$line" | awk '{print $2}')
+            case $STATUS in
+              A) echo "- ✅ **新增** \`$FILE\`" >> changelog.md ;;
+              M) echo "- ✏️ **修改** \`$FILE\`" >> changelog.md ;;
+              D) echo "- ❌ **刪除** \`$FILE\`" >> changelog.md ;;
+              R*) echo "- 🔄 **重新命名** \`$FILE\`" >> changelog.md ;;
+              *) echo "- 📄 \`$FILE\` ($STATUS)" >> changelog.md ;;
+            esac
+          done
+
+          cat changelog.md
+
+          # 輸出給後續步驟使用
+          CHANGELOG_CONTENT=$(cat changelog.md)
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG_CONTENT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Merge upstream changes
+        id: merge
+        if: steps.check.outputs.has_updates == 'true' || github.event.inputs.force_sync == 'true'
+        run: |
+          echo "🔄 Merging upstream/${{ env.UPSTREAM_BRANCH }} into ${{ env.TARGET_BRANCH }}..."
+
+          # 嘗試自動 merge
+          if git merge upstream/${{ env.UPSTREAM_BRANCH }} --no-edit -m "🔄 Auto-merge upstream changes ($(date +'%Y-%m-%d'))"; then
+            echo "✅ Merge successful!"
+            echo "merge_success=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Merge conflict detected!"
+            echo "merge_success=false" >> $GITHUB_OUTPUT
+            
+            # 取消 merge
+            git merge --abort
+            
+            # 建立 conflict issue
+            exit 1
+          fi
+
+      - name: Push changes
+        if: steps.merge.outputs.merge_success == 'true'
+        run: |
+          git push origin ${{ env.TARGET_BRANCH }}
+          echo "✅ Changes pushed to ${{ env.TARGET_BRANCH }}"
+
+      - name: Commit changelog
+        if: steps.merge.outputs.merge_success == 'true'
+        run: |
+          # 更新 upstream-changelog.md
+          if [ -f upstream-changelog.md ]; then
+            # 在檔案開頭插入新的 changelog
+            echo "" >> changelog.md
+            echo "---" >> changelog.md
+            echo "" >> changelog.md
+            cat upstream-changelog.md >> changelog.md
+          fi
+
+          mv changelog.md upstream-changelog.md
+          git add upstream-changelog.md
+          git commit -m "📋 Update upstream changelog (${{ steps.date.outputs.date }})" || true
+          git push origin ${{ env.TARGET_BRANCH }} || true
+
+      - name: Create GitHub Issue for sync summary
+        if: steps.merge.outputs.merge_success == 'true' && steps.check.outputs.commit_count > 0
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const date = '${{ steps.date.outputs.date }}';
+            const commitCount = '${{ steps.check.outputs.commit_count }}';
+
+            const body = `## 🔄 Upstream 自動同步完成
+
+            **同步日期:** ${date}
+            **新 Commits:** ${commitCount} 個
+            **目標分支:** \`dev\`
+
+            ### 📝 變更摘要
+
+            \`\`\`
+            ${{ steps.check.outputs.new_commits }}
+            \`\`\`
+
+            ### ⏳ 後續動作
+
+            - [ ] Smoke test 執行中...
+            - [ ] Docker image 建構中 (\`upstream-${date}\`)
+
+            ---
+            *此 Issue 由 GitHub Actions 自動建立*
+            `;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🔄 Upstream Sync: ${date} (${commitCount} commits)`,
+              body: body,
+              labels: ['upstream-sync', 'automated']
+            });
+
+      - name: Create Issue for merge conflict
+        if: failure() && steps.merge.outputs.merge_success == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const date = '${{ steps.date.outputs.date }}';
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `⚠️ Upstream Sync 衝突: ${date}`,
+              body: `## ⚠️ Upstream 同步發生衝突
+              
+              需要手動解決 merge conflict。
+              
+              ### 處理步驟
+              
+              \`\`\`bash
+              git fetch upstream main
+              git checkout dev
+              git merge upstream/main
+              # 解決衝突後
+              git add .
+              git commit
+              git push origin dev
+              \`\`\`
+              
+              ---
+              *此 Issue 由 GitHub Actions 自動建立*
+              `,
+              labels: ['upstream-sync', 'merge-conflict', 'needs-attention']
+            });
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## 🔄 Upstream Sync Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| 項目 | 狀態 |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 檢查時間 | $(date +'%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
+          echo "| 有新更新 | ${{ steps.check.outputs.has_updates }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 新 Commits | ${{ steps.check.outputs.commit_count }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Merge 成功 | ${{ steps.merge.outputs.merge_success || 'N/A' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.check.outputs.has_updates }}" == "true" ]; then
+            echo "### 📝 New Commits" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "${{ steps.check.outputs.new_commits }}" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          fi

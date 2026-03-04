@@ -1,0 +1,6 @@
+Hello, this is a smoke test file for ConvertX.
+這是 ConvertX 的冒煙測試檔案。
+日本語テスト：こんにちは
+한국어 테스트: 안녕하세요
+
+This file should be less than 1KB for quick testing.
