@@ -47,7 +47,7 @@ export const convert = new Elysia().use(userService).post(
     const convertTo = normalizeFiletype(body.convert_to.split(",")[0] ?? "");
     const converterName = body.convert_to.split(",")[1];
 
-    if (!converterName) {
+    if (!converterName || convertTo.includes("/") || convertTo.includes("\\") || convertTo.includes("..")) {
       return redirect(`${WEBROOT}/`, 302);
     }
 
