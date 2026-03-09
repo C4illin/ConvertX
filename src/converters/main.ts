@@ -171,7 +171,10 @@ export async function handleConvert(
       if (fileTypeOrig === "") {
         newFileName = `${fileName}.${newFileExt}`;
       } else {
-        newFileName = fileName.replace(new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`), newFileExt);
+        newFileName = fileName.replace(
+          new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`),
+          newFileExt,
+        );
       }
       const targetPath = `${userOutputDir}${newFileName}`;
       toProcess.push(
