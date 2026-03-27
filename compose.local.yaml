@@ -1,6 +1,6 @@
 services:
   convertx:
-    image: ${CONVERTX_IMAGE_REF:-ghcr.io/c4illin/convertx@sha256:e1f85be04bbaf8a55ead9261194c3ae0fa0957d303ea537127154860b2552afd}
+    image: ${CONVERTX_IMAGE:-ghcr.io/c4illin/convertx}
     container_name: ${CONVERTX_CONTAINER_NAME:-convertx}
     restart: unless-stopped
     ports:

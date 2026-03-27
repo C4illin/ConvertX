@@ -35,6 +35,7 @@ curl -fsS http://127.0.0.1:3000/healthcheck
 ```
 
 5. Open `http://localhost:3000`
+6. Create the first account before exposing the service to anyone else
 
 ## Useful operations
 
@@ -66,4 +67,4 @@ docker compose --env-file .env.local -f compose.local.yaml restart
 
 - The persistent database and job files are stored in `./data`
 - `HTTP_ALLOWED=true` is appropriate for localhost usage
-- The image reference is pinned through `CONVERTX_IMAGE_REF`, using an immutable digest instead of the floating `latest` tag
+- `CONVERTX_IMAGE` defaults to the published release image and can be overridden if you need a different tag
