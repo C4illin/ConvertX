@@ -1,0 +1,23 @@
+services:
+  convertx:
+    image: ${CONVERTX_IMAGE_REF:-ghcr.io/c4illin/convertx@sha256:e1f85be04bbaf8a55ead9261194c3ae0fa0957d303ea537127154860b2552afd}
+    container_name: ${CONVERTX_CONTAINER_NAME:-convertx}
+    restart: unless-stopped
+    ports:
+      - "${CONVERTX_PORT:-3000}:3000"
+    environment:
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env.local}
+      HTTP_ALLOWED: ${HTTP_ALLOWED:-true}
+      AUTO_DELETE_EVERY_N_HOURS: ${AUTO_DELETE_EVERY_N_HOURS:-24}
+      TZ: ${TZ:-UTC}
+      ACCOUNT_REGISTRATION: ${ACCOUNT_REGISTRATION:-false}
+      ALLOW_UNAUTHENTICATED: ${ALLOW_UNAUTHENTICATED:-false}
+      MAX_CONVERT_PROCESS: ${MAX_CONVERT_PROCESS:-0}
+    volumes:
+      - ${CONVERTX_DATA_DIR:-./data}:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3000/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
