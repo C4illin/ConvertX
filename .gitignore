@@ -50,3 +50,4 @@ package-lock.json
 /Bruno
 /tsconfig.tsbuildinfo
 /public/generated.css
+/.worktrees
