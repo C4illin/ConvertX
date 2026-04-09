@@ -20,7 +20,10 @@
     "@elysiajs/jwt": "^1.4.1",
     "@elysiajs/static": "^1.4.7",
     "@kitajs/html": "^4.2.13",
+    "csv-stringify": "^6.7.0",
     "elysia": "1.4.22",
+    "hyparquet": "^1.25.6",
+    "hyparquet-compressors": "^1.1.1",
     "sanitize-filename": "^1.6.4",
     "tar": "^7.5.13"
   },
