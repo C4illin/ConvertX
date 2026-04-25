@@ -24,7 +24,7 @@ export const download = new Elysia()
       const jobId = decodeURIComponent(params.jobId);
       const fileName = sanitize(decodeURIComponent(params.fileName));
 
-      const filePath = `${outputDir}${userId}/${jobId}/${fileName}`;
+      const filePath = `${outputDir}${userId}/${sanitize(jobId)}/${fileName}`;
       return Bun.file(filePath);
     },
     {
