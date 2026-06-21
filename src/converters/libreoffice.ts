@@ -46,10 +46,29 @@ export const properties = {
       "xml",
       "zabw",
     ],
+    calc: [
+      "csv",
+      "dbf",
+      "dif",
+      "fods",
+      "ods",
+      "ots",
+      "sxc",
+      "stc",
+      "sylk",
+      "tab",
+      "tsv",
+      "xls",
+      "xlsb",
+      "xlsm",
+      "xlsx",
+      "xlt",
+      "xltm",
+      "xltx",
+    ],
   },
   to: {
     text: [
-      "csv",
       "doc",
       "docm",
       "docx",
@@ -72,12 +91,25 @@ export const properties = {
       "xhtml",
       "xml",
     ],
+    calc: [
+      "csv",
+      "fods",
+      "html",
+      "ods",
+      "ots",
+      "xls",
+      "xlsx",
+    ],
   },
 };
 
 type FileCategories = "text" | "calc";
 
-const filters: Record<FileCategories, Record<string, string>> = {
+// Separate input and output filter maps because some formats (e.g. csv) are
+// readable by LibreOffice Writer but cannot be exported by it — Writer has no
+// CSV export filter.  Using a unified map caused "no export filter found" when
+// converting any Writer document to CSV (issue #561).
+const inputFilters: Record<FileCategories, Record<string, string>> = {
   text: {
     "602": "T602Document",
     abw: "AbiWord",
@@ -120,16 +152,71 @@ const filters: Record<FileCategories, Record<string, string>> = {
     xml: "OpenDocument Text Flat XML",
     zabw: "AbiWord",
   },
-  calc: {},
+  calc: {
+    csv: "Text - txt - csv (StarCalc)",
+    dbf: "dBase",
+    dif: "DIF",
+    fods: "OpenDocument Spreadsheet Flat XML",
+    html: "HTML (StarCalc)",
+    ods: "calc8",
+    ots: "calc8_template",
+    sxc: "StarOffice XML (Calc)",
+    stc: "calc_StarOffice_XML_Calc_Template",
+    sylk: "SYLK",
+    tab: "Text - txt - csv (StarCalc)",
+    tsv: "Text - txt - csv (StarCalc)",
+    xls: "MS Excel 97",
+    xlsb: "Calc MS Excel 2007 Binary",
+    xlsm: "Calc MS Excel 2007 VBA XML",
+    xlsx: "Calc MS Excel 2007 XML",
+    xlt: "MS Excel 97 Vorlage/Template",
+    xltm: "Calc MS Excel 2007 VBA XML Template",
+    xltx: "Calc MS Excel 2007 XML Template",
+  },
+};
+
+const outputFilters: Record<FileCategories, Record<string, string>> = {
+  text: {
+    // csv intentionally absent: LibreOffice Writer has no CSV export filter
+    doc: "MS Word 97",
+    docm: "MS Word 2007 XML VBA",
+    docx: "MS Word 2007 XML",
+    dot: "MS Word 97 Vorlage",
+    dotx: "MS Word 2007 XML Template",
+    dotm: "MS Word 2007 XML Template",
+    epub: "EPUB",
+    fodt: "OpenDocument Text Flat XML",
+    htm: "HTML (StarWriter)",
+    html: "HTML (StarWriter)",
+    odt: "writer8",
+    ott: "writer8_template",
+    rtf: "Rich Text Format",
+    tab: "Text",
+    tsv: "Text",
+    txt: "Text",
+    wps: "MS Word 97",
+    wpt: "MS Word 97 Vorlage",
+    xhtml: "HTML (StarWriter)",
+    xml: "OpenDocument Text Flat XML",
+  },
+  calc: {
+    csv: "Text - txt - csv (StarCalc)",
+    fods: "OpenDocument Spreadsheet Flat XML",
+    html: "HTML (StarCalc)",
+    ods: "calc8",
+    ots: "calc8_template",
+    xls: "MS Excel 97",
+    xlsx: "Calc MS Excel 2007 XML",
+  },
 };
 
 const getFilters = (fileType: string, converto: string) => {
   if (converto === "pdf") {
     return [null, null];
-  } else if (fileType in filters.text && converto in filters.text) {
-    return [filters.text[fileType], filters.text[converto]];
-  } else if (fileType in filters.calc && converto in filters.calc) {
-    return [filters.calc[fileType], filters.calc[converto]];
+  } else if (fileType in inputFilters.text && converto in outputFilters.text) {
+    return [inputFilters.text[fileType], outputFilters.text[converto]];
+  } else if (fileType in inputFilters.calc && converto in outputFilters.calc) {
+    return [inputFilters.calc[fileType], outputFilters.calc[converto]];
   }
   return [null, null];
 };
