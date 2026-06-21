@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, expect, test } from "bun:test";
 import { convert } from "../../src/converters/libreoffice";
 import type { ExecFileFn } from "../../src/converters/types";
-import { filters, getFilters } from "../../src/converters/libreoffice";
+import { inputFilters, outputFilters, getFilters } from "../../src/converters/libreoffice";
 
 function requireDefined<T>(value: T, msg: string): NonNullable<T> {
   if (value === undefined || value === null) throw new Error(msg);

@@ -53,7 +53,7 @@ export const properties = {
       "ots",
       "sxc",
       "stc",
-      "sylk",
+      "slk",
       "tab",
       "tsv",
       "xls",
@@ -178,7 +178,7 @@ const inputFilters: Record<FileCategories, Record<string, string>> = {
     pdf: "calc_pdf_Export",
     sxc: "StarOffice XML (Calc)",
     stc: "calc_StarOffice_XML_Calc_Template",
-    sylk: "SYLK",
+    slk: "SYLK",
     tab: "Text - txt - csv (StarCalc)",
     tsv: "Text - txt - csv (StarCalc)",
     xls: "MS Excel 97",
@@ -292,4 +292,4 @@ export function convert(
  * @internal For testing only. Do not use in production.
  * Tests need direct access to cover all filters.
  */
-export { filters, getFilters };
+export { inputFilters, outputFilters, getFilters };
