@@ -16,13 +16,13 @@
     "lint:prettier": "prettier --check ."
   },
   "dependencies": {
-    "@elysiajs/html": "^1.4.0",
-    "@elysiajs/jwt": "^1.4.1",
-    "@elysiajs/static": "^1.4.7",
+    "@elysiajs/html": "^1.4.2",
+    "@elysiajs/jwt": "^1.4.2",
+    "@elysiajs/static": "^1.4.10",
     "@kitajs/html": "^4.2.13",
     "elysia": "1.4.22",
     "sanitize-filename": "^1.6.4",
-    "tar": "^7.5.13"
+    "tar": "^7.5.16"
   },
   "module": "src/index.tsx",
   "type": "module",
@@ -32,21 +32,21 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@kitajs/ts-html-plugin": "^4.1.4",
-    "@tailwindcss/cli": "^4.2.2",
-    "@tailwindcss/postcss": "^4.2.2",
+    "@tailwindcss/cli": "^4.3.1",
+    "@tailwindcss/postcss": "^4.3.1",
     "@types/bun": "latest",
-    "@types/node": "^24.12.0",
-    "eslint": "^10.1.0",
-    "eslint-plugin-better-tailwindcss": "^4.3.2",
-    "globals": "^17.4.0",
+    "@types/node": "^24.13.2",
+    "eslint": "^10.5.0",
+    "eslint-plugin-better-tailwindcss": "^4.6.0",
+    "globals": "^17.6.0",
     "knip": "^5.88.1",
     "npm-run-all2": "^8.0.4",
-    "postcss": "^8.5.8",
-    "prettier": "^3.8.1",
+    "postcss": "^8.5.15",
+    "prettier": "^3.8.4",
     "tailwind-scrollbar": "^4.0.2",
-    "tailwindcss": "^4.2.2",
+    "tailwindcss": "^4.3.1",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.57.2"
+    "typescript-eslint": "^8.61.1"
   },
   "trustedDependencies": [
     "@parcel/watcher",
