@@ -7,6 +7,10 @@ let fileType;
 let pendingFiles = 0;
 let formatSelected = false;
 
+const urlParams = new URLSearchParams(window.location.search);
+const defaultTo = urlParams.get("to");
+const defaultConverter = urlParams.get("converter");
+
 dropZone.addEventListener("dragover", (e) => {
   e.preventDefault();
   dropZone.classList.add("dragover");
@@ -59,6 +63,23 @@ function handleFile(file) {
       .then((html) => {
         selectContainer.innerHTML = html;
         updateSearchBar();
+
+        if (defaultTo) {
+          const selector = defaultConverter
+            ? `.target[data-value="${defaultTo},${defaultConverter}"]`
+            : `.target[data-target="${defaultTo}"]`;
+          const targetBtn = document.querySelector(selector);
+          if (targetBtn) {
+            const convertToEl = document.querySelector("select[name='convert_to']");
+            const convertToInputEl = document.querySelector("input[name='convert_to_search']");
+            convertToEl.value = targetBtn.dataset.value;
+            convertToInputEl.value = `${targetBtn.dataset.target} using ${targetBtn.dataset.converter}`;
+            formatSelected = true;
+            if (pendingFiles === 0 && fileNames.length > 0) {
+              convertButton.disabled = false;
+            }
+          }
+        }
       })
       .catch(console.error);
   }
