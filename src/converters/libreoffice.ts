@@ -91,15 +91,7 @@ export const properties = {
       "xhtml",
       "xml",
     ],
-    calc: [
-      "csv",
-      "fods",
-      "html",
-      "ods",
-      "ots",
-      "xls",
-      "xlsx",
-    ],
+    calc: ["csv", "fods", "html", "ods", "ots", "xls", "xlsx"],
   },
 };
 
