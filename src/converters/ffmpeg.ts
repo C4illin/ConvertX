@@ -710,8 +710,9 @@ export async function convert(
   }
 
   if (convertTo === "wav-3cx") {
-    // 3CX telephony preset: mono, 8 kHz, 16-bit PCM
-    extraArgs.push("-ac", "1", "-ar", "8000", "-sample_fmt", "s16");
+    // 3CX telephony preset: mono, 8 kHz, 16-bit PCM (pcm_s16le is explicit to
+    // avoid FFMPEG_OUTPUT_ARGS overriding the codec and breaking 3CX playback)
+    extraArgs.push("-ac", "1", "-ar", "8000", "-c:a", "pcm_s16le");
   }
 
   if (convertTo.split(".").length > 1) {

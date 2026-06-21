@@ -65,10 +65,11 @@ function handleFile(file) {
         updateSearchBar();
 
         if (defaultTo) {
-          const selector = defaultConverter
-            ? `.target[data-value="${defaultTo},${defaultConverter}"]`
-            : `.target[data-target="${defaultTo}"]`;
-          const targetBtn = document.querySelector(selector);
+          const targetBtn = Array.from(document.querySelectorAll(".target")).find((t) =>
+            defaultConverter
+              ? t.dataset.target === defaultTo && t.dataset.converter === defaultConverter
+              : t.dataset.target === defaultTo,
+          );
           if (targetBtn) {
             const convertToEl = document.querySelector("select[name='convert_to']");
             const convertToInputEl = document.querySelector("input[name='convert_to_search']");
