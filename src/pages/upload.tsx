@@ -1,9 +1,10 @@
 import { Elysia, t } from "elysia";
 import db from "../db/db";
 import { WEBROOT } from "../helpers/env";
-import { uploadsDir } from "../index";
 import { userService } from "./user";
 import sanitize from "sanitize-filename";
+import { getStorage } from "../storage";
+import crypto from "node:crypto";
 
 export const upload = new Elysia().use(userService).post(
   "/upload",
@@ -11,6 +12,8 @@ export const upload = new Elysia().use(userService).post(
     if (!jobId?.value) {
       return redirect(`${WEBROOT}/`, 302);
     }
+
+    const jobIdValue = jobId.value;
 
     const existingJob = await db
       .query("SELECT * FROM jobs WHERE id = ? AND user_id = ?")
@@ -20,17 +23,29 @@ export const upload = new Elysia().use(userService).post(
       return redirect(`${WEBROOT}/`, 302);
     }
 
-    const userUploadsDir = `${uploadsDir}${user.id}/${jobId.value}/`;
+    const storage = getStorage();
+
+    const saveFile = async (file: File) => {
+      const sanitizedFileName = sanitize(file.name);
+      const storageKey = `${user.id}/${jobId.value}/${crypto.randomUUID()}`;
+      const buffer = Buffer.from(await file.arrayBuffer());
+      await storage.save(storageKey, buffer);
+
+      db.query(
+        `
+        INSERT INTO file_names (job_id, file_name, storage_key)
+        VALUES (?, ?, ?)
+        `,
+      ).run(jobIdValue, sanitizedFileName, storageKey);
+    };
 
     if (body?.file) {
       if (Array.isArray(body.file)) {
         for (const file of body.file) {
-          const santizedFileName = sanitize(file.name);
-          await Bun.write(`${userUploadsDir}${santizedFileName}`, file);
+          await saveFile(file);
         }
       } else {
-        const santizedFileName = sanitize(body.file["name"]);
-        await Bun.write(`${userUploadsDir}${santizedFileName}`, body.file);
+        await saveFile(body.file);
       }
     }
 
