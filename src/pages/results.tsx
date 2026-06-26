@@ -23,14 +23,16 @@ function ResultsArticle({
       <div class="mb-4 flex items-center justify-between">
         <h1 class="text-xl">Results</h1>
         <div class="flex flex-row gap-4">
-          <a
-            style={files.length !== job.num_files ? "pointer-events: none;" : ""}
-            class="flex btn-secondary flex-row gap-2 text-contrast"
-            href={`${WEBROOT}/delete/${job.id}`}
-            {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
-          >
-            <DeleteIcon /> <p>Delete</p>
-          </a>
+          <form action={`${WEBROOT}/delete/${job.id}`} method="POST">
+            <button
+              type="submit"
+              style={files.length !== job.num_files ? "pointer-events: none;" : ""}
+              class="flex btn-secondary flex-row gap-2 text-contrast"
+              {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
+            >
+              <DeleteIcon /> <p>Delete</p>
+            </button>
+          </form>
           <a
             style={files.length !== job.num_files ? "pointer-events: none;" : ""}
             href={`${WEBROOT}/archive/${job.id}`}
