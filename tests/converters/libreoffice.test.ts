@@ -166,3 +166,59 @@ test("logs stderr on exec error as well", async () => {
   // The callback still provided stderr; your implementation logs it before settling
   expect(errors).toContain("stderr: EPIPE");
 });
+
+// --- calc (spreadsheet) category --------------------------------------------
+test("uses Calc infilter and outfilter for xlsx -> csv (regression for issue #561)", async () => {
+  await convert("in.xlsx", "xlsx", "csv", "out/out.csv", undefined, mockExecFile);
+
+  const { args } = requireDefined(calls[0], "Expected at least one execFile call");
+  expect(args).toEqual([
+    "--headless",
+    "--infilter=Calc MS Excel 2007 XML",
+    "--convert-to",
+    "csv:Text - txt - csv (StarCalc)",
+    "--outdir",
+    "out",
+    "in.xlsx",
+  ]);
+});
+
+test("uses Calc infilter and outfilter for csv -> xlsx", async () => {
+  await convert("in.csv", "csv", "xlsx", "out/out.xlsx", undefined, mockExecFile);
+
+  const { args } = requireDefined(calls[0], "Expected at least one execFile call");
+  expect(args).toEqual([
+    "--headless",
+    "--infilter=Text - txt - csv (StarCalc)",
+    "--convert-to",
+    "xlsx:Calc MS Excel 2007 XML",
+    "--outdir",
+    "out",
+    "in.csv",
+  ]);
+});
+
+test("uses Calc infilter and outfilter for ods -> xlsx", async () => {
+  await convert("in.ods", "ods", "xlsx", "out/out.xlsx", undefined, mockExecFile);
+
+  const { args } = requireDefined(calls[0], "Expected at least one execFile call");
+  expect(args).toEqual([
+    "--headless",
+    "--infilter=calc8",
+    "--convert-to",
+    "xlsx:Calc MS Excel 2007 XML",
+    "--outdir",
+    "out",
+    "in.ods",
+  ]);
+});
+
+test("pdf -> csv produces no filters (cross-category: not supported via LibreOffice Writer)", async () => {
+  await convert("in.pdf", "pdf", "csv", "out/out.csv", undefined, mockExecFile);
+
+  const { args } = requireDefined(calls[0], "Expected at least one execFile call");
+  // pdf is Writer-category; csv output requires Calc — no valid cross-category
+  // filter exists, so soffice is invoked without explicit filters and will fail
+  // gracefully.  The properties list no longer exposes this combination.
+  expect(args).toEqual(["--headless", "--convert-to", "csv", "--outdir", "out", "in.pdf"]);
+});
