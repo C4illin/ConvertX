@@ -57,6 +57,47 @@ describe("convert", () => {
     expect(calledArgs[1]).toContain("output.pdf");
   });
 
+  test("should add CJK mainfont argument for pdf output", async () => {
+    let calledArgs: Parameters<ExecFileFn> = ["", [], () => {}];
+    mockExecFile = (cmd, args, callback) => {
+      calledArgs = [cmd, args, callback];
+      callback(null, "output-data", "");
+    };
+
+    await convert("input.md", "markdown", "pdf", "output.pdf", undefined, mockExecFile);
+
+    const cjkFontIndex = calledArgs[1].indexOf("-V");
+    expect(cjkFontIndex).toBeGreaterThan(-1);
+    expect(calledArgs[1][cjkFontIndex + 1]).toBe("CJKmainfont=Noto Sans CJK SC");
+  });
+
+  test("should add CJK mainfont argument for latex output", async () => {
+    let calledArgs: Parameters<ExecFileFn> = ["", [], () => {}];
+    mockExecFile = (cmd, args, callback) => {
+      calledArgs = [cmd, args, callback];
+      callback(null, "output-data", "");
+    };
+
+    await convert("input.md", "markdown", "latex", "output.tex", undefined, mockExecFile);
+
+    expect(calledArgs[1][0]).toBe("--pdf-engine=xelatex");
+    const cjkFontIndex = calledArgs[1].indexOf("-V");
+    expect(cjkFontIndex).toBeGreaterThan(-1);
+    expect(calledArgs[1][cjkFontIndex + 1]).toBe("CJKmainfont=Noto Sans CJK SC");
+  });
+
+  test("should not add CJK mainfont for non-pdf/latex output", async () => {
+    let calledArgs: Parameters<ExecFileFn> = ["", [], () => {}];
+    mockExecFile = (cmd, args, callback) => {
+      calledArgs = [cmd, args, callback];
+      callback(null, "output-data", "");
+    };
+
+    await convert("input.md", "markdown", "html", "output.html", undefined, mockExecFile);
+
+    expect(calledArgs[1].some((arg) => arg.startsWith("CJKmainfont"))).toBe(false);
+  });
+
   test("should reject if execFile returns an error", async () => {
     mockExecFile = (cmd, args, callback) => callback(new Error("fail"), "", "");
     await expect(

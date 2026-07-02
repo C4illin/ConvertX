@@ -136,6 +136,11 @@ export function convert(
 
   if (xelatex.includes(convertTo)) {
     args.push("--pdf-engine=xelatex");
+    // Specify a CJK-capable main font so that documents containing Chinese,
+    // Japanese or Korean characters render correctly instead of producing
+    // blank/missing glyphs. "Noto Sans CJK SC" is provided by the
+    // fonts-noto-cjk package installed in the Dockerfile.
+    args.push("-V", "CJKmainfont=Noto Sans CJK SC");
   }
 
   args.push(filePath);
