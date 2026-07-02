@@ -169,38 +169,19 @@ describe("convert", () => {
     expect(calledArgs[1].some((arg) => arg.startsWith("CJKmainfont"))).toBe(false);
   });
 
-  test("should always add CJK font for docx binary format with -V adjacency", async () => {
-    let calledArgs: Parameters<ExecFileFn> = ["", [], () => {}];
-    mockExecFile = (cmd, args, callback) => {
-      calledArgs = [cmd, args, callback];
-      callback(null, "output-data", "");
-    };
-    const filePath = makeTempFile("binary placeholder content", "docx");
-    await convert(filePath, "docx", "pdf", "output.pdf", undefined, mockExecFile);
-    assertCJKFontArg(calledArgs[1], "Noto Sans CJK SC");
-  });
-
-  test("should always add CJK font for epub binary format with -V adjacency", async () => {
-    let calledArgs: Parameters<ExecFileFn> = ["", [], () => {}];
-    mockExecFile = (cmd, args, callback) => {
-      calledArgs = [cmd, args, callback];
-      callback(null, "output-data", "");
-    };
-    const filePath = makeTempFile("binary placeholder content", "epub");
-    await convert(filePath, "epub", "pdf", "output.pdf", undefined, mockExecFile);
-    assertCJKFontArg(calledArgs[1], "Noto Sans CJK SC");
-  });
-
-  test("should always add CJK font for odt binary format", async () => {
-    let calledArgs: Parameters<ExecFileFn> = ["", [], () => {}];
-    mockExecFile = (cmd, args, callback) => {
-      calledArgs = [cmd, args, callback];
-      callback(null, "output-data", "");
-    };
-    const filePath = makeTempFile("binary placeholder content", "odt");
-    await convert(filePath, "odt", "pdf", "output.pdf", undefined, mockExecFile);
-    assertCJKFontArg(calledArgs[1], "Noto Sans CJK SC");
-  });
+  test.each(["docx", "epub", "odt"])(
+    "should always add CJK font for %s binary format with -V adjacency",
+    async (format: string) => {
+      let calledArgs: Parameters<ExecFileFn> = ["", [], () => {}];
+      mockExecFile = (cmd, args, callback) => {
+        calledArgs = [cmd, args, callback];
+        callback(null, "output-data", "");
+      };
+      const filePath = makeTempFile("binary placeholder content", format);
+      await convert(filePath, format, "pdf", "output.pdf", undefined, mockExecFile);
+      assertCJKFontArg(calledArgs[1], "Noto Sans CJK SC");
+    },
+  );
 
   test("should reject if execFile returns an error", async () => {
     const filePath = makeTempFile("# Test\n");
