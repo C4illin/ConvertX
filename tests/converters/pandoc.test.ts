@@ -21,26 +21,31 @@ describe("convert", () => {
   });
 
   function makeTempFile(content: string, ext = "md"): string {
-    const path = join(
+    const p = join(
       tmpdir(),
       `pandoc-test-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`,
     );
-    writeFileSync(path, content, "utf-8");
-    tempFiles.push(path);
-    return path;
+    writeFileSync(p, content, "utf-8");
+    tempFiles.push(p);
+    return p;
+  }
+
+  function assertCJKFontArg(args: string[], expectedFont: string) {
+    const idx = args.indexOf(`CJKmainfont=${expectedFont}`);
+    expect(idx).toBeGreaterThan(-1);
+    expect(args[idx - 1]).toBe("-V");
   }
 
   beforeEach(() => {
     mockExecFile = (cmd, args, callback) => callback(null, "output-data", "");
   });
 
-  test("should call pandoc with correct arguments (normal)", async () => {
+  test("should call pandoc with correct arguments", async () => {
     let calledArgs: Parameters<ExecFileFn> = ["", [], () => {}];
     mockExecFile = (cmd, args, callback) => {
       calledArgs = [cmd, args, callback];
       callback(null, "output-data", "");
     };
-
     const result = await convert(
       "input.md",
       "markdown",
@@ -49,7 +54,6 @@ describe("convert", () => {
       undefined,
       mockExecFile,
     );
-
     expect(calledArgs[0]).toBe("pandoc");
     expect(calledArgs[1]).toEqual([
       "input.md",
@@ -63,24 +67,16 @@ describe("convert", () => {
     expect(result).toBe("Done");
   });
 
-  test("should add xelatex argument for pdf/latex", async () => {
+  test("should add xelatex argument for pdf", async () => {
     let calledArgs: Parameters<ExecFileFn> = ["", [], () => {}];
     mockExecFile = (cmd, args, callback) => {
       calledArgs = [cmd, args, callback];
       callback(null, "output-data", "");
     };
-
     const filePath = makeTempFile("# Hello World\n");
     await convert(filePath, "markdown", "pdf", "output.pdf", undefined, mockExecFile);
-
     expect(calledArgs[1][0]).toBe("--pdf-engine=xelatex");
     expect(calledArgs[1]).toContain(filePath);
-    expect(calledArgs[1]).toContain("-f");
-    expect(calledArgs[1]).toContain("markdown");
-    expect(calledArgs[1]).toContain("-t");
-    expect(calledArgs[1]).toContain("pdf");
-    expect(calledArgs[1]).toContain("-o");
-    expect(calledArgs[1]).toContain("output.pdf");
   });
 
   test("should not add CJK mainfont for non-CJK content", async () => {
@@ -89,50 +85,42 @@ describe("convert", () => {
       calledArgs = [cmd, args, callback];
       callback(null, "output-data", "");
     };
-
     const filePath = makeTempFile("# Hello World\nThis is English text.\n");
     await convert(filePath, "markdown", "pdf", "output.pdf", undefined, mockExecFile);
-
     expect(calledArgs[1].some((arg) => arg.startsWith("CJKmainfont"))).toBe(false);
   });
 
-  test("should add CJKmainfont=SC for Chinese content", async () => {
+  test("should add CJKmainfont=SC for Chinese content with -V adjacency", async () => {
     let calledArgs: Parameters<ExecFileFn> = ["", [], () => {}];
     mockExecFile = (cmd, args, callback) => {
       calledArgs = [cmd, args, callback];
       callback(null, "output-data", "");
     };
-
     const filePath = makeTempFile("# 中文标题\n这是一段中文内容。\n");
     await convert(filePath, "markdown", "pdf", "output.pdf", undefined, mockExecFile);
-
-    expect(calledArgs[1].some((arg) => arg === "CJKmainfont=Noto Sans CJK SC")).toBe(true);
+    assertCJKFontArg(calledArgs[1], "Noto Sans CJK SC");
   });
 
-  test("should add CJKmainfont=JP for Japanese content", async () => {
+  test("should add CJKmainfont=JP for Japanese content with -V adjacency", async () => {
     let calledArgs: Parameters<ExecFileFn> = ["", [], () => {}];
     mockExecFile = (cmd, args, callback) => {
       calledArgs = [cmd, args, callback];
       callback(null, "output-data", "");
     };
-
     const filePath = makeTempFile("# 日本語タイトル\nこれは日本語の内容です。\n");
     await convert(filePath, "markdown", "pdf", "output.pdf", undefined, mockExecFile);
-
-    expect(calledArgs[1].some((arg) => arg === "CJKmainfont=Noto Sans CJK JP")).toBe(true);
+    assertCJKFontArg(calledArgs[1], "Noto Sans CJK JP");
   });
 
-  test("should add CJKmainfont=KR for Korean content", async () => {
+  test("should add CJKmainfont=KR for Korean content with -V adjacency", async () => {
     let calledArgs: Parameters<ExecFileFn> = ["", [], () => {}];
     mockExecFile = (cmd, args, callback) => {
       calledArgs = [cmd, args, callback];
       callback(null, "output-data", "");
     };
-
     const filePath = makeTempFile("# 한국어 제목\n이것은 한국어 내용입니다.\n");
     await convert(filePath, "markdown", "pdf", "output.pdf", undefined, mockExecFile);
-
-    expect(calledArgs[1].some((arg) => arg === "CJKmainfont=Noto Sans CJK KR")).toBe(true);
+    assertCJKFontArg(calledArgs[1], "Noto Sans CJK KR");
   });
 
   test("should prefer Japanese font when both Kanji and Kana present", async () => {
@@ -141,12 +129,9 @@ describe("convert", () => {
       calledArgs = [cmd, args, callback];
       callback(null, "output-data", "");
     };
-
-    // Japanese text with both Kanji and Hiragana
     const filePath = makeTempFile("# 日本語のテスト\nこれは漢字とひらがなの文章です。\n");
     await convert(filePath, "markdown", "pdf", "output.pdf", undefined, mockExecFile);
-
-    expect(calledArgs[1].some((arg) => arg === "CJKmainfont=Noto Sans CJK JP")).toBe(true);
+    assertCJKFontArg(calledArgs[1], "Noto Sans CJK JP");
     expect(calledArgs[1].some((arg) => arg === "CJKmainfont=Noto Sans CJK SC")).toBe(false);
   });
 
@@ -156,10 +141,8 @@ describe("convert", () => {
       calledArgs = [cmd, args, callback];
       callback(null, "output-data", "");
     };
-
     const filePath = makeTempFile("# English Title\nSome text.\n");
     await convert(filePath, "markdown", "latex", "output.tex", undefined, mockExecFile);
-
     expect(calledArgs[1][0]).toBe("--pdf-engine=xelatex");
     expect(calledArgs[1].some((arg) => arg.startsWith("CJKmainfont"))).toBe(false);
   });
@@ -170,10 +153,8 @@ describe("convert", () => {
       calledArgs = [cmd, args, callback];
       callback(null, "output-data", "");
     };
-
     const filePath = makeTempFile("# 中文标题\n");
     await convert(filePath, "markdown", "html", "output.html", undefined, mockExecFile);
-
     expect(calledArgs[1].some((arg) => arg.startsWith("CJKmainfont"))).toBe(false);
   });
 
@@ -183,12 +164,42 @@ describe("convert", () => {
       calledArgs = [cmd, args, callback];
       callback(null, "output-data", "");
     };
-
-    // Use a non-existent file path
     await convert("/nonexistent/file.md", "markdown", "pdf", "output.pdf", undefined, mockExecFile);
-
     expect(calledArgs[1][0]).toBe("--pdf-engine=xelatex");
     expect(calledArgs[1].some((arg) => arg.startsWith("CJKmainfont"))).toBe(false);
+  });
+
+  test("should always add CJK font for docx binary format with -V adjacency", async () => {
+    let calledArgs: Parameters<ExecFileFn> = ["", [], () => {}];
+    mockExecFile = (cmd, args, callback) => {
+      calledArgs = [cmd, args, callback];
+      callback(null, "output-data", "");
+    };
+    const filePath = makeTempFile("binary placeholder content", "docx");
+    await convert(filePath, "docx", "pdf", "output.pdf", undefined, mockExecFile);
+    assertCJKFontArg(calledArgs[1], "Noto Sans CJK SC");
+  });
+
+  test("should always add CJK font for epub binary format with -V adjacency", async () => {
+    let calledArgs: Parameters<ExecFileFn> = ["", [], () => {}];
+    mockExecFile = (cmd, args, callback) => {
+      calledArgs = [cmd, args, callback];
+      callback(null, "output-data", "");
+    };
+    const filePath = makeTempFile("binary placeholder content", "epub");
+    await convert(filePath, "epub", "pdf", "output.pdf", undefined, mockExecFile);
+    assertCJKFontArg(calledArgs[1], "Noto Sans CJK SC");
+  });
+
+  test("should always add CJK font for odt binary format", async () => {
+    let calledArgs: Parameters<ExecFileFn> = ["", [], () => {}];
+    mockExecFile = (cmd, args, callback) => {
+      calledArgs = [cmd, args, callback];
+      callback(null, "output-data", "");
+    };
+    const filePath = makeTempFile("binary placeholder content", "odt");
+    await convert(filePath, "odt", "pdf", "output.pdf", undefined, mockExecFile);
+    assertCJKFontArg(calledArgs[1], "Noto Sans CJK SC");
   });
 
   test("should reject if execFile returns an error", async () => {

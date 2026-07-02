@@ -122,6 +122,13 @@ export const properties = {
 };
 
 /**
+ * Input formats whose files are binary or compressed (ZIP-based) and cannot
+ * be reliably scanned for CJK characters by reading raw bytes. For these
+ * formats, a CJK font is always passed to avoid missing glyphs.
+ */
+const binaryFormats = new Set(["docx", "epub", "odt", "pptx"]);
+
+/**
  * Detects CJK characters in a file and returns the appropriate Noto Sans CJK
  * font variant for the detected language. Returns null for non-CJK content
  * so that the CJK font argument is omitted entirely, keeping non-CJK
@@ -176,11 +183,18 @@ export function convert(
 
   if (xelatex.includes(convertTo)) {
     args.push("--pdf-engine=xelatex");
-    // Detect CJK characters in the source file and set an appropriate
-    // CJK font only when needed. This avoids breaking non-CJK conversions
-    // in environments without CJK fonts, and selects the correct locale-
-    // specific font variant (JP/KR/SC) for proper glyph rendering.
-    const cjkFont = detectCJKFont(filePath);
+    // For binary/compressed formats (docx, epub, etc.), the raw file bytes
+    // cannot be scanned for CJK characters, so always pass a CJK font.
+    // For text-based formats, detect CJK characters to select the correct
+    // locale-specific font variant (JP/KR/SC) and to avoid adding a CJK
+    // font when the document contains none, keeping non-CJK conversions
+    // working in environments without CJK fonts installed.
+    let cjkFont: string | null;
+    if (binaryFormats.has(fileType.toLowerCase())) {
+      cjkFont = "Noto Sans CJK SC";
+    } else {
+      cjkFont = detectCJKFont(filePath);
+    }
     if (cjkFont) {
       args.push("-V", `CJKmainfont=${cjkFont}`);
     }
