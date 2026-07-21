@@ -163,3 +163,19 @@ test("convert respects emf as input filetype", async () => {
   );
   expect(loggedMessage).toBe("stdout: Fake stdout");
 });
+
+test("convert applies EXIF auto-orient", async () => {
+  const mockExecFile: ExecFileFn = (
+    _cmd: string,
+    _args: string[],
+    callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
+  ) => {
+    calls.push(_args);
+    callback(null, "", "");
+  };
+
+  const result = await convert("input.jpg", "jpg", "png", "output.png", undefined, mockExecFile);
+
+  expect(result).toBe("Done");
+  expect(calls[0]).toEqual(expect.arrayContaining(["input.jpg", "-auto-orient", "output.png"]));
+});
