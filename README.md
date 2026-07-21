@@ -89,6 +89,7 @@ All are optional, JWT_SECRET is recommended to be set.
 
 | Name                         | Default                                            | Description                                                                                                                                                   |
 | ---------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PORT                         | 3000                                               | Application listen port                                                                                                                                       |
 | JWT_SECRET                   | when unset it will use the value from randomUUID() | A long and secret string used to sign the JSON Web Token                                                                                                      |
 | ACCOUNT_REGISTRATION         | false                                              | Allow users to register accounts                                                                                                                              |
 | HTTP_ALLOWED                 | false                                              | Allow HTTP connections, only set this to true locally                                                                                                         |
