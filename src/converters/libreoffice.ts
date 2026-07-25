@@ -77,7 +77,7 @@ export const properties = {
 
 type FileCategories = "text" | "calc";
 
-const filters: Record<FileCategories, Record<string, string>> = {
+const filters: Record<FileCategories, Record<string, string | null>> = {
   text: {
     "602": "T602Document",
     abw: "AbiWord",
@@ -113,7 +113,11 @@ const filters: Record<FileCategories, Record<string, string>> = {
     txt: "Text",
     wn: "WriteNow",
     wpd: "WordPerfect",
-    wps: "MS Word 97",
+    // .wps is Microsoft Works, not MS Word 97/.doc - forcing the "MS Word 97"
+    // filter makes soffice reject a genuine Works document with "source file
+    // could not be loaded", even though it converts the same file fine with
+    // no --infilter at all (LibreOffice auto-detects it correctly).
+    wps: null,
     wpt: "MS Word 97 Vorlage",
     wri: "MS_Write",
     xhtml: "HTML (StarWriter)",

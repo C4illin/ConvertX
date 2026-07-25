@@ -102,6 +102,26 @@ test("uses only infilter when convertTo has no out filter (e.g., docx -> pdf)", 
   expect(args.slice(-2)).toEqual(["out", "in.docx"]);
 });
 
+test("does not force an infilter for wps (Microsoft Works, not MS Word 97)", async () => {
+  // Regression test for https://github.com/C4illin/ConvertX/issues/582 -
+  // forcing --infilter="MS Word 97" on a genuine .wps file makes soffice
+  // reject it with "source file could not be loaded". No forced infilter
+  // lets LibreOffice auto-detect the real format instead.
+  await convert("in.wps", "wps", "docx", "out/out.docx", undefined, mockExecFile);
+
+  const { args } = requireDefined(calls[0], "Expected at least one execFile call");
+
+  expect(args).toEqual([
+    "--headless",
+    "--convert-to",
+    "docx:MS Word 2007 XML",
+    "--outdir",
+    "out",
+    "in.wps",
+  ]);
+  expect(args.some((a) => a.startsWith("--infilter"))).toBe(false);
+});
+
 test("strips leading './' from outdir", async () => {
   await convert("in.txt", "txt", "docx", "./out/out.docx", undefined, mockExecFile);
 
