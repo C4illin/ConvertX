@@ -122,6 +122,29 @@ test("does not force an infilter for wps (Microsoft Works, not MS Word 97)", asy
   expect(args.some((a) => a.startsWith("--infilter"))).toBe(false);
 });
 
+test("does not force an outfilter for wps as an export target either", async () => {
+  // wps shares one filter-map entry for both directions (see the comment in
+  // libreoffice.ts) - docx's own infilter is still emitted (that describes
+  // the real source file), but no --convert-to wps:<filter> suffix is
+  // forced. Verified against a real soffice: this exact invocation succeeds,
+  // with LibreOffice's default export filter for .wps ("MS Word 97" - the
+  // same filter the map pinned before this change, so output is unchanged).
+  // LibreOffice has no Works export filter, so no suffix could do better.
+  await convert("in.docx", "docx", "wps", "out/out.wps", undefined, mockExecFile);
+
+  const { args } = requireDefined(calls[0], "Expected at least one execFile call");
+
+  expect(args).toEqual([
+    "--headless",
+    "--infilter=MS Word 2007 XML",
+    "--convert-to",
+    "wps",
+    "--outdir",
+    "out",
+    "in.docx",
+  ]);
+});
+
 test("strips leading './' from outdir", async () => {
   await convert("in.txt", "txt", "docx", "./out/out.docx", undefined, mockExecFile);
 

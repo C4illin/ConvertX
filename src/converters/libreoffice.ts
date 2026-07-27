@@ -117,6 +117,15 @@ const filters: Record<FileCategories, Record<string, string | null>> = {
     // filter makes soffice reject a genuine Works document with "source file
     // could not be loaded", even though it converts the same file fine with
     // no --infilter at all (LibreOffice auto-detects it correctly).
+    //
+    // null is deliberate for BOTH directions here, not just the import side:
+    // this map feeds both --infilter (import) and the --convert-to suffix
+    // (export). On import, null lets LibreOffice auto-detect - its Works
+    // import filter (MS_Works, libwps-backed) is import-only, so it can only
+    // be reached via auto-detection anyway. On export, LibreOffice has no
+    // Works export filter at all; bare `--convert-to wps` falls back to its
+    // default export filter for the extension, which is "MS Word 97" - the
+    // exact filter this map pinned before, so export output is unchanged.
     wps: null,
     wpt: "MS Word 97 Vorlage",
     wri: "MS_Write",
