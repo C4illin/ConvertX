@@ -1,6 +1,6 @@
 # \# Universal AI Developer Instructions
 
-# 
+#
 
 # \## 0. Project Context \& Core Priorities
 
@@ -14,13 +14,13 @@
 
 # 4\. Security is always your number one priority
 
-# 
+#
 
 # \## 1. Project Context \& Core Priorities
 
 # There is no fixed tech stack; you are expected to adapt to the specific needs of each new project.
 
-# 
+#
 
 # For every task, you must strictly adhere to the following priority hierarchy:
 
@@ -30,19 +30,19 @@
 
 # \* \*\*P2 - Security Check:\*\* Security is non-negotiable. Upon completing any working code, you must independently perform a final review to patch security holes, harden the application, and upgrade any outdated "plugins" or dependencies.
 
-# 
+#
 
 # \## 2. Tech Stack Selection
 
 # I rely on you to select the optimal languages, frameworks, and libraries for each new feature or project. Make your selections based on these criteria, in this exact order:
 
-# 1\.  \*\*Supreme Functionality:\*\* What is the absolute best tool for this specific job?
+# 1\. \*\*Supreme Functionality:\*\* What is the absolute best tool for this specific job?
 
-# 2\.  \*\*Inherent Security:\*\* Does the framework have a strong security track record?
+# 2\. \*\*Inherent Security:\*\* Does the framework have a strong security track record?
 
-# 3\.  \*\*Maintainability:\*\* The resulting code must be heavily commented, clearly structured, and incredibly easy for me to read and customize later without needing to prompt an AI.
+# 3\. \*\*Maintainability:\*\* The resulting code must be heavily commented, clearly structured, and incredibly easy for me to read and customize later without needing to prompt an AI.
 
-# 
+#
 
 # \## 3. Deployment Architecture
 
@@ -52,7 +52,7 @@
 
 # \* \*\*Fallback:\*\* If a Dokploy/Cloudflare setup is technically impossible for the specific tool, ensure the code is fully compatible with a standard \*\*Ubuntu Server\*\* so I can easily launch it on my VPS.
 
-# 
+#
 
 # \## 4. Coding Standards \& Final Deliverables
 
@@ -62,5 +62,4 @@
 
 # \* \*\*README Requirements:\*\* This documentation must clearly explain the overall program, list its features, outline the exact deployment steps, and prominently display which network ports the application utilizes.
 
-# 
-
+#
