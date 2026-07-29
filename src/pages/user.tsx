@@ -228,7 +228,7 @@ export const user = new Elysia()
         httpOnly: true,
         secure: !HTTP_ALLOWED,
         maxAge: 60 * 60 * 24 * 7,
-        sameSite: "strict",
+        sameSite: !HTTP_ALLOWED ? "none" : "lax",
       });
 
       return redirect(`${WEBROOT}/`, 302);
