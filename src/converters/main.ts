@@ -1,5 +1,7 @@
 import { Cookie } from "elysia";
 import db from "../db/db";
+import fs from "node:fs";
+import path from "node:path";
 import { MAX_CONVERT_PROCESS } from "../helpers/env";
 import { normalizeFiletype, normalizeOutputFiletype } from "../helpers/normalizeFiletype";
 import { convert as convertassimp, properties as propertiesassimp } from "./assimp";
@@ -182,7 +184,30 @@ export async function handleConvert(
           mainConverter(filePath, fileType, convertTo, targetPath, {}, converterName)
             .then((r) => {
               if (jobId.value) {
-                query.run(jobId.value, fileName, newFileName, r);
+                const dir = path.dirname(targetPath);
+                const parsed = path.parse(targetPath);
+
+                const outputFiles = fs
+                  .readdirSync(dir)
+                  .filter((f) => {
+                    if (f === parsed.base) {
+                      return true;
+                    }
+
+                    return (
+                      f.startsWith(`${parsed.name}-`) &&
+                      f.endsWith(parsed.ext)
+                    );
+                  })
+                  .sort();
+
+                if (outputFiles.length > 0) {
+                  for (const outputFile of outputFiles) {
+                    query.run(jobId.value, fileName, outputFile, r);
+                  }
+                } else {
+                  query.run(jobId.value, fileName, newFileName, r);
+                }
               }
               resolve(r);
             })
