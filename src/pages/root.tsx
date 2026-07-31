@@ -11,6 +11,7 @@ import {
   ALLOW_UNAUTHENTICATED,
   HIDE_HISTORY,
   HTTP_ALLOWED,
+  OIDC_ONLY,
   UNAUTHENTICATED_USER_SHARING,
   WEBROOT,
 } from "../helpers/env";
@@ -20,7 +21,7 @@ export const root = new Elysia().use(userService).get(
   "/",
   async ({ jwt, redirect, cookie: { auth, jobId } }) => {
     if (!ALLOW_UNAUTHENTICATED) {
-      if (FIRST_RUN) {
+      if (FIRST_RUN && !OIDC_ONLY) {
         return redirect(`${WEBROOT}/setup`, 302);
       }
 

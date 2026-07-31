@@ -13,6 +13,7 @@ import { deleteJob } from "./pages/deleteJob";
 import { download } from "./pages/download";
 import { history } from "./pages/history";
 import { listConverters } from "./pages/listConverters";
+import { oidc } from "./pages/oidc";
 import { results } from "./pages/results";
 import { root } from "./pages/root";
 import { upload } from "./pages/upload";
@@ -39,6 +40,7 @@ const app = new Elysia({
     }),
   )
   .use(user)
+  .use(oidc)
   .use(root)
   .use(upload)
   .use(history)

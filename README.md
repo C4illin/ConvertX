@@ -101,6 +101,37 @@ All are optional, JWT_SECRET is recommended to be set.
 | LANGUAGE                     | en                                                 | Language to format date strings in, specified as a [BCP 47 language tag](https://en.wikipedia.org/wiki/IETF_language_tag)                                     |
 | UNAUTHENTICATED_USER_SHARING | false                                              | Shares conversion history between all unauthenticated users                                                                                                   |
 | MAX_CONVERT_PROCESS          | 0                                                  | Maximum number of concurrent conversion processes allowed. Set to 0 for unlimited.                                                                            |
+| OIDC_ISSUER                  |                                                    | The OIDC provider's issuer URL, e.g. `https://authentik.example.com/application/o/convertx/`. Setting this along with `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` and `OIDC_REDIRECT_URI` enables "Login with SSO". |
+| OIDC_CLIENT_ID               |                                                    | OAuth2/OIDC client ID issued by the provider                                                                                                                  |
+| OIDC_CLIENT_SECRET           |                                                    | OAuth2/OIDC client secret issued by the provider                                                                                                              |
+| OIDC_REDIRECT_URI            |                                                    | The public callback URL registered with the provider, e.g. `https://convertx.example.com/login/oidc/callback`                                                |
+| OIDC_SCOPES                  | openid profile email                               | Space-separated scopes requested from the provider                                                                                                            |
+| OIDC_NAME                    | SSO                                                | Display name used on the "Login with ..." button                                                                                                              |
+| OIDC_ONLY                    | false                                              | Hide the local email/password login and registration forms entirely, only allow login via OIDC                                                               |
+
+### Single sign-on with Authentik (OIDC)
+
+ConvertX can authenticate users against any standards-compliant OIDC provider using the authorization code flow with PKCE. To use Authentik:
+
+1. In Authentik, create a new **Provider** of type "OAuth2/OpenID Provider":
+   - Client type: `Confidential`
+   - Redirect URI: `https://convertx.example.com/login/oidc/callback` (strict, must match `OIDC_REDIRECT_URI` exactly)
+   - Note the generated **Client ID** and **Client Secret**
+2. Create an **Application** in Authentik and bind it to that provider.
+3. Note your provider's issuer URL, shown on the provider page, usually `https://authentik.example.com/application/o/<application-slug>/`.
+4. Set the following in your environment:
+
+```yml
+environment:
+  - OIDC_ISSUER=https://authentik.example.com/application/o/convertx/
+  - OIDC_CLIENT_ID=your-client-id
+  - OIDC_CLIENT_SECRET=your-client-secret
+  - OIDC_REDIRECT_URI=https://convertx.example.com/login/oidc/callback
+  # - OIDC_NAME=Authentik # optional, changes the button label
+  # - OIDC_ONLY=true # optional, hides local password login entirely
+```
+
+The first user to sign in via SSO is automatically created locally (matched/linked by email to any existing local account) and JWT sessions work exactly as with password login. If `OIDC_ONLY` is not set, both the local login form and the SSO button are shown, so existing local accounts keep working alongside SSO.
 
 ### Docker images
 

@@ -9,7 +9,8 @@ if (!db.query("SELECT * FROM sqlite_master WHERE type='table'").get()) {
 CREATE TABLE IF NOT EXISTS users (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	email TEXT NOT NULL,
-	password TEXT NOT NULL
+	password TEXT NOT NULL,
+  oidc_sub TEXT
 );
 CREATE TABLE IF NOT EXISTS file_names (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,7 +28,7 @@ CREATE TABLE IF NOT EXISTS jobs (
   num_files INTEGER DEFAULT 0,
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
-PRAGMA user_version = 1;`);
+PRAGMA user_version = 2;`);
 }
 
 const dbVersion = (db.query("PRAGMA user_version").get() as { user_version?: number }).user_version;
@@ -35,6 +36,11 @@ if (dbVersion === 0) {
   db.exec("ALTER TABLE file_names ADD COLUMN status TEXT DEFAULT 'not started';");
   db.exec("PRAGMA user_version = 1;");
   console.log("Updated database to version 1.");
+}
+if ((dbVersion ?? 0) < 2) {
+  db.exec("ALTER TABLE users ADD COLUMN oidc_sub TEXT;");
+  db.exec("PRAGMA user_version = 2;");
+  console.log("Updated database to version 2.");
 }
 
 // enable WAL mode
