@@ -196,10 +196,11 @@ export async function handleConvert(
 
                     return (
                       f.startsWith(`${parsed.name}-`) &&
-                      f.endsWith(parsed.ext)
+                      f.endsWith(parsed.ext) &&
+                      /^\d+$/.test(f.slice(parsed.name.length + 1, -parsed.ext.length))
                     );
                   })
-                  .sort();
+                  .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
                 if (outputFiles.length > 0) {
                   for (const outputFile of outputFiles) {
