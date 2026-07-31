@@ -21,4 +21,5 @@ export class User {
   email!: string;
   password!: string;
   oidc_sub!: string | null;
+  oidc_issuer!: string | null;
 }

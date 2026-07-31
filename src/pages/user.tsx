@@ -10,11 +10,11 @@ import {
   ALLOW_UNAUTHENTICATED,
   HIDE_HISTORY,
   HTTP_ALLOWED,
-  OIDC_ENABLED,
   OIDC_NAME,
   OIDC_ONLY,
   WEBROOT,
 } from "../helpers/env";
+import { isOidcReady } from "../helpers/oidcClient";
 
 export let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
 
@@ -145,7 +145,7 @@ export const user = new Elysia()
         <>
           <Header
             webroot={WEBROOT}
-            accountRegistration={ACCOUNT_REGISTRATION}
+            accountRegistration={ACCOUNT_REGISTRATION && !OIDC_ONLY}
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
             hideHistory={HIDE_HISTORY}
           />
@@ -267,7 +267,7 @@ export const user = new Elysia()
           <>
             <Header
               webroot={WEBROOT}
-              accountRegistration={ACCOUNT_REGISTRATION}
+              accountRegistration={ACCOUNT_REGISTRATION && !OIDC_ONLY}
               allowUnauthenticated={ALLOW_UNAUTHENTICATED}
               hideHistory={HIDE_HISTORY}
             />
@@ -318,14 +318,14 @@ export const user = new Elysia()
                     </div>
                   </form>
                 ) : null}
-                {OIDC_ENABLED && !OIDC_ONLY ? (
+                {isOidcReady() && !OIDC_ONLY ? (
                   <div class="my-4 flex items-center gap-4 text-sm text-neutral-500">
                     <hr class="flex-1 border-neutral-700" />
                     or
                     <hr class="flex-1 border-neutral-700" />
                   </div>
                 ) : null}
-                {OIDC_ENABLED ? (
+                {isOidcReady() ? (
                   <a
                     href={`${WEBROOT}/login/oidc`}
                     role="button"
@@ -423,7 +423,7 @@ export const user = new Elysia()
           <>
             <Header
               webroot={WEBROOT}
-              accountRegistration={ACCOUNT_REGISTRATION}
+              accountRegistration={ACCOUNT_REGISTRATION && !OIDC_ONLY}
               allowUnauthenticated={ALLOW_UNAUTHENTICATED}
               hideHistory={HIDE_HISTORY}
               loggedIn

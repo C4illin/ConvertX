@@ -10,8 +10,10 @@ CREATE TABLE IF NOT EXISTS users (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	email TEXT NOT NULL,
 	password TEXT NOT NULL,
-  oidc_sub TEXT
+  oidc_sub TEXT,
+  oidc_issuer TEXT
 );
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_oidc_identity ON users(oidc_issuer, oidc_sub);
 CREATE TABLE IF NOT EXISTS file_names (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   job_id INTEGER NOT NULL,
@@ -28,7 +30,7 @@ CREATE TABLE IF NOT EXISTS jobs (
   num_files INTEGER DEFAULT 0,
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
-PRAGMA user_version = 2;`);
+PRAGMA user_version = 3;`);
 }
 
 const dbVersion = (db.query("PRAGMA user_version").get() as { user_version?: number }).user_version;
@@ -41,6 +43,14 @@ if ((dbVersion ?? 0) < 2) {
   db.exec("ALTER TABLE users ADD COLUMN oidc_sub TEXT;");
   db.exec("PRAGMA user_version = 2;");
   console.log("Updated database to version 2.");
+}
+if ((dbVersion ?? 0) < 3) {
+  db.exec("ALTER TABLE users ADD COLUMN oidc_issuer TEXT;");
+  // sub is only guaranteed unique within its issuer, so identity is the (issuer, sub) pair.
+  // SQLite treats every NULL as distinct, so local-only users (both columns NULL) never collide.
+  db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_oidc_identity ON users(oidc_issuer, oidc_sub);");
+  db.exec("PRAGMA user_version = 3;");
+  console.log("Updated database to version 3.");
 }
 
 // enable WAL mode

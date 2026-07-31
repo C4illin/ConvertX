@@ -110,7 +110,7 @@ export const root = new Elysia().use(userService).get(
         <>
           <Header
             webroot={WEBROOT}
-            accountRegistration={ACCOUNT_REGISTRATION}
+            accountRegistration={ACCOUNT_REGISTRATION && !OIDC_ONLY}
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
             hideHistory={HIDE_HISTORY}
             loggedIn

@@ -5,32 +5,30 @@ import db from "../db/db";
 import { User } from "../db/types";
 import {
   HTTP_ALLOWED,
-  OIDC_CLIENT_ID,
-  OIDC_CLIENT_SECRET,
-  OIDC_ENABLED,
   OIDC_ISSUER,
   OIDC_REDIRECT_URI,
   OIDC_SCOPES,
   WEBROOT,
 } from "../helpers/env";
+import { oidcConfig } from "../helpers/oidcClient";
 import { markFirstRunComplete, userService } from "./user";
 
-let oidcConfig: Awaited<ReturnType<typeof client.discovery>> | undefined;
-
-if (OIDC_ENABLED) {
-  try {
-    oidcConfig = await client.discovery(
-      new URL(OIDC_ISSUER),
-      OIDC_CLIENT_ID,
-      OIDC_CLIENT_SECRET,
-    );
-    console.log("OIDC: discovered issuer", OIDC_ISSUER);
-  } catch (error) {
-    console.error("OIDC: failed to discover issuer, SSO login will be unavailable:", error);
-  }
-}
-
 const flowCookiePath = `${WEBROOT}/login/oidc`;
+
+// PKCE verifier/state/nonce are all base64url (oauth4webapi's randomBytes()),
+// so "." can never appear in a value and is safe as a delimiter here. This
+// also avoids Elysia's cookie parser, which auto-JSON.parses any cookie value
+// that looks like `{...}`/`[...]` - a JSON-encoded cookie here would get
+// silently turned into an object before the route's `t.String()` schema ever
+// saw it, failing validation before the handler even runs.
+function parseFlowCookie(value: string): { code_verifier: string; state: string; nonce: string } | null {
+  const parts = value.split(".");
+  if (parts.length !== 3 || parts.some((part) => part.length === 0)) {
+    return null;
+  }
+  const [code_verifier, state, nonce] = parts as [string, string, string];
+  return { code_verifier, state, nonce };
+}
 
 export const oidc = new Elysia().use(userService).get(
   "/login/oidc",
@@ -45,7 +43,7 @@ export const oidc = new Elysia().use(userService).get(
     const nonce = client.randomNonce();
 
     oidcFlow.set({
-      value: JSON.stringify({ code_verifier, state, nonce }),
+      value: `${code_verifier}.${state}.${nonce}`,
       httpOnly: true,
       secure: !HTTP_ALLOWED,
       sameSite: "lax",
@@ -76,13 +74,15 @@ export const oidc = new Elysia().use(userService).get(
       return redirect(`${WEBROOT}/login`, 302);
     }
 
-    const { code_verifier, state, nonce } = JSON.parse(oidcFlow.value) as {
-      code_verifier: string;
-      state: string;
-      nonce: string;
-    };
+    const flow = parseFlowCookie(oidcFlow.value);
     oidcFlow.path = flowCookiePath;
     oidcFlow.remove();
+
+    if (!flow) {
+      console.error("OIDC: malformed oidcFlow cookie");
+      return redirect(`${WEBROOT}/login`, 302);
+    }
+    const { code_verifier, state, nonce } = flow;
 
     let tokens: Awaited<ReturnType<typeof client.authorizationCodeGrant>>;
     try {
@@ -103,10 +103,12 @@ export const oidc = new Elysia().use(userService).get(
     }
 
     let email = typeof claims.email === "string" ? claims.email : undefined;
+    let emailVerified = claims.email_verified === true;
     if (!email) {
       try {
         const userinfo = await client.fetchUserInfo(oidcConfig, tokens.access_token, claims.sub);
         email = typeof userinfo.email === "string" ? userinfo.email : undefined;
+        emailVerified = userinfo.email_verified === true;
       } catch (error) {
         console.error("OIDC: failed to fetch userinfo:", error);
       }
@@ -117,28 +119,46 @@ export const oidc = new Elysia().use(userService).get(
       return redirect(`${WEBROOT}/login`, 302);
     }
 
-    let user = db.query("SELECT * FROM users WHERE oidc_sub = ?").as(User).get(claims.sub);
+    // sub is only guaranteed unique within its issuer, so identity is the (issuer, sub) pair.
+    let user = db
+      .query("SELECT * FROM users WHERE oidc_issuer = ? AND oidc_sub = ?")
+      .as(User)
+      .get(OIDC_ISSUER, claims.sub);
 
     if (!user) {
-      const existingByEmail = db.query("SELECT * FROM users WHERE email = ?").as(User).get(email);
+      // Only auto-link to an existing local account when the provider has
+      // positively verified the email - otherwise an unverified/attacker-set
+      // email claim could hijack an existing account.
+      if (emailVerified) {
+        const existingByEmail = db.query("SELECT * FROM users WHERE email = ?").as(User).get(email);
+        if (existingByEmail) {
+          db.query("UPDATE users SET oidc_sub = ?, oidc_issuer = ? WHERE id = ?").run(
+            claims.sub,
+            OIDC_ISSUER,
+            existingByEmail.id,
+          );
+          user = existingByEmail;
+        }
+      }
 
-      if (existingByEmail) {
-        // Link the existing local account to this OIDC identity.
-        db.query("UPDATE users SET oidc_sub = ? WHERE id = ?").run(claims.sub, existingByEmail.id);
-        user = existingByEmail;
-      } else {
+      if (!user) {
         const isFirstUser = db.query("SELECT * FROM users").get() === null;
         // Local password login stays disabled for SSO-provisioned accounts;
         // this hash is never revealed and the field is only NOT NULL for schema reasons.
         const unusablePassword = await Bun.password.hash(randomUUID());
-        db.query("INSERT INTO users (email, password, oidc_sub) VALUES (?, ?, ?)").run(
-          email,
-          unusablePassword,
-          claims.sub,
-        );
-        user = db.query("SELECT * FROM users WHERE oidc_sub = ?").as(User).get(claims.sub);
+        // ON CONFLICT guards against two concurrent first-logins for the same
+        // new identity both passing the SELECT above and racing to insert.
+        db.query(
+          `INSERT INTO users (email, password, oidc_sub, oidc_issuer)
+           VALUES (?, ?, ?, ?)
+           ON CONFLICT(oidc_issuer, oidc_sub) DO NOTHING`,
+        ).run(email, unusablePassword, claims.sub, OIDC_ISSUER);
+        user = db
+          .query("SELECT * FROM users WHERE oidc_issuer = ? AND oidc_sub = ?")
+          .as(User)
+          .get(OIDC_ISSUER, claims.sub);
 
-        if (isFirstUser) {
+        if (isFirstUser && user) {
           markFirstRunComplete();
         }
       }

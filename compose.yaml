@@ -16,7 +16,7 @@ services:
       # - FFMPEG_ARGS=-hwaccel vulkan # additional arguments to pass to ffmpeg
       # - WEBROOT=/convertx # the root path of the web interface, leave empty to disable
       # - HIDE_HISTORY=true # hides the history tab in the web interface, defaults to false
-      - TZ=Asia/Koltaka # set your timezone, defaults to UTC
+      - TZ=Asia/Kolkata # set your timezone, defaults to UTC
       # - UNAUTHENTICATED_USER_SHARING=true # for use with ALLOW_UNAUTHENTICATED=true to share history with all unauthenticated users / devices
       # OIDC / SSO login (e.g. Authentik) - set all four of these to enable the "Login with ..." button
       # never commit real client IDs/secrets here - put them in a local, gitignored .env file instead
