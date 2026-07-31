@@ -84,9 +84,20 @@ export const oidc = new Elysia().use(userService).get(
     }
     const { code_verifier, state, nonce } = flow;
 
+    // openid-client derives the redirect_uri it sends to the token endpoint from
+    // this URL's origin+path (stripped of query/hash) - it must be the public,
+    // admin-configured OIDC_REDIRECT_URI, not request.url's scheme/host. Behind a
+    // reverse proxy or tunnel (Cloudflare Tunnel, nginx, etc.) that terminates TLS
+    // and forwards to the origin over plain HTTP, request.url would otherwise
+    // report "http://" even though the browser used "https://", causing a
+    // redirect_uri mismatch at the provider. Only the query string (code, state)
+    // from the actual request is needed here.
+    const callbackUrl = new URL(OIDC_REDIRECT_URI);
+    callbackUrl.search = new URL(request.url).search;
+
     let tokens: Awaited<ReturnType<typeof client.authorizationCodeGrant>>;
     try {
-      tokens = await client.authorizationCodeGrant(oidcConfig, new URL(request.url), {
+      tokens = await client.authorizationCodeGrant(oidcConfig, callbackUrl, {
         pkceCodeVerifier: code_verifier,
         expectedState: state,
         expectedNonce: nonce,
