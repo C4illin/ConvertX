@@ -1,0 +1,17 @@
+# Production deployment using the published image.
+# All configuration is loaded from a local .env file - copy .env.example to
+# .env, fill in the values you need, then run:
+#   docker compose -f docker-compose.prod.yml up -d
+# See README.md for full setup and environment variable documentation.
+
+services:
+  convertx:
+    image: ghcr.io/c4illin/convertx
+    container_name: convertx
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data

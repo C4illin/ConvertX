@@ -79,6 +79,12 @@ or
 docker run -p 3000:3000 -v ./data:/app/data ghcr.io/c4illin/convertx
 ```
 
+or, to keep configuration in a single `.env` file instead of inline in the compose file, copy [`.env.example`](.env.example) to `.env`, fill in what you need, and run:
+
+```bash
+docker compose -f docker-compose.prod.yml up -d
+```
+
 Then visit `http://localhost:3000` in your browser and create your account. Don't leave it unconfigured and open, as anyone can register the first account.
 
 If you get unable to open database file run `chown -R $USER:$USER path` on the path you choose.
