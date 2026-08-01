@@ -297,12 +297,11 @@ for (const converterName in properties) {
     if (!fromList || !toList) continue;
  
     for (const target of toList) {
-      const targetClean = normalizeOutputFiletype(target);
 
-      if (!possibleSources[targetClean]) possibleSources[targetClean] = {};
+      if (!possibleSources[target]) possibleSources[target] = {};
  
-      const existing = possibleSources[targetClean][converterName];
-      possibleSources[targetClean][converterName] = existing
+      const existing = possibleSources[target][converterName];
+      possibleSources[target][converterName] = existing
         ? Array.from(new Set([...existing, ...fromList]))
         : [...fromList];
     }

@@ -76,11 +76,11 @@ const selectContainer = document.querySelector("form .select_container");
 
 // Fetches the supported source types for a given target extension and
 // renders them above the Convert button.
-const showSupportedSources = (targetExtension) => {
+const showSupportedSources = (targetExtension, converterName) => {
   if (!supportedSourcesEl) return;
 
   latestSourcesRequestTarget = targetExtension;
- 
+
   fetch(`${webroot}/convert-sources`, {
     method: "POST",
     body: JSON.stringify({ to: targetExtension }),
@@ -88,20 +88,20 @@ const showSupportedSources = (targetExtension) => {
   })
     .then((res) => res.json())
     .then((sourcesByConverter) => {
-      if(latestSourcesRequestTarget !== targetExtension) return;
+      if (latestSourcesRequestTarget !== targetExtension) return;
 
-      const allSources = Object.values(sourcesByConverter).flat();
-      const unique = [...new Set(allSources)].sort();
- 
+      const sources = sourcesByConverter[converterName] || [];
+      const unique = [...new Set(sources)].sort();
+
       if (unique.length === 0) {
         supportedSourcesEl.textContent = "";
         return;
       }
- 
+
       supportedSourcesEl.textContent = `Supported source types: ${unique.join(", ")}`;
     })
     .catch((err) => {
-      if(latestSourcesRequestTarget !== targetExtension) return;
+      if (latestSourcesRequestTarget !== targetExtension) return;
       console.error(err);
       supportedSourcesEl.textContent = "";
     });
@@ -153,7 +153,7 @@ const updateSearchBar = () => {
           convertButton.disabled = false;
         }
         showMatching("");
-        showSupportedSources(target.dataset.target);
+        showSupportedSources(target.dataset.target, target.dataset.converter);
       };
     }
 
