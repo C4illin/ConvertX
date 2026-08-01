@@ -2,6 +2,8 @@ const webroot = document.querySelector("meta[name='webroot']").content;
 const fileInput = document.querySelector('input[type="file"]');
 const dropZone = document.getElementById("dropzone");
 const convertButton = document.querySelector("input[type='submit']");
+const supportedSourcesEl = document.getElementById("supported-sources");
+
 const fileNames = [];
 let fileType;
 let pendingFiles = 0;
@@ -71,6 +73,34 @@ function handleFile(file) {
 
 const selectContainer = document.querySelector("form .select_container");
 
+// Fetches the supported source types for a given target extension and
+// renders them above the Convert button.
+const showSupportedSources = (targetExtension) => {
+  if (!supportedSourcesEl) return;
+ 
+  fetch(`${webroot}/convert-sources`, {
+    method: "POST",
+    body: JSON.stringify({ to: targetExtension }),
+    headers: { "Content-Type": "application/json" },
+  })
+    .then((res) => res.json())
+    .then((sourcesByConverter) => {
+      const allSources = Object.values(sourcesByConverter).flat();
+      const unique = [...new Set(allSources)].sort();
+ 
+      if (unique.length === 0) {
+        supportedSourcesEl.textContent = "";
+        return;
+      }
+ 
+      supportedSourcesEl.textContent = `Supported source types: ${unique.join(", ")}`;
+    })
+    .catch((err) => {
+      console.error(err);
+      supportedSourcesEl.textContent = "";
+    });
+};
+
 const updateSearchBar = () => {
   const convertToInput = document.querySelector("input[name='convert_to_search']");
   const convertToPopup = document.querySelector(".convert_to_popup");
@@ -117,6 +147,7 @@ const updateSearchBar = () => {
           convertButton.disabled = false;
         }
         showMatching("");
+        showSupportedSources(target.dataset.target);
       };
     }
 

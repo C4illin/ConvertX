@@ -234,6 +234,7 @@ export const root = new Elysia().use(userService).get(
                 value="Convert"
                 disabled
               />
+              <div id="supported-sources" class="mt-2 mb-2 text-sm text-neutral-400"></div>
             </form>
           </main>
           <script src="script.js" defer />
