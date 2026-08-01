@@ -282,24 +282,32 @@ export const getPossibleTargets = (from: string): Record<string, string[]> => {
   return possibleTargets[fromClean] || {};
 };
 
-// Reverse of possibleTargets: for a given output extension, which input
-// extensions (across all converters) can produce it, grouped by converter.
+// Reverse of possibleTargets: for a given raw output extension (as advertised
+// in each converter's `to` list — the same value the frontend's target
+// buttons carry in `data-target`), which input extensions (per converter)
+// can produce it.
+//
+// NOTE: intentionally keyed by the RAW target string, not the
+// normalizeOutputFiletype()-ed one. Several converters advertise distinct
+// raw targets that normalize to the same output extension (e.g. "latex" and
+// "tex" both normalize to "tex", "jpeg" normalizes to "jpg") — normalizing
+// here would incorrectly merge/misalign those. The frontend always sends
+// the raw `data-target` value, so the lookup key must match that exactly.
 const possibleSources: Record<string, Record<string, string[]>> = {};
- 
+
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
   if (!converterProperties) continue;
- 
+
   for (const key in converterProperties.from) {
     const fromList = converterProperties.from[key];
     const toList = converterProperties.to[key];
- 
-    if (!fromList || !toList) continue;
- 
-    for (const target of toList) {
 
+    if (!fromList || !toList) continue;
+
+    for (const target of toList) {
       if (!possibleSources[target]) possibleSources[target] = {};
- 
+
       const existing = possibleSources[target][converterName];
       possibleSources[target][converterName] = existing
         ? Array.from(new Set([...existing, ...fromList]))
@@ -307,11 +315,9 @@ for (const converterName in properties) {
     }
   }
 }
- 
+
 export const getPossibleSources = (to: string): Record<string, string[]> => {
-  const toClean = normalizeOutputFiletype(to);
- 
-  return possibleSources[toClean] || {};
+  return possibleSources[to] || {};
 };
 
 const possibleInputs: string[] = [];
