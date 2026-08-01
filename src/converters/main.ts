@@ -297,6 +297,8 @@ for (const converterName in properties) {
     if (!fromList || !toList) continue;
  
     for (const target of toList) {
+      const targetClean = normalizeOutputFiletype(target);
+
       if (!possibleSources[target]) possibleSources[target] = {};
  
       const existing = possibleSources[target][converterName];

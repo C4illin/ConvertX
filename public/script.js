@@ -77,6 +77,8 @@ const selectContainer = document.querySelector("form .select_container");
 // renders them above the Convert button.
 const showSupportedSources = (targetExtension) => {
   if (!supportedSourcesEl) return;
+
+  latestSourcesRequestTarget = targetExtension;
  
   fetch(`${webroot}/convert-sources`, {
     method: "POST",
@@ -85,6 +87,8 @@ const showSupportedSources = (targetExtension) => {
   })
     .then((res) => res.json())
     .then((sourcesByConverter) => {
+      if(latestSourcesRequestTarget !== targetExtension) return;
+
       const allSources = Object.values(sourcesByConverter).flat();
       const unique = [...new Set(allSources)].sort();
  
