@@ -299,10 +299,10 @@ for (const converterName in properties) {
     for (const target of toList) {
       const targetClean = normalizeOutputFiletype(target);
 
-      if (!possibleSources[target]) possibleSources[target] = {};
+      if (!possibleSources[targetClean]) possibleSources[targetClean] = {};
  
-      const existing = possibleSources[target][converterName];
-      possibleSources[target][converterName] = existing
+      const existing = possibleSources[targetClean][converterName];
+      possibleSources[targetClean][converterName] = existing
         ? Array.from(new Set([...existing, ...fromList]))
         : [...fromList];
     }

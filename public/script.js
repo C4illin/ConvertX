@@ -8,6 +8,7 @@ const fileNames = [];
 let fileType;
 let pendingFiles = 0;
 let formatSelected = false;
+let latestSourcesRequestTarget = null;
 
 dropZone.addEventListener("dragover", (e) => {
   e.preventDefault();
@@ -100,6 +101,7 @@ const showSupportedSources = (targetExtension) => {
       supportedSourcesEl.textContent = `Supported source types: ${unique.join(", ")}`;
     })
     .catch((err) => {
+      if (latestSourcesRequestTarget !== targetExtension) return;
       console.error(err);
       supportedSourcesEl.textContent = "";
     });
