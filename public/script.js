@@ -101,7 +101,7 @@ const showSupportedSources = (targetExtension) => {
       supportedSourcesEl.textContent = `Supported source types: ${unique.join(", ")}`;
     })
     .catch((err) => {
-      if (latestSourcesRequestTarget !== targetExtension) return;
+      if(latestSourcesRequestTarget !== targetExtension) return;
       console.error(err);
       supportedSourcesEl.textContent = "";
     });
@@ -168,6 +168,8 @@ const updateSearchBar = () => {
     // when the user clears the search bar using the 'x' button
     convertButton.disabled = true;
     formatSelected = false;
+    latestSourcesRequestTarget = null;
+    supportedSourcesEl.textContent = "";
   });
 
   convertToInput.addEventListener("blur", (e) => {
