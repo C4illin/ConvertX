@@ -8,7 +8,7 @@ const fileNames = [];
 let fileType;
 let pendingFiles = 0;
 let formatSelected = false;
-let latestSourcesRequestTarget = null;
+let latestSourcesRequestKey = null;
 
 dropZone.addEventListener("dragover", (e) => {
   e.preventDefault();
@@ -74,12 +74,17 @@ function handleFile(file) {
 
 const selectContainer = document.querySelector("form .select_container");
 
-// Fetches the supported source types for a given target extension and
-// renders them above the Convert button.
+// Fetches the supported source types for a given target extension +
+// converter pair, and renders them above the Convert button. Each request
+// is tagged with a key (extension::converter) so that a slower, stale
+// response — from an earlier selection, even one with the same extension
+// but a different converter — can never overwrite what the most recently
+// selected target should show.
 const showSupportedSources = (targetExtension, converterName) => {
   if (!supportedSourcesEl) return;
 
-  latestSourcesRequestTarget = targetExtension;
+  const requestKey = `${targetExtension}::${converterName}`;
+  latestSourcesRequestKey = requestKey;
 
   fetch(`${webroot}/convert-sources`, {
     method: "POST",
@@ -88,7 +93,7 @@ const showSupportedSources = (targetExtension, converterName) => {
   })
     .then((res) => res.json())
     .then((sourcesByConverter) => {
-      if (latestSourcesRequestTarget !== targetExtension) return;
+      if (latestSourcesRequestKey !== requestKey) return;
 
       const sources = sourcesByConverter[converterName] || [];
       const unique = [...new Set(sources)].sort();
@@ -101,7 +106,7 @@ const showSupportedSources = (targetExtension, converterName) => {
       supportedSourcesEl.textContent = `Supported source types: ${unique.join(", ")}`;
     })
     .catch((err) => {
-      if (latestSourcesRequestTarget !== targetExtension) return;
+      if (latestSourcesRequestKey !== requestKey) return;
       console.error(err);
       supportedSourcesEl.textContent = "";
     });
@@ -168,8 +173,8 @@ const updateSearchBar = () => {
     // when the user clears the search bar using the 'x' button
     convertButton.disabled = true;
     formatSelected = false;
-    latestSourcesRequestTarget = null;
-    supportedSourcesEl.textContent = "";
+    latestSourcesRequestKey = null;
+    if (supportedSourcesEl) supportedSourcesEl.textContent = "";
   });
 
   convertToInput.addEventListener("blur", (e) => {
