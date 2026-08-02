@@ -12,7 +12,8 @@ import { Database } from "bun:sqlite";
 import { mainConverter, chunks } from "../../src/converters/main";
 
 // Isolated test database: avoids mutation of ./data/mydb.sqlite
-const testDb = new Database(":memory:");
+const testDbPath = `./data/test-db-${Date.now()}.sqlite`;
+const testDb = new Database(testDbPath, { create: true });
 mock.module("../../src/db/db", () => ({
   db: testDb,
 }));
