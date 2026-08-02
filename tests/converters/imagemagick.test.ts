@@ -2,7 +2,7 @@ import { beforeEach, expect, test } from "bun:test";
 import type { ExecFileException } from "node:child_process";
 import { convert } from "../../src/converters/imagemagick";
 import { ExecFileFn } from "../../src/converters/types";
-import { runCommonTests } from "./helpers/commonTests.test";
+import { runCommonTests } from "./helpers/commonTests";
 
 let calls: string[][] = [];
 

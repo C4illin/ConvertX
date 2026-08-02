@@ -1,6 +1,6 @@
 import { test } from "bun:test";
 import { convert } from "../../src/converters/assimp";
-import { runCommonTests } from "./helpers/commonTests.test";
+import { runCommonTests } from "./helpers/commonTests";
 
 runCommonTests(convert);
 
