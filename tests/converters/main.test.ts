@@ -1,3 +1,6 @@
+// Set isolated DB path before import to protect production data
+process.env.DB_PATH = "./data/test-isolated.sqlite";
+
 import { test, expect, mock, afterEach } from "bun:test";
 import type { Cookie } from "elysia";
 import {
