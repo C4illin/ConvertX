@@ -1,4 +1,4 @@
-import { test, expect } from "bun:test";
+import { test, expect, mock, afterEach } from "bun:test";
 import type { Cookie } from "elysia";
 import {
   getPossibleTargets,
@@ -7,9 +7,26 @@ import {
   handleConvert,
 } from "../../src/converters/main";
 import { writeFile, mkdir, rm, readFile } from "fs/promises";
+import { Database } from "bun:sqlite";
 // Import test-only exports (marked @internal in main.ts)
-// @ts-expect-error - accessing @internal test-only exports
 import { mainConverter, chunks } from "../../src/converters/main";
+
+// Isolated test database: avoids mutation of ./data/mydb.sqlite
+const testDb = new Database(":memory:");
+mock.module("../../src/db/db", () => ({
+  db: testDb,
+}));
+
+// cleans up the table before each test for real isolation (even with parallel tests)
+afterEach(() => {
+  try {
+    testDb.query("DELETE FROM file_names");
+  } catch (err) {
+    if (err instanceof Error) {
+      // table does not exist yet or was already cleaned
+    }
+  }
+});
 
 // Mock factory for jobId Cookie to avoid repeated `as Cookie` casts
 function createMockJobId(value: string): Cookie<string | undefined> {
