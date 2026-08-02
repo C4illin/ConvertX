@@ -13,10 +13,18 @@ import { writeFile, mkdir, rm, readFile } from "fs/promises";
 import { Database } from "bun:sqlite";
 // Import test-only exports (marked @internal in main.ts)
 import { mainConverter, chunks } from "../../src/converters/main";
+import { mkdirSync, existsSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 
 // Isolated test database: avoids mutation of ./data/mydb.sqlite
-const testDbPath = `./data/test-db-${Date.now()}.sqlite`;
-const testDb = new Database(testDbPath, { create: true });
+const dbPath = process.env.DB_PATH ?? "./data/mydb.sqlite";
+const dbDir = dirname(resolve(dbPath));
+
+if (!existsSync(dbDir)) {
+  mkdirSync(dbDir, { recursive: true });
+}
+
+const testDb = new Database(dbPath, { create: true });
 mock.module("../../src/db/db", () => ({
   db: testDb,
 }));
