@@ -1,7 +1,14 @@
 // Set isolated DB path before import to protect production data
-process.env.DB_PATH = "./data/test-isolated.sqlite";
+import { tmpdir } from "node:os";
+import { mkdirSync, rmSync, existsSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
 
-import { test, expect, mock, afterEach } from "bun:test";
+const testDbDir: string =
+  mkdirSync(join(tmpdir(), "converter-test-db"), { recursive: true }) ??
+  join(tmpdir(), "converter-test-db");
+process.env.DB_PATH = join(testDbDir, "test.sqlite");
+
+import { test, expect, mock, afterAll, afterEach } from "bun:test";
 import type { Cookie } from "elysia";
 import {
   getPossibleTargets,
@@ -13,11 +20,9 @@ import { writeFile, mkdir, rm, readFile } from "fs/promises";
 import { Database } from "bun:sqlite";
 // Import test-only exports (marked @internal in main.ts)
 import { mainConverter, chunks } from "../../src/converters/main";
-import { mkdirSync, existsSync } from "node:fs";
-import { dirname, resolve } from "node:path";
 
 // Isolated test database: avoids mutation of ./data/mydb.sqlite
-const dbPath = process.env.DB_PATH ?? "./data/test-isolated.sqlite";
+const dbPath = process.env.DB_PATH ?? join(testDbDir, "test.sqlite");
 const dbDir = dirname(resolve(dbPath));
 
 if (!existsSync(dbDir)) {
@@ -38,6 +43,12 @@ afterEach(() => {
       // table does not exist yet or was already cleaned
     }
   }
+});
+
+// closes the DB and removes the temp directory after all tests finish
+afterAll(() => {
+  testDb.close();
+  rmSync(testDbDir, { recursive: true, force: true });
 });
 
 // Mock factory for jobId Cookie to avoid repeated `as Cookie` casts
