@@ -1,4 +1,6 @@
 import { Database } from "bun:sqlite";
+import { mkdirSync } from "node:fs";
+import { dirname } from "node:path";
 
 export function initializeDatabase(db: Database): void {
   const dbVersion = db.query("PRAGMA user_version").get() as { user_version?: number };
@@ -37,7 +39,9 @@ export function initializeDatabase(db: Database): void {
 }
 
 const dbPath = process.env.DB_PATH ?? "./data/mydb.sqlite";
+mkdirSync(dirname(dbPath), { recursive: true });
 const db = new Database(dbPath, { create: true });
+initializeDatabase(db);
 initializeDatabase(db);
 
 export default db;
