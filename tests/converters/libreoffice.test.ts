@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, expect, test } from "bun:test";
 import { convert } from "../../src/converters/libreoffice";
 import type { ExecFileFn } from "../../src/converters/types";
+import { filters, getFilters } from "../../src/converters/libreoffice";
 
 function requireDefined<T>(value: T, msg: string): NonNullable<T> {
   if (value === undefined || value === null) throw new Error(msg);
@@ -208,4 +209,18 @@ test("logs stderr on exec error as well", async () => {
 
   // The callback still provided stderr; your implementation logs it before settling
   expect(errors).toContain("stderr: EPIPE");
+});
+
+// --- calc filter branch (test-only exports) ---------------------------------
+test("getFilters returns calc mapping when present", () => {
+  // temporarily add entries to calc mapping
+  filters.calc["testfoo"] = "TestFooFilter";
+  filters.calc["testbar"] = "TestBarFilter";
+
+  const res = getFilters("testfoo", "testbar");
+  expect(res).toEqual(["TestFooFilter", "TestBarFilter"]);
+
+  // cleanup
+  delete filters.calc["testfoo"];
+  delete filters.calc["testbar"];
 });

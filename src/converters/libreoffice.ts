@@ -190,3 +190,9 @@ export function convert(
     });
   });
 }
+
+/**
+ * @internal For testing only. Do not use in production.
+ * Tests need direct access to cover all branches of converter discovery and chunking logic.
+ */
+export { filters, getFilters };

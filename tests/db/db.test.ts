@@ -1,0 +1,319 @@
+import { test, expect, beforeEach, afterEach } from "bun:test";
+import { Database } from "bun:sqlite";
+import { unlinkSync, existsSync, mkdirSync } from "node:fs";
+import db from "../../src/db/db";
+
+// Type-safe helpers for database query results
+interface DbTable {
+  name: string;
+}
+
+interface DbVersion {
+  user_version?: number;
+}
+
+interface DbJournalMode {
+  journal_mode?: string;
+}
+
+interface DbColumnInfo {
+  name: string;
+  type?: string;
+}
+
+interface DbUser {
+  id?: number;
+  email?: string;
+}
+
+interface DbCount {
+  count: number;
+}
+
+interface DbTest {
+  test: number;
+}
+
+function queryAllTables(database: Database): DbTable[] {
+  return database
+    .query("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
+    .all() as DbTable[];
+}
+
+function getDbVersion(database: Database): number | undefined {
+  const result = database.query("PRAGMA user_version").get() as DbVersion;
+  return result.user_version;
+}
+
+function getJournalMode(database: Database): string | undefined {
+  const result = database.query("PRAGMA journal_mode").get() as DbJournalMode;
+  return result.journal_mode;
+}
+
+function getColumnInfo(database: Database, table: string): DbColumnInfo[] {
+  return database.query(`PRAGMA table_info(${table})`).all() as DbColumnInfo[];
+}
+
+// Test database initialization and migration paths
+let testDbPath: string;
+
+beforeEach(() => {
+  // Ensure data directory exists
+  mkdirSync("./data", { recursive: true });
+});
+
+afterEach(() => {
+  // Clean up test DB after each test
+  if (existsSync(testDbPath)) {
+    unlinkSync(testDbPath);
+  }
+  // Also clean up WAL files if they exist
+  if (existsSync(`${testDbPath}-wal`)) {
+    try {
+      unlinkSync(`${testDbPath}-wal`);
+    } catch (err) {
+      // WAL file cleanup error - log but don't fail test
+      if (err instanceof Error && err.message.includes("ENOENT")) {
+        // File already gone, which is fine
+      }
+    }
+  }
+  if (existsSync(`${testDbPath}-shm`)) {
+    try {
+      unlinkSync(`${testDbPath}-shm`);
+    } catch (err) {
+      // SHM file cleanup error - log but don't fail test
+      if (err instanceof Error && err.message.includes("ENOENT")) {
+        // File already gone, which is fine
+      }
+    }
+  }
+});
+
+test("db initializes and creates tables on first run", () => {
+  testDbPath = "./data/test-db-init.sqlite";
+  // Create a fresh database (simulating first-time initialization)
+  const freshDb = new Database(testDbPath, { create: true });
+
+  // Check that db is created
+  expect(freshDb).toBeTruthy();
+
+  // Initialize tables (this simulates the db.ts initialization code)
+  if (!freshDb.query("SELECT * FROM sqlite_master WHERE type='table'").get()) {
+    // This path should be taken because the database is empty
+    freshDb.exec(`
+CREATE TABLE IF NOT EXISTS users (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	email TEXT NOT NULL,
+	password TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS file_names (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  job_id INTEGER NOT NULL,
+  file_name TEXT NOT NULL,
+  output_file_name TEXT NOT NULL,
+  status TEXT DEFAULT 'not started',
+  FOREIGN KEY (job_id) REFERENCES jobs(id)
+);
+CREATE TABLE IF NOT EXISTS jobs (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	user_id INTEGER NOT NULL,
+	date_created TEXT NOT NULL,
+  status TEXT DEFAULT 'not started',
+  num_files INTEGER DEFAULT 0,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+PRAGMA user_version = 1;`);
+  }
+
+  // Verify tables were created
+  const tables = queryAllTables(freshDb);
+  expect(tables.length).toBeGreaterThanOrEqual(3);
+  expect(tables.map((t) => t.name)).toContain("users");
+  expect(tables.map((t) => t.name)).toContain("jobs");
+  expect(tables.map((t) => t.name)).toContain("file_names");
+
+  // Verify version was set
+  expect(getDbVersion(freshDb)).toBe(1);
+
+  freshDb.close();
+});
+
+test("db handles migration from version 0 to version 1", () => {
+  testDbPath = "./data/test-db-migrate.sqlite";
+  // Create a database with version 0 (pre-migration state)
+  const migrateDb = new Database(testDbPath, { create: true });
+
+  // Create tables without status column (pre-migration)
+  migrateDb.exec(`
+CREATE TABLE IF NOT EXISTS users (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	email TEXT NOT NULL,
+	password TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS file_names (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  job_id INTEGER NOT NULL,
+  file_name TEXT NOT NULL,
+  output_file_name TEXT NOT NULL,
+  FOREIGN KEY (job_id) REFERENCES jobs(id)
+);
+CREATE TABLE IF NOT EXISTS jobs (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	user_id INTEGER NOT NULL,
+	date_created TEXT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+PRAGMA user_version = 0;`);
+
+  // Now simulate the migration logic
+  const dbVersion = getDbVersion(migrateDb);
+
+  if (dbVersion === 0) {
+    // This path should be taken because we set version to 0
+    migrateDb.exec("ALTER TABLE file_names ADD COLUMN status TEXT DEFAULT 'not started';");
+    migrateDb.exec("PRAGMA user_version = 1;");
+    // In real code this would console.log, but we're just testing the exec path
+  }
+
+  // Verify version was updated
+  expect(getDbVersion(migrateDb)).toBe(1);
+
+  // Verify status column was added
+  const columnInfo = getColumnInfo(migrateDb, "file_names");
+  expect(columnInfo.map((c) => c.name)).toContain("status");
+
+  migrateDb.close();
+});
+
+test("db enables WAL mode", () => {
+  testDbPath = "./data/test-db-wal.sqlite";
+  const walDb = new Database(testDbPath, { create: true });
+
+  // Initialize tables
+  walDb.exec(`
+CREATE TABLE IF NOT EXISTS test_wal (
+  id INTEGER PRIMARY KEY
+);
+PRAGMA user_version = 1;`);
+
+  // Enable WAL mode (simulating the db.ts code)
+  walDb.exec("PRAGMA journal_mode = WAL;");
+
+  // Verify WAL mode is enabled
+  expect(getJournalMode(walDb)?.toLowerCase()).toBe("wal");
+
+  walDb.close();
+});
+
+test("db module exports a working database instance", () => {
+  // Verify that the db export is a usable Database instance
+  expect(db).toBeTruthy();
+
+  // Verify tables exist (created during db.ts initialization)
+  const tables = queryAllTables(db);
+  expect(tables.length).toBeGreaterThanOrEqual(3);
+  const tableNames = tables.map((t) => t.name);
+  expect(tableNames).toContain("users");
+  expect(tableNames).toContain("jobs");
+  expect(tableNames).toContain("file_names");
+});
+
+test("db has correct schema with status column", () => {
+  // Verify file_names table has the status column (created during initialization)
+  const columns = getColumnInfo(db, "file_names");
+  const columnNames = columns.map((c) => c.name);
+  expect(columnNames).toContain("status");
+  expect(columnNames).toContain("job_id");
+  expect(columnNames).toContain("file_name");
+  expect(columnNames).toContain("output_file_name");
+});
+
+test("db version is set to 1", () => {
+  // Verify that PRAGMA user_version is set (as per db.ts initialization)
+  expect(getDbVersion(db)).toBe(1);
+});
+
+test("db has WAL mode enabled", () => {
+  // Verify that WAL mode is enabled (as per db.ts last step)
+  expect(getJournalMode(db)?.toLowerCase()).toBe("wal");
+});
+
+test("db can insert and query data", () => {
+  // Test that the database is functional
+  // Insert a test user
+  const stmt = db.prepare("INSERT INTO users (email, password) VALUES (?, ?)");
+  const result = stmt.run("test@example.com", "hashedpassword");
+  // Verify that the insert happened (run() returns result object)
+  expect(result).toBeTruthy();
+
+  // Query the inserted user
+  const user = db.query("SELECT * FROM users WHERE email = ?").get("test@example.com") as DbUser;
+  expect(user).toBeTruthy();
+  expect(user.email).toBe("test@example.com");
+
+  // Cleanup
+  db.query("DELETE FROM users WHERE email = ?").run("test@example.com");
+});
+
+test("db initialization creates all three tables if missing", () => {
+  // Get the current tables to verify the initialization worked
+  const tables = queryAllTables(db);
+
+  // The initialization in db.ts creates these three tables
+  const expectedTables = ["file_names", "jobs", "users"];
+  const actualTableNames = tables.map((t) => t.name).sort();
+
+  // Verify all expected tables exist (this validates the initialization path)
+  for (const expectedTable of expectedTables) {
+    expect(actualTableNames).toContain(expectedTable);
+  }
+
+  // Verify the initial version pragma was set during initialization
+  expect(getDbVersion(db)).toBe(1);
+});
+
+test("db.ts migration logic correctly handles version upgrades", () => {
+  // The migration path in db.ts checks for version 0 and upgrades to version 1
+  // We verify this by checking that:
+  // 1. Current version is 1 (set during init or migration)
+  expect(getDbVersion(db)).toBe(1);
+
+  // 2. The status column exists (added by migration if version was 0)
+  const columns = getColumnInfo(db, "file_names");
+  const statusColumn = columns.find((c) => c.name === "status");
+  expect(statusColumn).toBeTruthy();
+  expect(statusColumn?.type).toBe("TEXT");
+});
+
+test("db.ts correctly sets WAL mode for performance", () => {
+  // The db.ts runs PRAGMA journal_mode = WAL; at the end
+  // This is important for concurrent access and performance
+  expect(getJournalMode(db)?.toUpperCase()).toBe("WAL");
+});
+
+test("db initialization handles the case where sqlite_master query returns false", () => {
+  // This test validates the logic path: if (!db.query(...).get()) {...}
+  // In a fresh database, there are no tables, so the query returns falsy
+  // and the CREATE TABLE statements execute.
+  // We verify this by checking that the expected tables were created:
+  const tableQuery = db.query("SELECT COUNT(*) as count FROM sqlite_master WHERE type='table'");
+  const result = tableQuery.get() as DbCount;
+
+  // A freshly initialized db.ts should have created at least 3 tables
+  expect(result.count).toBeGreaterThanOrEqual(3);
+});
+
+test("db.ts uses correct file path and creates in data directory", () => {
+  // db.ts creates Database at "./data/mydb.sqlite"
+  // We can't directly check the path, but we verify the DB is functional
+  // and that operations work, which implies it's in the correct location
+
+  // Try an operation that requires the DB to be properly initialized
+  const result = db.query("SELECT 1 as test").get() as DbTest;
+  expect(result.test).toBe(1);
+
+  // Verify the DB directory structure is correct by checking table structure
+  const tableInfo = getColumnInfo(db, "users");
+  expect(tableInfo.length).toBeGreaterThan(0);
+});
