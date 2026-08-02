@@ -1,4 +1,4 @@
-// Isolierten DB-Pfad vor dem Import setzen, um Produktionsdaten zu schützen
+// Set isolated DB path before import to protect production data
 process.env.DB_PATH = "./data/test-isolated.sqlite";
 
 import { test, expect, beforeEach, afterEach, afterAll } from "bun:test";
@@ -65,7 +65,7 @@ beforeEach(() => {
   mkdirSync("./data", { recursive: true });
   testDbPath = `./data/test-db-${Date.now()}.sqlite`;
   testDb = new Database(testDbPath, { create: true });
-  // Nutzt nun die echte Initialisierungslogik aus db.ts
+  // Now uses the real initialization logic from db.ts
   initializeDatabase(testDb);
 });
 
@@ -99,7 +99,7 @@ afterEach(() => {
 });
 
 afterAll(() => {
-  // Bereinigung der isolierten Testdatenbank nach dem Testlauf
+  // Cleanup of the isolated test database after the test run
   if (existsSync("./data/test-isolated.sqlite")) {
     unlinkSync("./data/test-isolated.sqlite");
   }
@@ -139,7 +139,7 @@ test("db handles migration from version 0 to version 1", () => {
   const migrateDbPath = `./data/test-db-migrate-${Date.now()}.sqlite`;
   const migrateDb = new Database(migrateDbPath, { create: true });
 
-  // Simuliert einen echten v0-Database-Zustand
+  // Simulates a real v0 database state
   migrateDb.exec(`
     CREATE TABLE IF NOT EXISTS users (
                                        id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -162,7 +162,7 @@ test("db handles migration from version 0 to version 1", () => {
     PRAGMA user_version = 0;
   `);
 
-  // Führt jetzt die echte Migrationslogik aus db.ts aus
+  // Now runs the real migration logic from db.ts
   initializeDatabase(migrateDb);
 
   expect(getDbVersion(migrateDb)).toBe(1);
