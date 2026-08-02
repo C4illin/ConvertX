@@ -1,5 +1,4 @@
 import { Database } from "bun:sqlite";
-import path from "path";
 
 export function initializeDatabase(db: Database): void {
   const dbVersion = db.query("PRAGMA user_version").get() as { user_version?: number };
@@ -37,7 +36,7 @@ export function initializeDatabase(db: Database): void {
   db.exec("PRAGMA journal_mode = WAL;");
 }
 
-const dbPath = path.join(process.cwd(), "data", "mydb.sqlite");
+const dbPath = process.env.DB_PATH ?? "./data/mydb.sqlite";
 const db = new Database(dbPath, { create: true });
 initializeDatabase(db);
 
