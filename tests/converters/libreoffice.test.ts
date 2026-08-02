@@ -217,10 +217,12 @@ test("getFilters returns calc mapping when present", () => {
   filters.calc["testfoo"] = "TestFooFilter";
   filters.calc["testbar"] = "TestBarFilter";
 
-  const res = getFilters("testfoo", "testbar");
-  expect(res).toEqual(["TestFooFilter", "TestBarFilter"]);
-
-  // cleanup
-  delete filters.calc["testfoo"];
-  delete filters.calc["testbar"];
+  try {
+    const res = getFilters("testfoo", "testbar");
+    expect(res).toEqual(["TestFooFilter", "TestBarFilter"]);
+  } finally {
+    // cleanup
+    delete filters.calc["testfoo"];
+    delete filters.calc["testbar"];
+  }
 });
