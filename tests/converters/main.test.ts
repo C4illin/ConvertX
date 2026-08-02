@@ -3,9 +3,8 @@ import { tmpdir } from "node:os";
 import { mkdirSync, rmSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 
-const testDbDir: string =
-  mkdirSync(join(tmpdir(), "converter-test-db"), { recursive: true }) ??
-  join(tmpdir(), "converter-test-db");
+const testDbDir = join(tmpdir(), "converter-test-db");
+mkdirSync(testDbDir, { recursive: true });
 process.env.DB_PATH = join(testDbDir, "test.sqlite");
 
 import { test, expect, mock, afterAll, afterEach } from "bun:test";
