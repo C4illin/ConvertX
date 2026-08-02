@@ -42,6 +42,5 @@ const dbPath = process.env.DB_PATH ?? "./data/mydb.sqlite";
 mkdirSync(dirname(dbPath), { recursive: true });
 const db = new Database(dbPath, { create: true });
 initializeDatabase(db);
-initializeDatabase(db);
 
 export default db;
