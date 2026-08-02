@@ -193,6 +193,6 @@ export function convert(
 
 /**
  * @internal For testing only. Do not use in production.
- * Tests need direct access to cover all branches of converter discovery and chunking logic.
+ * Tests need direct access to cover all filters.
  */
 export { filters, getFilters };
