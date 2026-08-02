@@ -4,7 +4,7 @@ process.env.DB_PATH = "./data/test-isolated.sqlite";
 import { test, expect, beforeEach, afterEach, afterAll } from "bun:test";
 import { Database } from "bun:sqlite";
 import { unlinkSync, existsSync, mkdirSync } from "node:fs";
-import db, { initializeDatabase } from "../../src/db/db";
+import { initializeDatabase } from "../../src/db/db";
 
 // Type-safe helpers for database query results
 interface DbTable {
@@ -180,8 +180,8 @@ test("db enables WAL mode", () => {
 });
 
 test("db module exports a working database instance", () => {
-  expect(db).toBeTruthy();
-  const tables = queryAllTables(db);
+  expect(testDb).toBeTruthy();
+  const tables = queryAllTables(testDb);
   expect(tables.length).toBeGreaterThanOrEqual(3);
   const tableNames = tables.map((t) => t.name);
   expect(tableNames).toContain("users");
@@ -191,7 +191,7 @@ test("db module exports a working database instance", () => {
 
 test("db has correct schema with status column", () => {
   // Verify file_names table has the status column (created during initialization)
-  const columns = getColumnInfo(db, "file_names");
+  const columns = getColumnInfo(testDb, "file_names");
   const columnNames = columns.map((c) => c.name);
   expect(columnNames).toContain("status");
   expect(columnNames).toContain("job_id");
@@ -201,34 +201,36 @@ test("db has correct schema with status column", () => {
 
 test("db version is set to 1", () => {
   // Verify that PRAGMA user_version is set (as per db.ts initialization)
-  expect(getDbVersion(db)).toBe(1);
+  expect(getDbVersion(testDb)).toBe(1);
 });
 
 test("db has WAL mode enabled", () => {
   // Verify that WAL mode is enabled (as per db.ts last step)
-  expect(getJournalMode(db)?.toLowerCase()).toBe("wal");
+  expect(getJournalMode(testDb)?.toLowerCase()).toBe("wal");
 });
 
 test("db can insert and query data", () => {
   // Test that the database is functional
   // Insert a test user
-  const stmt = db.prepare("INSERT INTO users (email, password) VALUES (?, ?)");
+  const stmt = testDb.prepare("INSERT INTO users (email, password) VALUES (?, ?)");
   const result = stmt.run("test@example.com", "hashedpassword");
   // Verify that the insert happened (run() returns result object)
   expect(result).toBeTruthy();
 
   // Query the inserted user
-  const user = db.query("SELECT * FROM users WHERE email = ?").get("test@example.com") as DbUser;
+  const user = testDb
+    .query("SELECT * FROM users WHERE email = ?")
+    .get("test@example.com") as DbUser;
   expect(user).toBeTruthy();
   expect(user.email).toBe("test@example.com");
 
   // Cleanup
-  db.query("DELETE FROM users WHERE email = ?").run("test@example.com");
+  testDb.query("DELETE FROM users WHERE email = ?").run("test@example.com");
 });
 
 test("db initialization creates all three tables if missing", () => {
   // Get the current tables to verify the initialization worked
-  const tables = queryAllTables(db);
+  const tables = queryAllTables(testDb);
 
   // The initialization in db.ts creates these three tables
   const expectedTables = ["file_names", "jobs", "users"];
@@ -240,17 +242,17 @@ test("db initialization creates all three tables if missing", () => {
   }
 
   // Verify the initial version pragma was set during initialization
-  expect(getDbVersion(db)).toBe(1);
+  expect(getDbVersion(testDb)).toBe(1);
 });
 
 test("db.ts migration logic correctly handles version upgrades", () => {
   // The migration path in db.ts checks for version 0 and upgrades to version 1
   // We verify this by checking that:
   // 1. Current version is 1 (set during init or migration)
-  expect(getDbVersion(db)).toBe(1);
+  expect(getDbVersion(testDb)).toBe(1);
 
   // 2. The status column exists (added by migration if version was 0)
-  const columns = getColumnInfo(db, "file_names");
+  const columns = getColumnInfo(testDb, "file_names");
   const statusColumn = columns.find((c) => c.name === "status");
   expect(statusColumn).toBeTruthy();
   expect(statusColumn?.type).toBe("TEXT");
@@ -259,7 +261,7 @@ test("db.ts migration logic correctly handles version upgrades", () => {
 test("db.ts correctly sets WAL mode for performance", () => {
   // The db.ts runs PRAGMA journal_mode = WAL; at the end
   // This is important for concurrent access and performance
-  expect(getJournalMode(db)?.toUpperCase()).toBe("WAL");
+  expect(getJournalMode(testDb)?.toUpperCase()).toBe("WAL");
 });
 
 test("db initialization handles the case where sqlite_master query returns false", () => {
@@ -267,7 +269,7 @@ test("db initialization handles the case where sqlite_master query returns false
   // In a fresh database, there are no tables, so the query returns falsy
   // and the CREATE TABLE statements execute.
   // We verify this by checking that the expected tables were created:
-  const tableQuery = db.query("SELECT COUNT(*) as count FROM sqlite_master WHERE type='table'");
+  const tableQuery = testDb.query("SELECT COUNT(*) as count FROM sqlite_master WHERE type='table'");
   const result = tableQuery.get() as DbCount;
 
   // A freshly initialized db.ts should have created at least 3 tables
@@ -280,10 +282,10 @@ test("db.ts uses correct file path and creates in data directory", () => {
   // and that operations work, which implies it's in the correct location
 
   // Try an operation that requires the DB to be properly initialized
-  const result = db.query("SELECT 1 as test").get() as DbTest;
+  const result = testDb.query("SELECT 1 as test").get() as DbTest;
   expect(result.test).toBe(1);
 
   // Verify the DB directory structure is correct by checking table structure
-  const tableInfo = getColumnInfo(db, "users");
+  const tableInfo = getColumnInfo(testDb, "users");
   expect(tableInfo.length).toBeGreaterThan(0);
 });
