@@ -17,7 +17,7 @@ import { mkdirSync, existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
 // Isolated test database: avoids mutation of ./data/mydb.sqlite
-const dbPath = process.env.DB_PATH ?? "./data/mydb.sqlite";
+const dbPath = process.env.DB_PATH ?? "./data/test-isolated.sqlite";
 const dbDir = dirname(resolve(dbPath));
 
 if (!existsSync(dbDir)) {
