@@ -7,8 +7,10 @@ process.env.DB_PATH = "./data/test-isolated.sqlite";
 
 // dynamic import ensures that db.ts is loaded after the env is set
 let initializeDatabase: (db: Database) => void;
+let defaultDb: Database | undefined;
 await import("../../src/db/db").then((mod) => {
   initializeDatabase = mod.initializeDatabase;
+  defaultDb = mod.default as Database | undefined;
 });
 
 // Type-safe helpers for database query results
@@ -104,6 +106,10 @@ afterEach(() => {
 });
 
 afterAll(() => {
+  // Close the module-level default database before cleanup to prevent file lock errors
+  if (defaultDb) {
+    defaultDb.close();
+  }
   // Cleanup of the isolated test database after the test run
   if (existsSync("./data/test-isolated.sqlite")) {
     unlinkSync("./data/test-isolated.sqlite");
