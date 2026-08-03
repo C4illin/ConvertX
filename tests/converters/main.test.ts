@@ -342,7 +342,7 @@ test("handleConvert with normalization covers fileTypeOrig variations", async ()
   // PDF output may or may not exist depending on soffice availability, so we don't check it
 });
 
-test("handleConvert auto-discovers converter when converterName omitted", async () => {
+test("handleConvert with explicit converter processes VCF to CSV", async () => {
   const uploadsDir = "./data/uploads/test-main-extra/";
   const outputDir = "./data/output/test-main-extra/";
   await mkdir(uploadsDir, { recursive: true });
@@ -360,8 +360,7 @@ END:VCARD
 `;
   await writeFile(inputPath, sampleVcf, "utf-8");
 
-  // Call handleConvert with an array containing one file and no explicit converter name
-  // This exercises the converter discovery path indirectly through the public API
+  // Call handleConvert with an explicit converter name ("vcf") to transform VCF to CSV
   const jobId = createMockJobId("discovery-test");
   await handleConvert([fileName], uploadsDir, outputDir, "csv", "vcf", jobId);
 
