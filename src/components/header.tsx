@@ -4,12 +4,14 @@ export const Header = ({
   allowUnauthenticated,
   hideHistory,
   webroot = "",
+  branding = "ConvertX"
 }: {
   loggedIn?: boolean;
   accountRegistration?: boolean;
   allowUnauthenticated?: boolean;
   hideHistory?: boolean;
   webroot?: string;
+  branding?: string;
 }) => {
   let rightNav: JSX.Element;
   if (loggedIn) {
@@ -93,7 +95,7 @@ export const Header = ({
         <ul>
           <li>
             <strong>
-              <a href={`${webroot}/`}>ConvertX</a>
+              <a href={`${webroot}/`}>{branding.length < 26 ? branding : branding.slice(0, 26)}</a>
             </strong>
           </li>
         </ul>
