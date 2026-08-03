@@ -150,40 +150,42 @@ test("db handles migration from version 0 to version 1", () => {
   const migrateDbPath = `./data/test-db-migrate-${Date.now()}.sqlite`;
   const migrateDb = new Database(migrateDbPath, { create: true });
 
-  // Simulates a real v0 database state
-  migrateDb.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-                                       id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                       email TEXT NOT NULL,
-                                       password TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS file_names (
+  try {
+    // Simulates a real v0 database state
+    migrateDb.exec(`
+          CREATE TABLE IF NOT EXISTS users (
+                                             id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                             email TEXT NOT NULL,
+                                             password TEXT NOT NULL
+          );
+          CREATE TABLE IF NOT EXISTS file_names (
+                                                  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                                  job_id INTEGER NOT NULL,
+                                                  file_name TEXT NOT NULL,
+                                                  output_file_name TEXT NOT NULL,
+                                                  FOREIGN KEY (job_id) REFERENCES jobs(id)
+            );
+          CREATE TABLE IF NOT EXISTS jobs (
                                             id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                            job_id INTEGER NOT NULL,
-                                            file_name TEXT NOT NULL,
-                                            output_file_name TEXT NOT NULL,
-                                            FOREIGN KEY (job_id) REFERENCES jobs(id)
-      );
-    CREATE TABLE IF NOT EXISTS jobs (
-                                      id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                      user_id INTEGER NOT NULL,
-                                      date_created TEXT NOT NULL,
-                                      FOREIGN KEY (user_id) REFERENCES users(id)
-      );
-    PRAGMA user_version = 0;
-  `);
+                                            user_id INTEGER NOT NULL,
+                                            date_created TEXT NOT NULL,
+                                            FOREIGN KEY (user_id) REFERENCES users(id)
+            );
+          PRAGMA user_version = 0;
+        `);
 
-  // Now runs the real migration logic from db.ts
-  initializeDatabase(migrateDb);
+    // Now runs the real migration logic from db.ts
+    initializeDatabase(migrateDb);
 
-  expect(getDbVersion(migrateDb)).toBe(1);
-  const columnInfo = getColumnInfo(migrateDb, "file_names");
-  expect(columnInfo.map((c) => c.name)).toContain("status");
-
-  migrateDb.close();
-  if (existsSync(migrateDbPath)) unlinkSync(migrateDbPath);
-  if (existsSync(`${migrateDbPath}-wal`)) unlinkSync(`${migrateDbPath}-wal`);
-  if (existsSync(`${migrateDbPath}-shm`)) unlinkSync(`${migrateDbPath}-shm`);
+    expect(getDbVersion(migrateDb)).toBe(1);
+    const columnInfo = getColumnInfo(migrateDb, "file_names");
+    expect(columnInfo.map((c) => c.name)).toContain("status");
+  } finally {
+    if (migrateDb) migrateDb.close();
+    if (existsSync(migrateDbPath)) unlinkSync(migrateDbPath);
+    if (existsSync(`${migrateDbPath}-wal`)) unlinkSync(`${migrateDbPath}-wal`);
+    if (existsSync(`${migrateDbPath}-shm`)) unlinkSync(`${migrateDbPath}-shm`);
+  }
 });
 
 test("db enables WAL mode", () => {
