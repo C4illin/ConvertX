@@ -193,8 +193,8 @@ test("db enables WAL mode", () => {
 });
 
 test("db module exports a working database instance", () => {
-  expect(testDb).toBeTruthy();
-  const tables = queryAllTables(testDb);
+  expect(defaultDb).toBeTruthy();
+  const tables = queryAllTables(defaultDb!);
   expect(tables.length).toBeGreaterThanOrEqual(3);
   const tableNames = tables.map((t) => t.name);
   expect(tableNames).toContain("users");
