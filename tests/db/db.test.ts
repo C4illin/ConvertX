@@ -1,10 +1,15 @@
-// Set isolated DB path before import to protect production data
-process.env.DB_PATH = "./data/test-isolated.sqlite";
-
 import { test, expect, beforeEach, afterEach, afterAll } from "bun:test";
 import { Database } from "bun:sqlite";
 import { unlinkSync, existsSync, mkdirSync } from "node:fs";
-import { initializeDatabase } from "../../src/db/db";
+
+// set environment variable to ensure the test database is used instead of production data
+process.env.DB_PATH = "./data/test-isolated.sqlite";
+
+// dynamic import ensures that db.ts is loaded after the env is set
+let initializeDatabase: (db: Database) => void;
+await import("../../src/db/db").then((mod) => {
+  initializeDatabase = mod.initializeDatabase;
+});
 
 // Type-safe helpers for database query results
 interface DbTable {
