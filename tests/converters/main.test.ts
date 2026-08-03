@@ -39,7 +39,10 @@ afterEach(() => {
     testDb.query("DELETE FROM file_names");
   } catch (err) {
     if (err instanceof Error) {
-      // table does not exist yet or was already cleaned
+      // ignore only the expected error for missing tables; rethrow real issues
+      if (!err.message.includes("no such table")) {
+        throw err;
+      }
     }
   }
 });
