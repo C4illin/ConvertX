@@ -18,6 +18,7 @@ import { root } from "./pages/root";
 import { upload } from "./pages/upload";
 import { user } from "./pages/user";
 import { healthcheck } from "./pages/healthcheck";
+import { convertSources } from "./pages/convertSources";
 
 export const uploadsDir = "./data/uploads/";
 export const outputDir = "./data/output/";
@@ -50,6 +51,7 @@ const app = new Elysia({
   .use(listConverters)
   .use(chooseConverter)
   .use(healthcheck)
+  .use(convertSources)
   .onError(({ error }) => {
     console.error(error);
   });
