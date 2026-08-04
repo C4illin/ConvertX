@@ -107,7 +107,7 @@ END:VCARD
   await rm(outPath);
 });
 
-test("handleConvert with unsupported format returns error in DB", async () => {
+test("handleConvert with unsupported format does not throw", async () => {
   const uploadsDir = "./data/uploads/test-unsupported/";
   const outputDir = "./data/output/test-unsupported/";
   await mkdir(uploadsDir, { recursive: true });
@@ -121,7 +121,9 @@ test("handleConvert with unsupported format returns error in DB", async () => {
   // Try to convert unsupported format
   const jobId = createMockJobId("unsupported-test");
   // This should not throw, just log that no converter is available
-  await handleConvert([fileName], uploadsDir, outputDir, "pdf", "xyz123", jobId);
+  expect(
+    handleConvert([fileName], uploadsDir, outputDir, "pdf", "xyz123", jobId),
+  ).resolves.toBeUndefined();
 
   await rm(inputPath);
 });
