@@ -9,16 +9,13 @@ process.env.DB_PATH = join(testDbDir, "test.sqlite");
 
 import { test, expect, afterAll, afterEach } from "bun:test";
 import type { Cookie } from "elysia";
-import {
-  getPossibleTargets,
-  getAllTargets,
-  getAllInputs,
-  handleConvert,
-} from "../../src/converters/main";
 import { writeFile, mkdir, rm, readFile } from "fs/promises";
 import { Database } from "bun:sqlite";
-// Import test-only exports (marked @internal in main.ts)
-import { mainConverter, chunks } from "../../src/converters/main";
+
+// dynamic import ensures that the module is loaded after the environment variable is set
+const converterModule = await import("../../src/converters/main");
+const { getPossibleTargets, getAllTargets, getAllInputs, handleConvert, mainConverter, chunks } =
+  converterModule;
 
 // Isolated test database: avoids mutation of ./data/mydb.sqlite
 const dbPath = process.env.DB_PATH ?? join(testDbDir, "test.sqlite");
