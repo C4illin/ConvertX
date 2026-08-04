@@ -36,7 +36,7 @@ export function initializeDatabase(db: Database): void {
     // missing before altering. This makes the migration safe to re-run
     // even against a file left in an inconsistent state.
     const columns = db.query("PRAGMA table_info(file_names)").all() as { name: string }[];
-    const hasStatusColumn = columns.some((c) => c.name === "status");
+    const hasStatusColumn = columns.some((c) => c.name.toLowerCase() === "status");
 
     if (!hasStatusColumn) {
       db.exec("ALTER TABLE file_names ADD COLUMN status TEXT DEFAULT 'not started';");
