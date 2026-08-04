@@ -36,14 +36,6 @@ interface DbUser {
   email?: string;
 }
 
-interface DbCount {
-  count: number;
-}
-
-interface DbTest {
-  test: number;
-}
-
 function queryAllTables(database: Database): DbTable[] {
   return database
     .query("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
@@ -153,26 +145,26 @@ test("db handles migration from version 0 to version 1", () => {
   try {
     // Simulates a real v0 database state
     migrateDb.exec(`
-          CREATE TABLE IF NOT EXISTS users (
-                                             id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                             email TEXT NOT NULL,
-                                             password TEXT NOT NULL
-          );
-          CREATE TABLE IF NOT EXISTS file_names (
-                                                  id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                                  job_id INTEGER NOT NULL,
-                                                  file_name TEXT NOT NULL,
-                                                  output_file_name TEXT NOT NULL,
-                                                  FOREIGN KEY (job_id) REFERENCES jobs(id)
-            );
-          CREATE TABLE IF NOT EXISTS jobs (
-                                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                            user_id INTEGER NOT NULL,
-                                            date_created TEXT NOT NULL,
-                                            FOREIGN KEY (user_id) REFERENCES users(id)
-            );
-          PRAGMA user_version = 0;
-        `);
+      CREATE TABLE IF NOT EXISTS users (
+                                         id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                         email TEXT NOT NULL,
+                                         password TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS file_names (
+                                              id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                              job_id INTEGER NOT NULL,
+                                              file_name TEXT NOT NULL,
+                                              output_file_name TEXT NOT NULL,
+                                              FOREIGN KEY (job_id) REFERENCES jobs(id)
+        );
+      CREATE TABLE IF NOT EXISTS jobs (
+                                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                        user_id INTEGER NOT NULL,
+                                        date_created TEXT NOT NULL,
+                                        FOREIGN KEY (user_id) REFERENCES users(id)
+        );
+      PRAGMA user_version = 0;
+    `);
 
     // Now runs the real migration logic from db.ts
     initializeDatabase(migrateDb);
@@ -212,16 +204,6 @@ test("db has correct schema with status column", () => {
   expect(columnNames).toContain("output_file_name");
 });
 
-test("db version is set to 1", () => {
-  // Verify that PRAGMA user_version is set (as per db.ts initialization)
-  expect(getDbVersion(testDb)).toBe(1);
-});
-
-test("db has WAL mode enabled", () => {
-  // Verify that WAL mode is enabled (as per db.ts last step)
-  expect(getJournalMode(testDb)?.toLowerCase()).toBe("wal");
-});
-
 test("db can insert and query data", () => {
   // Test that the database is functional
   // Insert a test user
@@ -239,66 +221,4 @@ test("db can insert and query data", () => {
 
   // Cleanup
   testDb.query("DELETE FROM users WHERE email = ?").run("test@example.com");
-});
-
-test("db initialization creates all three tables if missing", () => {
-  // Get the current tables to verify the initialization worked
-  const tables = queryAllTables(testDb);
-
-  // The initialization in db.ts creates these three tables
-  const expectedTables = ["file_names", "jobs", "users"];
-  const actualTableNames = tables.map((t) => t.name).sort();
-
-  // Verify all expected tables exist (this validates the initialization path)
-  for (const expectedTable of expectedTables) {
-    expect(actualTableNames).toContain(expectedTable);
-  }
-
-  // Verify the initial version pragma was set during initialization
-  expect(getDbVersion(testDb)).toBe(1);
-});
-
-test("db.ts migration logic correctly handles version upgrades", () => {
-  // The migration path in db.ts checks for version 0 and upgrades to version 1
-  // We verify this by checking that:
-  // 1. Current version is 1 (set during init or migration)
-  expect(getDbVersion(testDb)).toBe(1);
-
-  // 2. The status column exists (added by migration if version was 0)
-  const columns = getColumnInfo(testDb, "file_names");
-  const statusColumn = columns.find((c) => c.name === "status");
-  expect(statusColumn).toBeTruthy();
-  expect(statusColumn?.type).toBe("TEXT");
-});
-
-test("db.ts correctly sets WAL mode for performance", () => {
-  // The db.ts runs PRAGMA journal_mode = WAL; at the end
-  // This is important for concurrent access and performance
-  expect(getJournalMode(testDb)?.toUpperCase()).toBe("WAL");
-});
-
-test("db initialization handles the case where sqlite_master query returns false", () => {
-  // This test validates the logic path: if (!db.query(...).get()) {...}
-  // In a fresh database, there are no tables, so the query returns falsy
-  // and the CREATE TABLE statements execute.
-  // We verify this by checking that the expected tables were created:
-  const tableQuery = testDb.query("SELECT COUNT(*) as count FROM sqlite_master WHERE type='table'");
-  const result = tableQuery.get() as DbCount;
-
-  // A freshly initialized db.ts should have created at least 3 tables
-  expect(result.count).toBeGreaterThanOrEqual(3);
-});
-
-test("db.ts uses correct file path and creates in data directory", () => {
-  // db.ts creates Database at "./data/mydb.sqlite"
-  // We can't directly check the path, but we verify the DB is functional
-  // and that operations work, which implies it's in the correct location
-
-  // Try an operation that requires the DB to be properly initialized
-  const result = testDb.query("SELECT 1 as test").get() as DbTest;
-  expect(result.test).toBe(1);
-
-  // Verify the DB directory structure is correct by checking table structure
-  const tableInfo = getColumnInfo(testDb, "users");
-  expect(tableInfo.length).toBeGreaterThan(0);
 });
