@@ -45,7 +45,7 @@ afterEach(() => {
   delete process.env.MOCK_EXEC_ERROR;
 });
 
-test("druckt nur die Version und beendet sich sofort, wenn NODE_ENV nicht production ist", async () => {
+test("prints only the version and terminates itself immediately when NODE_ENV is not production", async () => {
   consoleLogSpy = spyOn(console, "log");
   consoleErrorSpy = spyOn(console, "error");
 
@@ -61,7 +61,7 @@ test("druckt nur die Version und beendet sich sofort, wenn NODE_ENV nicht produc
   expect(readFile).not.toHaveBeenCalled();
 });
 
-test("druckt System-Infos und Tool-Versionen im Production-Modus", async () => {
+test("prints system information and tool versions in production mode", async () => {
   process.env.NODE_ENV = "production";
   consoleLogSpy = spyOn(console, "log");
   consoleErrorSpy = spyOn(console, "error");
@@ -74,10 +74,10 @@ test("druckt System-Infos und Tool-Versionen im Production-Modus", async () => {
   expect(consoleLogSpy).toHaveBeenCalledWith("ConvertX v1.0.0-test");
   expect(consoleLogSpy).toHaveBeenCalledWith("Ubuntu 22.04 LTS");
   expect(readFile).toHaveBeenCalledTimes(1);
-  expect(exec).toHaveBeenCalledTimes(17); // Entspricht exakt der Anzahl der exec-Aufrufe im Quellcode
+  expect(exec).toHaveBeenCalledTimes(17); // Corresponds exactly to the number of exec calls in the source code
 });
 
-test("loggt Fehlerpfade wenn Tools fehlen", async () => {
+test("logs error paths when tools are missing", async () => {
   process.env.NODE_ENV = "production";
   // Trigger a few error paths
   process.env.MOCK_EXEC_ERROR = "pandoc,resvg,bun";
@@ -93,7 +93,7 @@ test("loggt Fehlerpfade wenn Tools fehlen", async () => {
   expect(consoleErrorSpy).toHaveBeenCalledWith("Bun is not installed. wait what");
 });
 
-test("verarbeitet Ausgabe-Parsing korrekt und loggt keine Fehler im Erfolgsfall", async () => {
+test("processes output parsing correctly and logs no errors in the success case", async () => {
   process.env.NODE_ENV = "production";
   consoleLogSpy = spyOn(console, "log");
   consoleErrorSpy = spyOn(console, "error");
