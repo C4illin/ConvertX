@@ -30,11 +30,23 @@ export function initializeDatabase(db: Database): void {
         FOREIGN KEY (user_id) REFERENCES users(id)
       );
     `);
-  } else if (dbVersion?.user_version === 0) {
-    db.exec("ALTER TABLE file_names ADD COLUMN status TEXT DEFAULT 'not started';");
+    db.exec("PRAGMA user_version = 1;");
+  } else if ((dbVersion?.user_version ?? 0) < 1) {
+    // Don't trust user_version alone — verify the column is actually
+    // missing before altering. This makes the migration safe to re-run
+    // even against a file left in an inconsistent state.
+    const columns = db.query("PRAGMA table_info(file_names)").all() as { name: string }[];
+    const hasStatusColumn = columns.some((c) => c.name === "status");
+
+    if (!hasStatusColumn) {
+      db.exec("ALTER TABLE file_names ADD COLUMN status TEXT DEFAULT 'not started';");
+    }
+
+    db.exec("PRAGMA user_version = 1;");
+    console.log("Updated database to version 1.");
   }
 
-  db.exec("PRAGMA user_version = 1;");
+  // enable WAL mode
   db.exec("PRAGMA journal_mode = WAL;");
 }
 

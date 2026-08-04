@@ -4,6 +4,7 @@ import { mkdirSync, rmSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 
 const testDbDir = join(tmpdir(), "converter-test-db");
+rmSync(testDbDir, { recursive: true, force: true });
 mkdirSync(testDbDir, { recursive: true });
 process.env.DB_PATH = join(testDbDir, "test.sqlite");
 
