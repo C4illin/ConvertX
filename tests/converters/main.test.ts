@@ -115,7 +115,7 @@ test("handleConvert with unsupported format does not throw", async () => {
   // Try to convert unsupported format
   const jobId = createMockJobId("unsupported-test");
   // This should not throw, just log that no converter is available
-  expect(
+  await expect(
     handleConvert([fileName], uploadsDir, outputDir, "pdf", "xyz123", jobId),
   ).resolves.toBeUndefined();
 
