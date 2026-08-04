@@ -7,7 +7,7 @@ const testDbDir = join(tmpdir(), "converter-test-db");
 mkdirSync(testDbDir, { recursive: true });
 process.env.DB_PATH = join(testDbDir, "test.sqlite");
 
-import { test, expect, mock, afterAll, afterEach } from "bun:test";
+import { test, expect, afterAll, afterEach } from "bun:test";
 import type { Cookie } from "elysia";
 import {
   getPossibleTargets,
@@ -29,9 +29,6 @@ if (!existsSync(dbDir)) {
 }
 
 const testDb = new Database(dbPath, { create: true });
-mock.module("../../src/db/db", () => ({
-  db: testDb,
-}));
 
 // cleans up the table before each test for real isolation (even with parallel tests)
 afterEach(() => {
