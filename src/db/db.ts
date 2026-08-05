@@ -48,7 +48,9 @@ if ((dbVersion ?? 0) < 3) {
   db.exec("ALTER TABLE users ADD COLUMN oidc_issuer TEXT;");
   // sub is only guaranteed unique within its issuer, so identity is the (issuer, sub) pair.
   // SQLite treats every NULL as distinct, so local-only users (both columns NULL) never collide.
-  db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_oidc_identity ON users(oidc_issuer, oidc_sub);");
+  db.exec(
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_oidc_identity ON users(oidc_issuer, oidc_sub);",
+  );
   db.exec("PRAGMA user_version = 3;");
   console.log("Updated database to version 3.");
 }

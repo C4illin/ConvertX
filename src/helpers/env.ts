@@ -39,7 +39,9 @@ export const OIDC_SCOPES = process.env.OIDC_SCOPES ?? "openid profile email";
 export const OIDC_NAME = process.env.OIDC_NAME ?? "SSO";
 
 // Only enable OIDC once all required settings are present.
-export const OIDC_ENABLED = Boolean(OIDC_ISSUER && OIDC_CLIENT_ID && OIDC_CLIENT_SECRET && OIDC_REDIRECT_URI);
+export const OIDC_ENABLED = Boolean(
+  OIDC_ISSUER && OIDC_CLIENT_ID && OIDC_CLIENT_SECRET && OIDC_REDIRECT_URI,
+);
 
 // Hide the local email/password form entirely and only allow OIDC login.
 export const OIDC_ONLY = OIDC_ENABLED && process.env.OIDC_ONLY?.toLowerCase() === "true";
