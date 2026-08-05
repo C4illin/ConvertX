@@ -14,11 +14,27 @@ import {
   UNAUTHENTICATED_USER_SHARING,
   WEBROOT,
 } from "../helpers/env";
-import { FIRST_RUN, userService } from "./user";
+import { FIRST_RUN, trustedHeaderToken, userService } from "./user";
 
 export const root = new Elysia().use(userService).get(
   "/",
-  async ({ jwt, redirect, cookie: { auth, jobId } }) => {
+  async ({ request, jwt, redirect, cookie: { auth, jobId } }) => {
+    // Trusted-header SSO: if a reverse proxy already authenticated the request,
+    // establish the ConvertX session here — before any auth redirect — so the
+    // user lands straight on the app with no second login.
+    if (!auth?.value) {
+      const ssoToken = await trustedHeaderToken(request, jwt);
+      if (ssoToken && auth) {
+        auth.set({
+          value: ssoToken,
+          httpOnly: true,
+          secure: !HTTP_ALLOWED,
+          maxAge: 60 * 60 * 24 * 7,
+          sameSite: "strict",
+        });
+      }
+    }
+
     if (!ALLOW_UNAUTHENTICATED) {
       if (FIRST_RUN) {
         return redirect(`${WEBROOT}/setup`, 302);

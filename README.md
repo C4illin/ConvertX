@@ -93,6 +93,8 @@ All are optional, JWT_SECRET is recommended to be set.
 | ACCOUNT_REGISTRATION         | false                                              | Allow users to register accounts                                                                                                                              |
 | HTTP_ALLOWED                 | false                                              | Allow HTTP connections, only set this to true locally                                                                                                         |
 | ALLOW_UNAUTHENTICATED        | false                                              | Allow unauthenticated users to use the service, only set this to true locally                                                                                 |
+| HTTP_REMOTE_USER_ENABLED     | false                                              | Trust a reverse proxy to authenticate users and sign them in from a header (SSO). Only enable behind a proxy that strips the header — see below.               |
+| HTTP_REMOTE_USER_HEADER      | Remote-User                                        | Header the trusted proxy passes the authenticated identity in (e.g. `X-authentik-email`, `X-Forwarded-Email`). Case-insensitive.                              |
 | AUTO_DELETE_EVERY_N_HOURS    | 24                                                 | Checks every n hours for files older then n hours and deletes them, set to 0 to disable                                                                       |
 | WEBROOT                      |                                                    | The address to the root path setting this to "/convert" will serve the website on "example.com/convert/"                                                      |
 | FFMPEG_ARGS                  |                                                    | Arguments to pass to the input file of ffmpeg, e.g. `-hwaccel vaapi`. See https://github.com/C4illin/ConvertX/issues/190 for more info about hw-acceleration. |
@@ -101,6 +103,20 @@ All are optional, JWT_SECRET is recommended to be set.
 | LANGUAGE                     | en                                                 | Language to format date strings in, specified as a [BCP 47 language tag](https://en.wikipedia.org/wiki/IETF_language_tag)                                     |
 | UNAUTHENTICATED_USER_SHARING | false                                              | Shares conversion history between all unauthenticated users                                                                                                   |
 | MAX_CONVERT_PROCESS          | 0                                                  | Maximum number of concurrent conversion processes allowed. Set to 0 for unlimited.                                                                            |
+
+### Reverse proxy / SSO (trusted header)
+
+If you already run a reverse proxy that authenticates users — [Authentik](https://goauthentik.io/) (forward-auth outpost), [Authelia](https://www.authelia.com/), [oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/), Cloudflare Access, etc. — ConvertX can trust it instead of asking users to log in a second time. Set `HTTP_REMOTE_USER_ENABLED=true` and point `HTTP_REMOTE_USER_HEADER` at the header your proxy injects the authenticated identity in. On each request ConvertX reads that header, looks up the matching account (creating it on first sight), and signs the user in — so users go straight from your SSO to the app. The normal login/registration form still works for anyone reaching ConvertX without the header.
+
+```yml
+# behind an Authentik forward-auth outpost:
+environment:
+  - HTTP_REMOTE_USER_ENABLED=true
+  - HTTP_REMOTE_USER_HEADER=X-authentik-email # or X-authentik-username
+```
+
+> [!WARNING]
+> Only enable this behind a trusted reverse proxy, and make sure that proxy **strips any client-supplied copy of `HTTP_REMOTE_USER_HEADER`** before it sets its own. If ConvertX is reachable by clients directly (no proxy in front), anyone can send the header themselves and impersonate any user — so never enable it in that case. This is the same trade-off as other self-hosted apps' remote-user auth (e.g. paperless-ngx).
 
 ### Docker images
 
