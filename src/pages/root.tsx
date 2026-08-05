@@ -21,8 +21,10 @@ export const root = new Elysia().use(userService).get(
   async ({ request, jwt, redirect, cookie: { auth, jobId } }) => {
     // Trusted-header SSO: if a reverse proxy already authenticated the request,
     // establish the ConvertX session here — before any auth redirect — so the
-    // user lands straight on the app with no second login.
-    if (!auth?.value) {
+    // user lands straight on the app with no second login. Skipped under
+    // ALLOW_UNAUTHENTICATED (mutually exclusive: that mode issues its own
+    // ephemeral session below and would just overwrite this one).
+    if (!ALLOW_UNAUTHENTICATED && !auth?.value) {
       const ssoToken = await trustedHeaderToken(request, jwt);
       if (ssoToken && auth) {
         auth.set({
