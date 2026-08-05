@@ -16,7 +16,16 @@ services:
       # - FFMPEG_ARGS=-hwaccel vulkan # additional arguments to pass to ffmpeg
       # - WEBROOT=/convertx # the root path of the web interface, leave empty to disable
       # - HIDE_HISTORY=true # hides the history tab in the web interface, defaults to false
-      - TZ=Europe/Stockholm # set your timezone, defaults to UTC
+      - TZ=Asia/Kolkata # set your timezone, defaults to UTC
       # - UNAUTHENTICATED_USER_SHARING=true # for use with ALLOW_UNAUTHENTICATED=true to share history with all unauthenticated users / devices
+      # OIDC / SSO login (e.g. Authentik) - set all four of these to enable the "Login with ..." button
+      # never commit real client IDs/secrets here - put them in a local, gitignored .env file instead
+      # - OIDC_ISSUER=https://authentik.example.com/application/o/convertx/ # the provider's issuer URL
+      # - OIDC_CLIENT_ID=your-client-id
+      # - OIDC_CLIENT_SECRET=your-client-secret
+      # - OIDC_REDIRECT_URI=https://convertx.example.com/login/oidc/callback # must match the redirect URI registered with the provider exactly
+      # - OIDC_SCOPES=openid profile email # defaults to "openid profile email"
+      # - OIDC_NAME=Authentik # button label, defaults to "SSO"
+      # - OIDC_ONLY=true # hides local email/password login and registration entirely, only allow login via OIDC
     ports:
       - 3000:3000

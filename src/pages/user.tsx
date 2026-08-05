@@ -10,10 +10,19 @@ import {
   ALLOW_UNAUTHENTICATED,
   HIDE_HISTORY,
   HTTP_ALLOWED,
+  OIDC_NAME,
+  OIDC_ONLY,
   WEBROOT,
 } from "../helpers/env";
+import { isOidcReady } from "../helpers/oidcClient";
 
 export let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
+
+// Called once the OIDC callback provisions the very first local user, so
+// FIRST_RUN-gated routes (e.g. GET / and GET /login) stop redirecting to /setup.
+export function markFirstRunComplete() {
+  FIRST_RUN = false;
+}
 
 export const userService = new Elysia({ name: "user/service" })
   .use(
@@ -66,7 +75,7 @@ export const userService = new Elysia({ name: "user/service" })
 export const user = new Elysia()
   .use(userService)
   .get("/setup", ({ redirect }) => {
-    if (!FIRST_RUN) {
+    if (!FIRST_RUN || OIDC_ONLY) {
       return redirect(`${WEBROOT}/login`, 302);
     }
 
@@ -127,7 +136,7 @@ export const user = new Elysia()
     );
   })
   .get("/register", ({ redirect }) => {
-    if (!ACCOUNT_REGISTRATION) {
+    if (!ACCOUNT_REGISTRATION || OIDC_ONLY) {
       return redirect(`${WEBROOT}/login`, 302);
     }
 
@@ -136,7 +145,7 @@ export const user = new Elysia()
         <>
           <Header
             webroot={WEBROOT}
-            accountRegistration={ACCOUNT_REGISTRATION}
+            accountRegistration={ACCOUNT_REGISTRATION && !OIDC_ONLY}
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
             hideHistory={HIDE_HISTORY}
           />
@@ -183,7 +192,7 @@ export const user = new Elysia()
   .post(
     "/register",
     async ({ body: { email, password }, set, redirect, jwt, cookie: { auth } }) => {
-      if (!ACCOUNT_REGISTRATION && !FIRST_RUN) {
+      if (OIDC_ONLY || (!ACCOUNT_REGISTRATION && !FIRST_RUN)) {
         return redirect(`${WEBROOT}/login`, 302);
       }
 
@@ -238,7 +247,7 @@ export const user = new Elysia()
   .get(
     "/login",
     async ({ jwt, redirect, cookie: { auth } }) => {
-      if (FIRST_RUN) {
+      if (FIRST_RUN && !OIDC_ONLY) {
         return redirect(`${WEBROOT}/setup`, 302);
       }
 
@@ -258,7 +267,7 @@ export const user = new Elysia()
           <>
             <Header
               webroot={WEBROOT}
-              accountRegistration={ACCOUNT_REGISTRATION}
+              accountRegistration={ACCOUNT_REGISTRATION && !OIDC_ONLY}
               allowUnauthenticated={ALLOW_UNAUTHENTICATED}
               hideHistory={HIDE_HISTORY}
             />
@@ -269,44 +278,62 @@ export const user = new Elysia()
               `}
             >
               <article class="article">
-                <form method="post" class="flex flex-col gap-4">
-                  <fieldset class="mb-4 flex flex-col gap-4">
-                    <label class="flex flex-col gap-1">
-                      Email
-                      <input
-                        type="email"
-                        name="email"
-                        class="rounded-sm bg-neutral-800 p-3"
-                        placeholder="Email"
-                        autocomplete="email"
-                        required
-                      />
-                    </label>
-                    <label class="flex flex-col gap-1">
-                      Password
-                      <input
-                        type="password"
-                        name="password"
-                        class="rounded-sm bg-neutral-800 p-3"
-                        placeholder="Password"
-                        autocomplete="current-password"
-                        required
-                      />
-                    </label>
-                  </fieldset>
-                  <div class="flex flex-row gap-4">
-                    {ACCOUNT_REGISTRATION ? (
-                      <a
-                        href={`${WEBROOT}/register`}
-                        role="button"
-                        class="w-full btn-secondary text-center"
-                      >
-                        Register
-                      </a>
-                    ) : null}
-                    <input type="submit" value="Login" class="w-full btn-primary" />
+                {!OIDC_ONLY ? (
+                  <form method="post" class="flex flex-col gap-4">
+                    <fieldset class="mb-4 flex flex-col gap-4">
+                      <label class="flex flex-col gap-1">
+                        Email
+                        <input
+                          type="email"
+                          name="email"
+                          class="rounded-sm bg-neutral-800 p-3"
+                          placeholder="Email"
+                          autocomplete="email"
+                          required
+                        />
+                      </label>
+                      <label class="flex flex-col gap-1">
+                        Password
+                        <input
+                          type="password"
+                          name="password"
+                          class="rounded-sm bg-neutral-800 p-3"
+                          placeholder="Password"
+                          autocomplete="current-password"
+                          required
+                        />
+                      </label>
+                    </fieldset>
+                    <div class="flex flex-row gap-4">
+                      {ACCOUNT_REGISTRATION ? (
+                        <a
+                          href={`${WEBROOT}/register`}
+                          role="button"
+                          class="w-full btn-secondary text-center"
+                        >
+                          Register
+                        </a>
+                      ) : null}
+                      <input type="submit" value="Login" class="w-full btn-primary" />
+                    </div>
+                  </form>
+                ) : null}
+                {isOidcReady() && !OIDC_ONLY ? (
+                  <div class="my-4 flex items-center gap-4 text-sm text-neutral-500">
+                    <hr class="flex-1 border-neutral-700" />
+                    or
+                    <hr class="flex-1 border-neutral-700" />
                   </div>
-                </form>
+                ) : null}
+                {isOidcReady() ? (
+                  <a
+                    href={`${WEBROOT}/login/oidc`}
+                    role="button"
+                    class={`block w-full btn-primary text-center`}
+                  >
+                    Login with {OIDC_NAME}
+                  </a>
+                ) : null}
               </article>
             </main>
           </>
@@ -318,6 +345,10 @@ export const user = new Elysia()
   .post(
     "/login",
     async function handler({ body, set, redirect, jwt, cookie: { auth } }) {
+      if (OIDC_ONLY) {
+        return redirect(`${WEBROOT}/login`, 302);
+      }
+
       const existingUser = db.query("SELECT * FROM users WHERE email = ?").as(User).get(body.email);
 
       if (!existingUser) {
@@ -392,7 +423,7 @@ export const user = new Elysia()
           <>
             <Header
               webroot={WEBROOT}
-              accountRegistration={ACCOUNT_REGISTRATION}
+              accountRegistration={ACCOUNT_REGISTRATION && !OIDC_ONLY}
               allowUnauthenticated={ALLOW_UNAUTHENTICATED}
               hideHistory={HIDE_HISTORY}
               loggedIn

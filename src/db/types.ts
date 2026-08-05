@@ -20,4 +20,6 @@ export class User {
   id!: number;
   email!: string;
   password!: string;
+  oidc_sub!: string | null;
+  oidc_issuer!: string | null;
 }
