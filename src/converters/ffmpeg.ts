@@ -670,6 +670,7 @@ export const properties = {
       "vvc",
       "w64",
       "wav",
+      "wav-3cx",
       "wbmp",
       "webm",
       "webp",
@@ -706,6 +707,12 @@ export async function convert(
       "scale='min(256,iw)':min'(256,ih)':force_original_aspect_ratio=decrease",
     ];
     message = "Done: resized to 256x256";
+  }
+
+  if (convertTo === "wav-3cx") {
+    // 3CX telephony preset: mono, 8 kHz, 16-bit PCM (pcm_s16le is explicit to
+    // avoid FFMPEG_OUTPUT_ARGS overriding the codec and breaking 3CX playback)
+    extraArgs.push("-ac", "1", "-ar", "8000", "-c:a", "pcm_s16le");
   }
 
   if (convertTo.split(".").length > 1) {
