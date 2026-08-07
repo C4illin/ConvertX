@@ -190,3 +190,9 @@ export function convert(
     });
   });
 }
+
+/**
+ * @internal For testing only. Do not use in production.
+ * Tests need direct access to cover all filters.
+ */
+export { filters, getFilters };

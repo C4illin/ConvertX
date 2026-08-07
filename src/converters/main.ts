@@ -342,3 +342,9 @@ for (const converterName in properties) {
 export const getAllInputs = (converter: string) => {
   return allInputs[converter] || [];
 };
+
+/**
+ * @internal For testing only. Do not use in production.
+ * Tests need direct access to cover all branches of converter discovery and chunking logic.
+ */
+export { chunks, mainConverter };
