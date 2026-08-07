@@ -1,4 +1,5 @@
 import { execFile as execFileOriginal } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { ExecFileFn } from "./types";
 
 export const properties = {
@@ -120,6 +121,52 @@ export const properties = {
   },
 };
 
+/**
+ * Input formats whose files are binary or compressed (ZIP-based) and cannot
+ * be reliably scanned for CJK characters by reading raw bytes. For these
+ * formats, a CJK font is always passed to avoid missing glyphs.
+ */
+const binaryFormats = new Set(["docx", "epub", "odt", "pptx"]);
+
+/**
+ * Detects CJK characters in a file and returns the appropriate Noto Sans CJK
+ * font variant for the detected language. Returns null for non-CJK content
+ * so that the CJK font argument is omitted entirely, keeping non-CJK
+ * conversions working in environments without CJK fonts installed.
+ *
+ * Detection order matters: Japanese Kana is checked first (most specific),
+ * then Korean Hangul, then CJK Unified Ideographs (Chinese). This is because
+ * Japanese text also uses Kanji (shared with Chinese), but the presence of
+ * Kana uniquely identifies Japanese content.
+ */
+function detectCJKFont(filePath: string): string | null {
+  let content: string;
+  try {
+    content = readFileSync(filePath, "utf-8");
+  } catch {
+    // If the file can't be read, don't add a CJK font to avoid breaking
+    // conversions. Pandoc will still process the file independently.
+    return null;
+  }
+
+  // Japanese: Hiragana (U+3040-309F) or Katakana (U+30A0-30FF)
+  if (/[\u3040-\u309f\u30a0-\u30ff]/.test(content)) {
+    return "Noto Sans CJK JP";
+  }
+
+  // Korean: Hangul Syllables (U+AC00-D7AF)
+  if (/[\uac00-\ud7af]/.test(content)) {
+    return "Noto Sans CJK KR";
+  }
+
+  // Chinese: CJK Unified Ideographs (U+4E00-9FFF)
+  if (/[\u4e00-\u9fff]/.test(content)) {
+    return "Noto Sans CJK SC";
+  }
+
+  return null;
+}
+
 export function convert(
   filePath: string,
   fileType: string,
@@ -136,6 +183,21 @@ export function convert(
 
   if (xelatex.includes(convertTo)) {
     args.push("--pdf-engine=xelatex");
+    // For binary/compressed formats (docx, epub, etc.), the raw file bytes
+    // cannot be scanned for CJK characters, so always pass a CJK font.
+    // For text-based formats, detect CJK characters to select the correct
+    // locale-specific font variant (JP/KR/SC) and to avoid adding a CJK
+    // font when the document contains none, keeping non-CJK conversions
+    // working in environments without CJK fonts installed.
+    let cjkFont: string | null;
+    if (binaryFormats.has(fileType.toLowerCase())) {
+      cjkFont = "Noto Sans CJK SC";
+    } else {
+      cjkFont = detectCJKFont(filePath);
+    }
+    if (cjkFont) {
+      args.push("-V", `CJKmainfont=${cjkFont}`);
+    }
   }
 
   args.push(filePath);
