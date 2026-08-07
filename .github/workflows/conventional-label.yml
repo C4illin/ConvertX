@@ -1,7 +1,7 @@
 name: autolabel
 on:
-  pull_request:
-    types: [opened, edited, labeled, unlabeled]
+  pull_request_target:
+    types: [opened, edited]
 
 permissions:
   pull-requests: write
