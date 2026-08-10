@@ -17,6 +17,40 @@ import {
 
 export let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
 
+/** Standard session lifetime (matches the JWT `exp` of 7 days). */
+export const SESSION_MAX_AGE = 60 * 60 * 24 * 7;
+/** Shorter lifetime for the ephemeral ALLOW_UNAUTHENTICATED session. */
+export const EPHEMERAL_SESSION_MAX_AGE = 24 * 60 * 60;
+
+/**
+ * Set the auth session cookie with the project's hardened defaults
+ * (httpOnly, secure unless HTTP_ALLOWED, SameSite=strict). Centralised here so
+ * the security-sensitive cookie policy lives in exactly one place — every
+ * caller (register/login, ALLOW_UNAUTHENTICATED, and trusted-header SSO) sets
+ * it identically, and a future hardening change only has to be made once.
+ */
+export function setSessionCookie(
+  auth: {
+    set: (options: {
+      value: string;
+      httpOnly: boolean;
+      secure: boolean;
+      maxAge: number;
+      sameSite: "strict";
+    }) => void;
+  },
+  value: string,
+  maxAge: number = SESSION_MAX_AGE,
+): void {
+  auth.set({
+    value,
+    httpOnly: true,
+    secure: !HTTP_ALLOWED,
+    maxAge,
+    sameSite: "strict",
+  });
+}
+
 /**
  * Trusted-header (reverse-proxy) SSO.
  *
@@ -36,7 +70,11 @@ export async function trustedHeaderToken(
   request: Request,
   jwt: { sign: (payload: { id: string }) => Promise<string> },
 ): Promise<string | null> {
-  if (!HTTP_REMOTE_USER_ENABLED) {
+  // ALLOW_UNAUTHENTICATED and trusted-header SSO are mutually exclusive modes.
+  // Guard here (rather than at each call site) so every caller — /, /setup and
+  // /login — skips auto-provisioning and SSO sessions when unauthenticated mode
+  // is on, regardless of whether the proxy still supplies the header.
+  if (!HTTP_REMOTE_USER_ENABLED || ALLOW_UNAUTHENTICATED) {
     return null;
   }
 
@@ -119,13 +157,7 @@ export const user = new Elysia()
     // provision them as the initial account and sign them straight in.
     const ssoToken = await trustedHeaderToken(request, jwt);
     if (ssoToken && auth) {
-      auth.set({
-        value: ssoToken,
-        httpOnly: true,
-        secure: !HTTP_ALLOWED,
-        maxAge: 60 * 60 * 24 * 7,
-        sameSite: "strict",
-      });
+      setSessionCookie(auth, ssoToken);
       return redirect(`${WEBROOT}/`, 302);
     }
 
@@ -286,13 +318,7 @@ export const user = new Elysia()
       }
 
       // set cookie
-      auth.set({
-        value: accessToken,
-        httpOnly: true,
-        secure: !HTTP_ALLOWED,
-        maxAge: 60 * 60 * 24 * 7,
-        sameSite: "strict",
-      });
+      setSessionCookie(auth, accessToken);
 
       return redirect(`${WEBROOT}/`, 302);
     },
@@ -305,13 +331,7 @@ export const user = new Elysia()
       // establish the session and skip the login form entirely.
       const ssoToken = await trustedHeaderToken(request, jwt);
       if (ssoToken && auth) {
-        auth.set({
-          value: ssoToken,
-          httpOnly: true,
-          secure: !HTTP_ALLOWED,
-          maxAge: 60 * 60 * 24 * 7,
-          sameSite: "strict",
-        });
+        setSessionCookie(auth, ssoToken);
         return redirect(`${WEBROOT}/`, 302);
       }
 
@@ -425,13 +445,7 @@ export const user = new Elysia()
       }
 
       // set cookie
-      auth.set({
-        value: accessToken,
-        httpOnly: true,
-        secure: !HTTP_ALLOWED,
-        maxAge: 60 * 60 * 24 * 7,
-        sameSite: "strict",
-      });
+      setSessionCookie(auth, accessToken);
 
       return redirect(`${WEBROOT}/`, 302);
     },
