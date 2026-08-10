@@ -5,6 +5,9 @@ import { readFile } from "node:fs";
 // mocks have to be defined before importing the module under test,
 // otherwise the real modules will be loaded first and the mocks won't take effect.
 mock.module("node:child_process", () => ({
+  // The mock checks the environment variable MOCK_EXEC_ERROR at call-time so
+  // individual tests can trigger error paths by setting that env before
+  // importing the module under test.
   exec: mock((cmd: string, cb: (error: Error | null, stdout: string) => void) => {
     const shouldError = (process.env.MOCK_EXEC_ERROR || "")
       .split(",")
