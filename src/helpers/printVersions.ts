@@ -121,7 +121,8 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(`assimp ${stdout.split("\n")[5]}`);
+      const firstLines = (stdout || "").split("\n");
+      console.log(`assimp ${firstLines[5] || firstLines[0] || ""}`);
     }
   });
 

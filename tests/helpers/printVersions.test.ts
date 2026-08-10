@@ -27,7 +27,7 @@ mock.module("node:child_process", () => ({
 
     // assimp's real output is multi-line; the source reads line index 5.
     if (cmd.startsWith("assimp")) {
-      cb(null, "l1\nl2\nl3\nl4\nl5\nassimp v1.0.0\n");
+      cb(null, "l1\nl2\nl3\nl4\nl5\nVersion 1.0.0 (GIT commit abc123)\n");
       return;
     }
 
