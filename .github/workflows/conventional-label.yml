@@ -10,7 +10,7 @@ jobs:
   label:
     runs-on: ubuntu-latest
     steps:
-      - uses: c4illin/autolabel@v1
+      - uses: c4illin/autolabel@main
         with:
           type_labels: |
             feat: Feature
