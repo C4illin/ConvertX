@@ -11,6 +11,10 @@ export const properties = {
   },
 };
 
+export function buildDaselArgs(filePath: string, fileType: string, convertTo: string): string[] {
+  return ["--var", `data=${fileType}:file:${filePath}`, "--out", convertTo, "$data"];
+}
+
 export async function convert(
   filePath: string,
   fileType: string,
@@ -19,14 +23,10 @@ export async function convert(
   options?: unknown,
   execFile: ExecFileFn = execFileOriginal, // to make it mockable
 ): Promise<string> {
-  const args: string[] = [];
-
-  args.push("--file", filePath);
-  args.push("--read", fileType);
-  args.push("--write", convertTo);
+  const args = buildDaselArgs(filePath, fileType, convertTo);
 
   return new Promise((resolve, reject) => {
-    execFile("dasel", args, (error, stdout, stderr) => {
+    const childProcess = execFile("dasel", args, (error, stdout, stderr) => {
       if (error) {
         reject(`error: ${error}`);
         return;
@@ -44,5 +44,7 @@ export async function convert(
         }
       });
     });
+
+    childProcess?.stdin?.end();
   });
 }
