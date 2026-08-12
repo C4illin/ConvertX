@@ -89,7 +89,6 @@ All are optional, JWT_SECRET is recommended to be set.
 
 | Name                         | Default                                            | Description                                                                                                                                                   |
 | ---------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| PORT                         | 3000                                               | Application listen port                                                                                                                                       |
 | JWT_SECRET                   | when unset it will use the value from randomUUID() | A long and secret string used to sign the JSON Web Token                                                                                                      |
 | ACCOUNT_REGISTRATION         | false                                              | Allow users to register accounts                                                                                                                              |
 | HTTP_ALLOWED                 | false                                              | Allow HTTP connections, only set this to true locally                                                                                                         |
@@ -102,6 +101,7 @@ All are optional, JWT_SECRET is recommended to be set.
 | LANGUAGE                     | en                                                 | Language to format date strings in, specified as a [BCP 47 language tag](https://en.wikipedia.org/wiki/IETF_language_tag)                                     |
 | UNAUTHENTICATED_USER_SHARING | false                                              | Shares conversion history between all unauthenticated users                                                                                                   |
 | MAX_CONVERT_PROCESS          | 0                                                  | Maximum number of concurrent conversion processes allowed. Set to 0 for unlimited.                                                                            |
+| PORT                         | 3000                                               | Application listen port                                                                                                                                       |
 
 ### Docker images
 
