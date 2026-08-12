@@ -4,7 +4,7 @@ export const Header = ({
   allowUnauthenticated,
   hideHistory,
   webroot = "",
-  branding = "ConvertX"
+  branding = "ConvertX",
 }: {
   loggedIn?: boolean;
   accountRegistration?: boolean;

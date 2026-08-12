@@ -11,7 +11,7 @@ import {
   HIDE_HISTORY,
   HTTP_ALLOWED,
   WEBROOT,
-  BRANDING
+  BRANDING,
 } from "../helpers/env";
 
 export let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;

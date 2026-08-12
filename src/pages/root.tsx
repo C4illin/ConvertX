@@ -13,7 +13,7 @@ import {
   HTTP_ALLOWED,
   UNAUTHENTICATED_USER_SHARING,
   WEBROOT,
-  BRANDING
+  BRANDING,
 } from "../helpers/env";
 import { FIRST_RUN, userService } from "./user";
 

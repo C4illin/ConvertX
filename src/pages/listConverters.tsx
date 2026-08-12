@@ -11,7 +11,12 @@ export const listConverters = new Elysia().use(userService).get(
     return (
       <BaseHtml webroot={WEBROOT} title="ConvertX | Converters">
         <>
-          <Header webroot={WEBROOT} allowUnauthenticated={ALLOW_UNAUTHENTICATED} branding={BRANDING} loggedIn />
+          <Header
+            webroot={WEBROOT}
+            allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+            branding={BRANDING}
+            loggedIn
+          />
           <main
             class={`
               w-full flex-1 px-2

@@ -162,7 +162,12 @@ export const results = new Elysia()
       return (
         <BaseHtml webroot={WEBROOT} title="ConvertX | Result">
           <>
-            <Header webroot={WEBROOT} allowUnauthenticated={ALLOW_UNAUTHENTICATED} loggedIn branding={BRANDING} />
+            <Header
+              webroot={WEBROOT}
+              allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+              loggedIn
+              branding={BRANDING}
+            />
             <main
               class={`
                 w-full flex-1 px-2
