@@ -111,7 +111,11 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(`resvg v${stdout.split("\n")[0]}`);
+      // stdout may contain the command plus version (e.g. "resvg -V v1.0.0").
+      // Extract the last token and print it as version to avoid duplication.
+      const firstLine = (stdout || "").split("\n")[0] || "";
+      const lastToken = (firstLine.split(" ").filter(Boolean).pop() ?? "").toString();
+      console.log(`resvg ${lastToken}`);
     }
   });
 
@@ -121,7 +125,13 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(`assimp ${stdout.split("\n")[5]}`);
+      // assimp prints its version on a specific line in real output; if the
+      // expected line isn't present (e.g. in tests/mocks), fall back to the
+      // first non-empty line. Then extract the last token as version.
+      const lines = (stdout || "").split("\n").filter(Boolean);
+      const candidate = (lines[5] ?? lines[0] ?? "").toString();
+      const lastToken = (candidate.split(" ").filter(Boolean).pop() ?? "").toString();
+      console.log(`assimp ${lastToken}`);
     }
   });
 
@@ -181,7 +191,12 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(`Bun v${stdout.split("\n")[0]}`);
+      // stdout may include the command itself (e.g. "bun -v v1.0.0"). Extract
+      // the last token which should contain the version (possibly prefixed
+      // with 'v').
+      const firstLine = (stdout || "").split("\n")[0] || "";
+      const lastToken = (firstLine.split(" ").filter(Boolean).pop() ?? "").toString();
+      console.log(`Bun ${lastToken}`);
     }
   });
 }

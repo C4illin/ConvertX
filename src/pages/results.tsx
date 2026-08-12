@@ -3,6 +3,7 @@ import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import db from "../db/db";
 import { Filename, Jobs } from "../db/types";
+import { buildDownloadUrl } from "../helpers/buildDownloadUrl";
 import { ALLOW_UNAUTHENTICATED, WEBROOT } from "../helpers/env";
 import { DownloadIcon } from "../icons/download";
 import { DeleteIcon } from "../icons/delete";
@@ -107,7 +108,7 @@ function ResultsArticle({
                     text-accent-500 underline
                     hover:text-accent-400
                   `}
-                  href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
+                  href={buildDownloadUrl(WEBROOT, outputPath, file.output_file_name)}
                 >
                   <EyeIcon />
                 </a>
@@ -116,7 +117,7 @@ function ResultsArticle({
                     text-accent-500 underline
                     hover:text-accent-400
                   `}
-                  href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
+                  href={buildDownloadUrl(WEBROOT, outputPath, file.output_file_name)}
                   download={file.output_file_name}
                 >
                   <DownloadIcon />
