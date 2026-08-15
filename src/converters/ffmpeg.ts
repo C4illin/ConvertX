@@ -699,47 +699,6 @@ export async function convert(
   let extraArgs: string[] = [];
   let message = "Done";
 
-  const audioFormatsWithCover = ["m4a", "mp3", "flac", "ogg"];
-  const audioFormatsNoCover = ["wav", "aac"];
-
-  const audioInputFormats = [
-    "aac",
-    "ac3",
-    "ac4",
-    "aiff",
-    "alac",
-    "amr",
-    "ape",
-    "au",
-    "caf",
-    "dts",
-    "eac3",
-    "flac",
-    "m4a",
-    "m4b",
-    "mka",
-    "mp2",
-    "mp3",
-    "mpc",
-    "ogg",
-    "oga",
-    "opus",
-    "ra",
-    "voc",
-    "wav",
-    "wma",
-    "wv",
-  ];
-
-  if (
-    audioFormatsWithCover.includes(convertTo) &&
-    audioInputFormats.includes(fileType.toLowerCase())
-  ) {
-    extraArgs.push("-c:v", "copy", "-disposition:v", "attached_pic");
-  } else if (audioFormatsNoCover.includes(convertTo) || audioFormatsWithCover.includes(convertTo)) {
-    extraArgs.push("-vn");
-  }
-
   if (convertTo === "ico") {
     // Make sure image is 256x256 or smaller
     extraArgs = [
