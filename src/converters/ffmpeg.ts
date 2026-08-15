@@ -699,6 +699,15 @@ export async function convert(
   let extraArgs: string[] = [];
   let message = "Done";
 
+  const audioFormatsWithCover = ["m4a", "mp3", "flac", "ogg"];
+  const audioFormatsNoCover = ["wav", "aac"];
+
+  if (audioFormatsWithCover.includes(convertTo)) {
+    extraArgs.push("-c:v", "copy", "-disposition:v", "attached_pic");
+  } else if (audioFormatsNoCover.includes(convertTo)) {
+    extraArgs.push("-vn");
+  }
+
   if (convertTo === "ico") {
     // Make sure image is 256x256 or smaller
     extraArgs = [
