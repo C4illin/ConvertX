@@ -158,8 +158,8 @@ Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#summar
 
 <a href="https://github.com/C4illin/ConvertX/stargazers">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=C4illin/ConvertX&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=C4illin/ConvertX&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=C4illin/ConvertX&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=C4illin/ConvertX&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=C4illin/ConvertX&type=Date" />
+   <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=C4illin/ConvertX&type=Date" />
  </picture>
 </a>
