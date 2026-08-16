@@ -30,6 +30,7 @@ export async function convert(
     execFile("pdftops", args, (error, stdout, stderr) => {
       if (error) {
         reject(`error: ${error}`);
+        return;
       }
 
       if (stdout) {
@@ -37,7 +38,7 @@ export async function convert(
       }
 
       if (stderr) {
-        console.log(`stderr: ${stderr}`);
+        console.error(`stderr: ${stderr}`);
       }
 
       resolve("Done");
