@@ -3,6 +3,7 @@ import db from "../db/db";
 import { MAX_CONVERT_PROCESS } from "../helpers/env";
 import { normalizeFiletype, normalizeOutputFiletype } from "../helpers/normalizeFiletype";
 import { convert as convertassimp, properties as propertiesassimp } from "./assimp";
+import { convert as convertBsdtar, properties as propertiesBsdtar } from "./bsdtar";
 import { convert as convertCalibre, properties as propertiesCalibre } from "./calibre";
 import { convert as convertDasel, properties as propertiesDasel } from "./dasel";
 import { convert as convertDvisvgm, properties as propertiesDvisvgm } from "./dvisvgm";
@@ -136,6 +137,10 @@ const properties: Record<
   markitDown: {
     properties: propertiesMarkitdown,
     converter: convertMarkitdown,
+  },
+  bsdtar: {
+    properties: propertiesBsdtar,
+    converter: convertBsdtar,
   },
 };
 
