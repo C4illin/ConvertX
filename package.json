@@ -13,7 +13,8 @@
     "lint:tsc": "tsc --noEmit",
     "lint:knip": "knip",
     "lint:eslint": "eslint .",
-    "lint:prettier": "prettier --check ."
+    "lint:prettier": "prettier --check .",
+    "lint:xss": "xss-scan"
   },
   "dependencies": {
     "@elysiajs/html": "^1.4.2",
