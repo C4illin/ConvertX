@@ -49,7 +49,7 @@ test("adds -eps flag for eps output", async () => {
 
 test("fails on exec error", async () => {
   expect(convert("fail.pdf", "pdf", "ps", "output.ps", undefined, mockExecFile)).rejects.toMatch(
-    /error: Error: mock failure/
+    /error: Error: mock failure/,
   );
 });
 
