@@ -1,0 +1,17 @@
+# Configure pre-commit to reuse the AI indicator guard scripts.
+# Both hooks run locally from .config/ai-hooks.
+
+repos:
+  - repo: local
+    hooks:
+      - id: ai-pre-commit
+        name: Block AI indicators in staged files
+        entry: python3 .config/git-hooks/ai_guard.py pre-commit
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+      - id: ai-commit-msg
+        name: Block AI indicators in commit messages
+        entry: python3 .config/git-hooks/ai_guard.py commit-msg
+        language: system
+        stages: [commit-msg]
