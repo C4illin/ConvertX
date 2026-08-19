@@ -696,17 +696,11 @@ export async function convert(
   options?: unknown,
   execFile: ExecFileFn = execFileOriginal, // to make it mockable
 ): Promise<string> {
-  const extraArgs: string[] = [];
-  const message = "Done";
+  let extraArgs: string[] = [];
+  let message = "Done";
 
   const audioFormatsWithCover = ["m4a", "mp3", "flac", "ogg"];
   const audioFormatsNoCover = ["wav", "aac"];
-
-  if (audioFormatsWithCover.includes(convertTo)) {
-    extraArgs.push("-c:v", "copy", "-disposition:v", "attached_pic");
-  } else if (audioFormatsNoCover.includes(convertTo) || audioFormatsWithCover.includes(convertTo)) {
-    extraArgs.push("-vn");
-  }
 
   if (audioFormatsWithCover.includes(convertTo)) {
     extraArgs.push(
@@ -721,6 +715,15 @@ export async function convert(
     );
   } else if (audioFormatsNoCover.includes(convertTo)) {
     extraArgs.push("-vn");
+  }
+
+  if (convertTo === "ico") {
+    // Make sure image is 256x256 or smaller
+    extraArgs = [
+      "-filter:v",
+      "scale='min(256,iw)':min'(256,ih)':force_original_aspect_ratio=decrease",
+    ];
+    message = "Done: resized to 256x256";
   }
 
   if (convertTo.split(".").length > 1) {
