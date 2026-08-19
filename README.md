@@ -79,6 +79,45 @@ or
 docker run -p 3000:3000 -v ./data:/app/data ghcr.io/c4illin/convertx
 ```
 
+### NVIDIA GPU Hardware Acceleration
+
+For improved performance on NVIDIA GPUs with NVENC/NVDEC support, use this enhanced docker-compose configuration:
+
+```yml
+# docker-compose.yml (with NVIDIA GPU support)
+services:
+  convertx:
+    image: ghcr.io/c4illin/convertx
+    container_name: convertx
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    runtime: nvidia
+    group_add:
+      - 226 # The render group GID on the host (check with: getent group render | cut -d: -f3)
+    environment:
+      - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234
+      # - HTTP_ALLOWED=true # uncomment this if accessing it over a non-https connection
+      - FFMPEG_PREFER_HARDWARE=true # Enable hardware acceleration for video encoding/decoding
+      - NVIDIA_VISIBLE_DEVICES=all # Use 'all' for all GPUs, or '0,1' for specific GPUs (get IDs with: nvidia-smi -L)
+      - NVIDIA_DRIVER_CAPABILITIES=all # Comma-separated list (e.g., 'compute,video,utility'), 'all' for everything
+    volumes:
+      - ./data:/app/data
+      - /usr/bin/nvidia-smi:/usr/bin/nvidia-smi:ro # Mount nvidia-smi for GPU detection
+```
+
+**Requirements:**
+
+- NVIDIA drivers with NVENC/NVDEC support
+- nvidia-docker runtime
+- The render group GID (226) may differ on your system
+
+**Notes:**
+
+- `group_add` may not be needed in Unraid
+- `nvidia-smi` volume mount may not be needed in Unraid
+- Hardware acceleration requires: `FFMPEG_PREFER_HARDWARE=true`, NVIDIA GPU detection, and supported video codecs (H.264, H.265, VP9, VP8, MPEG-2, MPEG-4, AV1)
+
 Then visit `http://localhost:3000` in your browser and create your account. Don't leave it unconfigured and open, as anyone can register the first account.
 
 If you get unable to open database file run `chown -R $USER:$USER path` on the path you choose.
@@ -87,20 +126,21 @@ If you get unable to open database file run `chown -R $USER:$USER path` on the p
 
 All are optional, JWT_SECRET is recommended to be set.
 
-| Name                         | Default                                            | Description                                                                                                                                                   |
-| ---------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| JWT_SECRET                   | when unset it will use the value from randomUUID() | A long and secret string used to sign the JSON Web Token                                                                                                      |
-| ACCOUNT_REGISTRATION         | false                                              | Allow users to register accounts                                                                                                                              |
-| HTTP_ALLOWED                 | false                                              | Allow HTTP connections, only set this to true locally                                                                                                         |
-| ALLOW_UNAUTHENTICATED        | false                                              | Allow unauthenticated users to use the service, only set this to true locally                                                                                 |
-| AUTO_DELETE_EVERY_N_HOURS    | 24                                                 | Checks every n hours for files older then n hours and deletes them, set to 0 to disable                                                                       |
-| WEBROOT                      |                                                    | The address to the root path setting this to "/convert" will serve the website on "example.com/convert/"                                                      |
-| FFMPEG_ARGS                  |                                                    | Arguments to pass to the input file of ffmpeg, e.g. `-hwaccel vaapi`. See https://github.com/C4illin/ConvertX/issues/190 for more info about hw-acceleration. |
-| FFMPEG_OUTPUT_ARGS           |                                                    | Arguments to pass to the output of ffmpeg, e.g. `-preset veryfast`                                                                                            |
-| HIDE_HISTORY                 | false                                              | Hide the history page                                                                                                                                         |
-| LANGUAGE                     | en                                                 | Language to format date strings in, specified as a [BCP 47 language tag](https://en.wikipedia.org/wiki/IETF_language_tag)                                     |
-| UNAUTHENTICATED_USER_SHARING | false                                              | Shares conversion history between all unauthenticated users                                                                                                   |
-| MAX_CONVERT_PROCESS          | 0                                                  | Maximum number of concurrent conversion processes allowed. Set to 0 for unlimited.                                                                            |
+| Name                         | Default                                            | Description                                                                                                                                                                                                    |
+| ---------------------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| JWT_SECRET                   | when unset it will use the value from randomUUID() | A long and secret string used to sign the JSON Web Token                                                                                                                                                       |
+| ACCOUNT_REGISTRATION         | false                                              | Allow users to register accounts                                                                                                                                                                               |
+| HTTP_ALLOWED                 | false                                              | Allow HTTP connections, only set this to true locally                                                                                                                                                          |
+| ALLOW_UNAUTHENTICATED        | false                                              | Allow unauthenticated users to use the service, only set this to true locally                                                                                                                                  |
+| AUTO_DELETE_EVERY_N_HOURS    | 24                                                 | Checks every n hours for files older then n hours and deletes them, set to 0 to disable                                                                                                                        |
+| WEBROOT                      |                                                    | The address to the root path setting this to "/convert" will serve the website on "example.com/convert/"                                                                                                       |
+| FFMPEG_ARGS                  |                                                    | Arguments to pass to the input file of ffmpeg, e.g. `-hwaccel vaapi`. See https://github.com/C4illin/ConvertX/issues/190 for more info about hw-acceleration.                                                  |
+| FFMPEG_OUTPUT_ARGS           |                                                    | Arguments to pass to the output of ffmpeg, e.g. `-preset veryfast`                                                                                                                                             |
+| FFMPEG_PREFER_HARDWARE       | false                                              | Use hardware encoders (NVENC, VAAPI, etc.) when available instead of software encoders for h264/h265 formats. Also enables CUDA hardware acceleration for video input decoding (not applied to image formats). |
+| HIDE_HISTORY                 | false                                              | Hide the history page                                                                                                                                                                                          |
+| LANGUAGE                     | en                                                 | Language to format date strings in, specified as a [BCP 47 language tag](https://en.wikipedia.org/wiki/IETF_language_tag)                                                                                      |
+| UNAUTHENTICATED_USER_SHARING | false                                              | Shares conversion history between all unauthenticated users                                                                                                                                                    |
+| MAX_CONVERT_PROCESS          | 0                                                  | Maximum number of concurrent conversion processes allowed. Set to 0 for unlimited.                                                                                                                             |
 
 ### Docker images
 
