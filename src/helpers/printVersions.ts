@@ -100,7 +100,7 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(`dasel v${stdout.split("\n")[0]}`);
+      console.log(`dasel ${stdout.split("\n")[0]}`);
     }
   });
 
