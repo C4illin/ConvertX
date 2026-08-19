@@ -173,13 +173,14 @@ export async function handleConvert(
         throw new Error("Unsafe filename");
       }
 
-      const fileTypeOrig = fileName.split(".").pop() ?? "";
+      const lastDot = fileName.lastIndexOf(".");
+      const fileTypeOrig = lastDot === -1 ? "" : fileName.slice(lastDot + 1);
       const fileType = normalizeFiletype(fileTypeOrig);
       const newFileExt = normalizeOutputFiletype(convertTo);
-      const newFileName = fileName.replace(
-        new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`),
-        newFileExt,
-      );
+      const newFileName =
+        lastDot === -1
+          ? `${fileName}.${newFileExt}`
+          : `${fileName.slice(0, lastDot + 1)}${newFileExt}`;
 
       // `isSafePath` ensures the path as parsed by JS is safe, but if we pass the path to external programs, we don't
       // want to be affected by a parser differential so we normalize with JS' parsing
