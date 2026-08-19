@@ -1,4 +1,4 @@
-import { test, expect, mock, spyOn, afterEach } from "bun:test";
+import { afterEach, expect, mock, spyOn, test } from "bun:test";
 import { exec } from "node:child_process";
 import { readFile } from "node:fs";
 
@@ -138,7 +138,7 @@ test("processes output parsing correctly and logs no errors in the success case"
   expect(consoleLogSpy).toHaveBeenCalledWith("ffmpeg -version v1.0.0");
   expect(consoleLogSpy).toHaveBeenCalledWith("resvg v1.0.0");
   expect(consoleLogSpy).toHaveBeenCalledWith("Bun v1.0.0");
-  expect(consoleLogSpy).toHaveBeenCalledWith("dasel v1.0.0");
+  expect(consoleLogSpy).toHaveBeenCalledWith("dasel 1.0.0");
   expect(consoleLogSpy).toHaveBeenCalledWith("msgconvert v1.0.0");
 
   // make sure that error paths have not been triggered
