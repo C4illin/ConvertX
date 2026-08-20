@@ -95,7 +95,9 @@ export const Header = ({
         <ul>
           <li>
             <strong>
-              <a href={`${webroot}/`}>{branding.length < 26 ? branding : branding.slice(0, 26)}</a>
+              <a href={`${webroot}/`} safe>
+                {branding.length < 26 ? branding : branding.slice(0, 26)}
+              </a>
             </strong>
           </li>
         </ul>
