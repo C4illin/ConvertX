@@ -185,15 +185,17 @@ export const history = new Elysia().use(userService).get(
                           >
                             <EyeIcon />
                           </a>
-                          <a
-                            class={`
-                              text-accent-500 underline
-                              hover:text-accent-400
-                            `}
-                            href={`${WEBROOT}/delete/${job.id}`}
-                          >
-                            <DeleteIcon />
-                          </a>
+                          <form action={`${WEBROOT}/delete/${job.id}`} method="POST" class="inline">
+                            <button
+                              type="submit"
+                              class={`
+                                text-accent-500 underline
+                                hover:text-accent-400
+                              `}
+                            >
+                              <DeleteIcon />
+                            </button>
+                          </form>
                         </td>
                       </tr>
                       <tr id={`details-${job.id}`} class="hidden">

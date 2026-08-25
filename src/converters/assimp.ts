@@ -121,20 +121,24 @@ export async function convert(
   execFile: ExecFileFn = execFileOriginal, // to make it mockable
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    execFile("assimp", ["export", filePath, targetPath], (error, stdout, stderr) => {
-      if (error) {
-        reject(`error: ${error}`);
-      }
+    execFile(
+      "assimp",
+      ["export", filePath, targetPath, `-f${convertTo}`],
+      (error, stdout, stderr) => {
+        if (error) {
+          reject(`error: ${error}`);
+        }
 
-      if (stdout) {
-        console.log(`stdout: ${stdout}`);
-      }
+        if (stdout) {
+          console.log(`stdout: ${stdout}`);
+        }
 
-      if (stderr) {
-        console.error(`stderr: ${stderr}`);
-      }
+        if (stderr) {
+          console.error(`stderr: ${stderr}`);
+        }
 
-      resolve("Done");
-    });
+        resolve("Done");
+      },
+    );
   });
 }

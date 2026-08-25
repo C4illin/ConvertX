@@ -164,13 +164,18 @@ export async function handleConvert(
     const toProcess: Promise<string>[] = [];
     for (const fileName of chunk) {
       const filePath = `${userUploadsDir}${fileName}`;
-      const fileTypeOrig = fileName.split(".").pop() ?? "";
+      const fileTypeOrig = fileName.includes(".") ? (fileName.split(".").pop() ?? "") : "";
       const fileType = normalizeFiletype(fileTypeOrig);
       const newFileExt = normalizeOutputFiletype(convertTo);
-      const newFileName = fileName.replace(
-        new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`),
-        newFileExt,
-      );
+      let newFileName: string;
+      if (fileTypeOrig === "") {
+        newFileName = `${fileName}.${newFileExt}`;
+      } else {
+        newFileName = fileName.replace(
+          new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`),
+          newFileExt,
+        );
+      }
       const targetPath = `${userOutputDir}${newFileName}`;
       toProcess.push(
         new Promise((resolve, reject) => {
@@ -337,3 +342,9 @@ for (const converterName in properties) {
 export const getAllInputs = (converter: string) => {
   return allInputs[converter] || [];
 };
+
+/**
+ * @internal For testing only. Do not use in production.
+ * Tests need direct access to cover all branches of converter discovery and chunking logic.
+ */
+export { chunks, mainConverter };

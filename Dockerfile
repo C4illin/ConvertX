@@ -1,9 +1,10 @@
-FROM debian:trixie-slim AS base
+FROM debian:testing-slim AS base
 LABEL org.opencontainers.image.source="https://github.com/C4illin/ConvertX"
 WORKDIR /app
 
 # install bun
 RUN apt-get update && apt-get install -y \
+  ca-certificates \
   curl \
   unzip \
   && rm -rf /var/lib/apt/lists/*
@@ -113,6 +114,7 @@ RUN apt-get update && apt-get install -y \
   libreoffice \
   libva2 \
   libvips-tools \
+  libemail-address-perl \
   libemail-outlook-message-perl \
   lmodern \
   mupdf-tools \
