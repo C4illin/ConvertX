@@ -6,6 +6,7 @@ const JWT_SECRET = "test-secret";
 process.env.DB_PATH = ":memory:";
 process.env.JWT_SECRET = JWT_SECRET;
 process.env.HIDE_HISTORY = "true";
+process.env.WEBROOT = "";
 
 import { createHmac } from "node:crypto";
 import { expect, test } from "bun:test";
