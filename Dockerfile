@@ -82,6 +82,7 @@ RUN apt-get update && apt-get install -y \
   pipx \
   --no-install-recommends \
   && pipx install "markitdown[all]" \
+  && pipx install pdf2docx \
   && rm -rf /var/lib/apt/lists/*
 
 # Add pipx bin directory to PATH
