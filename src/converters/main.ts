@@ -25,6 +25,7 @@ import { convert as convertVtracer, properties as propertiesVtracer } from "./vt
 import { convert as convertVcf, properties as propertiesVcf } from "./vcf";
 import { convert as convertxelatex, properties as propertiesxelatex } from "./xelatex";
 import { convert as convertMarkitdown, properties as propertiesMarkitdown } from "./markitdown";
+import { convert as convertPdf2docx, properties as propertiesPdf2docx } from "./pdf2docx";
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
 
@@ -136,6 +137,13 @@ const properties: Record<
   markitDown: {
     properties: propertiesMarkitdown,
     converter: convertMarkitdown,
+  },
+  // Last, so that automatic selection prefers it over LibreOffice for pdf to
+  // docx. LibreOffice's pdf import turns every line into a floating text box,
+  // which loses tables entirely; pdf2docx reconstructs them.
+  pdf2docx: {
+    properties: propertiesPdf2docx,
+    converter: convertPdf2docx,
   },
 };
 
