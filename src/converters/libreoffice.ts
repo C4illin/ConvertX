@@ -98,7 +98,7 @@ type FileCategories = "text" | "calc";
 // readable by LibreOffice Writer but cannot be exported by it — Writer has no
 // CSV export filter.  Using a unified map caused "no export filter found" when
 // converting any Writer document to CSV (issue #561).
-const inputFilters: Record<FileCategories, Record<string, string>> = {
+const inputFilters: Record<FileCategories, Record<string, string | null>> = {
   text: {
     "602": "T602Document",
     abw: "AbiWord",
