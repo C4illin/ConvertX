@@ -4,6 +4,7 @@ import { ExecFileFn } from "./types";
 export const properties = {
   from: {
     document: [
+      "azw3",
       "azw4",
       "chm",
       "cbr",

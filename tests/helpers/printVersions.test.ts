@@ -1,4 +1,4 @@
-import { test, expect, mock, spyOn, afterEach } from "bun:test";
+import { afterEach, expect, mock, spyOn, test } from "bun:test";
 import { exec } from "node:child_process";
 import { readFile } from "node:fs";
 
@@ -12,11 +12,38 @@ mock.module("node:child_process", () => ({
     const shouldError = (process.env.MOCK_EXEC_ERROR || "")
       .split(",")
       .some((p) => p && cmd.includes(p));
+
     if (shouldError) {
       cb(new Error(`${cmd} not found`), "");
-    } else {
-      cb(null, `${cmd} v1.0.0\n`);
+      return;
     }
+
+    // resvg, bun, heif-info, dasel, and the perl one-liner (msgconvert) print just
+    // the bare version number — the source code itself prepends the tool name as a label.
+    if (
+      cmd.startsWith("resvg") ||
+      cmd.startsWith("bun") ||
+      cmd.startsWith("heif-info") ||
+      cmd.startsWith("dasel") ||
+      cmd.startsWith("perl")
+    ) {
+      cb(null, "1.0.0\n");
+      return;
+    }
+
+    // assimp's real output is multi-line; the source reads line index 5.
+    if (cmd.startsWith("assimp")) {
+      cb(null, "l1\nl2\nl3\nl4\nl5\nVersion 1.0.0 (GIT commit abc123)\n");
+      return;
+    }
+
+    // magick prefixes its version line with "Version: ".
+    if (cmd.startsWith("magick")) {
+      cb(null, "Version: ImageMagick v1.0.0\n");
+      return;
+    }
+
+    cb(null, `${cmd} v1.0.0\n`);
   }),
 }));
 
@@ -79,8 +106,8 @@ test("prints system information and tool versions in production mode", async () 
 
 test("logs error paths when tools are missing", async () => {
   process.env.NODE_ENV = "production";
-  // Trigger a few error paths
-  process.env.MOCK_EXEC_ERROR = "pandoc,resvg,bun";
+  // Trigger a few error paths ("perl" is the msgconvert version lookup)
+  process.env.MOCK_EXEC_ERROR = "pandoc,resvg,bun,perl";
   consoleLogSpy = spyOn(console, "log");
   consoleErrorSpy = spyOn(console, "error");
 
@@ -91,6 +118,9 @@ test("logs error paths when tools are missing", async () => {
   expect(consoleErrorSpy).toHaveBeenCalledWith("Pandoc is not installed.");
   expect(consoleErrorSpy).toHaveBeenCalledWith("resvg is not installed");
   expect(consoleErrorSpy).toHaveBeenCalledWith("Bun is not installed. wait what");
+  expect(consoleErrorSpy).toHaveBeenCalledWith(
+    "msgconvert (libemail-outlook-message-perl) is not installed",
+  );
 });
 
 test("processes output parsing correctly and logs no errors in the success case", async () => {
@@ -108,6 +138,8 @@ test("processes output parsing correctly and logs no errors in the success case"
   expect(consoleLogSpy).toHaveBeenCalledWith("ffmpeg -version v1.0.0");
   expect(consoleLogSpy).toHaveBeenCalledWith("resvg v1.0.0");
   expect(consoleLogSpy).toHaveBeenCalledWith("Bun v1.0.0");
+  expect(consoleLogSpy).toHaveBeenCalledWith("dasel 1.0.0");
+  expect(consoleLogSpy).toHaveBeenCalledWith("msgconvert v1.0.0");
 
   // make sure that error paths have not been triggered
   expect(consoleErrorSpy).not.toHaveBeenCalled();
