@@ -12,6 +12,7 @@ import {
   HTTP_ALLOWED,
   WEBROOT,
 } from "../helpers/env";
+import { isHtmlPageRequest } from "../helpers/isHtmlPageRequest";
 
 export let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
 
@@ -41,20 +42,30 @@ export const userService = new Elysia({ name: "user/service" })
     }),
   })
   .macro("auth", {
-    cookie: "session",
-    async resolve({ status, jwt, cookie: { auth } }) {
-      if (!auth.value) {
+    cookie: "optionalSession",
+    async resolve({ request, set, status, jwt, cookie: { auth } }) {
+      const unauthorized = () => {
+        if (isHtmlPageRequest(request)) {
+          set.headers.location = `${WEBROOT}/login`;
+          return status(302, {
+            success: false,
+            message: "Redirecting to login",
+          });
+        }
+
         return status(401, {
           success: false,
           message: "Unauthorized",
         });
+      };
+
+      if (!auth.value) {
+        return unauthorized();
       }
       const user = await jwt.verify(auth.value);
       if (!user) {
-        return status(401, {
-          success: false,
-          message: "Unauthorized",
-        });
+        auth.remove();
+        return unauthorized();
       }
       return {
         success: true,
