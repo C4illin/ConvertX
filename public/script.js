@@ -33,59 +33,13 @@ dropZone.addEventListener("drop", (e) => {
   }
 });
 
-const inferExtensionFromMimeType = (type) => {
-  const extensions = {
-    "application/epub+zip": "epub",
-    "application/json": "json",
-    "application/msword": "doc",
-    "application/pdf": "pdf",
-    "application/rtf": "rtf",
-    "application/vnd.ms-excel": "xls",
-    "application/vnd.ms-powerpoint": "ppt",
-    "application/vnd.oasis.opendocument.presentation": "odp",
-    "application/vnd.oasis.opendocument.spreadsheet": "ods",
-    "application/vnd.oasis.opendocument.text": "odt",
-    "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
-    "application/x-yaml": "yaml",
-    "application/xml": "xml",
-    "application/zip": "zip",
-    "image/jpeg": "jpg",
-    "image/pjpeg": "jpg",
-    "image/svg+xml": "svg",
-    "image/tiff": "tif",
-    "image/vnd.microsoft.icon": "ico",
-    "image/x-icon": "ico",
-    "text/csv": "csv",
-    "text/html": "html",
-    "text/markdown": "md",
-    "text/plain": "txt",
-    "text/xml": "xml",
-    "text/yaml": "yaml",
-  };
-
-  if (extensions[type]) {
-    return extensions[type];
-  }
-
-  // If it's a yet-unhandled `image/*` MIME type, return the subtype.
-  const [mediaType, subtype] = type.toLowerCase().split("/");
-  if (mediaType === "image" && subtype) {
-    return subtype.split("+")[0];
-  }
-
-  // Use `.bin` if we don't know what to do.
-  return "bin";
-};
-
 const generatePastedFilename = (sequenceNumber, file) => {
   // If the file has a name and it includes a period, use the name.
   if (file.name && file.name.includes(".")) {
     return file.name;
   }
 
-  const extension = inferExtensionFromMimeType(file.type);
+  const extension = window.inferExtensionFromMimeType(file.type);
   const timestamp = new Date().toISOString().replaceAll(":", "-").replace("Z", "");
   return `clipboard-file-${timestamp}-${sequenceNumber}.${extension}`;
 };

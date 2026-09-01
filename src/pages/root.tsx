@@ -236,7 +236,8 @@ export const root = new Elysia().use(userService).get(
               />
             </form>
           </main>
-          <script src="script.js" defer />
+          <script src={`${WEBROOT}/mime-types.js`} defer />
+          <script src={`${WEBROOT}/script.js`} defer />
         </>
       </BaseHtml>
     );
