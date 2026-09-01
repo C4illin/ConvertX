@@ -143,7 +143,7 @@ export const root = new Elysia().use(userService).get(
                 `}
               >
                 <span>
-                  <b>Choose a file</b> or drag it here
+                  <b>Click to choose a file</b>, drag it here, or paste it.
                 </span>
                 <input
                   type="file"

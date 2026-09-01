@@ -33,6 +33,69 @@ dropZone.addEventListener("drop", (e) => {
   }
 });
 
+const inferExtensionFromMimeType = (type) => {
+  const extensions = {
+    "application/epub+zip": "epub",
+    "application/json": "json",
+    "application/msword": "doc",
+    "application/pdf": "pdf",
+    "application/rtf": "rtf",
+    "application/vnd.ms-excel": "xls",
+    "application/vnd.ms-powerpoint": "ppt",
+    "application/vnd.oasis.opendocument.presentation": "odp",
+    "application/vnd.oasis.opendocument.spreadsheet": "ods",
+    "application/vnd.oasis.opendocument.text": "odt",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+    "application/x-yaml": "yaml",
+    "application/xml": "xml",
+    "application/zip": "zip",
+    "image/jpeg": "jpg",
+    "image/svg+xml": "svg",
+    "image/tiff": "tif",
+    "image/x-icon": "ico",
+    "text/csv": "csv",
+    "text/html": "html",
+    "text/markdown": "md",
+    "text/plain": "txt",
+    "text/xml": "xml",
+    "text/yaml": "yaml",
+  };
+
+  return extensions[type] ?? "bin";
+};
+
+const generatePastedFilename = (file) => {
+  if (file.name && file.name.includes(".")) {
+    return file.name;
+  }
+
+  const extension = inferExtensionFromMimeType(file.type);
+  const timestamp = new Date().toISOString().replaceAll(":", "-").replace("Z", "");
+  return `clipboard-file-${timestamp}.${extension}`;
+};
+
+// Listen for pastes and handle files if any are present.
+document.addEventListener("paste", (e) => {
+  const files = Array.from(e.clipboardData?.files ?? []);
+
+  if (files.length === 0) {
+    return;
+  }
+
+  e.preventDefault();
+
+  for (const file of files) {
+    const namedFile = new File([file], generatePastedFilename(file), {
+      type: file.type,
+      lastModified: file.lastModified,
+    });
+    console.log("Handling pasted file:", namedFile.name);
+    handleFile(namedFile);
+  }
+});
+
 // Extracted handleFile function for reusability in drag-and-drop and file input
 function handleFile(file) {
   const fileList = document.querySelector("#file-list");
