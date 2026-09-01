@@ -96,35 +96,47 @@ function ResultsArticle({
           </tr>
         </thead>
         <tbody>
-          {files.map((file) => (
-            <tr>
-              <td safe class="max-w-[20vw] truncate">
-                {file.output_file_name}
-              </td>
-              <td safe>{file.status}</td>
-              <td class="flex flex-row gap-4">
-                <a
-                  class={`
-                    text-accent-500 underline
-                    hover:text-accent-400
-                  `}
-                  href={buildDownloadUrl(WEBROOT, outputPath, file.output_file_name)}
-                >
-                  <EyeIcon />
-                </a>
-                <a
-                  class={`
-                    text-accent-500 underline
-                    hover:text-accent-400
-                  `}
-                  href={buildDownloadUrl(WEBROOT, outputPath, file.output_file_name)}
-                  download={file.output_file_name}
-                >
-                  <DownloadIcon />
-                </a>
-              </td>
-            </tr>
-          ))}
+          {files.map((file) => {
+            const conversionFailed = ["Failed, check logs", "File type not supported"].includes(
+              file.status,
+            );
+
+            return (
+              <tr>
+                <td safe class="max-w-[20vw] truncate">
+                  {file.output_file_name}
+                </td>
+                <td safe>{file.status}</td>
+                <td class="flex flex-row gap-4">
+                  {conversionFailed ? (
+                    <span class="text-neutral-500">Unavailable</span>
+                  ) : (
+                    <>
+                      <a
+                        class={`
+                          text-accent-500 underline
+                          hover:text-accent-400
+                        `}
+                        href={buildDownloadUrl(WEBROOT, outputPath, file.output_file_name)}
+                      >
+                        <EyeIcon />
+                      </a>
+                      <a
+                        class={`
+                          text-accent-500 underline
+                          hover:text-accent-400
+                        `}
+                        href={buildDownloadUrl(WEBROOT, outputPath, file.output_file_name)}
+                        download={file.output_file_name}
+                      >
+                        <DownloadIcon />
+                      </a>
+                    </>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </article>
