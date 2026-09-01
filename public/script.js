@@ -52,8 +52,10 @@ const inferExtensionFromMimeType = (type) => {
     "application/xml": "xml",
     "application/zip": "zip",
     "image/jpeg": "jpg",
+    "image/pjpeg": "jpg",
     "image/svg+xml": "svg",
     "image/tiff": "tif",
+    "image/vnd.microsoft.icon": "ico",
     "image/x-icon": "ico",
     "text/csv": "csv",
     "text/html": "html",
@@ -63,17 +65,29 @@ const inferExtensionFromMimeType = (type) => {
     "text/yaml": "yaml",
   };
 
-  return extensions[type] ?? "bin";
+  if (extensions[type]) {
+    return extensions[type];
+  }
+
+  // If it's a yet-unhandled `image/*` MIME type, return the subtype.
+  const [mediaType, subtype] = type.toLowerCase().split("/");
+  if (mediaType === "image" && subtype) {
+    return subtype.split("+")[0];
+  }
+
+  // Use `.bin` if we don't know what to do.
+  return "bin";
 };
 
-const generatePastedFilename = (file) => {
+const generatePastedFilename = (sequenceNumber, file) => {
+  // If the file has a name and it includes a period, use the name.
   if (file.name && file.name.includes(".")) {
     return file.name;
   }
 
   const extension = inferExtensionFromMimeType(file.type);
   const timestamp = new Date().toISOString().replaceAll(":", "-").replace("Z", "");
-  return `clipboard-file-${timestamp}.${extension}`;
+  return `clipboard-file-${timestamp}-${sequenceNumber}.${extension}`;
 };
 
 // Listen for pastes and handle files if any are present.
@@ -86,11 +100,12 @@ document.addEventListener("paste", (e) => {
 
   e.preventDefault();
 
-  for (const file of files) {
-    const namedFile = new File([file], generatePastedFilename(file), {
+  for (const [sequenceNumber, file] of files.entries()) {
+    const namedFile = new File([file], generatePastedFilename(sequenceNumber, file), {
       type: file.type,
       lastModified: file.lastModified,
     });
+
     console.log("Handling pasted file:", namedFile.name);
     handleFile(namedFile);
   }
@@ -102,11 +117,12 @@ function handleFile(file) {
 
   const row = document.createElement("tr");
   row.innerHTML = `
-    <td>${file.name}</td>
+    <td></td>
     <td><progress max="100" class="inline-block h-2 appearance-none overflow-hidden rounded-full border-0 bg-neutral-700 bg-none text-accent-500 accent-accent-500 [&::-moz-progress-bar]:bg-accent-500 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:[background:none] [&[value]::-webkit-progress-value]:bg-accent-500 [&[value]::-webkit-progress-value]:transition-[inline-size]"></progress></td>
     <td>${(file.size / 1024).toFixed(2)} kB</td>
     <td><button type="button" class="text-accent-500 hover:underline" onclick="deleteRow(this)">Remove</button></td>
   `;
+  row.firstElementChild.textContent = file.name;
 
   if (!fileType) {
     fileType = file.name.split(".").pop();
