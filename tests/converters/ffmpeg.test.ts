@@ -191,6 +191,7 @@ test("passes a maxBuffer above the 1 MB default so long conversions don't overfl
 
   // execFile's default maxBuffer is 1 MB; ffmpeg's progress output on a long
   // encode exceeds it and the conversion fails with "stderr maxBuffer length
-  // exceeded". The fix raises it well above the default.
-  expect(lastOptions?.maxBuffer).toBeGreaterThan(1024 * 1024);
+  // exceeded". Lock in the raised buffer (must match FFMPEG_MAX_BUFFER in
+  // ffmpeg.ts) so a regression to a smaller-but-still-over-1-MB value is caught.
+  expect(lastOptions?.maxBuffer).toBe(1024 * 1024 * 64);
 });
