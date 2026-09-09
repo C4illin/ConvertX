@@ -14,11 +14,32 @@ import {
   UNAUTHENTICATED_USER_SHARING,
   WEBROOT,
 } from "../helpers/env";
-import { FIRST_RUN, userService } from "./user";
+import {
+  EPHEMERAL_SESSION_MAX_AGE,
+  FIRST_RUN,
+  setSessionCookie,
+  trustedHeaderToken,
+  userService,
+} from "./user";
 
 export const root = new Elysia().use(userService).get(
   "/",
-  async ({ jwt, redirect, cookie: { auth, jobId } }) => {
+  async ({ request, jwt, redirect, cookie: { auth, jobId } }) => {
+    // Trusted-header SSO: if a reverse proxy already authenticated the request,
+    // establish the ConvertX session here — before any auth redirect — so the
+    // user lands straight on the app with no second login. Run this on every
+    // request (not only when no cookie is present): the proxy is authoritative
+    // in SSO mode, so a changed header must be able to switch the session even
+    // when a stale cookie for a previous user is still set. Skipped under
+    // ALLOW_UNAUTHENTICATED (mutually exclusive: that mode issues its own
+    // ephemeral session below, and trustedHeaderToken itself returns null there).
+    if (!ALLOW_UNAUTHENTICATED) {
+      const ssoToken = await trustedHeaderToken(request, jwt);
+      if (ssoToken && auth) {
+        setSessionCookie(auth, ssoToken);
+      }
+    }
+
     if (!ALLOW_UNAUTHENTICATED) {
       if (FIRST_RUN) {
         return redirect(`${WEBROOT}/setup`, 302);
@@ -49,13 +70,7 @@ export const root = new Elysia().use(userService).get(
       }
 
       // set cookie
-      auth.set({
-        value: accessToken,
-        httpOnly: true,
-        secure: !HTTP_ALLOWED,
-        maxAge: 24 * 60 * 60,
-        sameSite: "strict",
-      });
+      setSessionCookie(auth, accessToken, EPHEMERAL_SESSION_MAX_AGE);
     } else if (auth?.value) {
       user = await jwt.verify(auth.value);
 

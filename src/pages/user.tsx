@@ -10,10 +10,97 @@ import {
   ALLOW_UNAUTHENTICATED,
   HIDE_HISTORY,
   HTTP_ALLOWED,
+  HTTP_REMOTE_USER_ENABLED,
+  HTTP_REMOTE_USER_HEADER,
   WEBROOT,
 } from "../helpers/env";
 
 export let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
+
+/** Standard session lifetime (matches the JWT `exp` of 7 days). */
+export const SESSION_MAX_AGE = 60 * 60 * 24 * 7;
+/** Shorter lifetime for the ephemeral ALLOW_UNAUTHENTICATED session. */
+export const EPHEMERAL_SESSION_MAX_AGE = 24 * 60 * 60;
+
+/**
+ * Set the auth session cookie with the project's hardened defaults
+ * (httpOnly, secure unless HTTP_ALLOWED, SameSite=strict). Centralised here so
+ * the security-sensitive cookie policy lives in exactly one place — every
+ * caller (register/login, ALLOW_UNAUTHENTICATED, and trusted-header SSO) sets
+ * it identically, and a future hardening change only has to be made once.
+ */
+export function setSessionCookie(
+  auth: {
+    set: (options: {
+      value: string;
+      httpOnly: boolean;
+      secure: boolean;
+      maxAge: number;
+      sameSite: "strict";
+    }) => void;
+  },
+  value: string,
+  maxAge: number = SESSION_MAX_AGE,
+): void {
+  auth.set({
+    value,
+    httpOnly: true,
+    secure: !HTTP_ALLOWED,
+    maxAge,
+    sameSite: "strict",
+  });
+}
+
+/**
+ * Trusted-header (reverse-proxy) SSO.
+ *
+ * When HTTP_REMOTE_USER_ENABLED, a trusted reverse proxy in front of ConvertX
+ * has already authenticated the request and passes the user's identity in
+ * HTTP_REMOTE_USER_HEADER. We look up the local account for that identity —
+ * auto-provisioning it on first sight — and return a freshly signed session
+ * token so the caller can set the auth cookie. No second ConvertX login.
+ *
+ * Returns the signed JWT string if a session was established from a trusted
+ * header, otherwise null (feature disabled, header absent, or lookup failed).
+ *
+ * SECURITY: callers only run this behind a proxy that strips any client-supplied
+ * copy of the header. See the env.ts note and the README.
+ */
+export async function trustedHeaderToken(
+  request: Request,
+  jwt: { sign: (payload: { id: string }) => Promise<string> },
+): Promise<string | null> {
+  // ALLOW_UNAUTHENTICATED and trusted-header SSO are mutually exclusive modes.
+  // Guard here (rather than at each call site) so every caller — /, /setup and
+  // /login — skips auto-provisioning and SSO sessions when unauthenticated mode
+  // is on, regardless of whether the proxy still supplies the header.
+  if (!HTTP_REMOTE_USER_ENABLED || ALLOW_UNAUTHENTICATED) {
+    return null;
+  }
+
+  const identity = request.headers.get(HTTP_REMOTE_USER_HEADER)?.trim();
+  if (!identity) {
+    return null;
+  }
+
+  let user = db.query("SELECT * FROM users WHERE email = ?").as(User).get(identity);
+  if (!user) {
+    // Auto-provision. The local password is a random value the user never uses
+    // and cannot know — they always authenticate through the trusted proxy.
+    const savedPassword = await Bun.password.hash(randomUUID());
+    db.query("INSERT INTO users (email, password) VALUES (?, ?)").run(identity, savedPassword);
+    user = db.query("SELECT * FROM users WHERE email = ?").as(User).get(identity);
+    if (FIRST_RUN) {
+      FIRST_RUN = false;
+    }
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  return jwt.sign({ id: String(user.id) });
+}
 
 export const userService = new Elysia({ name: "user/service" })
   .use(
@@ -65,7 +152,15 @@ export const userService = new Elysia({ name: "user/service" })
 
 export const user = new Elysia()
   .use(userService)
-  .get("/setup", ({ redirect }) => {
+  .get("/setup", async ({ request, jwt, redirect, cookie: { auth } }) => {
+    // Trusted-header SSO: the proxy already authenticated the (first) user —
+    // provision them as the initial account and sign them straight in.
+    const ssoToken = await trustedHeaderToken(request, jwt);
+    if (ssoToken && auth) {
+      setSessionCookie(auth, ssoToken);
+      return redirect(`${WEBROOT}/`, 302);
+    }
+
     if (!FIRST_RUN) {
       return redirect(`${WEBROOT}/login`, 302);
     }
@@ -223,13 +318,7 @@ export const user = new Elysia()
       }
 
       // set cookie
-      auth.set({
-        value: accessToken,
-        httpOnly: true,
-        secure: !HTTP_ALLOWED,
-        maxAge: 60 * 60 * 24 * 7,
-        sameSite: "strict",
-      });
+      setSessionCookie(auth, accessToken);
 
       return redirect(`${WEBROOT}/`, 302);
     },
@@ -237,7 +326,15 @@ export const user = new Elysia()
   )
   .get(
     "/login",
-    async ({ jwt, redirect, cookie: { auth } }) => {
+    async ({ request, jwt, redirect, cookie: { auth } }) => {
+      // Trusted-header SSO: if the proxy already authenticated the request,
+      // establish the session and skip the login form entirely.
+      const ssoToken = await trustedHeaderToken(request, jwt);
+      if (ssoToken && auth) {
+        setSessionCookie(auth, ssoToken);
+        return redirect(`${WEBROOT}/`, 302);
+      }
+
       if (FIRST_RUN) {
         return redirect(`${WEBROOT}/setup`, 302);
       }
@@ -349,13 +446,7 @@ export const user = new Elysia()
       }
 
       // set cookie
-      auth.set({
-        value: accessToken,
-        httpOnly: true,
-        secure: !HTTP_ALLOWED,
-        maxAge: 60 * 60 * 24 * 7,
-        sameSite: "strict",
-      });
+      setSessionCookie(auth, accessToken);
 
       return redirect(`${WEBROOT}/`, 302);
     },
