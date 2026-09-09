@@ -279,6 +279,7 @@ export const user = new Elysia()
                         class="rounded-sm bg-neutral-800 p-3"
                         placeholder="Email"
                         autocomplete="email"
+                        autofocus
                         required
                       />
                     </label>
