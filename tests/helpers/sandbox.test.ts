@@ -142,8 +142,8 @@ test("landlock-runner enforces real sandboxing when available", async () => {
   expect(success).toBe(true);
   expect(existsSync(outputFile)).toBe(true);
 
-  // 2. Writing to unpermitted directory (parent testDir) must FAIL
-  const forbiddenFile = join(testDir, "forbidden.txt");
+  // 2. Writing to unpermitted directory outside /tmp (e.g. workspace root) must FAIL
+  const forbiddenFile = join(process.cwd(), `test-forbidden-${Date.now()}.txt`);
   const failure = await new Promise<boolean>((resolve) => {
     sandboxedExec("/bin/sh", ["-c", `echo "should fail" > "${forbiddenFile}"`], (err) => {
       resolve(!!err);

@@ -134,7 +134,7 @@ export function createSandboxedExec(config: SandboxConfig): ExecFileFn {
       "--rw",
       resolvedOutput,
       "--rw",
-      `${resolvedTemp}:/dev`,
+      `${resolvedTemp}:/tmp:/dev`,
     ];
 
     if (!config.allowNet) {
@@ -147,7 +147,7 @@ export function createSandboxedExec(config: SandboxConfig): ExecFileFn {
 
     runnerArgs.push("--", cmd, ...args);
 
-    // Provide isolated per-job TMPDIR and HOME
+    // Provide isolated per-job TMPDIR, HOME, and XDG directories
     const sandboxedEnv = {
       ...process.env,
       ...options.env,
@@ -155,6 +155,9 @@ export function createSandboxedExec(config: SandboxConfig): ExecFileFn {
       TEMP: resolvedTemp,
       TMP: resolvedTemp,
       HOME: resolvedTemp,
+      XDG_CONFIG_HOME: `${resolvedTemp}/.config`,
+      XDG_CACHE_HOME: `${resolvedTemp}/.cache`,
+      XDG_DATA_HOME: `${resolvedTemp}/.local/share`,
     };
 
     const sandboxedOptions: ExecFileOptions = {
