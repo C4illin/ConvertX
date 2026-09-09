@@ -1,5 +1,4 @@
-import { execFile as execFileOriginal } from "node:child_process";
-import { ExecFileFn } from "./types";
+import { defaultExecFile, ExecFileFn } from "./types";
 
 // declare possible conversions
 export const properties = {
@@ -96,7 +95,7 @@ export function convert(
   convertTo: string,
   targetPath: string,
   options?: unknown,
-  execFile: ExecFileFn = execFileOriginal,
+  execFile: ExecFileFn = defaultExecFile,
 ): Promise<string> {
   // if (fileType === "svg") {
   //   const scale = options.scale || 1;

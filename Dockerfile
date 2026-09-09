@@ -12,9 +12,9 @@ RUN apt-get update && apt-get install -y \
 # if architecture is arm64, use the arm64 version of bun
 RUN ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
-    curl -fsSL -o bun-linux-aarch64.zip https://github.com/oven-sh/bun/releases/download/bun-v1.2.2/bun-linux-aarch64.zip; \
+  curl -fsSL -o bun-linux-aarch64.zip https://github.com/oven-sh/bun/releases/download/bun-v1.2.2/bun-linux-aarch64.zip; \
   else \
-    curl -fsSL -o bun-linux-x64-baseline.zip https://github.com/oven-sh/bun/releases/download/bun-v1.2.2/bun-linux-x64-baseline.zip; \
+  curl -fsSL -o bun-linux-x64-baseline.zip https://github.com/oven-sh/bun/releases/download/bun-v1.2.2/bun-linux-x64-baseline.zip; \
   fi
 
 RUN unzip -j bun-linux-*.zip -d /usr/local/bin && \
@@ -35,6 +35,7 @@ RUN cd /temp/prod && bun install --frozen-lockfile --production
 
 FROM base AS prerelease
 WORKDIR /app
+RUN apt-get update && apt-get install -y gcc --no-install-recommends && rm -rf /var/lib/apt/lists/*
 COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 
@@ -52,6 +53,7 @@ RUN apt-get update && apt-get install -y \
   dcraw \
   dvisvgm \
   ffmpeg \
+  fonts-liberation \
   ghostscript \
   graphicsmagick \
   imagemagick-7.q16 \
@@ -90,9 +92,9 @@ ENV PATH="/root/.local/bin:${PATH}"
 # Install VTracer binary
 RUN ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
-    VTRACER_ASSET="vtracer-aarch64-unknown-linux-musl.tar.gz"; \
+  VTRACER_ASSET="vtracer-aarch64-unknown-linux-musl.tar.gz"; \
   else \
-    VTRACER_ASSET="vtracer-x86_64-unknown-linux-musl.tar.gz"; \
+  VTRACER_ASSET="vtracer-x86_64-unknown-linux-musl.tar.gz"; \
   fi && \
   curl -L -o /tmp/vtracer.tar.gz "https://github.com/visioncortex/vtracer/releases/download/0.6.4/${VTRACER_ASSET}" && \
   tar -xzf /tmp/vtracer.tar.gz -C /tmp/ && \
@@ -103,6 +105,7 @@ RUN ARCH=$(uname -m) && \
 COPY --from=install /temp/prod/node_modules node_modules
 COPY --from=prerelease /app/public/ /app/public/
 COPY --from=prerelease /app/dist /app/dist
+COPY --from=prerelease /app/bin/landlock-runner /usr/local/bin/landlock-runner
 
 # COPY . .
 RUN mkdir data
@@ -110,5 +113,6 @@ RUN mkdir data
 EXPOSE 3000/tcp
 # used for calibre
 ENV QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox"
+ENV SANDBOX_STRICT="true"
 ENV NODE_ENV=production
 ENTRYPOINT [ "bun", "run", "dist/src/index.js" ]
