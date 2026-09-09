@@ -1,10 +1,10 @@
-import path from "node:path";
 import { Elysia } from "elysia";
+import { lstat, realpath } from "node:fs/promises";
+import path from "node:path";
 import sanitize from "sanitize-filename";
 import * as tar from "tar";
-import { outputDir } from "..";
 import db from "../db/db";
-import { WEBROOT } from "../helpers/env";
+import { outputDir, WEBROOT } from "../helpers/env";
 import { userService } from "./user";
 
 export const download = new Elysia()
@@ -24,13 +24,28 @@ export const download = new Elysia()
       const jobId = decodeURIComponent(params.jobId);
       const fileName = sanitize(decodeURIComponent(params.fileName));
 
-      const filePath = `${outputDir}${userId}/${jobId}/${fileName}`;
-      const file = Bun.file(filePath);
-      if (!(await file.exists())) {
+      const jobOutputDir = path.join(outputDir, userId, jobId);
+      const filePath = path.join(jobOutputDir, fileName);
+
+      try {
+        const stat = await lstat(filePath);
+        if (stat.isSymbolicLink()) {
+          set.status = 403;
+          return { message: "Access denied." };
+        }
+
+        const resolvedBase = await realpath(jobOutputDir);
+        const resolvedFile = await realpath(filePath);
+        if (!resolvedFile.startsWith(resolvedBase + path.sep)) {
+          set.status = 403;
+          return { message: "Access denied." };
+        }
+      } catch {
         set.status = 404;
         return { message: "Converted file not found." };
       }
 
+      const file = Bun.file(filePath);
       return file;
     },
     {
@@ -50,15 +65,23 @@ export const download = new Elysia()
       }
 
       const jobId = decodeURIComponent(params.jobId);
-      const outputPath = `${outputDir}${userId}/${jobId}`;
+      const outputPath = path.join(outputDir, userId, jobId);
       const outputTar = path.join(outputPath, `converted_files_${jobId}.tar`);
 
       await tar.create(
         {
           file: outputTar,
           cwd: outputPath,
-          filter: (path) => {
-            return !path.match(".*\\.tar");
+          filter: (entryPath, stat) => {
+            const isSymlink =
+              ("isSymbolicLink" in stat &&
+                typeof stat.isSymbolicLink === "function" &&
+                stat.isSymbolicLink()) ||
+              ("type" in stat && (stat as { type?: string }).type === "SymbolicLink");
+            if (entryPath.endsWith(".tar") || isSymlink) {
+              return false;
+            }
+            return true;
           },
         },
         ["."],

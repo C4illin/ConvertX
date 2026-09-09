@@ -226,28 +226,45 @@ int main(int argc, char *argv[]) {
         return 127;
     }
 
-    // Build supported filesystem access rights
+    // Handled filesystem access rights in ruleset
+    __u64 handled_fs_access = LANDLOCK_ACCESS_FS_EXECUTE |
+                              LANDLOCK_ACCESS_FS_READ_FILE |
+                              LANDLOCK_ACCESS_FS_READ_DIR |
+                              LANDLOCK_ACCESS_FS_WRITE_FILE |
+                              LANDLOCK_ACCESS_FS_REMOVE_DIR |
+                              LANDLOCK_ACCESS_FS_REMOVE_FILE |
+                              LANDLOCK_ACCESS_FS_MAKE_CHAR |
+                              LANDLOCK_ACCESS_FS_MAKE_DIR |
+                              LANDLOCK_ACCESS_FS_MAKE_REG |
+                              LANDLOCK_ACCESS_FS_MAKE_SOCK |
+                              LANDLOCK_ACCESS_FS_MAKE_FIFO |
+                              LANDLOCK_ACCESS_FS_MAKE_BLOCK |
+                              LANDLOCK_ACCESS_FS_MAKE_SYM;
+    if (abi >= 2) handled_fs_access |= LANDLOCK_ACCESS_FS_REFER;
+    if (abi >= 3) handled_fs_access |= LANDLOCK_ACCESS_FS_TRUNCATE;
+    if (abi >= 5) handled_fs_access |= LANDLOCK_ACCESS_FS_IOCTL_DEV;
+
+    // Build supported filesystem access rights for read-only paths
     __u64 fs_ro_access = LANDLOCK_ACCESS_FS_EXECUTE |
                          LANDLOCK_ACCESS_FS_READ_FILE |
                          LANDLOCK_ACCESS_FS_READ_DIR;
     if (abi >= 2) fs_ro_access |= LANDLOCK_ACCESS_FS_REFER;
 
+    // Build supported filesystem access rights for read-write paths
+    // NOTE: Intentionally exclude LANDLOCK_ACCESS_FS_MAKE_SYM, MAKE_CHAR, MAKE_BLOCK, MAKE_FIFO
+    // to prevent creation of symlinks (CWE-59 sandbox escape) and device nodes.
     __u64 fs_rw_access = fs_ro_access |
                          LANDLOCK_ACCESS_FS_WRITE_FILE |
                          LANDLOCK_ACCESS_FS_REMOVE_DIR |
                          LANDLOCK_ACCESS_FS_REMOVE_FILE |
-                         LANDLOCK_ACCESS_FS_MAKE_CHAR |
                          LANDLOCK_ACCESS_FS_MAKE_DIR |
                          LANDLOCK_ACCESS_FS_MAKE_REG |
-                         LANDLOCK_ACCESS_FS_MAKE_SOCK |
-                         LANDLOCK_ACCESS_FS_MAKE_FIFO |
-                         LANDLOCK_ACCESS_FS_MAKE_BLOCK |
-                         LANDLOCK_ACCESS_FS_MAKE_SYM;
+                         LANDLOCK_ACCESS_FS_MAKE_SOCK;
     if (abi >= 3) fs_rw_access |= LANDLOCK_ACCESS_FS_TRUNCATE;
     if (abi >= 5) fs_rw_access |= LANDLOCK_ACCESS_FS_IOCTL_DEV;
 
     struct landlock_ruleset_attr attr = {
-        .handled_access_fs = fs_rw_access,
+        .handled_access_fs = handled_fs_access,
     };
 
     if (no_net && abi >= 4) {

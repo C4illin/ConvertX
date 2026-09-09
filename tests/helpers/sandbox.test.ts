@@ -153,7 +153,19 @@ test("landlock-runner enforces real sandboxing when available", async () => {
   expect(failure).toBe(true);
   expect(existsSync(forbiddenFile)).toBe(false);
 
-  // 3. Network operations must be blocked (Permission denied)
+  // 3. Creating symlinks in outputDir must be blocked (Permission denied)
+  const symlinkTarget = "/etc/passwd";
+  const symlinkFile = join(outputDir, "symlink-test");
+  const symlinkFailed = await new Promise<boolean>((resolve) => {
+    sandboxedExec("/bin/ln", ["-s", symlinkTarget, symlinkFile], (err) => {
+      resolve(!!err);
+    });
+  });
+
+  expect(symlinkFailed).toBe(true);
+  expect(existsSync(symlinkFile)).toBe(false);
+
+  // 4. Network operations must be blocked (Permission denied)
   const netBlocked = await new Promise<boolean>((resolve) => {
     sandboxedExec(
       "/usr/bin/python3",

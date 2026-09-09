@@ -4,7 +4,7 @@ import { Elysia } from "elysia";
 import { rmSync } from "node:fs";
 import db from "./db/db";
 import { Jobs } from "./db/types";
-import { AUTO_DELETE_EVERY_N_HOURS, WEBROOT } from "./helpers/env";
+import { AUTO_DELETE_EVERY_N_HOURS, outputDir, uploadsDir, WEBROOT } from "./helpers/env";
 import "./helpers/printVersions";
 import { getLandlockRunnerPath, isSandboxAvailable } from "./helpers/sandbox";
 import { chooseConverter } from "./pages/chooseConverter";
@@ -20,8 +20,6 @@ import { root } from "./pages/root";
 import { upload } from "./pages/upload";
 import { user } from "./pages/user";
 
-export const uploadsDir = "./data/uploads/";
-export const outputDir = "./data/output/";
 
 // Fix for Elysia issue with Bun, (see https://github.com/oven-sh/bun/issues/12161)
 process.getBuiltinModule = require;
