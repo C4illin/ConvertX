@@ -20,7 +20,6 @@ import { root } from "./pages/root";
 import { upload } from "./pages/upload";
 import { user } from "./pages/user";
 
-
 // Fix for Elysia issue with Bun, (see https://github.com/oven-sh/bun/issues/12161)
 process.getBuiltinModule = require;
 

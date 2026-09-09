@@ -1,11 +1,10 @@
-import { unlink } from "node:fs/promises";
 import { Elysia, t } from "elysia";
-import { uploadsDir } from "..";
-import db from "../db/db";
-import { WEBROOT } from "../helpers/env";
-import { userService } from "./user";
-import sanitize from "sanitize-filename";
+import { unlink } from "node:fs/promises";
 import path from "node:path";
+import sanitize from "sanitize-filename";
+import db from "../db/db";
+import { uploadsDir, WEBROOT } from "../helpers/env";
+import { userService } from "./user";
 
 export const deleteFile = new Elysia().use(userService).post(
   "/delete",
