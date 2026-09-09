@@ -83,6 +83,8 @@ Then visit `http://localhost:3000` in your browser and create your account. Don'
 
 If you get unable to open database file run `chown -R $USER:$USER path` on the path you choose.
 
+To back up ConvertX, back up the whole `data` directory. It holds `mydb.sqlite` together with its `-wal` file, where recent rows live until SQLite checkpoints them, and the `uploads/` and `output/` directories holding the files your conversion jobs refer to. Copying `mydb.sqlite` alone gives you an instance you cannot log in to.
+
 ### Environment variables
 
 All are optional, JWT_SECRET is recommended to be set.
