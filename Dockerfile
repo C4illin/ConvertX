@@ -35,7 +35,7 @@ RUN cd /temp/prod && bun install --frozen-lockfile --production
 
 FROM base AS prerelease
 WORKDIR /app
-RUN apt-get update && apt-get install -y gcc --no-install-recommends && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y gcc libc6-dev --no-install-recommends && rm -rf /var/lib/apt/lists/*
 COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 
