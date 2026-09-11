@@ -55,12 +55,17 @@ test("createSandboxedExec sets TMPDIR and HOME in environment", async () => {
     tempDir,
   });
 
-  await new Promise<void>((resolve) => {
-    sandboxedExec("/bin/sh", ["-c", "echo $TMPDIR"], (_err, stdout) => {
-      expect(stdout.trim()).toBe(tempDir);
-      resolve();
+  const stdout = await new Promise<string>((resolve, reject) => {
+    sandboxedExec("/bin/sh", ["-c", 'echo "$TMPDIR $HOME"'], (err, out) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(String(out));
+      }
     });
   });
+
+  expect(stdout.trim()).toBe(`${tempDir} ${tempDir}`);
 
   rmSync(testDir, { recursive: true, force: true });
 });
@@ -95,12 +100,13 @@ test("createSandboxedExec passes options before callback correctly", async () =>
   });
 
   let called = false;
-  sandboxedExec("echo", ["hi"], { maxBuffer: 1024 }, () => {
-    called = true;
+  await new Promise<void>((resolve) => {
+    sandboxedExec("echo", ["hi"], { maxBuffer: 1024 }, () => {
+      called = true;
+      resolve();
+    });
   });
 
-  // Give child process time if real exec was spawned
-  await new Promise((r) => setTimeout(r, 50));
   expect(called).toBe(true);
 
   rmSync(testDir, { recursive: true, force: true });

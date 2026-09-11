@@ -107,6 +107,24 @@ export function createSandboxedExec(config: SandboxConfig): ExecFileFn {
 
     const cb: ExecFileCallback = callback ?? (() => {});
 
+    // Provide isolated per-job TMPDIR, HOME, and XDG directories
+    const sandboxedEnv = {
+      ...process.env,
+      ...options.env,
+      TMPDIR: resolvedTemp,
+      TEMP: resolvedTemp,
+      TMP: resolvedTemp,
+      HOME: resolvedTemp,
+      XDG_CONFIG_HOME: `${resolvedTemp}/.config`,
+      XDG_CACHE_HOME: `${resolvedTemp}/.cache`,
+      XDG_DATA_HOME: `${resolvedTemp}/.local/share`,
+    };
+
+    const sandboxedOptions: ExecFileOptions = {
+      ...options,
+      env: sandboxedEnv,
+    };
+
     if (!runnerPath) {
       if (isStrict) {
         const error = new Error(
@@ -122,7 +140,7 @@ export function createSandboxedExec(config: SandboxConfig): ExecFileFn {
           o: ExecFileOptions,
           f: ExecFileCallback,
         ) => ChildProcess
-      )(cmd, args, options, cb);
+      )(cmd, args, sandboxedOptions, cb);
     }
 
     // Build landlock-runner arguments
@@ -146,24 +164,6 @@ export function createSandboxedExec(config: SandboxConfig): ExecFileFn {
     }
 
     runnerArgs.push("--", cmd, ...args);
-
-    // Provide isolated per-job TMPDIR, HOME, and XDG directories
-    const sandboxedEnv = {
-      ...process.env,
-      ...options.env,
-      TMPDIR: resolvedTemp,
-      TEMP: resolvedTemp,
-      TMP: resolvedTemp,
-      HOME: resolvedTemp,
-      XDG_CONFIG_HOME: `${resolvedTemp}/.config`,
-      XDG_CACHE_HOME: `${resolvedTemp}/.cache`,
-      XDG_DATA_HOME: `${resolvedTemp}/.local/share`,
-    };
-
-    const sandboxedOptions: ExecFileOptions = {
-      ...options,
-      env: sandboxedEnv,
-    };
 
     return (
       execFileOriginal as (
