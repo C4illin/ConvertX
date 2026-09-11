@@ -6,6 +6,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   autofix:
     runs-on: ubuntu-latest
@@ -13,8 +17,12 @@ jobs:
       - uses: actions/checkout@v7
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.2.2
-      - run: bun i
-      - run: bun run format
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Format code
+        run: |
+          bun run format:eslint || true
+          bun run format:prettier
       - uses: autofix-ci/action@c5b2d67aa2274e7b5a18224e8171550871fc7e4a
