@@ -1,5 +1,4 @@
-import { execFile as execFileOriginal } from "node:child_process";
-import { ExecFileFn } from "./types";
+import { defaultExecFile, ExecFileFn } from "./types";
 
 // declare possible conversions
 export const properties = {
@@ -19,7 +18,7 @@ export function convert(
   convertTo: string,
   targetPath: string,
   options?: unknown,
-  execFile: ExecFileFn = execFileOriginal, // to make it mockable
+  execFile: ExecFileFn = defaultExecFile, // to make it mockable
 ): Promise<string> {
   let tool = "";
   if (fileType === "jxl") {

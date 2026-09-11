@@ -1,26 +1,24 @@
-import { rmSync } from "node:fs";
 import { html } from "@elysiajs/html";
 import { staticPlugin } from "@elysiajs/static";
 import { Elysia } from "elysia";
-import "./helpers/printVersions";
+import { rmSync } from "node:fs";
 import db from "./db/db";
 import { Jobs } from "./db/types";
-import { AUTO_DELETE_EVERY_N_HOURS, WEBROOT } from "./helpers/env";
+import { AUTO_DELETE_EVERY_N_HOURS, outputDir, uploadsDir, WEBROOT } from "./helpers/env";
+import "./helpers/printVersions";
+import { getLandlockRunnerPath, isSandboxAvailable } from "./helpers/sandbox";
 import { chooseConverter } from "./pages/chooseConverter";
 import { convert } from "./pages/convert";
 import { deleteFile } from "./pages/deleteFile";
 import { deleteJob } from "./pages/deleteJob";
 import { download } from "./pages/download";
+import { healthcheck } from "./pages/healthcheck";
 import { history } from "./pages/history";
 import { listConverters } from "./pages/listConverters";
 import { results } from "./pages/results";
 import { root } from "./pages/root";
 import { upload } from "./pages/upload";
 import { user } from "./pages/user";
-import { healthcheck } from "./pages/healthcheck";
-
-export const uploadsDir = "./data/uploads/";
-export const outputDir = "./data/output/";
 
 // Fix for Elysia issue with Bun, (see https://github.com/oven-sh/bun/issues/12161)
 process.getBuiltinModule = require;
@@ -72,6 +70,14 @@ if (process.env.NODE_ENV !== "production") {
 app.listen(process.env.PORT || 3000);
 
 console.log(`🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}${WEBROOT}`);
+
+if (isSandboxAvailable()) {
+  console.log(`🔒 Landlock sandbox: ENABLED (${getLandlockRunnerPath()})`);
+} else if (process.env.SANDBOX_STRICT === "true") {
+  console.warn("⚠️ Landlock sandbox: STRICT mode enabled but runner unavailable!");
+} else {
+  console.log("ℹ️ Landlock sandbox: NOT AVAILABLE (running unsandboxed)");
+}
 
 const clearJobs = () => {
   const jobs = db
