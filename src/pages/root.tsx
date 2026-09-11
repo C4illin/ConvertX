@@ -143,7 +143,7 @@ export const root = new Elysia().use(userService).get(
                 `}
               >
                 <span>
-                  <b>Choose a file</b> or drag it here
+                  <b>Click to choose a file</b>, drag it here, or paste it.
                 </span>
                 <input
                   type="file"
@@ -236,7 +236,8 @@ export const root = new Elysia().use(userService).get(
               />
             </form>
           </main>
-          <script src="script.js" defer />
+          <script src={`${WEBROOT}/mime-types.js`} defer />
+          <script src={`${WEBROOT}/script.js`} defer />
         </>
       </BaseHtml>
     );
