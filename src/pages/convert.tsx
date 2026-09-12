@@ -1,6 +1,5 @@
 import { mkdir } from "node:fs/promises";
 import { Elysia, t } from "elysia";
-import sanitize from "sanitize-filename";
 import { outputDir, uploadsDir } from "..";
 import { handleConvert } from "../converters/main";
 import db from "../db/db";
@@ -57,10 +56,6 @@ export const convert = new Elysia().use(userService).post(
     }
 
     const fileNames = JSON.parse(body.file_names) as string[];
-
-    for (let i = 0; i < fileNames.length; i++) {
-      fileNames[i] = sanitize(fileNames[i] || "");
-    }
 
     if (!Array.isArray(fileNames) || fileNames.length === 0) {
       return redirect(`${WEBROOT}/`, 302);
