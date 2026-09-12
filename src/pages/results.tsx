@@ -140,7 +140,9 @@ function ResultsArticle({
                         `}
                         data-filename={file.output_file_name}
                         data-download-url={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
-                        data-mime-type={mime.getType(file.output_file_name) || "application/octet-stream"}
+                        data-mime-type={
+                          mime.getType(file.output_file_name) || "application/octet-stream"
+                        }
                         style="display: none;"
                       >
                         <ShareIcon />
