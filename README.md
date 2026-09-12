@@ -36,6 +36,7 @@ A self-hosted online file converter. Supports over a thousand different formats.
 | [Calibre](https://calibre-ebook.com/)                           | E-books          | 26            | 19          |
 | [LibreOffice](https://www.libreoffice.org/)                     | Documents        | 41            | 22          |
 | [Dasel](https://github.com/TomWright/dasel)                     | Data Files       | 5             | 4           |
+| [DjVuLibre](https://djvu.sourceforge.net/)                       | Documents        | 2             | 2           |
 | [Pandoc](https://pandoc.org/)                                   | Documents        | 43            | 65          |
 | [msgconvert](https://github.com/mvz/email-outlook-message-perl) | Outlook          | 1             | 1           |
 | VCF to CSV                                                      | Contacts         | 1             | 1           |
