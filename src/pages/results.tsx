@@ -1,15 +1,15 @@
 import { Elysia } from "elysia";
+import mime from "mime";
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import db from "../db/db";
 import { Filename, Jobs } from "../db/types";
 import { buildDownloadUrl } from "../helpers/buildDownloadUrl";
 import { ALLOW_UNAUTHENTICATED, WEBROOT } from "../helpers/env";
-import { DownloadIcon } from "../icons/download";
 import { DeleteIcon } from "../icons/delete";
+import { DownloadIcon } from "../icons/download";
 import { EyeIcon } from "../icons/eye";
 import { ShareIcon } from "../icons/share";
-import mime from "mime";
 import { userService } from "./user";
 
 function ResultsArticle({
@@ -98,47 +98,59 @@ function ResultsArticle({
           </tr>
         </thead>
         <tbody>
-          {files.map((file) => (
-            <tr>
-              <td safe class="max-w-[20vw] truncate">
-                {file.output_file_name}
-              </td>
-              <td safe>{file.status}</td>
-              <td class="flex flex-row gap-4">
-                <a
-                  class={`
-                    text-accent-500 underline
-                    hover:text-accent-400
-                  `}
-                  href={buildDownloadUrl(WEBROOT, outputPath, file.output_file_name)}
-                >
-                  <EyeIcon />
-                </a>
-                <a
-                  class={`
-                    text-accent-500 underline
-                    hover:text-accent-400
-                  `}
-                  href={buildDownloadUrl(WEBROOT, outputPath, file.output_file_name)}
-                  download={file.output_file_name}
-                >
-                  <DownloadIcon />
-                </a>
-                <button
-                  class={`
-                    share-btn text-accent-500 underline
-                    hover:text-accent-400
-                  `}
-                  data-filename={file.output_file_name}
-                  data-download-url={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
-                  data-mime-type={mime.getType(file.output_file_name) || "application/octet-stream"}
-                  style="display: none;"
-                >
-                  <ShareIcon />
-                </button>
-              </td>
-            </tr>
-          ))}
+          {files.map((file) => {
+            const conversionFailed = ["Failed, check logs", "File type not supported"].includes(
+              file.status,
+            );
+
+            return (
+              <tr>
+                <td safe class="max-w-[20vw] truncate">
+                  {file.output_file_name}
+                </td>
+                <td safe>{file.status}</td>
+                <td class="flex flex-row gap-4">
+                  {conversionFailed ? (
+                    <span class="text-neutral-500">Unavailable</span>
+                  ) : (
+                    <>
+                      <a
+                        class={`
+                          text-accent-500 underline
+                          hover:text-accent-400
+                        `}
+                        href={buildDownloadUrl(WEBROOT, outputPath, file.output_file_name)}
+                      >
+                        <EyeIcon />
+                      </a>
+                      <a
+                        class={`
+                          text-accent-500 underline
+                          hover:text-accent-400
+                        `}
+                        href={buildDownloadUrl(WEBROOT, outputPath, file.output_file_name)}
+                        download={file.output_file_name}
+                      >
+                        <DownloadIcon />
+                      </a>
+                      <button
+                        class={`
+                          share-btn text-accent-500 underline
+                          hover:text-accent-400
+                        `}
+                        data-filename={file.output_file_name}
+                        data-download-url={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
+                        data-mime-type={mime.getType(file.output_file_name) || "application/octet-stream"}
+                        style="display: none;"
+                      >
+                        <ShareIcon />
+                      </button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </article>
