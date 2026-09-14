@@ -139,7 +139,11 @@ function ResultsArticle({
                           hover:text-accent-400
                         `}
                         data-filename={file.output_file_name}
-                        data-download-url={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
+                        data-download-url={buildDownloadUrl(
+                          WEBROOT,
+                          outputPath,
+                          file.output_file_name,
+                        )}
                         data-mime-type={
                           mime.getType(file.output_file_name) || "application/octet-stream"
                         }
