@@ -6,6 +6,8 @@ export const HTTP_ALLOWED = process.env.HTTP_ALLOWED?.toLowerCase() === "true" |
 export const ALLOW_UNAUTHENTICATED =
   process.env.ALLOW_UNAUTHENTICATED?.toLowerCase() === "true" || false;
 
+export const ALLOW_URL_UPLOAD = process.env.ALLOW_URL_UPLOAD?.toLowerCase() === "true" || false;
+
 export const AUTO_DELETE_EVERY_N_HOURS = process.env.AUTO_DELETE_EVERY_N_HOURS
   ? Number(process.env.AUTO_DELETE_EVERY_N_HOURS)
   : 24;
