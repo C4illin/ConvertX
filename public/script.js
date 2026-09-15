@@ -18,26 +18,41 @@ dropZone.addEventListener("dragleave", () => {
   dropZone.classList.remove("dragover");
 });
 
+const readAllEntries = async (reader) => {
+  const entries = [];
+  let batch;
+  do {
+    batch = await new Promise((resolve, reject) => reader.readEntries(resolve, reject));
+    entries.push(...batch);
+  } while (batch.length > 0);
+  return entries;
+};
+
 const entryToFiles = async (entry) => {
   if (entry.isFile) {
     const file = await new Promise((resolve, reject) => entry.file(resolve, reject));
+    if (entry.fullPath) {
+      file.filepath = entry.fullPath.replace(/^\/+/, "");
+    }
     return [file];
   }
   const reader = entry.createReader();
-  const entries = await new Promise((resolve, reject) => reader.readEntries(resolve, reject));
+  const entries = await readAllEntries(reader);
   const out = [];
-  for (const entry of entries) {
-    out.push(...(await entryToFiles(entry)));
+  for (const child of entries) {
+    out.push(...(await entryToFiles(child)));
   }
   return out;
 };
 
 const getFileNameWithSlashes = (file) => {
+  if (file.filepath) {
+    return file.filepath;
+  }
   if (file.webkitRelativePath) {
     return file.webkitRelativePath;
-  } else {
-    return file.name;
   }
+  return file.name;
 };
 
 dropZone.addEventListener("drop", async (e) => {
@@ -64,33 +79,97 @@ dropZone.addEventListener("drop", async (e) => {
   }
 });
 
-urlSubmit.addEventListener("click", (e) => {
+urlSubmit?.addEventListener("click", (e) => {
   e.preventDefault();
-  handleUrl(urlInput.value);
+  if (urlInput) {
+    handleUrl(urlInput.value);
+  }
 });
 
 function handleUrl(url) {
+  if (!url || !url.trim()) return;
+
+  if (urlSubmit) urlSubmit.disabled = true;
+  pendingFiles += 1;
+  convertButton.disabled = true;
+  convertButton.textContent = "Uploading...";
+
   fetch(`${webroot}/url`, {
     method: "POST",
-    body: JSON.stringify({ url }),
+    body: JSON.stringify({ url: url.trim() }),
     headers: { "Content-Type": "application/json" },
   })
-    .then((res) => res.json())
     .then((res) => {
+      if (!res.ok) {
+        return res.text().then((text) => {
+          throw new Error(text || `HTTP ${res.status}`);
+        });
+      }
+      return res.json();
+    })
+    .then((res) => {
+      if (urlInput) urlInput.value = "";
       const fileList = document.querySelector("#file-list");
 
       const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${res.filename}</td>
-        <td></td>
-        <td>${(res.fileSizeBytes / 1024).toFixed(2)} kB</td>
-        <td><a onclick="deleteRow(this)">Remove</a></td>
-      `;
+
+      const nameTd = document.createElement("td");
+      nameTd.textContent = res.filename;
+      row.appendChild(nameTd);
+
+      const emptyTd = document.createElement("td");
+      row.appendChild(emptyTd);
+
+      const sizeTd = document.createElement("td");
+      sizeTd.textContent = `${(res.fileSizeBytes / 1024).toFixed(2)} kB`;
+      row.appendChild(sizeTd);
+
+      const actionTd = document.createElement("td");
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "text-accent-500 hover:underline";
+      removeBtn.textContent = "Remove";
+      removeBtn.onclick = function () {
+        deleteRow(this);
+      };
+      actionTd.appendChild(removeBtn);
+      row.appendChild(actionTd);
 
       fileList.appendChild(row);
       fileNames.push(res.filename);
+
+      if (!fileType) {
+        fileType = res.filename.split(".").pop();
+        fileInput.setAttribute("accept", `.${fileType}`);
+        setTitle();
+
+        fetch(`${webroot}/conversions`, {
+          method: "POST",
+          body: JSON.stringify({ fileType }),
+          headers: { "Content-Type": "application/json" },
+        })
+          .then((r) => r.text())
+          .then((html) => {
+            selectContainer.innerHTML = html;
+            updateSearchBar();
+          })
+          .catch(console.error);
+      }
     })
-    .catch(console.error);
+    .catch((err) => {
+      console.error(err);
+      alert(`Failed to add URL: ${err.message || err}`);
+    })
+    .finally(() => {
+      if (urlSubmit) urlSubmit.disabled = false;
+      pendingFiles -= 1;
+      if (pendingFiles === 0) {
+        convertButton.textContent = "Convert";
+        if (formatSelected && fileNames.length > 0) {
+          convertButton.disabled = false;
+        }
+      }
+    });
 }
 
 // Extracted handleFile function for reusability in drag-and-drop and file input
@@ -226,7 +305,6 @@ const setTitle = () => {
 };
 
 // Add a onclick for the delete button
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const deleteRow = (target) => {
   const filename = target.parentElement.parentElement.children[0].textContent;
   const row = target.parentElement.parentElement;
