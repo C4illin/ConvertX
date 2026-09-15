@@ -9,6 +9,7 @@ import {
   HIDE_HISTORY,
   HTTP_ALLOWED,
   WEBROOT,
+  BRANDING,
 } from "../helpers/env";
 import { userService } from "../services/user";
 
@@ -89,6 +90,7 @@ export const user = new Elysia()
         <>
           <Header
             webroot={WEBROOT}
+            branding={BRANDING}
             accountRegistration={ACCOUNT_REGISTRATION}
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
             hideHistory={HIDE_HISTORY}
@@ -211,6 +213,7 @@ export const user = new Elysia()
           <>
             <Header
               webroot={WEBROOT}
+              branding={BRANDING}
               accountRegistration={ACCOUNT_REGISTRATION}
               allowUnauthenticated={ALLOW_UNAUTHENTICATED}
               hideHistory={HIDE_HISTORY}
@@ -346,6 +349,7 @@ export const user = new Elysia()
           <>
             <Header
               webroot={WEBROOT}
+              branding={BRANDING}
               accountRegistration={ACCOUNT_REGISTRATION}
               allowUnauthenticated={ALLOW_UNAUTHENTICATED}
               hideHistory={HIDE_HISTORY}
