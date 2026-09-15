@@ -1,39 +1,20 @@
 import { Elysia, t } from "elysia";
 import { uploadsDir } from "..";
 import db from "../db/db";
-import { WEBROOT } from "../helpers/env";
+import { ALLOW_URL_UPLOAD, WEBROOT } from "../helpers/env";
+import { getFilename } from "../helpers/getFilename";
+import { isSafePath } from "../helpers/validatePath";
+import { validateSafeUrl } from "../helpers/validateUrl";
 import { userService } from "./user";
-import sanitize from "sanitize-filename";
-import { randomUUID } from "node:crypto";
-import mime from "mime";
-
-const getFilename = (url: string, headers: Headers) => {
-  const contentDisposition = headers.get("Content-Disposition");
-  if (contentDisposition) {
-    const match = /filename="([^"]+)"/.exec(contentDisposition);
-    if (match && match[1]) {
-      return sanitize(match[1]);
-    }
-  }
-  const path = new URL(url).pathname;
-  const lastPart = path.split("/").at(-1);
-  const contentType = headers.get("content-type");
-  const extension = contentType ? mime.getExtension(contentType) : null;
-  if (!lastPart) {
-    if (extension) {
-      return `${randomUUID()}.${extension}`;
-    }
-    return randomUUID();
-  }
-  if (!lastPart.includes(".") && extension) {
-    return `${sanitize(lastPart)}.${extension}`;
-  }
-  return sanitize(lastPart);
-};
 
 export const url = new Elysia().use(userService).post(
   "/url",
-  async ({ body, redirect, user, cookie: { jobId } }) => {
+  async ({ body, redirect, user, cookie: { jobId }, set }) => {
+    if (!ALLOW_URL_UPLOAD) {
+      set.status = 403;
+      throw new Error("URL upload is disabled");
+    }
+
     if (!jobId?.value) {
       return redirect(`${WEBROOT}/`, 302);
     }
@@ -48,12 +29,47 @@ export const url = new Elysia().use(userService).post(
 
     const userUploadsDir = `${uploadsDir}${user.id}/${jobId.value}/`;
 
-    const res = await fetch(body.url);
-    if (!res.ok) {
-      throw new Error(`Failed to download URL, received ${res.status}`);
+    // 30 seconds timeout for the fetch operation
+    const abortController = new AbortController();
+    const timeout = setTimeout(() => abortController.abort(), 30_000);
+
+    let currentUrl = body.url;
+    let res: Response | null = null;
+    let redirects = 0;
+
+    try {
+      while (redirects < 5) {
+        await validateSafeUrl(currentUrl);
+
+        res = await fetch(currentUrl, {
+          signal: abortController.signal,
+          redirect: "manual",
+        });
+
+        if ([301, 302, 303, 307, 308].includes(res.status)) {
+          const loc = res.headers.get("Location");
+          if (!loc) break;
+          currentUrl = new URL(loc, currentUrl).toString();
+          redirects++;
+          continue;
+        }
+        break;
+      }
+    } finally {
+      clearTimeout(timeout);
     }
-    const filename = getFilename(body.url, res.headers);
-    const fileSizeBytes = await Bun.write(`${userUploadsDir}${filename}`, await res.blob());
+
+    if (!res || !res.ok) {
+      throw new Error(`Failed to download URL, received ${res?.status || "unknown"}`);
+    }
+
+    const filename = getFilename(currentUrl, res.headers);
+    const targetFilePath = `${userUploadsDir}${filename}`;
+    if (!isSafePath(userUploadsDir, targetFilePath)) {
+      throw new Error("Unsafe filename");
+    }
+
+    const fileSizeBytes = await Bun.write(targetFilePath, await res.blob());
 
     return {
       message: "Files downloaded successfully.",
