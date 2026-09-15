@@ -21,17 +21,31 @@ const setupShareButtons = () => {
     if (!navigator.canShare({ files: [dummyFile] })) {
       return;
     }
+    let cachedFile = null;
+    let isFetching = false;
+
     btn.addEventListener("click", async (e) => {
       e.preventDefault();
+      if (isFetching) return;
       try {
-        const response = await fetch(fileUrl);
-        const blob = await response.blob();
-        const file = new File([blob], filename, { type: mimeType });
-        await navigator.share({ files: [file] });
+        if (!cachedFile) {
+          isFetching = true;
+          const response = await fetch(fileUrl);
+          if (!response.ok) {
+            throw new Error(`Failed to download file (${response.status})`);
+          }
+          const blob = await response.blob();
+          cachedFile = new File([blob], filename, { type: mimeType });
+        }
+        await navigator.share({ files: [cachedFile] });
       } catch (err) {
-        if (err.name !== "AbortError") {
+        if (err.name === "NotAllowedError" && cachedFile) {
+          alert("File is ready. Please tap the share button again to share.");
+        } else if (err.name !== "AbortError") {
           console.error("Error sharing:", err);
         }
+      } finally {
+        isFetching = false;
       }
     });
     btn.style.display = "";
