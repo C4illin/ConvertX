@@ -1,4 +1,4 @@
-import { expect, test, describe } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { isSafePath } from "../src/helpers/validatePath";
 
 describe("isSafePath", () => {
@@ -26,9 +26,25 @@ describe("isSafePath", () => {
     expect(result).toEqual(true);
   });
 
+  test("should allow leading dots in parent", () => {
+    const path = "..cat.jpg";
+    const result = isSafePath("./job/", `./job/${path}`);
+    expect(result).toEqual(true);
+  });
+
   test("should disallow parent", () => {
     const path = "../cat.jpg";
     const result = isSafePath("./job/", `./job/${path}`);
+    expect(result).toEqual(false);
+  });
+
+  test("should disallow absolute paths escaping parent", () => {
+    const result = isSafePath("./job/", "/etc/passwd");
+    expect(result).toEqual(false);
+  });
+
+  test("should disallow relative paths escaping parent", () => {
+    const result = isSafePath("./job/", "./job/../etc/passwd");
     expect(result).toEqual(false);
   });
 });
