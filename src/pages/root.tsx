@@ -9,6 +9,7 @@ import { User } from "../db/types";
 import {
   ACCOUNT_REGISTRATION,
   ALLOW_UNAUTHENTICATED,
+  ALLOW_URL_UPLOAD,
   HIDE_HISTORY,
   HTTP_ALLOWED,
   UNAUTHENTICATED_USER_SHARING,
@@ -152,20 +153,22 @@ export const root = new Elysia().use(userService).get(
                   class="absolute inset-0 size-full cursor-pointer opacity-0"
                 />
               </div>
-              <label class="mt-4 flex flex-col gap-1 text-neutral-400">
-                Or enter a URL
-                <div class="flex flex-row">
-                  <input
-                    name="url"
-                    id="url-input"
-                    class="mr-2 flex-auto rounded-sm bg-neutral-800 p-3"
-                    placeholder="https://example.com/cat.jpg"
-                  />
-                  <button id="url-submit" type="button" class="flex-initial btn-secondary">
-                    Add URL
-                  </button>
-                </div>
-              </label>
+              {ALLOW_URL_UPLOAD && (
+                <label class="mt-4 flex flex-col gap-1 text-neutral-400">
+                  Or enter a URL
+                  <div class="flex flex-row">
+                    <input
+                      name="url"
+                      id="url-input"
+                      class="mr-2 flex-auto rounded-sm bg-neutral-800 p-3"
+                      placeholder="https://example.com/cat.jpg"
+                    />
+                    <button id="url-submit" type="button" class="flex-initial btn-secondary">
+                      Add URL
+                    </button>
+                  </div>
+                </label>
+              )}
             </article>
             <form
               method="post"
