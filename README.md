@@ -94,6 +94,7 @@ All are optional, JWT_SECRET is recommended to be set.
 | ACCOUNT_REGISTRATION         | false                                              | Allow users to register accounts                                                                                                                              |
 | HTTP_ALLOWED                 | false                                              | Allow HTTP connections, only set this to true locally                                                                                                         |
 | ALLOW_UNAUTHENTICATED        | false                                              | Allow unauthenticated users to use the service, only set this to true locally                                                                                 |
+| ALLOW_URL_UPLOAD             | false                                              | Allow uploading/converting files from URLs                                                                                                                    |
 | AUTO_DELETE_EVERY_N_HOURS    | 24                                                 | Checks every n hours for files older then n hours and deletes them, set to 0 to disable                                                                       |
 | WEBROOT                      |                                                    | The address to the root path setting this to "/convert" will serve the website on "example.com/convert/"                                                      |
 | BRANDING                     | ConvertX                                           | Custom string that allows you to change the display name of the website in the header (max 26 characters)                                                     |
@@ -103,6 +104,8 @@ All are optional, JWT_SECRET is recommended to be set.
 | LANGUAGE                     | en                                                 | Language to format date strings in, specified as a [BCP 47 language tag](https://en.wikipedia.org/wiki/IETF_language_tag)                                     |
 | UNAUTHENTICATED_USER_SHARING | false                                              | Shares conversion history between all unauthenticated users                                                                                                   |
 | MAX_CONVERT_PROCESS          | 0                                                  | Maximum number of concurrent conversion processes allowed. Set to 0 for unlimited.                                                                            |
+| MAGICK_MAX_WIDTH             | unset (ImageMagick default)                        | (Docker only) ImageMagick maximum image width in pixels                                                                                                       |
+| MAGICK_MAX_HEIGHT            | unset (ImageMagick default)                        | (Docker only) ImageMagick maximum image height in pixels                                                                                                      |
 | PORT                         | 3000                                               | Application listen port                                                                                                                                       |
 
 ### Docker images

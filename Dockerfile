@@ -103,6 +103,7 @@ RUN ARCH=$(uname -m) && \
 COPY --from=install /temp/prod/node_modules node_modules
 COPY --from=prerelease /app/public/ /app/public/
 COPY --from=prerelease /app/dist /app/dist
+COPY entrypoint.sh /app/entrypoint.sh
 
 # COPY . .
 RUN mkdir data
@@ -111,4 +112,4 @@ EXPOSE 3000/tcp
 # used for calibre
 ENV QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox"
 ENV NODE_ENV=production
-ENTRYPOINT [ "bun", "run", "dist/src/index.js" ]
+ENTRYPOINT [ "/app/entrypoint.sh" ]

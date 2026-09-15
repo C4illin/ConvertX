@@ -16,6 +16,7 @@ import { listConverters } from "./pages/listConverters";
 import { results } from "./pages/results";
 import { root } from "./pages/root";
 import { upload } from "./pages/upload";
+import { url } from "./pages/url";
 import { user } from "./pages/user";
 import { healthcheck } from "./pages/healthcheck";
 
@@ -41,6 +42,7 @@ const app = new Elysia({
   .use(user)
   .use(root)
   .use(upload)
+  .use(url)
   .use(history)
   .use(convert)
   .use(download)
