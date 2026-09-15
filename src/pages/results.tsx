@@ -4,7 +4,7 @@ import { Header } from "../components/header";
 import db from "../db/db";
 import { Filename, Jobs } from "../db/types";
 import { buildDownloadUrl } from "../helpers/buildDownloadUrl";
-import { ALLOW_UNAUTHENTICATED, WEBROOT } from "../helpers/env";
+import { ALLOW_UNAUTHENTICATED, HIDE_HISTORY, WEBROOT } from "../helpers/env";
 import { DownloadIcon } from "../icons/download";
 import { DeleteIcon } from "../icons/delete";
 import { EyeIcon } from "../icons/eye";
@@ -175,7 +175,12 @@ export const results = new Elysia()
       return (
         <BaseHtml webroot={WEBROOT} title="ConvertX | Result">
           <>
-            <Header webroot={WEBROOT} allowUnauthenticated={ALLOW_UNAUTHENTICATED} loggedIn />
+            <Header
+              webroot={WEBROOT}
+              allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+              hideHistory={HIDE_HISTORY}
+              loggedIn
+            />
             <main
               class={`
                 w-full flex-1 px-2
