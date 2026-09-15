@@ -20,6 +20,7 @@ import { convert as convertLibjxl, properties as propertiesLibjxl } from "./libj
 import { convert as convertLibreOffice, properties as propertiesLibreOffice } from "./libreoffice";
 import { convert as convertMsgconvert, properties as propertiesMsgconvert } from "./msgconvert";
 import { convert as convertPandoc, properties as propertiesPandoc } from "./pandoc";
+import { convert as convertPdftops, properties as propertiesPdftops } from "./pdftops";
 import { convert as convertPotrace, properties as propertiesPotrace } from "./potrace";
 import { convert as convertresvg, properties as propertiesresvg } from "./resvg";
 import { convert as convertImage, properties as propertiesImage } from "./vips";
@@ -138,6 +139,10 @@ const properties: Record<
   markitDown: {
     properties: propertiesMarkitdown,
     converter: convertMarkitdown,
+  },
+  pdftops: {
+    properties: propertiesPdftops,
+    converter: convertPdftops,
   },
 };
 
@@ -368,3 +373,9 @@ for (const converterName in properties) {
 export const getAllInputs = (converter: string) => {
   return allInputs[converter] || [];
 };
+
+/**
+ * @internal For testing only. Do not use in production.
+ * Tests need direct access to cover all branches of converter discovery and chunking logic.
+ */
+export { chunks, mainConverter };

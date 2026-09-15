@@ -1,23 +1,26 @@
+name: autolabel
 on:
   pull_request_target:
     types: [opened, edited]
-name: conventional-release-labels
+
 permissions:
-  contents: read
   pull-requests: write
+
 jobs:
   label:
     runs-on: ubuntu-latest
     steps:
-      - uses: bcoe/conventional-release-labels@v1
+      - uses: c4illin/autolabel@main
         with:
           type_labels: |
-            {
-              "feat": "Feature",
-              "fix": "Fix",
-              "breaking": "Breaking",
-              "chore": "Chore",
-              "docs": "Docs",
-              "test": "Test",
-              "ci": "CI"
-            }
+            feat: Feature
+            fix: Fix
+            docs: Docs
+            style: Style
+            refactor: Refactor
+            perf: Performance
+            test: Test
+            build: Build
+            ci: CI
+            revert: Revert
+            breaking: Breaking

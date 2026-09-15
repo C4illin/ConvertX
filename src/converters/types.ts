@@ -1,11 +1,11 @@
-import { ExecFileOptions } from "child_process";
+import type { ChildProcess, ExecFileOptions } from "child_process";
 
 export type ExecFileFn = (
   cmd: string,
   args: string[],
   callback: (err: Error | null, stdout: string, stderr: string) => void,
   options?: ExecFileOptions,
-) => void;
+) => ChildProcess | void;
 
 export type ConvertFnWithExecFile = (
   filePath: string,

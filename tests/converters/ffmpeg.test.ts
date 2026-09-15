@@ -1,14 +1,18 @@
 import { beforeEach, expect, test } from "bun:test";
 import { convert } from "../../src/converters/ffmpeg";
+import type { ExecFileOptions } from "node:child_process";
 
 let calls: string[][] = [];
+let lastOptions: ExecFileOptions | undefined;
 
 function mockExecFile(
   _cmd: string,
   args: string[],
+  options: ExecFileOptions,
   callback: (err: Error | null, stdout: string, stderr: string) => void,
 ) {
   calls.push(args);
+  lastOptions = options;
   if (args.includes("fail.mov")) {
     callback(new Error("mock failure"), "", "Fake stderr: fail");
   } else {
@@ -18,6 +22,7 @@ function mockExecFile(
 
 beforeEach(() => {
   calls = [];
+  lastOptions = undefined;
   delete process.env.FFMPEG_ARGS;
 });
 
@@ -168,6 +173,7 @@ test("logs stderr when execFile returns only stderr and no error", async () => {
   const mockExecFileStderrOnly = (
     _cmd: string,
     _args: string[],
+    _options: ExecFileOptions,
     callback: (err: Error | null, stdout: string, stderr: string) => void,
   ) => {
     callback(null, "", "Only stderr output");
@@ -178,4 +184,14 @@ test("logs stderr when execFile returns only stderr and no error", async () => {
   console.error = originalConsoleError;
 
   expect(loggedMessage).toBe("stderr: Only stderr output");
+});
+
+test("passes a maxBuffer above the 1 MB default so long conversions don't overflow stderr (#565)", async () => {
+  await convert("in.mkv", "mkv", "h264.mp4", "out.mp4", undefined, mockExecFile);
+
+  // execFile's default maxBuffer is 1 MB; ffmpeg's progress output on a long
+  // encode exceeds it and the conversion fails with "stderr maxBuffer length
+  // exceeded". Lock in the raised buffer (must match FFMPEG_MAX_BUFFER in
+  // ffmpeg.ts) so a regression to a smaller-but-still-over-1-MB value is caught.
+  expect(lastOptions?.maxBuffer).toBe(1024 * 1024 * 64);
 });

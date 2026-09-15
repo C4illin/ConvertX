@@ -473,6 +473,10 @@ export function convert(
     outputArgs.push("-background", "white", "-alpha", "remove");
   }
 
+  // Apply EXIF orientation so photos (e.g. from phones) don't end up sideways
+  // when converted to formats where the orientation tag is lost or ignored
+  outputArgs.push("-auto-orient");
+
   return new Promise((resolve, reject) => {
     execFile(
       "magick",

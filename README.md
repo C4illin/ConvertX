@@ -47,6 +47,7 @@ A self-hosted online file converter. Supports over a thousand different formats.
 | [Potrace](https://potrace.sourceforge.net/)                     | Raster to vector | 4             | 11          |
 | [VTracer](https://github.com/visioncortex/vtracer)              | Raster to vector | 8             | 1           |
 | [Markitdown](https://github.com/microsoft/markitdown)           | Documents        | 6             | 1           |
+| [pdftops](https://poppler.freedesktop.org/)                     | Documents        | 1             | 2           |
 
 <!-- many ffmpeg fileformats are duplicates -->
 
@@ -95,12 +96,14 @@ All are optional, JWT_SECRET is recommended to be set.
 | ALLOW_UNAUTHENTICATED        | false                                              | Allow unauthenticated users to use the service, only set this to true locally                                                                                 |
 | AUTO_DELETE_EVERY_N_HOURS    | 24                                                 | Checks every n hours for files older then n hours and deletes them, set to 0 to disable                                                                       |
 | WEBROOT                      |                                                    | The address to the root path setting this to "/convert" will serve the website on "example.com/convert/"                                                      |
+| BRANDING                     | ConvertX                                           | Custom string that allows you to change the display name of the website in the header (max 26 characters)                                                     |
 | FFMPEG_ARGS                  |                                                    | Arguments to pass to the input file of ffmpeg, e.g. `-hwaccel vaapi`. See https://github.com/C4illin/ConvertX/issues/190 for more info about hw-acceleration. |
 | FFMPEG_OUTPUT_ARGS           |                                                    | Arguments to pass to the output of ffmpeg, e.g. `-preset veryfast`                                                                                            |
 | HIDE_HISTORY                 | false                                              | Hide the history page                                                                                                                                         |
 | LANGUAGE                     | en                                                 | Language to format date strings in, specified as a [BCP 47 language tag](https://en.wikipedia.org/wiki/IETF_language_tag)                                     |
 | UNAUTHENTICATED_USER_SHARING | false                                              | Shares conversion history between all unauthenticated users                                                                                                   |
 | MAX_CONVERT_PROCESS          | 0                                                  | Maximum number of concurrent conversion processes allowed. Set to 0 for unlimited.                                                                            |
+| PORT                         | 3000                                               | Application listen port                                                                                                                                       |
 
 ### Docker images
 

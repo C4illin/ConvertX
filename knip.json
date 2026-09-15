@@ -1,7 +1,25 @@
 {
-  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": ["tests/**/*.test.ts"],
-  "project": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts"],
+  "project": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.css", "tests/**/*.ts"],
+  "ignoreBinaries": [
+    "pandoc",
+    "ffmpeg",
+    "vips",
+    "magick",
+    "gm",
+    "inkscape",
+    "djxl",
+    "dasel",
+    "xelatex",
+    "resvg",
+    "assimp",
+    "ebook-convert",
+    "heif-info",
+    "potrace",
+    "soffice",
+    "perl"
+  ],
   "tailwind": {
     "entry": ["src/main.css"]
   }
