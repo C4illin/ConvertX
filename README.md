@@ -133,6 +133,15 @@ Tutorial in chinese: <https://xzllll.com/24092901/>
 
 Tutorial in polish: <https://www.kreatywnyprogramista.pl/convertx-lokalny-konwerter-plikow>
 
+### Easypanel
+
+You can also deploy ConvertX with one click using the official [Easypanel](https://easypanel.io) template:
+
+[![Deploy on Easypanel][easypanel-btn]][easypanel-deploy]
+
+[easypanel-btn]: https://easypanel.io/img/deploy-on-easypanel-40.svg
+[easypanel-deploy]: https://easypanel.io/templates/convertx
+
 ## Screenshots
 
 ![ConvertX Preview](images/preview.png)
