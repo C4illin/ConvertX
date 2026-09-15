@@ -5,8 +5,7 @@ import { Header } from "../components/header";
 import db from "../db/db";
 import { Filename, Jobs } from "../db/types";
 import { buildDownloadUrl } from "../helpers/buildDownloadUrl";
-import { ALLOW_UNAUTHENTICATED, WEBROOT, BRANDING } from "../helpers/env";
-import { DownloadIcon } from "../icons/download";
+import { ALLOW_UNAUTHENTICATED, BRANDING, WEBROOT } from "../helpers/env";
 import { DeleteIcon } from "../icons/delete";
 import { DownloadIcon } from "../icons/download";
 import { EyeIcon } from "../icons/eye";
@@ -31,7 +30,7 @@ function ResultsArticle({
             <button
               type="submit"
               style={files.length !== job.num_files ? "pointer-events: none;" : ""}
-              class="flex btn-secondary flex-row gap-2 text-contrast"
+              class="btn-secondary text-contrast flex flex-row gap-2"
               {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
             >
               <DeleteIcon /> <p>Delete</p>
@@ -41,12 +40,12 @@ function ResultsArticle({
             style={files.length !== job.num_files ? "pointer-events: none;" : ""}
             href={`${WEBROOT}/archive/${job.id}`}
             download={`converted_files_${job.id}.tar`}
-            class="flex btn-primary flex-row gap-2 text-contrast"
+            class="btn-primary text-contrast flex flex-row gap-2"
             {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
           >
             <DownloadIcon /> <p>Tar</p>
           </a>
-          <button class="flex btn-primary flex-row gap-2 text-contrast" onclick="downloadAll()">
+          <button class="btn-primary text-contrast flex flex-row gap-2" onclick="downloadAll()">
             <DownloadIcon /> <p>All</p>
           </button>
         </div>
@@ -55,11 +54,12 @@ function ResultsArticle({
         max={job.num_files}
         {...(files.length === job.num_files ? { value: files.length } : "")}
         class={`
-          mb-4 inline-block h-2 w-full appearance-none overflow-hidden rounded-full border-0
-          bg-neutral-700 bg-none text-accent-500 accent-accent-500
+          text-accent-500 accent-accent-500
           [&::-moz-progress-bar]:bg-accent-500
-          [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:[background:none]
           [&[value]::-webkit-progress-value]:bg-accent-500
+          mb-4 inline-block h-2 w-full appearance-none overflow-hidden rounded-full border-0
+          bg-neutral-700 bg-none
+          [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:[background:none]
           [&[value]::-webkit-progress-value]:transition-[inline-size]
         `}
       />
@@ -117,8 +117,9 @@ function ResultsArticle({
                     <>
                       <a
                         class={`
-                          text-accent-500 underline
+                          text-accent-500
                           hover:text-accent-400
+                          underline
                         `}
                         href={buildDownloadUrl(WEBROOT, outputPath, file.output_file_name)}
                       >
@@ -126,8 +127,9 @@ function ResultsArticle({
                       </a>
                       <a
                         class={`
-                          text-accent-500 underline
+                          text-accent-500
                           hover:text-accent-400
+                          underline
                         `}
                         href={buildDownloadUrl(WEBROOT, outputPath, file.output_file_name)}
                         download={file.output_file_name}
@@ -136,8 +138,9 @@ function ResultsArticle({
                       </a>
                       <button
                         class={`
-                          share-btn text-accent-500 underline
+                          share-btn text-accent-500
                           hover:text-accent-400
+                          underline
                         `}
                         data-filename={file.output_file_name}
                         data-download-url={buildDownloadUrl(
