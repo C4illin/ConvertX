@@ -14,6 +14,7 @@ import {
   HTTP_ALLOWED,
   UNAUTHENTICATED_USER_SHARING,
   WEBROOT,
+  BRANDING,
 } from "../helpers/env";
 import { FIRST_RUN, userService } from "./user";
 
@@ -110,6 +111,7 @@ export const root = new Elysia().use(userService).get(
         <>
           <Header
             webroot={WEBROOT}
+            branding={BRANDING}
             accountRegistration={ACCOUNT_REGISTRATION}
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
             hideHistory={HIDE_HISTORY}
