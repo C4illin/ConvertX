@@ -32,11 +32,15 @@ fi
 
 # Ensure home directory exists and is owned by convertx
 mkdir -p /home/convertx
-chown -R convertx:convertx /home/convertx
+if [ "$(stat -c '%u:%g' /home/convertx)" != "$PUID:$PGID" ]; then
+  chown -R convertx:convertx /home/convertx
+fi
 
-# Ensure /app/data exists and fix permissions if necessary
+# Ensure /app/data exists and fix permissions only if the mount point ownership differs
 mkdir -p /app/data
-find /app/data \( ! -user "$PUID" -o ! -group "$PGID" \) -exec chown "$PUID:$PGID" '{}' +
+if [ "$(stat -c '%u:%g' /app/data)" != "$PUID:$PGID" ]; then
+  find /app/data \( ! -user "$PUID" -o ! -group "$PGID" \) -exec chown -h "$PUID:$PGID" '{}' +
+fi
 
 export HOME=/home/convertx
 
