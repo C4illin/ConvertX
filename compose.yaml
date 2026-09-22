@@ -8,8 +8,8 @@ services:
     volumes:
       - ./data:/app/data
     environment: # Defaults are listed below. All are optional.
-      - PUID=1000 # user ID for file permissions, defaults to 1000
-      - PGID=1000 # group ID for file permissions, defaults to 1000
+      - PUID=1000 # user ID for file permissions, defaults to 0
+      - PGID=1000 # group ID for file permissions, defaults to 0
       - UMASK=002 # file creation mask, defaults to 002 when PUID is set
       - ACCOUNT_REGISTRATION=true # true or false, doesn't matter for the first account (e.g. keep this to false if you only want one account)
       - JWT_SECRET=aLongAndSecretStringUsedToSignTheJSONWebToken1234 # will use randomUUID() by default
