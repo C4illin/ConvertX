@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
+if ! [[ "$PUID" =~ ^[0-9]+$ ]] || ! [[ "$PGID" =~ ^[0-9]+$ ]]; then
+  echo "[entrypoint] ERROR: PUID and PGID must be numeric integers." >&2
+  exit 1
+fi
+
 # If PUID is not set or is 0, run as root (backwards-compatible default)
 if [ -z "$PUID" ] || [ "$PUID" -eq 0 ]; then
   if [ -n "$UMASK" ]; then
@@ -16,11 +21,6 @@ PGID=${PGID:-$PUID}
 UMASK=${UMASK:-002}
 
 umask "$UMASK"
-
-if ! [[ "$PUID" =~ ^[0-9]+$ ]] || ! [[ "$PGID" =~ ^[0-9]+$ ]]; then
-  echo "[entrypoint] ERROR: PUID and PGID must be numeric integers." >&2
-  exit 1
-fi
 
 if [ "$PGID" -ne "$(id -g convertx)" ]; then
   groupmod -o -g "$PGID" convertx
