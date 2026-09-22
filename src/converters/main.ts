@@ -3,6 +3,7 @@ import db from "../db/db";
 import fs from "node:fs";
 import path from "node:path";
 import { MAX_CONVERT_PROCESS } from "../helpers/env";
+import { isSafePath } from "../helpers/validatePath";
 import { normalizeFiletype, normalizeOutputFiletype } from "../helpers/normalizeFiletype";
 import { convert as convertassimp, properties as propertiesassimp } from "./assimp";
 import { convert as convertCalibre, properties as propertiesCalibre } from "./calibre";
@@ -28,6 +29,8 @@ import { convert as convertVtracer, properties as propertiesVtracer } from "./vt
 import { convert as convertVcf, properties as propertiesVcf } from "./vcf";
 import { convert as convertxelatex, properties as propertiesxelatex } from "./xelatex";
 import { convert as convertMarkitdown, properties as propertiesMarkitdown } from "./markitdown";
+import path from "node:path";
+import fs from "node:fs/promises";
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
 
@@ -170,23 +173,38 @@ export async function handleConvert(
   for (const chunk of chunks(fileNames, MAX_CONVERT_PROCESS)) {
     const toProcess: Promise<string>[] = [];
     for (const fileName of chunk) {
-      const filePath = `${userUploadsDir}${fileName}`;
-      const fileTypeOrig = fileName.includes(".") ? (fileName.split(".").pop() ?? "") : "";
+      // `isSafePath` ensures the path as parsed by JS is safe, but if we pass the path to external programs, we don't
+      // want to be affected by a parser differential so we normalize with JS' parsing
+      const filePath = path.normalize(`${userUploadsDir}${fileName}`);
+      if (!isSafePath(userUploadsDir, filePath)) {
+        throw new Error("Unsafe filename");
+      }
+
+      const lastDot = fileName.lastIndexOf(".");
+      const fileTypeOrig = lastDot === -1 ? "" : fileName.slice(lastDot + 1);
       const fileType = normalizeFiletype(fileTypeOrig);
       const newFileExt = normalizeOutputFiletype(convertTo);
-      let newFileName: string;
-      if (fileTypeOrig === "") {
-        newFileName = `${fileName}.${newFileExt}`;
-      } else {
-        newFileName = fileName.replace(
-          new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`),
-          newFileExt,
-        );
+      const newFileName =
+        lastDot === -1
+          ? `${fileName}.${newFileExt}`
+          : `${fileName.slice(0, lastDot + 1)}${newFileExt}`;
+
+      // `isSafePath` ensures the path as parsed by JS is safe, but if we pass the path to external programs, we don't
+      // want to be affected by a parser differential so we normalize with JS' parsing
+      // This shouldn't be unsafe as we've already validated the original filename is safe, but if a filename is
+      // provided which *attempts* to be malicious, `targetPath` could theoretically differ to `newFileName` due to
+      // normalization
+      const targetPath = path.normalize(`${userOutputDir}${newFileName}`);
+      if (!isSafePath(userOutputDir, targetPath)) {
+        throw new Error("Unsafe filename");
       }
-      const targetPath = `${userOutputDir}${newFileName}`;
       toProcess.push(
         new Promise((resolve, reject) => {
-          mainConverter(filePath, fileType, convertTo, targetPath, {}, converterName)
+          const parent = path.dirname(targetPath);
+          fs.mkdir(parent, { recursive: true })
+            .then(() => {
+              return mainConverter(filePath, fileType, convertTo, targetPath, {}, converterName);
+            })
             .then((r) => {
               if (jobId.value) {
                 const dir = path.dirname(targetPath);

@@ -1,10 +1,10 @@
-import path from "node:path";
 import { Elysia } from "elysia";
-import sanitize from "sanitize-filename";
+import path from "node:path";
 import * as tar from "tar";
 import { outputDir } from "..";
 import db from "../db/db";
 import { WEBROOT } from "../helpers/env";
+import { isSafePath } from "../helpers/validatePath";
 import { userService } from "./user";
 
 export const download = new Elysia()
@@ -22,9 +22,12 @@ export const download = new Elysia()
       }
       // parse from URL encoded string
       const jobId = decodeURIComponent(params.jobId);
-      const fileName = sanitize(decodeURIComponent(params.fileName));
+      const jobPath = `${outputDir}${userId}/${jobId}/`;
+      const filePath = `${jobPath}${decodeURIComponent(params.fileName)}`;
+      if (!isSafePath(jobPath, filePath)) {
+        throw new Error("Unsafe filename");
+      }
 
-      const filePath = `${outputDir}${userId}/${jobId}/${fileName}`;
       const file = Bun.file(filePath);
       if (!(await file.exists())) {
         set.status = 404;

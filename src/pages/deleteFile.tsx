@@ -3,8 +3,8 @@ import { Elysia, t } from "elysia";
 import { uploadsDir } from "..";
 import db from "../db/db";
 import { WEBROOT } from "../helpers/env";
+import { isSafePath } from "../helpers/validatePath";
 import { userService } from "./user";
-import sanitize from "sanitize-filename";
 import path from "node:path";
 
 export const deleteFile = new Elysia().use(userService).post(
@@ -24,8 +24,10 @@ export const deleteFile = new Elysia().use(userService).post(
 
     const userUploadsDir = path.join(uploadsDir, user.id, jobId.value);
 
-    const sanitized = sanitize(body.filename);
-    const targetPath = path.join(userUploadsDir, sanitized);
+    const targetPath = path.join(userUploadsDir, body.filename);
+    if (!isSafePath(userUploadsDir, targetPath)) {
+      throw new Error("Unsafe filename");
+    }
 
     await unlink(targetPath);
 

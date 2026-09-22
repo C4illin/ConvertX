@@ -1,4 +1,6 @@
 const webroot = document.querySelector("meta[name='webroot']").content;
+const urlInput = document.querySelector("#url-input");
+const urlSubmit = document.querySelector("#url-submit");
 const fileInput = document.querySelector('input[type="file"]');
 const dropZone = document.getElementById("dropzone");
 const convertButton = document.querySelector("input[type='submit']");
@@ -16,22 +18,159 @@ dropZone.addEventListener("dragleave", () => {
   dropZone.classList.remove("dragover");
 });
 
-dropZone.addEventListener("drop", (e) => {
+const readAllEntries = async (reader) => {
+  const entries = [];
+  let batch;
+  do {
+    batch = await new Promise((resolve, reject) => reader.readEntries(resolve, reject));
+    entries.push(...batch);
+  } while (batch.length > 0);
+  return entries;
+};
+
+const entryToFiles = async (entry) => {
+  if (entry.isFile) {
+    const file = await new Promise((resolve, reject) => entry.file(resolve, reject));
+    if (entry.fullPath) {
+      file.filepath = entry.fullPath.replace(/^\/+/, "");
+    }
+    return [file];
+  }
+  const reader = entry.createReader();
+  const entries = await readAllEntries(reader);
+  const out = [];
+  for (const child of entries) {
+    out.push(...(await entryToFiles(child)));
+  }
+  return out;
+};
+
+const getFileNameWithSlashes = (file) => {
+  if (file.filepath) {
+    return file.filepath;
+  }
+  if (file.webkitRelativePath) {
+    return file.webkitRelativePath;
+  }
+  return file.name;
+};
+
+dropZone.addEventListener("drop", async (e) => {
   e.preventDefault();
   dropZone.classList.remove("dragover");
 
-  const files = e.dataTransfer.files;
+  const items = e.dataTransfer.items;
 
-  if (files.length === 0) {
+  if (items.length === 0) {
     console.warn("No files dropped — likely a URL or unsupported source.");
     return;
   }
 
-  for (const file of files) {
-    console.log("Handling dropped file:", file.name);
-    handleFile(file);
+  for (const item of items) {
+    const entry = item.webkitGetAsEntry();
+    if (!entry) {
+      return;
+    }
+    const files = await entryToFiles(entry);
+    for (const file of files) {
+      console.log("Handling dropped file:", getFileNameWithSlashes(file));
+      handleFile(file);
+    }
   }
 });
+
+urlSubmit?.addEventListener("click", (e) => {
+  e.preventDefault();
+  if (urlInput) {
+    handleUrl(urlInput.value);
+  }
+});
+
+function handleUrl(url) {
+  if (!url || !url.trim()) return;
+
+  if (urlSubmit) urlSubmit.disabled = true;
+  pendingFiles += 1;
+  convertButton.disabled = true;
+  convertButton.textContent = "Uploading...";
+
+  fetch(`${webroot}/url`, {
+    method: "POST",
+    body: JSON.stringify({ url: url.trim() }),
+    headers: { "Content-Type": "application/json" },
+  })
+    .then((res) => {
+      if (!res.ok) {
+        return res.text().then((text) => {
+          throw new Error(text || `HTTP ${res.status}`);
+        });
+      }
+      return res.json();
+    })
+    .then((res) => {
+      if (urlInput) urlInput.value = "";
+      const fileList = document.querySelector("#file-list");
+
+      const row = document.createElement("tr");
+
+      const nameTd = document.createElement("td");
+      nameTd.textContent = res.filename;
+      row.appendChild(nameTd);
+
+      const emptyTd = document.createElement("td");
+      row.appendChild(emptyTd);
+
+      const sizeTd = document.createElement("td");
+      sizeTd.textContent = `${(res.fileSizeBytes / 1024).toFixed(2)} kB`;
+      row.appendChild(sizeTd);
+
+      const actionTd = document.createElement("td");
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "text-accent-500 hover:underline";
+      removeBtn.textContent = "Remove";
+      removeBtn.onclick = function () {
+        deleteRow(this);
+      };
+      actionTd.appendChild(removeBtn);
+      row.appendChild(actionTd);
+
+      fileList.appendChild(row);
+      fileNames.push(res.filename);
+
+      if (!fileType) {
+        fileType = res.filename.split(".").pop();
+        fileInput.setAttribute("accept", `.${fileType}`);
+        setTitle();
+
+        fetch(`${webroot}/conversions`, {
+          method: "POST",
+          body: JSON.stringify({ fileType }),
+          headers: { "Content-Type": "application/json" },
+        })
+          .then((r) => r.text())
+          .then((html) => {
+            selectContainer.innerHTML = html;
+            updateSearchBar();
+          })
+          .catch(console.error);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      alert(`Failed to add URL: ${err.message || err}`);
+    })
+    .finally(() => {
+      if (urlSubmit) urlSubmit.disabled = false;
+      pendingFiles -= 1;
+      if (pendingFiles === 0) {
+        convertButton.textContent = "Convert";
+        if (formatSelected && fileNames.length > 0) {
+          convertButton.disabled = false;
+        }
+      }
+    });
+}
 
 // Extracted handleFile function for reusability in drag-and-drop and file input
 function handleFile(file) {
@@ -39,14 +178,14 @@ function handleFile(file) {
 
   const row = document.createElement("tr");
   row.innerHTML = `
-    <td>${file.name}</td>
+    <td>${getFileNameWithSlashes(file)}</td>
     <td><progress max="100" class="inline-block h-2 appearance-none overflow-hidden rounded-full border-0 bg-neutral-700 bg-none text-accent-500 accent-accent-500 [&::-moz-progress-bar]:bg-accent-500 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:[background:none] [&[value]::-webkit-progress-value]:bg-accent-500 [&[value]::-webkit-progress-value]:transition-[inline-size]"></progress></td>
     <td>${(file.size / 1024).toFixed(2)} kB</td>
     <td><button type="button" class="text-accent-500 hover:underline" onclick="deleteRow(this)">Remove</button></td>
   `;
 
   if (!fileType) {
-    fileType = file.name.split(".").pop();
+    fileType = getFileNameWithSlashes(file).split(".").pop();
     fileInput.setAttribute("accept", `.${fileType}`);
     setTitle();
 
@@ -65,7 +204,7 @@ function handleFile(file) {
 
   fileList.appendChild(row);
   file.htmlRow = row;
-  fileNames.push(file.name);
+  fileNames.push(getFileNameWithSlashes(file));
   uploadFile(file);
 }
 
@@ -166,7 +305,6 @@ const setTitle = () => {
 };
 
 // Add a onclick for the delete button
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const deleteRow = (target) => {
   const filename = target.parentElement.parentElement.children[0].textContent;
   const row = target.parentElement.parentElement;
@@ -202,7 +340,7 @@ const uploadFile = (file) => {
   pendingFiles += 1;
 
   const formData = new FormData();
-  formData.append("file", file, file.name);
+  formData.append("file", file, getFileNameWithSlashes(file));
 
   let xhr = new XMLHttpRequest();
 
@@ -228,7 +366,7 @@ const uploadFile = (file) => {
   xhr.upload.onprogress = (e) => {
     let sent = e.loaded;
     let total = e.total;
-    console.log(`upload progress (${file.name}):`, (100 * sent) / total);
+    console.log(`upload progress (${getFileNameWithSlashes(file)}):`, (100 * sent) / total);
 
     let progressbar = file.htmlRow.getElementsByTagName("progress");
     progressbar[0].value = (100 * sent) / total;

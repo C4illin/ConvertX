@@ -51,6 +51,7 @@ export default defineConfig(
             "target",
             "convert_to_target",
             "job-details-toggle",
+            "share-btn",
           ],
         },
       ],

@@ -1,9 +1,9 @@
 import { Elysia, t } from "elysia";
 import db from "../db/db";
 import { WEBROOT } from "../helpers/env";
+import { isSafePath } from "../helpers/validatePath";
 import { uploadsDir } from "../index";
 import { userService } from "./user";
-import sanitize from "sanitize-filename";
 
 export const upload = new Elysia().use(userService).post(
   "/upload",
@@ -25,12 +25,18 @@ export const upload = new Elysia().use(userService).post(
     if (body?.file) {
       if (Array.isArray(body.file)) {
         for (const file of body.file) {
-          const santizedFileName = sanitize(file.name);
-          await Bun.write(`${userUploadsDir}${santizedFileName}`, file);
+          const filePath = `${userUploadsDir}${file.name}`;
+          if (!isSafePath(userUploadsDir, filePath)) {
+            throw new Error("Unsafe filename");
+          }
+          await Bun.write(filePath, file);
         }
       } else {
-        const santizedFileName = sanitize(body.file["name"]);
-        await Bun.write(`${userUploadsDir}${santizedFileName}`, body.file);
+        const filePath = `${userUploadsDir}${body.file["name"]}`;
+        if (!isSafePath(userUploadsDir, filePath)) {
+          throw new Error("Unsafe filename");
+        }
+        await Bun.write(filePath, body.file);
       }
     }
 
