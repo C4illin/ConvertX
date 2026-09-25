@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-if ! [[ "$PUID" =~ ^[0-9]+$ ]] || ! [[ "$PGID" =~ ^[0-9]+$ ]]; then
+if [[ -n "$PUID" && ! "$PUID" =~ ^[0-9]+$ ]] || [[ -n "$PGID" && ! "$PGID" =~ ^[0-9]+$ ]]; then
   echo "[entrypoint] ERROR: PUID and PGID must be numeric integers." >&2
   exit 1
 fi
