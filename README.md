@@ -89,6 +89,9 @@ Then visit `http://localhost:3000` in your browser and create your account. Don'
 
 All are optional, JWT_SECRET is recommended to be set.
 
+> [!WARNING]
+> Never expose the service to the internet with ALLOW_UNAUTHENTICATED or ACCOUNT_REGISTRATION true. Only allow users you trust to access the service.
+
 | Name                         | Default                                            | Description                                                                                                                                                   |
 | ---------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | JWT_SECRET                   | when unset it will use the value from randomUUID() | A long and secret string used to sign the JSON Web Token                                                                                                      |
