@@ -18,7 +18,8 @@
     "heif-info",
     "potrace",
     "soffice",
-    "perl"
+    "perl",
+    "markitdown"
   ],
   "tailwind": {
     "entry": ["src/main.css"]
