@@ -2,7 +2,22 @@ import { defaultExecFile, ExecFileFn } from "./types";
 
 export const properties = {
   from: {
-    document: ["pdf", "powerpoint", "excel", "docx", "pptx", "html"],
+    document: [
+      "pdf",
+      "pptx",
+      "docx",
+      "xlsx",
+      "xls",
+      "msg",
+      "wav",
+      "mp3",
+      "epub",
+      "html",
+      "csv",
+      "json",
+      "xml",
+      "zip",
+    ],
   },
   to: {
     document: ["md"],

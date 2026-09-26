@@ -26,7 +26,6 @@ export const properties = {
       "pml",
       "rb",
       "rtf",
-      "recipe",
       "snb",
       "tcr",
       "txt",
@@ -66,6 +65,18 @@ export async function convert(
   options?: unknown,
   execFile: ExecFileFn = defaultExecFile, // to make it mockable
 ): Promise<string> {
+  const normalizedFileType = fileType.toLowerCase();
+  const fileExt = (filePath.split(".").pop() ?? "").toLowerCase();
+
+  if (
+    normalizedFileType === "recipe" ||
+    normalizedFileType === "downloaded_recipe" ||
+    fileExt === "recipe" ||
+    fileExt === "downloaded_recipe"
+  ) {
+    throw new Error("Recipe files are not supported");
+  }
+
   return new Promise((resolve, reject) => {
     execFile("ebook-convert", [filePath, targetPath], (error, stdout, stderr) => {
       if (error) {

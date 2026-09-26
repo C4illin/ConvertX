@@ -19,7 +19,8 @@
     "potrace",
     "soffice",
     "perl",
-    "gcc"
+    "gcc",
+    "markitdown"
   ],
   "tailwind": {
     "entry": ["src/main.css"]

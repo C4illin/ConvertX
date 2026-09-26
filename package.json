@@ -1,6 +1,6 @@
 {
   "name": "convertx-frontend",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "scripts": {
     "dev": "bun run --watch src/index.tsx",
     "hot": "bun run --hot src/index.tsx",
@@ -22,7 +22,7 @@
     "@elysiajs/jwt": "^1.4.2",
     "@elysiajs/static": "^1.4.10",
     "@kitajs/html": "^4.2.13",
-    "elysia": "1.4.27",
+    "elysia": "1.4.30",
     "sanitize-filename": "^1.6.4",
     "tar": "^7.5.22"
   },
@@ -37,18 +37,18 @@
     "@tailwindcss/cli": "^4.3.3",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/bun": "latest",
-    "@types/node": "^24.13.3",
-    "eslint": "^10.8.1",
+    "@types/node": "^24.19.0",
+    "eslint": "^10.11.0",
     "eslint-plugin-better-tailwindcss": "^4.7.0",
-    "globals": "^17.9.0",
-    "knip": "^6.32.1",
+    "globals": "^17.12.0",
+    "knip": "^6.38.0",
     "npm-run-all2": "^9.0.3",
-    "postcss": "^8.5.26",
-    "prettier": "^3.9.6",
+    "postcss": "^8.5.28",
+    "prettier": "^3.9.9",
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.67.0"
+    "typescript-eslint": "^8.70.1"
   },
   "trustedDependencies": [
     "@parcel/watcher",

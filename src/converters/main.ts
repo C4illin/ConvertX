@@ -1,6 +1,7 @@
 import { Cookie } from "elysia";
-import { rmSync } from "node:fs";
+import fs, { rmSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
+import path from "node:path";
 import db from "../db/db";
 import { MAX_CONVERT_PROCESS } from "../helpers/env";
 import { normalizeFiletype, normalizeOutputFiletype } from "../helpers/normalizeFiletype";
@@ -214,7 +215,31 @@ export async function handleConvert(
             )
               .then((r) => {
                 if (jobId.value) {
-                  query.run(jobId.value, fileName, newFileName, r);
+                  const dir = path.dirname(targetPath);
+                  const parsed = path.parse(targetPath);
+
+                  const outputFiles = fs
+                    .readdirSync(dir)
+                    .filter((f) => {
+                      if (f === parsed.base) {
+                        return true;
+                      }
+
+                      return (
+                        f.startsWith(`${parsed.name}-`) &&
+                        f.endsWith(parsed.ext) &&
+                        /^\d+$/.test(f.slice(parsed.name.length + 1, -parsed.ext.length))
+                      );
+                    })
+                    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+                  if (outputFiles.length > 0) {
+                    for (const outputFile of outputFiles) {
+                      query.run(jobId.value, fileName, outputFile, r);
+                    }
+                  } else {
+                    query.run(jobId.value, fileName, newFileName, r);
+                  }
                 }
                 resolve(r);
               })
