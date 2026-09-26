@@ -1,22 +1,11 @@
-import {
-  execFile as execFileOriginal,
-  type ChildProcess,
-  type ExecFileOptions,
-} from "node:child_process";
-
 // ffmpeg streams continuous progress to stderr, so a long conversion overflows
 // execFile's 1 MB default maxBuffer and fails with "stderr maxBuffer length
 // exceeded" (issue #565). Raise it well above that. The options object must be
 // passed before the callback: execFile ignores an options argument placed after
-// the callback, which is why the shared ExecFileFn type cannot carry it.
+// the callback.
 const FFMPEG_MAX_BUFFER = 1024 * 1024 * 64; // 64 MB
 
-type FfmpegExecFile = (
-  cmd: string,
-  args: string[],
-  options: ExecFileOptions,
-  callback: (err: Error | null, stdout: string, stderr: string) => void,
-) => ChildProcess | void;
+import { defaultExecFile, ExecFileFn } from "./types";
 
 // This could be done dynamically by running `ffmpeg -formats` and parsing the output
 export const properties = {
@@ -716,7 +705,7 @@ export async function convert(
   convertTo: string,
   targetPath: string,
   options?: unknown,
-  execFile: FfmpegExecFile = execFileOriginal as FfmpegExecFile, // to make it mockable
+  execFile: ExecFileFn = defaultExecFile, // to make it mockable
 ): Promise<string> {
   let extraArgs: string[] = [];
   let message = "Done";

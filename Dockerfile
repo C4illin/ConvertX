@@ -35,6 +35,7 @@ RUN cd /temp/prod && bun install --frozen-lockfile --production
 
 FROM base AS prerelease
 WORKDIR /app
+RUN apt-get update && apt-get install -y gcc libc6-dev --no-install-recommends && rm -rf /var/lib/apt/lists/*
 COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 
@@ -55,6 +56,7 @@ RUN apt-get update && apt-get install -y \
   dcraw \
   dvisvgm \
   ffmpeg \
+  fonts-liberation \
   ghostscript \
   gosu \
   graphicsmagick \
@@ -107,6 +109,7 @@ RUN ARCH=$(uname -m) && \
 COPY --from=install /temp/prod/node_modules node_modules
 COPY --from=prerelease /app/public/ /app/public/
 COPY --from=prerelease /app/dist /app/dist
+COPY --from=prerelease /app/bin/landlock-runner /usr/local/bin/landlock-runner
 
 # COPY . .
 RUN mkdir data
@@ -117,6 +120,7 @@ RUN chmod +x /entrypoint.sh
 EXPOSE 3000/tcp
 # used for calibre
 ENV QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox"
+ENV SANDBOX_STRICT="true"
 ENV NODE_ENV=production
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD [ "bun", "run", "dist/src/index.js" ]

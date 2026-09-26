@@ -1,5 +1,4 @@
-import { execFile as execFileOriginal } from "node:child_process";
-import { ExecFileFn } from "./types";
+import { defaultExecFile, ExecFileFn } from "./types";
 
 export const properties = {
   from: {
@@ -16,7 +15,7 @@ export function convert(
   convertTo: string,
   targetPath: string,
   options?: unknown,
-  execFile: ExecFileFn = execFileOriginal,
+  execFile: ExecFileFn = defaultExecFile,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     // const fileName: string = (targetPath.split("/").pop() as string).replace(".pdf", "")

@@ -1,9 +1,11 @@
 import { Cookie } from "elysia";
-import db from "../db/db";
-import fs from "node:fs";
+import fs, { rmSync } from "node:fs";
+import { mkdir } from "node:fs/promises";
 import path from "node:path";
+import db from "../db/db";
 import { MAX_CONVERT_PROCESS } from "../helpers/env";
 import { normalizeFiletype, normalizeOutputFiletype } from "../helpers/normalizeFiletype";
+import { createSandboxedExec } from "../helpers/sandbox";
 import { convert as convertassimp, properties as propertiesassimp } from "./assimp";
 import { convert as convertCalibre, properties as propertiesCalibre } from "./calibre";
 import { convert as convertDasel, properties as propertiesDasel } from "./dasel";
@@ -18,16 +20,17 @@ import { convert as convertInkscape, properties as propertiesInkscape } from "./
 import { convert as convertLibheif, properties as propertiesLibheif } from "./libheif";
 import { convert as convertLibjxl, properties as propertiesLibjxl } from "./libjxl";
 import { convert as convertLibreOffice, properties as propertiesLibreOffice } from "./libreoffice";
+import { convert as convertMarkitdown, properties as propertiesMarkitdown } from "./markitdown";
 import { convert as convertMsgconvert, properties as propertiesMsgconvert } from "./msgconvert";
 import { convert as convertPandoc, properties as propertiesPandoc } from "./pandoc";
 import { convert as convertPdftops, properties as propertiesPdftops } from "./pdftops";
 import { convert as convertPotrace, properties as propertiesPotrace } from "./potrace";
 import { convert as convertresvg, properties as propertiesresvg } from "./resvg";
+import { ExecFileFn } from "./types";
+import { convert as convertVcf, properties as propertiesVcf } from "./vcf";
 import { convert as convertImage, properties as propertiesImage } from "./vips";
 import { convert as convertVtracer, properties as propertiesVtracer } from "./vtracer";
-import { convert as convertVcf, properties as propertiesVcf } from "./vcf";
 import { convert as convertxelatex, properties as propertiesxelatex } from "./xelatex";
-import { convert as convertMarkitdown, properties as propertiesMarkitdown } from "./markitdown";
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
 
@@ -54,8 +57,8 @@ const properties: Record<
       fileType: string,
       convertTo: string,
       targetPath: string,
-
       options?: unknown,
+      execFile?: ExecFileFn,
     ) => unknown;
   }
 > = {
@@ -167,61 +170,91 @@ export async function handleConvert(
     "INSERT INTO file_names (job_id, file_name, output_file_name, status) VALUES (?1, ?2, ?3, ?4)",
   );
 
-  for (const chunk of chunks(fileNames, MAX_CONVERT_PROCESS)) {
-    const toProcess: Promise<string>[] = [];
-    for (const fileName of chunk) {
-      const filePath = `${userUploadsDir}${fileName}`;
-      const fileTypeOrig = fileName.includes(".") ? (fileName.split(".").pop() ?? "") : "";
-      const fileType = normalizeFiletype(fileTypeOrig);
-      const newFileExt = normalizeOutputFiletype(convertTo);
-      let newFileName: string;
-      if (fileTypeOrig === "") {
-        newFileName = `${fileName}.${newFileExt}`;
-      } else {
-        newFileName = fileName.replace(
-          new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`),
-          newFileExt,
+  const effectiveJobId = jobId.value ?? `convertx_${Date.now()}`;
+  const tempJobDir = `/tmp/convertx_${effectiveJobId}/`;
+  try {
+    await mkdir(tempJobDir, { recursive: true });
+  } catch (err) {
+    console.error(`Failed to create temp directory ${tempJobDir}:`, err);
+  }
+
+  const sandboxedExec = createSandboxedExec({
+    inputDir: userUploadsDir,
+    outputDir: userOutputDir,
+    tempDir: tempJobDir,
+  });
+
+  try {
+    for (const chunk of chunks(fileNames, MAX_CONVERT_PROCESS)) {
+      const toProcess: Promise<string>[] = [];
+      for (const fileName of chunk) {
+        const filePath = `${userUploadsDir}${fileName}`;
+        const fileTypeOrig = fileName.includes(".") ? (fileName.split(".").pop() ?? "") : "";
+        const fileType = normalizeFiletype(fileTypeOrig);
+        const newFileExt = normalizeOutputFiletype(convertTo);
+        let newFileName: string;
+        if (fileTypeOrig === "") {
+          newFileName = `${fileName}.${newFileExt}`;
+        } else {
+          newFileName = fileName.replace(
+            new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`),
+            newFileExt,
+          );
+        }
+        const targetPath = `${userOutputDir}${newFileName}`;
+        toProcess.push(
+          new Promise((resolve, reject) => {
+            mainConverter(
+              filePath,
+              fileType,
+              convertTo,
+              targetPath,
+              {},
+              converterName,
+              sandboxedExec,
+            )
+              .then((r) => {
+                if (jobId.value) {
+                  const dir = path.dirname(targetPath);
+                  const parsed = path.parse(targetPath);
+
+                  const outputFiles = fs
+                    .readdirSync(dir)
+                    .filter((f) => {
+                      if (f === parsed.base) {
+                        return true;
+                      }
+
+                      return (
+                        f.startsWith(`${parsed.name}-`) &&
+                        f.endsWith(parsed.ext) &&
+                        /^\d+$/.test(f.slice(parsed.name.length + 1, -parsed.ext.length))
+                      );
+                    })
+                    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+                  if (outputFiles.length > 0) {
+                    for (const outputFile of outputFiles) {
+                      query.run(jobId.value, fileName, outputFile, r);
+                    }
+                  } else {
+                    query.run(jobId.value, fileName, newFileName, r);
+                  }
+                }
+                resolve(r);
+              })
+              .catch((c) => reject(c));
+          }),
         );
       }
-      const targetPath = `${userOutputDir}${newFileName}`;
-      toProcess.push(
-        new Promise((resolve, reject) => {
-          mainConverter(filePath, fileType, convertTo, targetPath, {}, converterName)
-            .then((r) => {
-              if (jobId.value) {
-                const dir = path.dirname(targetPath);
-                const parsed = path.parse(targetPath);
-
-                const outputFiles = fs
-                  .readdirSync(dir)
-                  .filter((f) => {
-                    if (f === parsed.base) {
-                      return true;
-                    }
-
-                    return (
-                      f.startsWith(`${parsed.name}-`) &&
-                      f.endsWith(parsed.ext) &&
-                      /^\d+$/.test(f.slice(parsed.name.length + 1, -parsed.ext.length))
-                    );
-                  })
-                  .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-
-                if (outputFiles.length > 0) {
-                  for (const outputFile of outputFiles) {
-                    query.run(jobId.value, fileName, outputFile, r);
-                  }
-                } else {
-                  query.run(jobId.value, fileName, newFileName, r);
-                }
-              }
-              resolve(r);
-            })
-            .catch((c) => reject(c));
-        }),
-      );
+      await Promise.all(toProcess);
     }
-    await Promise.all(toProcess);
+  } finally {
+    try {
+      rmSync(tempJobDir, { recursive: true, force: true });
+    } catch {
+      // Ignore cleanup error if temp directory was already removed
+    }
   }
 }
 
@@ -232,6 +265,7 @@ async function mainConverter(
   targetPath: string,
   options?: unknown,
   converterName?: string,
+  execFile?: ExecFileFn,
 ) {
   const fileType = normalizeFiletype(fileTypeOriginal);
 
@@ -266,7 +300,14 @@ async function mainConverter(
   }
 
   try {
-    const result = await converterFunc(inputFilePath, fileType, convertTo, targetPath, options);
+    const result = await converterFunc(
+      inputFilePath,
+      fileType,
+      convertTo,
+      targetPath,
+      options,
+      execFile,
+    );
 
     console.log(
       `Converted ${inputFilePath} from ${fileType} to ${convertTo} successfully using ${converterName}.`,
