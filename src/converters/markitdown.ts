@@ -9,7 +9,7 @@ export const properties = {
       "docx",
       "xlsx",
       "xls",
-      "pdf",
+      "msg",
       "wav",
       "mp3",
       "epub",
