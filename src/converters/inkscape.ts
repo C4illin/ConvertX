@@ -1,5 +1,4 @@
-import { execFile as execFileOriginal } from "node:child_process";
-import { ExecFileFn } from "./types";
+import { defaultExecFile, ExecFileFn } from "./types";
 
 export const properties = {
   from: {
@@ -34,7 +33,7 @@ export function convert(
   convertTo: string,
   targetPath: string,
   options?: unknown,
-  execFile: ExecFileFn = execFileOriginal, // to make it mockable
+  execFile: ExecFileFn = defaultExecFile, // to make it mockable
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     execFile("inkscape", [filePath, "-o", targetPath], (error, stdout, stderr) => {
