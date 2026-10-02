@@ -1,91 +1,40 @@
-import { beforeEach, expect, test } from "bun:test";
-import type { ExecFileException } from "node:child_process";
+import { expect, test } from "bun:test";
 import { convert } from "../../src/converters/libjxl";
-import { ExecFileFn } from "../../src/converters/types";
 import { runCommonTests } from "./helpers/commonTests";
-
-let command: string = "";
-
-beforeEach(() => {
-  command = "";
-});
+import { createMockExecFile } from "./helpers/converters";
 
 runCommonTests(convert);
 
 test("convert uses djxl with input filetype being jxl", async () => {
-  const originalConsoleLog = console.log;
+  const { execFile, calls } = createMockExecFile();
 
-  let loggedMessage = "";
-  console.log = (msg) => {
-    loggedMessage = msg;
-  };
-
-  const mockExecFile: ExecFileFn = (
-    _cmd: string,
-    _args: string[],
-    callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-  ) => {
-    command = _cmd;
-    callback(null, "Fake stdout", "");
-  };
-
-  const result = await convert("input.jxl", "jxl", "png", "output.png", undefined, mockExecFile);
-
-  console.log = originalConsoleLog;
+  const result = await convert("input.jxl", "jxl", "png", "output.png", undefined, execFile);
 
   expect(result).toBe("Done");
-  expect(command).toEqual("djxl");
-  expect(loggedMessage).toBe("stdout: Fake stdout");
+  expect(calls).toEqual([{ cmd: "djxl", args: ["input.jxl", "output.png"] }]);
 });
 
 test("convert uses cjxl with output filetype being jxl", async () => {
-  const originalConsoleLog = console.log;
+  const { execFile, calls } = createMockExecFile();
 
-  let loggedMessage = "";
-  console.log = (msg) => {
-    loggedMessage = msg;
-  };
-
-  const mockExecFile: ExecFileFn = (
-    _cmd: string,
-    _args: string[],
-    callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-  ) => {
-    command = _cmd;
-    callback(null, "Fake stdout", "");
-  };
-
-  const result = await convert("input.png", "png", "jxl", "output.jxl", undefined, mockExecFile);
-
-  console.log = originalConsoleLog;
+  const result = await convert("input.png", "png", "jxl", "output.jxl", undefined, execFile);
 
   expect(result).toBe("Done");
-  expect(command).toEqual("cjxl");
-  expect(loggedMessage).toBe("stdout: Fake stdout");
+  expect(calls).toEqual([{ cmd: "cjxl", args: ["input.png", "output.jxl"] }]);
+});
+
+test("convert prefers cjxl when both input and output filetype are jxl", async () => {
+  const { execFile, calls } = createMockExecFile();
+
+  await convert("input.jxl", "jxl", "jxl", "output.jxl", undefined, execFile);
+
+  expect(calls[0]?.cmd).toBe("cjxl");
 });
 
 test("convert uses empty string as command with neither input nor output filetype being jxl", async () => {
-  const originalConsoleLog = console.log;
+  const { execFile, calls } = createMockExecFile();
 
-  let loggedMessage = "";
-  console.log = (msg) => {
-    loggedMessage = msg;
-  };
+  await convert("input.png", "png", "jpg", "output.jpg", undefined, execFile);
 
-  const mockExecFile: ExecFileFn = (
-    _cmd: string,
-    _args: string[],
-    callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-  ) => {
-    command = _cmd;
-    callback(null, "Fake stdout", "");
-  };
-
-  const result = await convert("input.png", "png", "jpg", "output.jpg", undefined, mockExecFile);
-
-  console.log = originalConsoleLog;
-
-  expect(result).toBe("Done");
-  expect(command).toEqual("");
-  expect(loggedMessage).toBe("stdout: Fake stdout");
+  expect(calls[0]?.cmd).toBe("");
 });
