@@ -270,7 +270,7 @@ test("getFilters returns text filters when both formats are text formats", () =>
   expect(getFilters("doc", "odt")).toEqual(["MS Word 97", "writer8"]);
 });
 
-test("getFilters falls back to calc filters when the target is not a text format", () => {
+test("getFilters falls back to calc filters when the source is not a text format", () => {
   expect(getFilters("xls", "csv")).toEqual(["MS Excel 97", "Text - txt - csv (StarCalc)"]);
 });
 

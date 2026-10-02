@@ -10,6 +10,24 @@ const testRoot = mkdtempSync(join(tmpdir(), "convertx-tests-"));
 process.env.DB_PATH = join(testRoot, "test.sqlite");
 process.env.CONVERTX_TEST_ROOT = testRoot;
 
+// Settings from the developer's shell or a .env file (which Bun loads automatically) must
+// not change what the tests see, e.g. WEBROOT would move every page. src/helpers/env.ts
+// reads them once at import; tests switch them with setEnv() from tests/pages/helpers/app.ts.
+for (const name of [
+  "ACCOUNT_REGISTRATION",
+  "HTTP_ALLOWED",
+  "ALLOW_UNAUTHENTICATED",
+  "AUTO_DELETE_EVERY_N_HOURS",
+  "HIDE_HISTORY",
+  "BRANDING",
+  "WEBROOT",
+  "LANGUAGE",
+  "MAX_CONVERT_PROCESS",
+  "UNAUTHENTICATED_USER_SHARING",
+]) {
+  delete process.env[name];
+}
+
 // Several pages import uploadsDir/outputDir from src/index.tsx. Importing the real module
 // would start the server, spawn every converter's --version and schedule the job cleanup,
 // and its relative ./data paths would mix test files with real conversions. Provide the

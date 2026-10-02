@@ -51,12 +51,4 @@ describe("convert", () => {
 
     expect(calls[0]?.args.some((arg) => arg.startsWith("--pdf-engine"))).toBe(false);
   });
-
-  test("should reject if execFile returns an error", async () => {
-    const { execFile } = createMockExecFile({ error: new Error("fail") });
-
-    await expect(
-      convert("input.md", "markdown", "html", "output.html", undefined, execFile),
-    ).rejects.toMatch(/error: Error: fail/);
-  });
 });

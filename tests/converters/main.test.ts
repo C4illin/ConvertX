@@ -5,17 +5,18 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Cookie } from "elysia";
 import { properties as libreofficeProperties } from "../../src/converters/libreoffice";
-import {
-  chunks,
-  getAllInputs,
-  getAllTargets,
-  getPossibleTargets,
-  handleConvert,
-  mainConverter,
-} from "../../src/converters/main";
-// tests/preload.ts points DB_PATH at a temporary database, so production data is never used
-import db from "../../src/db/db";
 import { captureConsole } from "./helpers/converters";
+
+if (!process.env.CONVERTX_TEST_ROOT) {
+  // Without tests/preload.ts the db module would open ./data/mydb.sqlite and these tests
+  // would write their rows into it.
+  throw new Error("Converter tests must run via `bun test` so that tests/preload.ts is loaded.");
+}
+
+// dynamic imports ensure that the guard above runs before the db module is loaded
+const { default: db } = await import("../../src/db/db");
+const { chunks, getAllInputs, getAllTargets, getPossibleTargets, handleConvert, mainConverter } =
+  await import("../../src/converters/main");
 
 const testRoot = mkdtempSync(join(tmpdir(), "convertx-main-test-"));
 
@@ -36,10 +37,6 @@ function rowsFor(name: string, orderBy: "id" | "file_name" = "id"): FileRow[] {
       `SELECT file_name, output_file_name, status FROM file_names WHERE job_id = ? ORDER BY ${orderBy}`,
     )
     .all(`${JOB_PREFIX}${name}`) as FileRow[];
-}
-
-function countAllRows(): number {
-  return (db.query("SELECT COUNT(*) AS count FROM file_names").get() as { count: number }).count;
 }
 
 const vcard = (fullName: string) => `BEGIN:VCARD\nFN:${fullName}\nEND:VCARD\n`;
@@ -297,13 +294,14 @@ describe("handleConvert", () => {
   });
 
   test("converts but does not record rows when the job id cookie has no value", async () => {
-    await writeFile(`${uploadsDir}contact.vcf`, vcard("No Job"));
-    const rowsBefore = countAllRows();
+    // without a job id there is no job_id to look for, so look for the file name instead
+    const fileName = `${JOB_PREFIX}no-job.vcf`;
+    await writeFile(`${uploadsDir}${fileName}`, vcard("No Job"));
 
-    await handleConvert(["contact.vcf"], uploadsDir, outputDir, "csv", "vcf", jobCookie());
+    await handleConvert([fileName], uploadsDir, outputDir, "csv", "vcf", jobCookie());
 
-    expect(countAllRows()).toBe(rowsBefore);
-    expect(await readFile(`${outputDir}contact.csv`, "utf-8")).toContain("No Job");
+    expect(db.query("SELECT * FROM file_names WHERE file_name = ?").all(fileName)).toEqual([]);
+    expect(await readFile(`${outputDir}${JOB_PREFIX}no-job.csv`, "utf-8")).toContain("No Job");
   });
 
   test("replaces only the last occurrence of the extension", async () => {

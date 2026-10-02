@@ -8,7 +8,6 @@ import {
   setCookie,
   setCookieValue,
   setEnv,
-  signToken,
 } from "./helpers/app";
 
 afterEach(() => {
@@ -42,12 +41,16 @@ describe("GET / with accounts", () => {
   });
 
   test("clears the session of an account that no longer exists", async () => {
-    const response = await request("/", { cookies: { auth: await signToken(999_999) } });
+    const user = await createUser();
+    db.query("DELETE FROM users WHERE id = ?").run(user.id);
+
+    const response = await request("/", { cookies: { auth: user.token } });
 
     expect(response.status).toBe(302);
     expect(response.headers.get("location")).toBe("/login");
     expect(setCookie(response, "auth")).toContain("Max-Age=0");
-    expect(jobsOf(999_999)).toEqual([]);
+    // no job is started for the deleted account
+    expect(jobsOf(user.id)).toEqual([]);
   });
 
   test("starts a new job and remembers it in the jobId cookie", async () => {

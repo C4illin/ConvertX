@@ -1,8 +1,15 @@
 import { test, expect, beforeEach, afterEach } from "bun:test";
 import { Database } from "bun:sqlite";
-import { unlinkSync, existsSync, mkdirSync } from "node:fs";
+import { unlinkSync, existsSync } from "node:fs";
+import { join } from "node:path";
 
-// tests/preload.ts points DB_PATH at a temporary database, so production data is never used
+const testRoot = process.env.CONVERTX_TEST_ROOT;
+if (!testRoot) {
+  // Without tests/preload.ts the db module would open and migrate ./data/mydb.sqlite.
+  throw new Error("Database tests must run via `bun test` so that tests/preload.ts is loaded.");
+}
+
+// the dynamic import ensures that the guard above runs before the db module is loaded
 let initializeDatabase: (db: Database) => void;
 let defaultDb: Database | undefined;
 await import("../../src/db/db").then((mod) => {
@@ -58,8 +65,7 @@ let testDbPath: string;
 let testDb: Database;
 
 beforeEach(() => {
-  mkdirSync("./data", { recursive: true });
-  testDbPath = `./data/test-db-${Date.now()}.sqlite`;
+  testDbPath = join(testRoot, `test-db-${Date.now()}.sqlite`);
   testDb = new Database(testDbPath, { create: true });
   // Now uses the real initialization logic from db.ts
   initializeDatabase(testDb);
@@ -105,7 +111,7 @@ test("db initializes and creates tables on first run", () => {
 
 test("db handles migration from version 0 to version 1", () => {
   testDb.close();
-  const migrateDbPath = `./data/test-db-migrate-${Date.now()}.sqlite`;
+  const migrateDbPath = join(testRoot, `test-db-migrate-${Date.now()}.sqlite`);
   const migrateDb = new Database(migrateDbPath, { create: true });
 
   try {
