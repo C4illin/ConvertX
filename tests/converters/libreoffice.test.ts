@@ -73,7 +73,7 @@ test("invokes soffice with --headless and outdir derived from targetPath", async
   ]);
 });
 
-test("uses only outFilter when input has no filter (e.g., pdf -> txt)", async () => {
+test("uses writer_pdf_import and a text outFilter for pdf -> txt", async () => {
   await convert("in.pdf", "pdf", "txt", "out/out.txt", undefined, mockExecFile);
 
   const { args } = requireDefined(calls[0], "Expected at least one execFile call");
@@ -89,18 +89,12 @@ test("uses only outFilter when input has no filter (e.g., pdf -> txt)", async ()
   ]);
 });
 
-test("uses only infilter when convertTo has no out filter (e.g., docx -> pdf)", async () => {
+test("uses no filters at all when converting to pdf (e.g., docx -> pdf)", async () => {
   await convert("in.docx", "docx", "pdf", "out/out.pdf", undefined, mockExecFile);
 
   const { args } = requireDefined(calls[0], "Expected at least one execFile call");
 
-  // If docx has an infilter, it should be present
   expect(args).toEqual(["--headless", "--convert-to", "pdf", "--outdir", "out", "in.docx"]);
-
-  const i = args.indexOf("--convert-to");
-  expect(i).toBeGreaterThanOrEqual(0);
-  expect(args[i + 1]).toBe("pdf");
-  expect(args.slice(-2)).toEqual(["out", "in.docx"]);
 });
 
 test("does not force an infilter for wps (Microsoft Works, not MS Word 97)", async () => {
@@ -203,26 +197,94 @@ test("logs both stdout and stderr when both are present", async () => {
 test("logs stderr on exec error as well", async () => {
   behavior = { kind: "error", message: "boom", stderr: "EPIPE" };
 
-  expect(convert("in.txt", "txt", "docx", "out/out.docx", undefined, mockExecFile)).rejects.toMatch(
-    /error: Error: boom/,
-  );
+  await expect(
+    convert("in.txt", "txt", "docx", "out/out.docx", undefined, mockExecFile),
+  ).rejects.toMatch(/error: Error: boom/);
 
   // The callback still provided stderr; your implementation logs it before settling
   expect(errors).toContain("stderr: EPIPE");
 });
 
-// --- calc filter branch (test-only exports) ---------------------------------
-test("getFilters returns calc mapping when present", () => {
-  // temporarily add entries to calc mapping
-  filters.calc["testfoo"] = "TestFooFilter";
-  filters.calc["testbar"] = "TestBarFilter";
+// --- spreadsheet (calc) conversions ------------------------------------------
+test.each([
+  {
+    fileType: "csv",
+    convertTo: "xlsx",
+    infilter: "Text - txt - csv (StarCalc)",
+    convertToArg: "xlsx:Calc MS Excel 2007 XML",
+  },
+  {
+    fileType: "ods",
+    convertTo: "xlsx",
+    infilter: "calc8",
+    convertToArg: "xlsx:Calc MS Excel 2007 XML",
+  },
+  {
+    fileType: "xlsx",
+    convertTo: "ods",
+    infilter: "Calc MS Excel 2007 XML",
+    convertToArg: "ods:calc8",
+  },
+  {
+    fileType: "xls",
+    convertTo: "xlsm",
+    infilter: "MS Excel 97",
+    convertToArg: "xlsm:Calc MS Excel 2007 XML VBA",
+  },
+])(
+  "uses calc filters for $fileType -> $convertTo",
+  async ({ fileType, convertTo, infilter, convertToArg }) => {
+    await convert(
+      `in.${fileType}`,
+      fileType,
+      convertTo,
+      `out/out.${convertTo}`,
+      undefined,
+      mockExecFile,
+    );
 
-  try {
-    const res = getFilters("testfoo", "testbar");
-    expect(res).toEqual(["TestFooFilter", "TestBarFilter"]);
-  } finally {
-    // cleanup
-    delete filters.calc["testfoo"];
-    delete filters.calc["testbar"];
-  }
+    const { args } = requireDefined(calls[0], "Expected at least one execFile call");
+
+    expect(args).toEqual([
+      "--headless",
+      `--infilter=${infilter}`,
+      "--convert-to",
+      convertToArg,
+      "--outdir",
+      "out",
+      `in.${fileType}`,
+    ]);
+  },
+);
+
+test("uses no filters for a spreadsheet converted to pdf", async () => {
+  await convert("in.xlsx", "xlsx", "pdf", "out/out.pdf", undefined, mockExecFile);
+
+  const { args } = requireDefined(calls[0], "Expected at least one execFile call");
+
+  expect(args).toEqual(["--headless", "--convert-to", "pdf", "--outdir", "out", "in.xlsx"]);
+});
+
+// --- getFilters (test-only export) -------------------------------------------
+test("getFilters returns text filters when both formats are text formats", () => {
+  expect(getFilters("doc", "odt")).toEqual(["MS Word 97", "writer8"]);
+});
+
+test("getFilters falls back to calc filters when the target is not a text format", () => {
+  expect(getFilters("xls", "csv")).toEqual(["MS Excel 97", "Text - txt - csv (StarCalc)"]);
+});
+
+test.each([
+  ["docx", "xlsx"],
+  ["xlsx", "docx"],
+  ["unknown", "odt"],
+  ["docx", "unknown"],
+])("getFilters returns no filters for unrelated formats (%s -> %s)", (fileType, convertTo) => {
+  expect(getFilters(fileType, convertTo)).toEqual([null, null]);
+});
+
+test("getFilters keeps wps deliberately unmapped instead of falling through to calc", () => {
+  expect("wps" in filters.text).toBe(true);
+  expect(filters.text.wps).toBeNull();
+  expect(getFilters("wps", "docx")).toEqual([null, "MS Word 2007 XML"]);
 });
