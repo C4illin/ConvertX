@@ -1,181 +1,86 @@
-import { beforeEach, expect, test } from "bun:test";
-import type { ExecFileException } from "node:child_process";
+import { expect, test } from "bun:test";
 import { convert } from "../../src/converters/imagemagick";
-import { ExecFileFn } from "../../src/converters/types";
 import { runCommonTests } from "./helpers/commonTests";
-
-let calls: string[][] = [];
-
-beforeEach(() => {
-  calls = [];
-});
+import { createMockExecFile } from "./helpers/converters";
 
 runCommonTests(convert);
 
-test("convert respects ico conversion target type", async () => {
-  const originalConsoleLog = console.log;
+const ICO_ARGS = ["-define", "icon:auto-resize=256,128,64,48,32,16", "-background", "none"];
 
-  let loggedMessage = "";
-  console.log = (msg) => {
-    loggedMessage = msg;
-  };
+test.each([
+  {
+    name: "applies only EXIF auto-orient for a plain conversion",
+    fileType: "jpg",
+    convertTo: "png",
+    inputArgs: [],
+    outputArgs: ["-auto-orient"],
+  },
+  {
+    name: "does not rasterize svg at high density unless the target is ico",
+    fileType: "svg",
+    convertTo: "png",
+    inputArgs: [],
+    outputArgs: ["-auto-orient"],
+  },
+  {
+    name: "auto-resizes ico output with a transparent background",
+    fileType: "eps",
+    convertTo: "ico",
+    inputArgs: [],
+    outputArgs: [...ICO_ARGS, "-auto-orient"],
+  },
+  {
+    name: "rasterizes svg at high density for ico output",
+    fileType: "svg",
+    convertTo: "ico",
+    inputArgs: ["-background", "none", "-density", "512"],
+    outputArgs: [...ICO_ARGS, "-auto-orient"],
+  },
+  {
+    name: "rasterizes pdf input at 300 dpi",
+    fileType: "pdf",
+    convertTo: "png",
+    inputArgs: ["-density", "300"],
+    outputArgs: ["-auto-orient"],
+  },
+  {
+    name: "combines pdf density with ico options",
+    fileType: "pdf",
+    convertTo: "ico",
+    inputArgs: ["-density", "300"],
+    outputArgs: [...ICO_ARGS, "-auto-orient"],
+  },
+  {
+    name: "disables the emf delegate and flattens onto white",
+    fileType: "emf",
+    convertTo: "png",
+    inputArgs: ["-define", "emf:delegate=false", "-density", "300"],
+    outputArgs: ["-background", "white", "-alpha", "remove", "-auto-orient"],
+  },
+  {
+    name: "combines emf handling with ico options",
+    fileType: "emf",
+    convertTo: "ico",
+    inputArgs: ["-define", "emf:delegate=false", "-density", "300"],
+    outputArgs: [...ICO_ARGS, "-background", "white", "-alpha", "remove", "-auto-orient"],
+  },
+])("$name ($fileType -> $convertTo)", async ({ fileType, convertTo, inputArgs, outputArgs }) => {
+  const { execFile, calls } = createMockExecFile();
 
-  const mockExecFile: ExecFileFn = (
-    _cmd: string,
-    _args: string[],
-    callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-  ) => {
-    calls.push(_args);
-    callback(null, "Fake stdout", "");
-  };
-
-  const result = await convert("input.obj", "eps", "ico", "output.ico", undefined, mockExecFile);
-
-  console.log = originalConsoleLog;
-
-  expect(result).toBe("Done");
-  expect(calls[0]).toEqual(
-    expect.arrayContaining([
-      "-define",
-      "icon:auto-resize=256,128,64,48,32,16",
-      "-background",
-      "none",
-      "input.obj",
-      "output.ico",
-    ]),
+  const result = await convert(
+    `in/image.${fileType}`,
+    fileType,
+    convertTo,
+    `out/image.${convertTo}`,
+    undefined,
+    execFile,
   );
-  expect(loggedMessage).toBe("stdout: Fake stdout");
-});
-
-test("convert respects ico conversion target type with svg as input filetype", async () => {
-  const originalConsoleLog = console.log;
-
-  let loggedMessage = "";
-  console.log = (msg) => {
-    loggedMessage = msg;
-  };
-
-  const mockExecFile: ExecFileFn = (
-    _cmd: string,
-    _args: string[],
-    callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-  ) => {
-    calls.push(_args);
-    callback(null, "Fake stdout", "");
-  };
-
-  const result = await convert("input.svg", "svg", "ico", "output.ico", undefined, mockExecFile);
-
-  console.log = originalConsoleLog;
 
   expect(result).toBe("Done");
-  expect(calls[0]).toEqual(
-    expect.arrayContaining([
-      "-define",
-      "icon:auto-resize=256,128,64,48,32,16",
-      "-background",
-      "none",
-      "-density",
-      "512",
-      "input.svg",
-      "output.ico",
-    ]),
-  );
-  expect(loggedMessage).toBe("stdout: Fake stdout");
-});
-
-test("convert respects ico conversion target type with emf as input filetype", async () => {
-  const originalConsoleLog = console.log;
-
-  let loggedMessage = "";
-  console.log = (msg) => {
-    loggedMessage = msg;
-  };
-
-  const mockExecFile: ExecFileFn = (
-    _cmd: string,
-    _args: string[],
-    callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-  ) => {
-    calls.push(_args);
-    callback(null, "Fake stdout", "");
-  };
-
-  const result = await convert("input.emf", "emf", "ico", "output.ico", undefined, mockExecFile);
-
-  console.log = originalConsoleLog;
-
-  expect(result).toBe("Done");
-  expect(calls[0]).toEqual(
-    expect.arrayContaining([
-      "-define",
-      "icon:auto-resize=256,128,64,48,32,16",
-      "-background",
-      "none",
-      "emf:delegate=false",
-      "-density",
-      "300",
-      "white",
-      "-alpha",
-      "remove",
-      "input.emf",
-      "output.ico",
-    ]),
-  );
-  expect(loggedMessage).toBe("stdout: Fake stdout");
-});
-
-test("convert respects emf as input filetype", async () => {
-  const originalConsoleLog = console.log;
-
-  let loggedMessage = "";
-  console.log = (msg) => {
-    loggedMessage = msg;
-  };
-
-  const mockExecFile: ExecFileFn = (
-    _cmd: string,
-    _args: string[],
-    callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-  ) => {
-    calls.push(_args);
-    callback(null, "Fake stdout", "");
-  };
-
-  const result = await convert("input.emf", "emf", "obj", "output.obj", undefined, mockExecFile);
-
-  console.log = originalConsoleLog;
-
-  expect(result).toBe("Done");
-  expect(calls[0]).toEqual(
-    expect.arrayContaining([
-      "-define",
-      "emf:delegate=false",
-      "-density",
-      "300",
-      "-background",
-      "white",
-      "-alpha",
-      "remove",
-      "input.emf",
-      "output.obj",
-    ]),
-  );
-  expect(loggedMessage).toBe("stdout: Fake stdout");
-});
-
-test("convert applies EXIF auto-orient", async () => {
-  const mockExecFile: ExecFileFn = (
-    _cmd: string,
-    _args: string[],
-    callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-  ) => {
-    calls.push(_args);
-    callback(null, "", "");
-  };
-
-  const result = await convert("input.jpg", "jpg", "png", "output.png", undefined, mockExecFile);
-
-  expect(result).toBe("Done");
-  expect(calls[0]).toEqual(expect.arrayContaining(["input.jpg", "-auto-orient", "output.png"]));
+  expect(calls).toEqual([
+    {
+      cmd: "magick",
+      args: [...inputArgs, `in/image.${fileType}`, ...outputArgs, `out/image.${convertTo}`],
+    },
+  ]);
 });

@@ -1,20 +1,13 @@
-import { beforeEach, expect, test, describe } from "bun:test";
+import { expect, test, describe } from "bun:test";
 import { convert } from "../../src/converters/pandoc";
-import type { ExecFileFn } from "../../src/converters/types";
+import { runCommonTests } from "./helpers/commonTests";
+import { createMockExecFile } from "./helpers/converters";
+
+runCommonTests(convert);
 
 describe("convert", () => {
-  let mockExecFile: ExecFileFn;
-
-  beforeEach(() => {
-    mockExecFile = (cmd, args, callback) => callback(null, "output-data", "");
-  });
-
   test("should call pandoc with correct arguments (normal)", async () => {
-    let calledArgs: Parameters<ExecFileFn> = ["", [], () => {}];
-    mockExecFile = (cmd, args, callback) => {
-      calledArgs = [cmd, args, callback];
-      callback(null, "output-data", "");
-    };
+    const { execFile, calls } = createMockExecFile();
 
     const result = await convert(
       "input.md",
@@ -22,45 +15,48 @@ describe("convert", () => {
       "html",
       "output.html",
       undefined,
-      mockExecFile,
+      execFile,
     );
 
-    expect(calledArgs[0]).toBe("pandoc");
-    expect(calledArgs[1]).toEqual([
-      "input.md",
-      "-f",
-      "markdown",
-      "-t",
-      "html",
-      "-o",
-      "output.html",
+    expect(calls).toEqual([
+      {
+        cmd: "pandoc",
+        args: ["input.md", "-f", "markdown", "-t", "html", "-o", "output.html"],
+      },
     ]);
     expect(result).toBe("Done");
   });
 
-  test("should add xelatex argument for pdf/latex", async () => {
-    let calledArgs: Parameters<ExecFileFn> = ["", [], () => {}];
-    mockExecFile = (cmd, args, callback) => {
-      calledArgs = [cmd, args, callback];
-      callback(null, "output-data", "");
-    };
+  test.each(["pdf", "latex"])("should use the xelatex pdf engine for %s", async (convertTo) => {
+    const { execFile, calls } = createMockExecFile();
 
-    await convert("input.md", "markdown", "pdf", "output.pdf", undefined, mockExecFile);
+    await convert("input.md", "markdown", convertTo, `output.${convertTo}`, undefined, execFile);
 
-    expect(calledArgs[1][0]).toBe("--pdf-engine=xelatex");
-    expect(calledArgs[1]).toContain("input.md");
-    expect(calledArgs[1]).toContain("-f");
-    expect(calledArgs[1]).toContain("markdown");
-    expect(calledArgs[1]).toContain("-t");
-    expect(calledArgs[1]).toContain("pdf");
-    expect(calledArgs[1]).toContain("-o");
-    expect(calledArgs[1]).toContain("output.pdf");
+    expect(calls[0]?.args).toEqual([
+      "--pdf-engine=xelatex",
+      "input.md",
+      "-f",
+      "markdown",
+      "-t",
+      convertTo,
+      "-o",
+      `output.${convertTo}`,
+    ]);
+  });
+
+  test("should not set a pdf engine for other targets", async () => {
+    const { execFile, calls } = createMockExecFile();
+
+    await convert("input.md", "markdown", "docx", "output.docx", undefined, execFile);
+
+    expect(calls[0]?.args.some((arg) => arg.startsWith("--pdf-engine"))).toBe(false);
   });
 
   test("should reject if execFile returns an error", async () => {
-    mockExecFile = (cmd, args, callback) => callback(new Error("fail"), "", "");
+    const { execFile } = createMockExecFile({ error: new Error("fail") });
+
     await expect(
-      convert("input.md", "markdown", "html", "output.html", undefined, mockExecFile),
+      convert("input.md", "markdown", "html", "output.html", undefined, execFile),
     ).rejects.toMatch(/error: Error: fail/);
   });
 });
