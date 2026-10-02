@@ -2,6 +2,7 @@ import { test } from "bun:test";
 import { ConvertFnWithExecFile } from "../../../src/converters/types";
 import {
   runConvertFailTest,
+  runConvertLogsNothingWithoutOutput,
   runConvertLogsStderror,
   runConvertLogsStderrorAndStdout,
   runConvertSuccessTest,
@@ -22,5 +23,9 @@ export function runCommonTests(convert: ConvertFnWithExecFile) {
 
   test("convert logs both stderr and stdout when present", async () => {
     await runConvertLogsStderrorAndStdout(convert);
+  });
+
+  test("convert logs nothing when stdout and stderr are empty", async () => {
+    await runConvertLogsNothingWithoutOutput(convert);
   });
 }

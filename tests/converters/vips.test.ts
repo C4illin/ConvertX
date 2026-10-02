@@ -1,65 +1,24 @@
-import { beforeEach, expect, test } from "bun:test";
-import type { ExecFileException } from "node:child_process";
-import { ExecFileFn } from "../../src/converters/types";
+import { expect, test } from "bun:test";
 import { convert } from "../../src/converters/vips";
 import { runCommonTests } from "./helpers/commonTests";
-
-let calls: string[][] = [];
-
-beforeEach(() => {
-  calls = [];
-});
+import { createMockExecFile } from "./helpers/converters";
 
 runCommonTests(convert);
 
-test("convert uses action pdfload with filetype being pdf", async () => {
-  const originalConsoleLog = console.log;
+test("uses the pdfload action for pdf input", async () => {
+  const { execFile, calls } = createMockExecFile();
 
-  let loggedMessage = "";
-  console.log = (msg) => {
-    loggedMessage = msg;
-  };
+  await convert("in/doc.pdf", "pdf", "png", "out/doc.png", undefined, execFile);
 
-  const mockExecFile: ExecFileFn = (
-    _cmd: string,
-    _args: string[],
-    callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-  ) => {
-    calls.push(_args);
-    callback(null, "Fake stdout", "");
-  };
-
-  const result = await convert("input.pdf", "pdf", "obj", "output.obj", undefined, mockExecFile);
-
-  console.log = originalConsoleLog;
-
-  expect(result).toBe("Done");
-  expect(calls[0]).toEqual(expect.arrayContaining(["pdfload"]));
-  expect(loggedMessage).toBe("stdout: Fake stdout");
+  expect(calls).toEqual([{ cmd: "vips", args: ["pdfload", "in/doc.pdf", "out/doc.png"] }]);
 });
 
-test("convert uses action copy with filetype being anything but pdf", async () => {
-  const originalConsoleLog = console.log;
+test.each(["jpeg", "png", "svg", "tiff"])("uses the copy action for %s input", async (fileType) => {
+  const { execFile, calls } = createMockExecFile();
 
-  let loggedMessage = "";
-  console.log = (msg) => {
-    loggedMessage = msg;
-  };
+  await convert(`in/image.${fileType}`, fileType, "webp", "out/image.webp", undefined, execFile);
 
-  const mockExecFile: ExecFileFn = (
-    _cmd: string,
-    _args: string[],
-    callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-  ) => {
-    calls.push(_args);
-    callback(null, "Fake stdout", "");
-  };
-
-  const result = await convert("input.jpg", "jpg", "obj", "output.obj", undefined, mockExecFile);
-
-  console.log = originalConsoleLog;
-
-  expect(result).toBe("Done");
-  expect(calls[0]).toEqual(expect.arrayContaining(["copy"]));
-  expect(loggedMessage).toBe("stdout: Fake stdout");
+  expect(calls).toEqual([
+    { cmd: "vips", args: ["copy", `in/image.${fileType}`, "out/image.webp"] },
+  ]);
 });
