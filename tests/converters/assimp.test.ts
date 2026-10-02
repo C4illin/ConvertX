@@ -21,5 +21,7 @@ test("passes format ids that are not file extensions through unchanged", async (
 
   await convert("in/scene.obj", "obj", "glb2", "out/scene.glb", undefined, execFile);
 
-  expect(calls[0]?.args).toEqual(["export", "in/scene.obj", "out/scene.glb", "-fglb2"]);
+  expect(calls).toEqual([
+    { cmd: "assimp", args: ["export", "in/scene.obj", "out/scene.glb", "-fglb2"] },
+  ]);
 });

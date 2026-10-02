@@ -14,9 +14,10 @@ test("invokes ebook-convert with input and target path", async () => {
 });
 
 test.each([
-  ["recipe file type", "in/news.recipe", "recipe"],
-  ["downloaded_recipe file type", "in/news.downloaded_recipe", "downloaded_recipe"],
-  ["upper-case file type", "in/news.RECIPE", "RECIPE"],
+  // the extension is harmless, so only the file type triggers the rejection
+  ["recipe file type", "in/news.txt", "recipe"],
+  ["downloaded_recipe file type", "in/news.txt", "downloaded_recipe"],
+  ["upper-case file type", "in/news.txt", "RECIPE"],
   ["recipe extension with another file type", "in/news.recipe", "txt"],
   ["upper-case downloaded_recipe extension", "in/news.DOWNLOADED_RECIPE", "txt"],
 ])("rejects recipe input (%s) without invoking ebook-convert", async (_, filePath, fileType) => {
