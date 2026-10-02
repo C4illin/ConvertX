@@ -28,6 +28,11 @@ for (const name of [
   delete process.env[name];
 }
 
+// TZ is read as TIMEZONE for the times on the history page. Deleting it would not help:
+// Bun would fall back to the system timezone instead of bun test's UTC default (or keep
+// the shell's zone). Assigning it switches the runtime timezone as well, so pin it.
+process.env.TZ = "UTC";
+
 // Several pages import uploadsDir/outputDir from src/index.tsx. Importing the real module
 // would start the server, spawn every converter's --version and schedule the job cleanup,
 // and its relative ./data paths would mix test files with real conversions. Provide the
