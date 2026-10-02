@@ -143,7 +143,7 @@ describe.each([
     expect(body).toContain(`href="/convertx/archive/${job}"`);
   });
 
-  test("does not set cookies", async () => {
+  test("keeps the session and the current job", async () => {
     const user = await createUser();
     const job = createJob(user.id);
 
@@ -154,6 +154,20 @@ describe.each([
 
     expect(setCookie(response, "jobId")).toBeUndefined();
     expect(setCookie(response, "auth")).toBeUndefined();
+  });
+
+  // no page sets job_id anymore (the job cookie is called jobId), but the handlers still
+  // clear it for browsers that kept it
+  test("clears the legacy job_id cookie", async () => {
+    const user = await createUser();
+    const job = createJob(user.id);
+
+    const response = await request(`${route}/${job}`, {
+      method,
+      cookies: { auth: user.token, job_id: job },
+    });
+
+    expect(setCookie(response, "job_id")).toContain("Max-Age=0");
   });
 });
 
