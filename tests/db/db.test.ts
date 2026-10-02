@@ -1,11 +1,8 @@
-import { test, expect, beforeEach, afterEach, afterAll } from "bun:test";
+import { test, expect, beforeEach, afterEach } from "bun:test";
 import { Database } from "bun:sqlite";
 import { unlinkSync, existsSync, mkdirSync } from "node:fs";
 
-// set environment variable to ensure the test database is used instead of production data
-process.env.DB_PATH = "./data/test-isolated.sqlite";
-
-// dynamic import ensures that db.ts is loaded after the env is set
+// tests/preload.ts points DB_PATH at a temporary database, so production data is never used
 let initializeDatabase: (db: Database) => void;
 let defaultDb: Database | undefined;
 await import("../../src/db/db").then((mod) => {
@@ -88,37 +85,6 @@ afterEach(() => {
   if (existsSync(`${testDbPath}-shm`)) {
     try {
       unlinkSync(`${testDbPath}-shm`);
-    } catch (err) {
-      // SHM file cleanup error - log but don't fail test
-      if (err instanceof Error && err.message.includes("ENOENT")) {
-        // File already gone, which is fine
-      }
-    }
-  }
-});
-
-afterAll(() => {
-  // Close the module-level default database before cleanup to prevent file lock errors
-  if (defaultDb) {
-    defaultDb.close();
-  }
-  // Cleanup of the isolated test database after the test run
-  if (existsSync("./data/test-isolated.sqlite")) {
-    unlinkSync("./data/test-isolated.sqlite");
-  }
-  if (existsSync("./data/test-isolated.sqlite-wal")) {
-    try {
-      unlinkSync("./data/test-isolated.sqlite-wal");
-    } catch (err) {
-      // WAL file cleanup error - log but don't fail test
-      if (err instanceof Error && err.message.includes("ENOENT")) {
-        // File already gone, which is fine
-      }
-    }
-  }
-  if (existsSync("./data/test-isolated.sqlite-shm")) {
-    try {
-      unlinkSync("./data/test-isolated.sqlite-shm");
     } catch (err) {
       // SHM file cleanup error - log but don't fail test
       if (err instanceof Error && err.message.includes("ENOENT")) {
