@@ -74,6 +74,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build and load for testing
+        if: matrix.platform == 'linux/amd64'
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: ${{ matrix.platform }}
+          load: true
+          tags: convertx:test
+          cache-from: type=gha,scope=${{ matrix.platform }}
+
+      - name: Run integration tests
+        if: matrix.platform == 'linux/amd64'
+        run: docker run --rm -v $(pwd)/tests:/app/tests -v $(pwd)/src:/app/src -v $(pwd)/package.json:/app/package.json convertx:test bun test tests/integration
+
       - name: Build and push by digest
         id: build
         uses: docker/build-push-action@v7
