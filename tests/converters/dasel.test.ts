@@ -1,6 +1,6 @@
 import fs from "fs";
 import { beforeEach, afterEach, expect, test, describe } from "bun:test";
-import { convert } from "../../src/converters/dasel";
+import { buildDaselArgs, convert } from "../../src/converters/dasel";
 import type { ExecFileFn } from "../../src/converters/types";
 
 const originalWriteFile = fs.writeFile;
@@ -19,6 +19,16 @@ describe("convert", () => {
   afterEach(() => {
     // reset fs.writeFile
     fs.writeFile = originalWriteFile;
+  });
+
+  test("should build dasel v3 arguments", () => {
+    expect(buildDaselArgs("input.yaml", "yaml", "json")).toEqual([
+      "--var",
+      "data=yaml:file:input.yaml",
+      "--out",
+      "json",
+      "$data",
+    ]);
   });
 
   test("should call dasel with correct arguments and write output", async () => {
@@ -48,9 +58,21 @@ describe("convert", () => {
     );
 
     expect(calledArgs[0]).toBe("dasel");
-    expect(calledArgs[1]).toEqual(["--file", "input.yaml", "--read", "yaml", "--write", "json"]);
+    expect(calledArgs[1]).toEqual(["--var", "data=yaml:file:input.yaml", "--out", "json", "$data"]);
     expect(writeFileCalled).toBe(true);
     expect(result).toBe("Done");
+  });
+
+  test("should close dasel stdin so v3 does not wait for input", async () => {
+    let stdinEnded = false;
+    mockExecFile = (cmd, args, callback) => {
+      callback(null, "output-data", "");
+      return { stdin: { end: () => (stdinEnded = true) } } as ReturnType<ExecFileFn>;
+    };
+
+    await convert("input.yaml", "yaml", "json", "output.json", undefined, mockExecFile);
+
+    expect(stdinEnded).toBe(true);
   });
 
   test("should reject if execFile returns an error", async () => {

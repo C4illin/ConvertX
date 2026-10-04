@@ -3,7 +3,8 @@ import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import db from "../db/db";
 import { Filename, Jobs } from "../db/types";
-import { ALLOW_UNAUTHENTICATED, WEBROOT } from "../helpers/env";
+import { buildDownloadUrl } from "../helpers/buildDownloadUrl";
+import { ALLOW_UNAUTHENTICATED, WEBROOT, BRANDING } from "../helpers/env";
 import { DownloadIcon } from "../icons/download";
 import { DeleteIcon } from "../icons/delete";
 import { EyeIcon } from "../icons/eye";
@@ -23,14 +24,16 @@ function ResultsArticle({
       <div class="mb-4 flex items-center justify-between">
         <h1 class="text-xl">Results</h1>
         <div class="flex flex-row gap-4">
-          <a
-            style={files.length !== job.num_files ? "pointer-events: none;" : ""}
-            class="flex btn-secondary flex-row gap-2 text-contrast"
-            href={`${WEBROOT}/delete/${job.id}`}
-            {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
-          >
-            <DeleteIcon /> <p>Delete</p>
-          </a>
+          <form action={`${WEBROOT}/delete/${job.id}`} method="POST">
+            <button
+              type="submit"
+              style={files.length !== job.num_files ? "pointer-events: none;" : ""}
+              class="flex btn-secondary flex-row gap-2 text-contrast"
+              {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
+            >
+              <DeleteIcon /> <p>Delete</p>
+            </button>
+          </form>
           <a
             style={files.length !== job.num_files ? "pointer-events: none;" : ""}
             href={`${WEBROOT}/archive/${job.id}`}
@@ -93,35 +96,47 @@ function ResultsArticle({
           </tr>
         </thead>
         <tbody>
-          {files.map((file) => (
-            <tr>
-              <td safe class="max-w-[20vw] truncate">
-                {file.output_file_name}
-              </td>
-              <td safe>{file.status}</td>
-              <td class="flex flex-row gap-4">
-                <a
-                  class={`
-                    text-accent-500 underline
-                    hover:text-accent-400
-                  `}
-                  href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
-                >
-                  <EyeIcon />
-                </a>
-                <a
-                  class={`
-                    text-accent-500 underline
-                    hover:text-accent-400
-                  `}
-                  href={`${WEBROOT}/download/${outputPath}${file.output_file_name}`}
-                  download={file.output_file_name}
-                >
-                  <DownloadIcon />
-                </a>
-              </td>
-            </tr>
-          ))}
+          {files.map((file) => {
+            const conversionFailed = ["Failed, check logs", "File type not supported"].includes(
+              file.status,
+            );
+
+            return (
+              <tr>
+                <td safe class="max-w-[20vw] truncate">
+                  {file.output_file_name}
+                </td>
+                <td safe>{file.status}</td>
+                <td class="flex flex-row gap-4">
+                  {conversionFailed ? (
+                    <span class="text-neutral-500">Unavailable</span>
+                  ) : (
+                    <>
+                      <a
+                        class={`
+                          text-accent-500 underline
+                          hover:text-accent-400
+                        `}
+                        href={buildDownloadUrl(WEBROOT, outputPath, file.output_file_name)}
+                      >
+                        <EyeIcon />
+                      </a>
+                      <a
+                        class={`
+                          text-accent-500 underline
+                          hover:text-accent-400
+                        `}
+                        href={buildDownloadUrl(WEBROOT, outputPath, file.output_file_name)}
+                        download={file.output_file_name}
+                      >
+                        <DownloadIcon />
+                      </a>
+                    </>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </article>
@@ -160,7 +175,12 @@ export const results = new Elysia()
       return (
         <BaseHtml webroot={WEBROOT} title="ConvertX | Result">
           <>
-            <Header webroot={WEBROOT} allowUnauthenticated={ALLOW_UNAUTHENTICATED} loggedIn />
+            <Header
+              webroot={WEBROOT}
+              allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+              loggedIn
+              branding={BRANDING}
+            />
             <main
               class={`
                 w-full flex-1 px-2

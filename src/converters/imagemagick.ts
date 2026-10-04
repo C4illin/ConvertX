@@ -461,12 +461,21 @@ export function convert(
     }
   }
 
+  // Increase rasterization quality for PDF input
+  if (fileType === "pdf") {
+    inputArgs.push("-density", "300");
+  }
+
   // Handle EMF files specifically to avoid LibreOffice delegate issues
   if (fileType === "emf") {
     // Use direct conversion without delegates for EMF files
     inputArgs.push("-define", "emf:delegate=false", "-density", "300");
     outputArgs.push("-background", "white", "-alpha", "remove");
   }
+
+  // Apply EXIF orientation so photos (e.g. from phones) don't end up sideways
+  // when converted to formats where the orientation tag is lost or ignored
+  outputArgs.push("-auto-orient");
 
   return new Promise((resolve, reject) => {
     execFile(

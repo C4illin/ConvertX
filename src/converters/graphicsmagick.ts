@@ -317,8 +317,10 @@ export function convert(
   options?: unknown,
   execFile: ExecFileFn = execFileOriginal, // to make it mockable
 ): Promise<string> {
+  // Apply EXIF orientation so photos (e.g. from phones) don't end up sideways
+  // when converted to formats where the orientation tag is lost or ignored
   return new Promise((resolve, reject) => {
-    execFile("gm", ["convert", filePath, targetPath], (error, stdout, stderr) => {
+    execFile("gm", ["convert", filePath, "-auto-orient", targetPath], (error, stdout, stderr) => {
       if (error) {
         reject(`error: ${error}`);
       }

@@ -20,6 +20,7 @@ export default defineConfig(
       parser: eslintParserTypeScript,
       parserOptions: {
         project: "./tsconfig.eslint.json",
+        tsconfigRootDir: import.meta.dirname,
       },
       globals: {
         ...globals.node,

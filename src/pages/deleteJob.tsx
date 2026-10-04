@@ -8,7 +8,9 @@ import { Jobs } from "../db/types";
 
 export const deleteJob = new Elysia()
   .use(userService)
-  .get(
+  // SECURE: Use POST instead of GET for state-changing actions to prevent CSRF.
+  // Browsers automatically follow GET links, which can lead to silent data deletion.
+  .post(
     "/delete/:jobId",
     async ({ params, redirect, user }) => {
       const job = db
