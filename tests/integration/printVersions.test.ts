@@ -31,7 +31,7 @@ test("prints system information and tool versions in production mode without err
 
     // Ignore the OS string which doesn't follow the pattern
     if (msg.includes("Linux") || msg.includes("Debian") || msg.includes("Ubuntu")) continue;
-    
+
     // Dasel on Debian Sid prints "development" instead of a numerical version
     if (msg === "dasel development") continue;
 
