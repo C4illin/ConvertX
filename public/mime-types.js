@@ -36,7 +36,7 @@ const mimeTypeExtensions = {
 window.inferExtensionFromMimeType = (type) => {
   const normalizedType = type.toLowerCase();
   // If it's a known MIME type, return the extension.
-  if (mimeTypeExtensions[normalizedType]) {
+  if (Object.hasOwn(mimeTypeExtensions, normalizedType)) {
     return mimeTypeExtensions[normalizedType];
   }
 
