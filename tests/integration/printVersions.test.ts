@@ -1,11 +1,17 @@
-import { afterEach, expect, spyOn, test } from "bun:test";
+import { afterEach, beforeEach, expect, spyOn, test } from "bun:test";
 
 let consoleLogSpy: ReturnType<typeof spyOn>;
 let consoleErrorSpy: ReturnType<typeof spyOn>;
+let originalNodeEnv: string | undefined;
+
+beforeEach(() => {
+  originalNodeEnv = process.env.NODE_ENV;
+});
 
 afterEach(() => {
   if (consoleLogSpy) consoleLogSpy.mockRestore();
   if (consoleErrorSpy) consoleErrorSpy.mockRestore();
+  process.env.NODE_ENV = originalNodeEnv;
 });
 
 test("prints system information and tool versions in production mode without errors", async () => {
