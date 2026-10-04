@@ -360,18 +360,17 @@ export const user = new Elysia()
     "/login",
     async function handler({ body, set, redirect, jwt, cookie: { auth } }) {
       const existingUser = db.query("SELECT * FROM users WHERE email = ?").as(User).get(body.email);
-      const invalidCredentials = <LoginPage error="Invalid credentials." email={body.email} />;
 
       if (!existingUser) {
         set.status = 403;
-        return invalidCredentials;
+        return <LoginPage error="Invalid credentials." email={body.email} />;
       }
 
       const validPassword = await Bun.password.verify(body.password, existingUser.password);
 
       if (!validPassword) {
         set.status = 403;
-        return invalidCredentials;
+        return <LoginPage error="Invalid credentials." email={body.email} />;
       }
 
       const accessToken = await jwt.sign({
