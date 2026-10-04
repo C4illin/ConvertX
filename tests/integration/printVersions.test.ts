@@ -21,13 +21,19 @@ test("prints system information and tool versions in production mode without err
 
   await import("../../src/helpers/printVersions?test=" + Math.random());
 
-  // Wait for all exec callbacks to finish
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  const printVersionsContent = await Bun.file("src/helpers/printVersions.ts").text();
+  const expectedLogsCount = (printVersionsContent.match(/console\.log/g) || []).length;
+
+  // Poll every 50ms (up to 3 seconds) until all expected versions are logged
+  for (let i = 0; i < 60; i++) {
+    if (consoleLogSpy.mock.calls.length >= expectedLogsCount) break;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
 
   expect(consoleErrorSpy).not.toHaveBeenCalled();
 
-  // We expect at least the tools in printVersions.ts to be logged
-  expect(consoleLogSpy.mock.calls.length).toBeGreaterThan(15);
+  // We expect exactly one log per console.log statement in the file
+  expect(consoleLogSpy.mock.calls.length).toBe(expectedLogsCount);
 
   // Verify the standard format "ToolName v1.2.3" for all tools (except ConvertX version and OS)
   // ConvertX vX.X.X is the first call, OS is the second call.
