@@ -2,6 +2,7 @@
 
 services:
   convertx:
+    image: convertx:test
     build:
       context: .
       # dockerfile: Debian.Dockerfile
