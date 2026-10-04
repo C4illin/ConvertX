@@ -101,7 +101,7 @@ test("prints system information and tool versions in production mode", async () 
   expect(consoleLogSpy).toHaveBeenCalledWith("ConvertX v1.0.0-test");
   expect(consoleLogSpy).toHaveBeenCalledWith("Ubuntu 22.04 LTS");
   expect(readFile).toHaveBeenCalledTimes(1);
-  expect(exec).toHaveBeenCalledTimes(17); // Corresponds exactly to the number of exec calls in the source code
+  expect(exec).toHaveBeenCalledTimes(18); // Corresponds exactly to the number of exec calls in the source code
 });
 
 test("logs error paths when tools are missing", async () => {

@@ -3,25 +3,10 @@ import { ExecFileFn } from "./types";
 
 export const properties = {
   from: {
-    document: [
-      "pdf",
-      "pptx",
-      "docx",
-      "xlsx",
-      "xls",
-      "msg",
-      "wav",
-      "mp3",
-      "epub",
-      "html",
-      "csv",
-      "json",
-      "xml",
-      "zip",
-    ],
+    document: ["pdf"],
   },
   to: {
-    document: ["md"],
+    document: ["eps", "ps"],
   },
 };
 
@@ -31,12 +16,20 @@ export async function convert(
   convertTo: string,
   targetPath: string,
   options?: unknown,
-  execFile: ExecFileFn = execFileOriginal,
+  execFile: ExecFileFn = execFileOriginal, // to make it mockable
 ): Promise<string> {
+  const args: string[] = [];
+
+  if (convertTo === "eps") {
+    args.push("-eps");
+  }
+
+  args.push(filePath, targetPath);
+
   return new Promise((resolve, reject) => {
-    execFile("markitdown", [filePath, "-o", targetPath], (err, stdout, stderr) => {
-      if (err) {
-        reject(`markitdown error: ${err}`);
+    execFile("pdftops", args, (error, stdout, stderr) => {
+      if (error) {
+        reject(`error: ${error}`);
         return;
       }
 

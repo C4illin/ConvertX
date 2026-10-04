@@ -1,26 +1,20 @@
-name: Check Lint
-permissions:
-  contents: read
-
+name: autofix.ci
 on:
+  pull_request:
   push:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
-  workflow_dispatch:
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Run linting checks
+  autofix:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
+      - uses: actions/checkout@v7
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -29,5 +23,8 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Run lint
-        run: bun run lint
+      - name: Format code
+        run: |
+          bun run format:eslint || true
+          bun run format:prettier
+      - uses: autofix-ci/action@c5b2d67aa2274e7b5a18224e8171550871fc7e4a
