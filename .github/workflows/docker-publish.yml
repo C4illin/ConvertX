@@ -83,6 +83,7 @@ jobs:
           load: true
           tags: convertx:test
           cache-from: type=gha,scope=${{ matrix.platform }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
 
       - name: Run integration tests
         if: matrix.platform == 'linux/amd64'
