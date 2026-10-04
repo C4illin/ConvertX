@@ -23,7 +23,7 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(stdout.split("\n")[0]);
+      console.log(`pandoc v${stdout.match(/pandoc ([\d.]+)/)?.[1] || "unknown"}`);
     }
   });
 
@@ -34,7 +34,7 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(stdout.split("\n")[0]);
+      console.log(`FFmpeg v${stdout.match(/version ([\w+.-]+)/)?.[1] || "unknown"}`);
     }
   });
 
@@ -45,7 +45,7 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(stdout.split("\n")[0]);
+      console.log(`Vips v${stdout.match(/vips-([\d.]+)/)?.[1] || "unknown"}`);
     }
   });
 
@@ -56,7 +56,7 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(stdout.split("\n")[0]?.replace("Version: ", ""));
+      console.log(`ImageMagick v${stdout.match(/ImageMagick ([\d.-]+)/)?.[1] || "unknown"}`);
     }
   });
 
@@ -67,7 +67,7 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(stdout.split("\n")[0]);
+      console.log(`GraphicsMagick v${stdout.match(/GraphicsMagick ([\d.]+)/)?.[1] || "unknown"}`);
     }
   });
 
@@ -78,7 +78,7 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(stdout.split("\n")[0]);
+      console.log(`Inkscape v${stdout.match(/Inkscape ([\d.]+)/)?.[1] || "unknown"}`);
     }
   });
 
@@ -89,7 +89,7 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(stdout.split("\n")[0]);
+      console.log(`djxl v${stdout.match(/(?:v)?([\d.]+)/)?.[1] || "unknown"}`);
     }
   });
 
@@ -100,7 +100,8 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(`dasel ${stdout.split("\n")[0]}`);
+      const ver = stdout.replace("dasel", "").trim().split(/\s+/)[0] || "unknown";
+      console.log(`dasel ${ver}`);
     }
   });
 
@@ -111,7 +112,7 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(stdout.split("\n")[0]);
+      console.log(`XeTeX v${stdout.match(/XeTeX ([\d.-]+)/)?.[1] || "unknown"}`);
     }
   });
 
@@ -122,7 +123,7 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(`resvg v${stdout.split("\n")[0]}`);
+      console.log(`resvg v${(stdout.split("\n")[0] ?? "").trim().replace(/^v/, "")}`);
     }
   });
 
@@ -133,8 +134,8 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      const firstLines = stdout.split("\n");
-      console.log(`assimp ${firstLines[5] || firstLines[0] || ""}`);
+      const match = stdout.match(/Version ([\d.]+)/i);
+      console.log(`assimp v${match?.[1] || "unknown"}`);
     }
   });
 
@@ -145,7 +146,7 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(stdout.split("\n")[0]);
+      console.log(`ebook-convert v${stdout.match(/calibre ([\d.]+)/)?.[1] || "unknown"}`);
     }
   });
 
@@ -167,7 +168,8 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(stdout.split("\n")[0]);
+      const ver = stdout.match(/potrace ([\d.]+)/)?.[1]?.replace(/\.$/, "") || "unknown";
+      console.log(`potrace v${ver}`);
     }
   });
 
@@ -178,7 +180,7 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(stdout.split("\n")[0]);
+      console.log(`LibreOffice v${stdout.match(/LibreOffice ([\d.]+)/)?.[1] || "unknown"}`);
     }
   });
 
@@ -204,7 +206,8 @@ if (process.env.NODE_ENV === "production") {
     }
 
     if (stdout) {
-      console.log(`${stdout.split("\n")[0]}`);
+      const ver = stdout.match(/([\d.]+)/)?.[1] || "unknown";
+      console.log(`markitdown v${ver}`);
     }
   });
 
