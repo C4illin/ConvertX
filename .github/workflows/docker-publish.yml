@@ -86,7 +86,7 @@ jobs:
 
       - name: Run integration tests
         if: matrix.platform == 'linux/amd64'
-        run: docker run --rm -v $(pwd)/tests:/app/tests -v $(pwd)/src:/app/src -v $(pwd)/package.json:/app/package.json convertx:test bun test tests/integration
+        run: docker run --rm -v ./tests:/app/tests -v ./src:/app/src -v ./package.json:/app/package.json convertx:test bun test tests/integration
 
       - name: Build and push by digest
         id: build
