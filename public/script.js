@@ -44,8 +44,35 @@ const generatePastedFilename = (sequenceNumber, file) => {
   return `clipboard-file-${timestamp}-${sequenceNumber}.${extension}`;
 };
 
+const isEditablePasteTarget = (target) => {
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
+
+  if (target.isContentEditable) {
+    return true;
+  }
+
+  if (target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement) {
+    return true;
+  }
+
+  // Keep file-input pastes (the dropzone overlay) as uploads; skip text-like inputs.
+  if (target instanceof HTMLInputElement) {
+    return !["file", "button", "submit", "reset", "checkbox", "radio", "hidden", "image"].includes(
+      target.type,
+    );
+  }
+
+  return false;
+};
+
 // Listen for pastes and handle files if any are present.
 document.addEventListener("paste", (e) => {
+  if (isEditablePasteTarget(e.target)) {
+    return;
+  }
+
   const files = Array.from(e.clipboardData?.files ?? []);
 
   if (files.length === 0) {
