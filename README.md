@@ -85,6 +85,8 @@ Ensure `PUID` and `PGID` match your host user (`id -u` and `id -g`) to avoid per
 
 Then visit `http://localhost:3000` in your browser and create your account. Don't leave it unconfigured and open, as anyone can register the first account.
 
+To back up ConvertX, back up the whole `data` directory. It holds `mydb.sqlite` together with its `-wal` file, where recent rows live until SQLite checkpoints them, and the `uploads/` and `output/` directories holding the files your conversion jobs refer to. Copying `mydb.sqlite` alone gives you an instance you cannot log in to.
+
 ### Environment variables
 
 All are optional, JWT_SECRET is recommended to be set.
