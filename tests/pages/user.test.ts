@@ -114,6 +114,12 @@ describe("POST /register", () => {
   });
 });
 
+const expectErrorPage = async (response: Response, message: string) => {
+  expect(response.headers.get("content-type")).toContain("text/html");
+  const body = await response.text();
+  expect(body).toContain('role="alert"');
+  expect(body).toContain(message);
+};
 describe("GET /login", () => {
   test("shows the login form without a register link while registration is closed", async () => {
     setEnv({ ACCOUNT_REGISTRATION: false });
@@ -173,7 +179,7 @@ describe("POST /login", () => {
     const response = await request("/login", { form: { email: user.email, password } });
 
     expect(response.status).toBe(403);
-    expect(await response.json()).toEqual({ message: "Invalid credentials." });
+    await expectErrorPage(response, "Invalid credentials.");
     expect(setCookie(response, "auth")).toBeUndefined();
   });
 
@@ -183,7 +189,17 @@ describe("POST /login", () => {
     });
 
     expect(response.status).toBe(403);
-    expect(await response.json()).toEqual({ message: "Invalid credentials." });
+    await expectErrorPage(response, "Invalid credentials.");
+  });
+
+  test("keeps the entered email in the form after a failed login", async () => {
+    const user = await createUser();
+
+    const response = await request("/login", {
+      form: { email: user.email, password: "wrong password" },
+    });
+
+    expect(await response.text()).toContain(`value="${user.email}"`);
   });
 
   test("rejects a request without a password", async () => {
@@ -259,7 +275,7 @@ describe("POST /account", () => {
     });
 
     expect(response.status).toBe(403);
-    expect(await response.json()).toEqual({ message: "Invalid credentials." });
+    await expectErrorPage(response, "Invalid credentials.");
     expect(findUserById(user.id)?.email).toBe(user.email);
   });
 
@@ -296,7 +312,7 @@ describe("POST /account", () => {
     });
 
     expect(response.status).toBe(409);
-    expect(await response.json()).toEqual({ message: "Email already in use." });
+    await expectErrorPage(response, "Email already in use.");
     expect(findUserById(user.id)?.email).toBe(user.email);
   });
 
