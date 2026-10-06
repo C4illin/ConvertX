@@ -38,7 +38,7 @@
     "@kitajs/ts-html-plugin": "^4.1.4",
     "@tailwindcss/cli": "^4.3.3",
     "@tailwindcss/postcss": "^4.3.3",
-    "@types/bun": "latest",
+    "@types/bun": "1.4.2",
     "@types/node": "^24.19.0",
     "eslint": "^10.11.0",
     "eslint-plugin-better-tailwindcss": "^4.7.0",
