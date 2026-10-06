@@ -28,6 +28,7 @@ import { convert as convertVtracer, properties as propertiesVtracer } from "./vt
 import { convert as convertVcf, properties as propertiesVcf } from "./vcf";
 import { convert as convertxelatex, properties as propertiesxelatex } from "./xelatex";
 import { convert as convertMarkitdown, properties as propertiesMarkitdown } from "./markitdown";
+import { convert as convertParquet, properties as propertiesParquet } from "./parquet";
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
 
@@ -139,6 +140,10 @@ const properties: Record<
   markitDown: {
     properties: propertiesMarkitdown,
     converter: convertMarkitdown,
+  },
+  parquet: {
+    properties: propertiesParquet,
+    converter: convertParquet,
   },
   pdftops: {
     properties: propertiesPdftops,
