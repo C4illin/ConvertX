@@ -1,77 +1,55 @@
-import { beforeEach, expect, test } from "bun:test";
+import { afterEach, beforeEach, expect, test } from "bun:test";
 import { convert } from "../../src/converters/pdftops";
 import { runCommonTests } from "./helpers/commonTests";
+import { captureConsole, createMockExecFile } from "./helpers/converters";
 
 runCommonTests(convert);
 
-let calls: string[][] = [];
-
-function mockExecFile(
-  _cmd: string,
-  args: string[],
-  callback: (err: Error | null, stdout: string, stderr: string) => void,
-) {
-  calls.push(args);
-  if (args.includes("fail.pdf")) {
-    callback(new Error("mock failure"), "", "Fake stderr: fail");
-  } else {
-    callback(null, "Fake stdout", "");
-  }
-}
+let output: ReturnType<typeof captureConsole>;
 
 beforeEach(() => {
-  calls = [];
+  output = captureConsole();
+});
+
+afterEach(() => {
+  output.restore();
 });
 
 test("converts a normal file to ps", async () => {
-  const originalConsoleLog = console.log;
+  const { execFile, calls } = createMockExecFile({ stdout: "Fake stdout" });
 
-  let loggedMessage = "";
-  console.log = (msg) => {
-    loggedMessage = msg;
-  };
-
-  const result = await convert("in.pdf", "pdf", "ps", "out.ps", undefined, mockExecFile);
-
-  console.log = originalConsoleLog;
+  const result = await convert("in.pdf", "pdf", "ps", "out.ps", undefined, execFile);
 
   expect(result).toBe("Done");
-  expect(calls[0]).toEqual(["in.pdf", "out.ps"]);
-  expect(loggedMessage).toBe("stdout: Fake stdout");
+  expect(calls).toEqual([{ cmd: "pdftops", args: ["in.pdf", "out.ps"] }]);
+  expect(output.logs).toEqual(["stdout: Fake stdout"]);
 });
 
 test("adds -eps flag for eps output", async () => {
-  const result = await convert("in.pdf", "pdf", "eps", "out.eps", undefined, mockExecFile);
+  const { execFile, calls } = createMockExecFile();
+
+  const result = await convert("in.pdf", "pdf", "eps", "out.eps", undefined, execFile);
 
   expect(result).toBe("Done");
-  expect(calls[0]).toEqual(["-eps", "in.pdf", "out.eps"]);
+  expect(calls).toEqual([{ cmd: "pdftops", args: ["-eps", "in.pdf", "out.eps"] }]);
 });
 
-test("fails on exec error", async () => {
-  expect(convert("fail.pdf", "pdf", "ps", "output.ps", undefined, mockExecFile)).rejects.toMatch(
-    /error: Error: mock failure/,
+test("fails on exec error without logging the output of the failed run", async () => {
+  const { execFile } = createMockExecFile({
+    error: new Error("mock failure"),
+    stderr: "Fake stderr: fail",
+  });
+
+  await expect(convert("fail.pdf", "pdf", "ps", "output.ps", undefined, execFile)).rejects.toBe(
+    "error: Error: mock failure",
   );
+  expect(output.errors).toEqual([]);
 });
 
 test("logs stderr when execFile returns only stderr and no error", async () => {
-  const originalConsoleError = console.error;
+  const { execFile } = createMockExecFile({ stderr: "Only stderr output" });
 
-  let loggedMessage = "";
-  console.error = (msg) => {
-    loggedMessage = msg;
-  };
+  await convert("input.pdf", "pdf", "ps", "output.ps", undefined, execFile);
 
-  const mockExecFileStderrOnly = (
-    _cmd: string,
-    _args: string[],
-    callback: (err: Error | null, stdout: string, stderr: string) => void,
-  ) => {
-    callback(null, "", "Only stderr output");
-  };
-
-  await convert("input.pdf", "pdf", "ps", "output.ps", undefined, mockExecFileStderrOnly);
-
-  console.error = originalConsoleError;
-
-  expect(loggedMessage).toBe("stderr: Only stderr output");
+  expect(output.errors).toEqual(["stderr: Only stderr output"]);
 });
