@@ -1,6 +1,6 @@
-import { test, expect, beforeEach, afterEach, afterAll } from "bun:test";
 import { Database } from "bun:sqlite";
-import { unlinkSync, existsSync, mkdirSync } from "node:fs";
+import { afterAll, afterEach, beforeEach, expect, test } from "bun:test";
+import { existsSync, mkdirSync, unlinkSync } from "node:fs";
 
 // set environment variable to ensure the test database is used instead of production data
 process.env.DB_PATH = "./data/test-isolated.sqlite";
@@ -98,10 +98,7 @@ afterEach(() => {
 });
 
 afterAll(() => {
-  // Close the module-level default database before cleanup to prevent file lock errors
-  if (defaultDb) {
-    defaultDb.close();
-  }
+  // Do not close defaultDb as subsequent test files in the test suite share the db instance
   // Cleanup of the isolated test database after the test run
   if (existsSync("./data/test-isolated.sqlite")) {
     unlinkSync("./data/test-isolated.sqlite");

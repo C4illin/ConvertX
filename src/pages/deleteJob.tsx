@@ -1,10 +1,9 @@
-import { rmSync } from "node:fs";
 import { Elysia, t } from "elysia";
-import { outputDir, uploadsDir } from "..";
+import { rmSync } from "node:fs";
 import db from "../db/db";
-import { WEBROOT } from "../helpers/env";
-import { userService } from "./user";
 import { Jobs } from "../db/types";
+import { outputDir, uploadsDir, WEBROOT } from "../helpers/env";
+import { userService } from "./user";
 
 export const deleteJob = new Elysia()
   .use(userService)
