@@ -8,13 +8,16 @@
     "format:eslint": "eslint --fix .",
     "format:prettier": "prettier --write .",
     "build:js": "tsc",
+    "build:docker": "docker compose build",
     "build": "bun x @tailwindcss/cli -i ./src/main.css -o ./public/generated.css && bun run build:js",
     "lint": "npm-run-all 'lint:*'",
     "lint:tsc": "tsc --noEmit",
     "lint:knip": "knip",
     "lint:eslint": "eslint .",
     "lint:prettier": "prettier --check .",
-    "lint:xss": "xss-scan"
+    "lint:xss": "xss-scan",
+    "test": "bun test --path-ignore-patterns=tests/integration",
+    "test:integration": "docker run --rm -v ./tests:/app/tests -v ./src:/app/src -v ./package.json:/app/package.json convertx:test bun test tests/integration"
   },
   "dependencies": {
     "@elysiajs/html": "^1.4.2",

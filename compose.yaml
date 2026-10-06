@@ -2,6 +2,8 @@
 
 services:
   convertx:
+    image: convertx:test
+    pull_policy: build
     build:
       context: .
       # dockerfile: Debian.Dockerfile
