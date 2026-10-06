@@ -85,6 +85,14 @@ Ensure `PUID` and `PGID` match your host user (`id -u` and `id -g`) to avoid per
 
 Then visit `http://localhost:3000` in your browser and create your account. Don't leave it unconfigured and open, as anyone can register the first account.
 
+### Managed hosting
+
+If you'd rather not run a server yourself:
+
+[![Deploy with Zenith](https://cdn.zenith.hosting/buttons/deploy-with-zenith.svg)](https://zenith.hosting/host/convertx)
+
+One-click managed ConvertX: storage, backups and a free subdomain included. A share of every subscription goes back to ConvertX.
+
 ### Environment variables
 
 All are optional, JWT_SECRET is recommended to be set.
