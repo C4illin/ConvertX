@@ -1,23 +1,23 @@
-import { rmSync } from "node:fs";
 import { html } from "@elysiajs/html";
 import { staticPlugin } from "@elysiajs/static";
 import { Elysia } from "elysia";
-import "./helpers/printVersions";
+import { rmSync } from "node:fs";
 import db from "./db/db";
 import { Jobs } from "./db/types";
 import { AUTO_DELETE_EVERY_N_HOURS, WEBROOT } from "./helpers/env";
+import "./helpers/printVersions";
 import { chooseConverter } from "./pages/chooseConverter";
 import { convert } from "./pages/convert";
 import { deleteFile } from "./pages/deleteFile";
 import { deleteJob } from "./pages/deleteJob";
 import { download } from "./pages/download";
+import { healthcheck } from "./pages/healthcheck";
 import { history } from "./pages/history";
 import { listConverters } from "./pages/listConverters";
 import { results } from "./pages/results";
 import { root } from "./pages/root";
 import { upload } from "./pages/upload";
 import { user } from "./pages/user";
-import { healthcheck } from "./pages/healthcheck";
 
 export const uploadsDir = "./data/uploads/";
 export const outputDir = "./data/output/";
@@ -100,3 +100,14 @@ const clearJobs = () => {
 if (AUTO_DELETE_EVERY_N_HOURS > 0) {
   clearJobs();
 }
+
+const handleShutdown = async () => {
+  console.log("Closing database connection...");
+  await app.stop();
+  db.close();
+  process.exit(0);
+};
+};
+
+process.on("SIGINT", handleShutdown);
+process.on("SIGTERM", handleShutdown);
