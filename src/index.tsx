@@ -1,10 +1,9 @@
-import { rmSync } from "node:fs";
 import { html } from "@elysiajs/html";
 import { staticPlugin } from "@elysiajs/static";
 import { Elysia } from "elysia";
 import "./helpers/printVersions";
 import db from "./db/db";
-import { Jobs } from "./db/types";
+import { startJobCleanup } from "./helpers/clearJobs";
 import { AUTO_DELETE_EVERY_N_HOURS, WEBROOT } from "./helpers/env";
 import { chooseConverter } from "./pages/chooseConverter";
 import { convert } from "./pages/convert";
@@ -73,30 +72,11 @@ app.listen(process.env.PORT || 3000);
 
 console.log(`🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}${WEBROOT}`);
 
-const clearJobs = () => {
-  const jobs = db
-    .query("SELECT * FROM jobs WHERE date_created < ?")
-    .as(Jobs)
-    .all(new Date(Date.now() - AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000).toISOString());
-
-  for (const job of jobs) {
-    // delete the directories
-    rmSync(`${outputDir}${job.user_id}/${job.id}`, {
-      recursive: true,
-      force: true,
-    });
-    rmSync(`${uploadsDir}${job.user_id}/${job.id}`, {
-      recursive: true,
-      force: true,
-    });
-
-    // delete the job
-    db.query("DELETE FROM jobs WHERE id = ?").run(job.id);
-  }
-
-  setTimeout(clearJobs, AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000);
-};
-
 if (AUTO_DELETE_EVERY_N_HOURS > 0) {
-  clearJobs();
+  startJobCleanup({
+    db,
+    outputDir,
+    uploadsDir,
+    intervalHours: AUTO_DELETE_EVERY_N_HOURS,
+  });
 }
