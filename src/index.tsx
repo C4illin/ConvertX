@@ -73,6 +73,7 @@ app.listen(process.env.PORT || 3000);
 
 console.log(`🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}${WEBROOT}`);
 
+let clearJobsTimer: ReturnType<typeof setTimeout> | undefined;
 const clearJobs = () => {
   const jobs = db
     .query("SELECT * FROM jobs WHERE date_created < ?")
@@ -94,17 +95,28 @@ const clearJobs = () => {
     db.query("DELETE FROM jobs WHERE id = ?").run(job.id);
   }
 
-  setTimeout(clearJobs, AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000);
+  clearJobsTimer = setTimeout(clearJobs, AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000);
 };
 
 if (AUTO_DELETE_EVERY_N_HOURS > 0) {
   clearJobs();
 }
 
+let isShuttingDown = false;
 const handleShutdown = async () => {
-  await app.stop();
-  db.close();
-  process.exit(0);
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  if (clearJobsTimer) {
+    clearTimeout(clearJobsTimer);
+  }
+  try {
+    await app.stop(true);
+    db.close();
+    process.exit(0);
+  } catch (error) {
+    console.error("Error during graceful shutdown:", error);
+    process.exit(1);
+  }
 };
 
 process.on("SIGINT", handleShutdown);
