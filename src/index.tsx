@@ -1,23 +1,23 @@
-import { rmSync } from "node:fs";
 import { html } from "@elysiajs/html";
 import { staticPlugin } from "@elysiajs/static";
 import { Elysia } from "elysia";
-import "./helpers/printVersions";
+import { rmSync } from "node:fs";
 import db from "./db/db";
 import { Jobs } from "./db/types";
 import { AUTO_DELETE_EVERY_N_HOURS, WEBROOT } from "./helpers/env";
+import "./helpers/printVersions";
 import { chooseConverter } from "./pages/chooseConverter";
 import { convert } from "./pages/convert";
 import { deleteFile } from "./pages/deleteFile";
 import { deleteJob } from "./pages/deleteJob";
 import { download } from "./pages/download";
+import { healthcheck } from "./pages/healthcheck";
 import { history } from "./pages/history";
 import { listConverters } from "./pages/listConverters";
 import { results } from "./pages/results";
 import { root } from "./pages/root";
 import { upload } from "./pages/upload";
 import { user } from "./pages/user";
-import { healthcheck } from "./pages/healthcheck";
 
 export const uploadsDir = "./data/uploads/";
 export const outputDir = "./data/output/";
@@ -73,6 +73,7 @@ app.listen(process.env.PORT || 3000);
 
 console.log(`🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}${WEBROOT}`);
 
+let clearJobsTimer: ReturnType<typeof setTimeout> | undefined;
 const clearJobs = () => {
   const jobs = db
     .query("SELECT * FROM jobs WHERE date_created < ?")
@@ -94,9 +95,29 @@ const clearJobs = () => {
     db.query("DELETE FROM jobs WHERE id = ?").run(job.id);
   }
 
-  setTimeout(clearJobs, AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000);
+  clearJobsTimer = setTimeout(clearJobs, AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000);
 };
 
 if (AUTO_DELETE_EVERY_N_HOURS > 0) {
   clearJobs();
 }
+
+let isShuttingDown = false;
+const handleShutdown = async () => {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  if (clearJobsTimer) {
+    clearTimeout(clearJobsTimer);
+  }
+  try {
+    await app.stop(true);
+    db.close();
+    process.exit(0);
+  } catch (error) {
+    console.error("Error during graceful shutdown:", error);
+    process.exit(1);
+  }
+};
+
+process.on("SIGINT", handleShutdown);
+process.on("SIGTERM", handleShutdown);

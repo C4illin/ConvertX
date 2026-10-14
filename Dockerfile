@@ -9,12 +9,15 @@ RUN apt-get update && apt-get install -y \
   unzip \
   && rm -rf /var/lib/apt/lists/*
 
+COPY .bun-version .
+
 # if architecture is arm64, use the arm64 version of bun
 RUN ARCH=$(uname -m) && \
+  BUN_VERSION=$(cat .bun-version) && \
   if [ "$ARCH" = "aarch64" ]; then \
-    curl -fsSL -o bun-linux-aarch64.zip https://github.com/oven-sh/bun/releases/download/bun-v1.2.2/bun-linux-aarch64.zip; \
+  curl -fsSL -o bun-linux-aarch64.zip https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-aarch64.zip; \
   else \
-    curl -fsSL -o bun-linux-x64-baseline.zip https://github.com/oven-sh/bun/releases/download/bun-v1.2.2/bun-linux-x64-baseline.zip; \
+  curl -fsSL -o bun-linux-x64-baseline.zip https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-x64-baseline.zip; \
   fi
 
 RUN unzip -j bun-linux-*.zip -d /usr/local/bin && \
@@ -45,6 +48,9 @@ RUN bun run build
 FROM base AS release
 
 # install additional dependencies 
+ENV PIPX_HOME=/opt/pipx
+ENV PIPX_BIN_DIR=/usr/local/bin
+
 RUN apt-get update && apt-get install -y \
   assimp-utils \
   calibre \
@@ -54,6 +60,7 @@ RUN apt-get update && apt-get install -y \
   dvisvgm \
   ffmpeg \
   ghostscript \
+  gosu \
   graphicsmagick \
   imagemagick-7.q16 \
   inkscape \
@@ -85,15 +92,15 @@ RUN apt-get update && apt-get install -y \
   && pipx install "markitdown[all]" \
   && rm -rf /var/lib/apt/lists/*
 
-# Add pipx bin directory to PATH
-ENV PATH="/root/.local/bin:${PATH}"
+RUN groupadd -g 1000 convertx && \
+  useradd -u 1000 -g convertx -d /home/convertx -m -s /bin/bash convertx
 
 # Install VTracer binary
 RUN ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
-    VTRACER_ASSET="vtracer-aarch64-unknown-linux-musl.tar.gz"; \
+  VTRACER_ASSET="vtracer-aarch64-unknown-linux-musl.tar.gz"; \
   else \
-    VTRACER_ASSET="vtracer-x86_64-unknown-linux-musl.tar.gz"; \
+  VTRACER_ASSET="vtracer-x86_64-unknown-linux-musl.tar.gz"; \
   fi && \
   curl -L -o /tmp/vtracer.tar.gz "https://github.com/visioncortex/vtracer/releases/download/0.6.4/${VTRACER_ASSET}" && \
   tar -xzf /tmp/vtracer.tar.gz -C /tmp/ && \
@@ -108,8 +115,12 @@ COPY --from=prerelease /app/dist /app/dist
 # COPY . .
 RUN mkdir data
 
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 3000/tcp
 # used for calibre
 ENV QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox"
 ENV NODE_ENV=production
-ENTRYPOINT [ "bun", "run", "dist/src/index.js" ]
+ENTRYPOINT [ "/entrypoint.sh" ]
+CMD [ "bun", "run", "dist/src/index.js" ]

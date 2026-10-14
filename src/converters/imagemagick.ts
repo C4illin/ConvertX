@@ -461,6 +461,11 @@ export function convert(
     }
   }
 
+  // Increase rasterization quality for PDF input
+  if (fileType === "pdf") {
+    inputArgs.push("-density", "300");
+  }
+
   // Handle EMF files specifically to avoid LibreOffice delegate issues
   if (fileType === "emf") {
     // Use direct conversion without delegates for EMF files
