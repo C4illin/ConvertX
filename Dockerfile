@@ -9,12 +9,15 @@ RUN apt-get update && apt-get install -y \
   unzip \
   && rm -rf /var/lib/apt/lists/*
 
+COPY .bun-version .
+
 # if architecture is arm64, use the arm64 version of bun
 RUN ARCH=$(uname -m) && \
+  BUN_VERSION=$(cat .bun-version) && \
   if [ "$ARCH" = "aarch64" ]; then \
-  curl -fsSL -o bun-linux-aarch64.zip https://github.com/oven-sh/bun/releases/download/bun-v1.4.2/bun-linux-aarch64.zip; \
+  curl -fsSL -o bun-linux-aarch64.zip https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-aarch64.zip; \
   else \
-  curl -fsSL -o bun-linux-x64-baseline.zip https://github.com/oven-sh/bun/releases/download/bun-v1.4.2/bun-linux-x64-baseline.zip; \
+  curl -fsSL -o bun-linux-x64-baseline.zip https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-x64-baseline.zip; \
   fi
 
 RUN unzip -j bun-linux-*.zip -d /usr/local/bin && \
