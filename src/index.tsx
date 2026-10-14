@@ -107,7 +107,6 @@ const handleShutdown = async () => {
   db.close();
   process.exit(0);
 };
-};
 
 process.on("SIGINT", handleShutdown);
 process.on("SIGTERM", handleShutdown);
