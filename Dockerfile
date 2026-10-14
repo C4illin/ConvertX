@@ -1,4 +1,4 @@
-FROM debian:testing-slim AS base
+FROM debian:testing-slim AS bun-base
 LABEL org.opencontainers.image.source="https://github.com/C4illin/ConvertX"
 WORKDIR /app
 
@@ -26,26 +26,22 @@ RUN unzip -j bun-linux-*.zip -d /usr/local/bin && \
 
 # install dependencies into temp directory
 # this will cache them and speed up future builds
-FROM base AS install
+FROM bun-base AS install
 RUN mkdir -p /temp/dev
 COPY package.json bun.lock /temp/dev/
 RUN cd /temp/dev && bun install --frozen-lockfile
 
-# install with --production (exclude devDependencies)
-RUN mkdir -p /temp/prod
-COPY package.json bun.lock /temp/prod/
-RUN cd /temp/prod && bun install --frozen-lockfile --production
-
-FROM base AS prerelease
+FROM bun-base AS build
 WORKDIR /app
 COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 
-# ENV NODE_ENV=production
-RUN bun run build
+RUN bun run build:bin
 
 # copy production dependencies and source code into final image
-FROM base AS release
+FROM debian:testing-slim AS release
+LABEL org.opencontainers.image.source="https://github.com/C4illin/ConvertX"
+WORKDIR /app
 
 # install additional dependencies 
 ENV PIPX_HOME=/opt/pipx
@@ -53,7 +49,9 @@ ENV PIPX_BIN_DIR=/usr/local/bin
 
 RUN apt-get update && apt-get install -y \
   assimp-utils \
+  ca-certificates \
   calibre \
+  curl \
   dasel \
   dcraw \
   djvulibre-bin \
@@ -108,9 +106,8 @@ RUN ARCH=$(uname -m) && \
   chmod +x /usr/local/bin/vtracer && \
   rm /tmp/vtracer.tar.gz
 
-COPY --from=install /temp/prod/node_modules node_modules
-COPY --from=prerelease /app/public/ /app/public/
-COPY --from=prerelease /app/dist /app/dist
+COPY --from=build /app/public/ /app/public/
+COPY --from=build /app/dist/convertx /app/convertx
 
 # COPY . .
 RUN mkdir data
@@ -123,4 +120,11 @@ EXPOSE 3000/tcp
 ENV QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox"
 ENV NODE_ENV=production
 ENTRYPOINT [ "/entrypoint.sh" ]
-CMD [ "bun", "run", "dist/src/index.js" ]
+CMD [ "/app/convertx" ]
+
+# test stage that includes Bun for running tests if needed
+FROM release AS test
+COPY --from=bun-base /usr/local/bin/bun /usr/local/bin/bun
+
+# default target remains release
+FROM release
