@@ -1,44 +1,11 @@
-FROM debian:testing-slim AS bun-base
-LABEL org.opencontainers.image.source="https://github.com/C4illin/ConvertX"
+FROM oven/bun:1.4.3-slim AS base
 WORKDIR /app
-
-# install bun
-RUN apt-get update && apt-get install -y \
-  ca-certificates \
-  curl \
-  unzip \
-  && rm -rf /var/lib/apt/lists/*
-
-COPY .bun-version .
-
-# if architecture is arm64, use the arm64 version of bun
-RUN ARCH=$(uname -m) && \
-  BUN_VERSION=$(cat .bun-version) && \
-  if [ "$ARCH" = "aarch64" ]; then \
-  curl -fsSL -o bun-linux-aarch64.zip https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-aarch64.zip; \
-  else \
-  curl -fsSL -o bun-linux-x64-baseline.zip https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-x64-baseline.zip; \
-  fi
-
-RUN unzip -j bun-linux-*.zip -d /usr/local/bin && \
-  rm bun-linux-*.zip && \
-  chmod +x /usr/local/bin/bun
-
-# install dependencies into temp directory
-# this will cache them and speed up future builds
-FROM bun-base AS install
-RUN mkdir -p /temp/dev
-COPY package.json bun.lock /temp/dev/
-RUN cd /temp/dev && bun install --frozen-lockfile
-
-FROM bun-base AS build
-WORKDIR /app
-COPY --from=install /temp/dev/node_modules node_modules
+COPY package.json bun.lock /app/
+RUN bun install --frozen-lockfile
 COPY . .
 
 RUN bun run build:bin
 
-# copy production dependencies and source code into final image
 FROM debian:testing-slim AS release
 LABEL org.opencontainers.image.source="https://github.com/C4illin/ConvertX"
 WORKDIR /app
@@ -106,8 +73,8 @@ RUN ARCH=$(uname -m) && \
   chmod +x /usr/local/bin/vtracer && \
   rm /tmp/vtracer.tar.gz
 
-COPY --from=build /app/public/ /app/public/
-COPY --from=build /app/dist/convertx /app/convertx
+COPY --from=base /app/public/ /app/public/
+COPY --from=base /app/dist/convertx /app/convertx
 
 # COPY . .
 RUN mkdir data
@@ -124,7 +91,7 @@ CMD [ "/app/convertx" ]
 
 # test stage that includes Bun for running tests if needed
 FROM release AS test
-COPY --from=bun-base /usr/local/bin/bun /usr/local/bin/bun
+COPY --from=base /usr/local/bin/bun /usr/local/bin/bun
 
 # default target remains release
 FROM release
