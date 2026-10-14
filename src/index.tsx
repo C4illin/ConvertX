@@ -102,7 +102,6 @@ if (AUTO_DELETE_EVERY_N_HOURS > 0) {
 }
 
 const handleShutdown = async () => {
-  console.log("Closing database connection...");
   await app.stop();
   db.close();
   process.exit(0);
