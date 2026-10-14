@@ -2,10 +2,13 @@ const webroot = document.querySelector("meta[name='webroot']").content;
 const fileInput = document.querySelector('input[type="file"]');
 const dropZone = document.getElementById("dropzone");
 const convertButton = document.querySelector("input[type='submit']");
+const supportedSourcesEl = document.getElementById("supported-sources");
+
 const fileNames = [];
 let fileType;
 let pendingFiles = 0;
 let formatSelected = false;
+let latestSourcesRequestKey = null;
 
 dropZone.addEventListener("dragover", (e) => {
   e.preventDefault();
@@ -71,6 +74,44 @@ function handleFile(file) {
 
 const selectContainer = document.querySelector("form .select_container");
 
+// Fetches the supported source types for a given target extension +
+// converter pair, and renders them above the Convert button. Each request
+// is tagged with a key (extension::converter) so that a slower, stale
+// response — from an earlier selection, even one with the same extension
+// but a different converter — can never overwrite what the most recently
+// selected target should show.
+const showSupportedSources = (targetExtension, converterName) => {
+  if (!supportedSourcesEl) return;
+
+  const requestKey = `${targetExtension}::${converterName}`;
+  latestSourcesRequestKey = requestKey;
+
+  fetch(`${webroot}/convert-sources`, {
+    method: "POST",
+    body: JSON.stringify({ to: targetExtension }),
+    headers: { "Content-Type": "application/json" },
+  })
+    .then((res) => res.json())
+    .then((sourcesByConverter) => {
+      if (latestSourcesRequestKey !== requestKey) return;
+
+      const sources = sourcesByConverter[converterName] || [];
+      const unique = [...new Set(sources)].sort();
+
+      if (unique.length === 0) {
+        supportedSourcesEl.textContent = "";
+        return;
+      }
+
+      supportedSourcesEl.textContent = `Supported source types: ${unique.join(", ")}`;
+    })
+    .catch((err) => {
+      if (latestSourcesRequestKey !== requestKey) return;
+      console.error(err);
+      supportedSourcesEl.textContent = "";
+    });
+};
+
 const updateSearchBar = () => {
   const convertToInput = document.querySelector("input[name='convert_to_search']");
   const convertToPopup = document.querySelector(".convert_to_popup");
@@ -117,6 +158,7 @@ const updateSearchBar = () => {
           convertButton.disabled = false;
         }
         showMatching("");
+        showSupportedSources(target.dataset.target, target.dataset.converter);
       };
     }
 
@@ -131,6 +173,8 @@ const updateSearchBar = () => {
     // when the user clears the search bar using the 'x' button
     convertButton.disabled = true;
     formatSelected = false;
+    latestSourcesRequestKey = null;
+    if (supportedSourcesEl) supportedSourcesEl.textContent = "";
   });
 
   convertToInput.addEventListener("blur", (e) => {
