@@ -14,13 +14,15 @@ type Converter = (
 export async function runGoldenConversion(
   converterName: string,
   convert: Converter,
+  inputFileName: string,
   outputExtension: string,
 ) {
   const outputDirectory = await mkdtemp(path.join(tmpdir(), `convertx-${converterName}-`));
-  const outputPath = path.join(outputDirectory, `sample.${outputExtension}`);
-  const inputPath = path.resolve("tests/integration/converters/inputs/sample.png");
+  const inputStem = path.parse(inputFileName).name;
+  const outputPath = path.join(outputDirectory, `${inputStem}.${outputExtension}`);
+  const inputPath = path.resolve(`tests/integration/converters/inputs/${inputFileName}`);
   const expectedPath = path.resolve(
-    `tests/integration/converters/outputs/${converterName}/sample.${outputExtension}`,
+    `tests/integration/converters/outputs/${converterName}/${inputStem}.${outputExtension}`,
   );
 
   try {
