@@ -19,7 +19,7 @@
     "lint:prettier": "prettier --check .",
     "lint:xss": "xss-scan",
     "test": "bun test --path-ignore-patterns=tests/integration",
-    "test:integration": "docker build --target test -t convertx:test . && docker run --rm -v ./tests:/app/tests -v ./src:/app/src -v ./package.json:/app/package.json convertx:test bun test tests/integration"
+    "test:integration": "docker build --target test -t convertx:test . && docker run --rm -t -v ./tests:/app/tests -v ./src:/app/src -v ./package.json:/app/package.json convertx:test bun test tests/integration"
   },
   "dependencies": {
     "@elysiajs/html": "^1.4.2",
