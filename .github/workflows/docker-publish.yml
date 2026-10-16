@@ -79,6 +79,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
+          target: test
           platforms: ${{ matrix.platform }}
           load: true
           tags: convertx:test
@@ -96,6 +97,7 @@ jobs:
           DOCKER_BUILDKIT: 1
         with:
           context: .
+          target: release
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
