@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Graphic xmlns="http://ns.adobe.com/fxg/2008" xmlns:fxg="http://ns.adobe.com/fxg/2008" xmlns:d="http://ns.adobe.com/fxg/2008/dt" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:svg="http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd" version="2.0" viewWidth="16" viewHeight="16">
+  <mask>
+    <Group>
+      <Rect width="16" height="16">
+        <fill>
+          <SolidColor color="#ffffff" alpha="1"/>
+        </fill>
+      </Rect>
+    </Group>
+  </mask>
+  <!--Unknown tag: defs-->
+  <!--Unknown tag: sodipodi:namedview-->
+  <Group id="g1">
+    <Rect width="16" height="16" id="image1">
+      <fill>
+        <BitmapFill source="@Embed('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABXElEQVQ4T2NkgILS2knrr1677A/j&#10;o9Py8go3HN0CbMI8tN8hyzHCOMEx+Xf37dmhhMsARkZGhujYxCNGmmauiYmOP2DqiDYApIGVlY0h&#10;JS17NdvfFxENDQ3/QGIkGQDSwMPDy5CWkddbWxJXgtMAHuF/DF/eMgEVc4Nd+uXLVwaYGIjv5Op+&#10;d+3iSSpYDZDW+s0Q3vmFYXkpD8OUhkVgA3Ia4hgiu78wrCznYXh6jRW/ASxs/xk07H8xXD/AxmCk&#10;bwg24NzF8wyaDr8YbhxkY/jzixG/AQrysgwTe1sYcgurGKRt74ANeHpYhWFyfxtDfnENw4OHj2ls&#10;ADYv3Hp8lkHZ4jfD3ZOsDB9fMJMeiKW9sQyB9V8ZNjRzAw1hw28AyM/cwGj8ihSNP/98YeAT/cfw&#10;6Q0Tw+/vBAIRV1JGFsebDgbOgJK6iRuuXb2CMzsju0xTS3dDb3NeIEgMAM4T4RHCgBZYAAAAAElF&#10;TkSuQmCC&#10;')"/>
+      </fill>
+    </Rect>
+  </Group>
+</Graphic>
