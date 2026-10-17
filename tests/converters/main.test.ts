@@ -87,6 +87,7 @@ describe("converter registry", () => {
       "assimp",
       "calibre",
       "dasel",
+      "djvu",
       "dvisvgm",
       "ffmpeg",
       "graphicsmagick",
