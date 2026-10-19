@@ -50,21 +50,17 @@ export const download = new Elysia()
 
       const jobId = decodeURIComponent(params.jobId);
       const outputPath = `${outputDir}${userId}/${jobId}`;
-      const archiveName = `converted_files_${jobId}.tar`;
+      const outputTar = path.join(outputPath, `converted_files_${jobId}.tar`);
 
       const files: Record<string, Bun.BunFile> = {};
       const glob = new Bun.Glob("**/*");
       for await (const file of glob.scan({ cwd: outputPath, onlyFiles: true, dot: true })) {
-        if (file !== archiveName) {
+        if (file !== path.basename(outputTar)) {
           files[file] = Bun.file(path.join(outputPath, file));
         }
       }
-      const archive = new Bun.Archive(files);
-      return new Response(await archive.blob(), {
-        headers: {
-          "Content-Type": "application/x-tar",
-        },
-      });
+      await Bun.Archive.write(outputTar, files);
+      return Bun.file(outputTar);
     },
     {
       auth: true,
