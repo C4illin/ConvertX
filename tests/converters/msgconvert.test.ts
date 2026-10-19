@@ -1,61 +1,90 @@
-import { expect, test } from "bun:test";
-import type { ExecFileException } from "node:child_process";
+import { afterEach, beforeEach, expect, test } from "bun:test";
 import { convert } from "../../src/converters/msgconvert";
-import { ExecFileFn } from "../../src/converters/types";
+import { captureConsole, createMockExecFile } from "./helpers/converters";
 
-test("convert rejects conversion if input filetype is not msg and output type is not eml", async () => {
-  const mockExecFile: ExecFileFn = (
-    _cmd: string,
-    _args: string[],
-    callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-  ) => {
-    callback(null, "Fake stdout", "");
-  };
+let output: ReturnType<typeof captureConsole>;
 
-  const expectedError = new Error(
-    "Unsupported conversion from obj to stl. Only MSG to EML conversion is currently supported.",
+beforeEach(() => {
+  output = captureConsole();
+});
+
+afterEach(() => {
+  output.restore();
+});
+
+test("convert invokes msgconvert with --outfile and resolves with the target path", async () => {
+  const { execFile, calls } = createMockExecFile();
+
+  const result = await convert("in/mail.msg", "msg", "eml", "out/mail.eml", undefined, execFile);
+
+  expect(result).toBe("out/mail.eml");
+  expect(calls).toEqual([
+    { cmd: "msgconvert", args: ["--outfile", "out/mail.eml", "in/mail.msg"] },
+  ]);
+});
+
+test.each([
+  ["obj", "stl"],
+  ["msg", "pdf"],
+  ["eml", "eml"],
+  ["eml", "msg"],
+])("convert rejects %s to %s without invoking msgconvert", async (fileType, convertTo) => {
+  const { execFile, calls } = createMockExecFile();
+
+  await expect(
+    convert(`input.${fileType}`, fileType, convertTo, `output.${convertTo}`, undefined, execFile),
+  ).rejects.toThrow(
+    `Unsupported conversion from ${fileType} to ${convertTo}. Only MSG to EML conversion is currently supported.`,
   );
-
-  expect(convert("input.obj", "obj", "stl", "output.stl", undefined, mockExecFile)).rejects.toEqual(
-    expectedError,
-  );
+  expect(calls).toHaveLength(0);
 });
 
 test("convert rejects conversion on error", async () => {
-  const mockExecFile: ExecFileFn = (
-    _cmd: string,
-    _args: string[],
-    callback: (err: ExecFileException | null, stdout: string, stderr: string) => void,
-  ) => {
-    callback(new Error("Test error"), "", "");
-  };
+  const { execFile } = createMockExecFile({ error: new Error("Test error") });
 
-  const expectedError = new Error("msgconvert failed: Test error");
-
-  expect(convert("input.msg", "msg", "eml", "output.eml", undefined, mockExecFile)).rejects.toEqual(
-    expectedError,
-  );
+  await expect(
+    convert("input.msg", "msg", "eml", "output.eml", undefined, execFile),
+  ).rejects.toThrow("msgconvert failed: Test error");
 });
 
 test("convert logs stderr as warning", async () => {
-  const originalConsoleWarn = console.warn;
+  const { execFile } = createMockExecFile({ stderr: "Fake stderr" });
 
-  let loggedMessage = "";
-  console.warn = (msg) => {
-    loggedMessage = msg;
-  };
+  await convert("file.msg", "msg", "eml", "out.eml", undefined, execFile);
 
-  const mockExecFile = (
-    _cmd: string,
-    _args: string[],
-    callback: (err: Error | null, stdout: string, stderr: string) => void,
-  ) => {
-    callback(null, "", "Fake stderr");
-  };
+  expect(output.warnings).toEqual(["msgconvert stderr: Fake stderr"]);
+});
 
-  await convert("file.msg", "msg", "eml", "out.eml", undefined, mockExecFile);
+test("convert redacts absolute paths in logged stderr", async () => {
+  const { execFile } = createMockExecFile({
+    stderr: "cannot read /home/user/uploads/secret.msg: bad header",
+  });
 
-  console.error = originalConsoleWarn;
+  await convert("file.msg", "msg", "eml", "out.eml", undefined, execFile);
 
-  expect(loggedMessage).toBe("msgconvert stderr: Fake stderr");
+  expect(output.warnings).toEqual(["msgconvert stderr: cannot read [REDACTED_PATH] bad header"]);
+});
+
+test("convert truncates logged stderr longer than 200 characters", async () => {
+  const { execFile } = createMockExecFile({ stderr: "x".repeat(201) });
+
+  await convert("file.msg", "msg", "eml", "out.eml", undefined, execFile);
+
+  expect(output.warnings).toEqual([`msgconvert stderr: ${"x".repeat(200)}...`]);
+});
+
+test("convert does not truncate stderr of exactly 200 characters", async () => {
+  const { execFile } = createMockExecFile({ stderr: "x".repeat(200) });
+
+  await convert("file.msg", "msg", "eml", "out.eml", undefined, execFile);
+
+  expect(output.warnings).toEqual([`msgconvert stderr: ${"x".repeat(200)}`]);
+});
+
+test("convert does not warn when stderr is empty", async () => {
+  const { execFile } = createMockExecFile({ stdout: "converted" });
+
+  await convert("file.msg", "msg", "eml", "out.eml", undefined, execFile);
+
+  expect(output.warnings).toEqual([]);
 });
