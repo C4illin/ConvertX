@@ -1,7 +1,6 @@
-import path from "node:path";
 import { Elysia } from "elysia";
+import path from "node:path";
 import sanitize from "sanitize-filename";
-import * as tar from "tar";
 import { outputDir } from "..";
 import db from "../db/db";
 import { WEBROOT } from "../helpers/env";
@@ -51,19 +50,21 @@ export const download = new Elysia()
 
       const jobId = decodeURIComponent(params.jobId);
       const outputPath = `${outputDir}${userId}/${jobId}`;
-      const outputTar = path.join(outputPath, `converted_files_${jobId}.tar`);
+      const archiveName = `converted_files_${jobId}.tar`;
 
-      await tar.create(
-        {
-          file: outputTar,
-          cwd: outputPath,
-          filter: (path) => {
-            return !path.match(".*\\.tar");
-          },
+      const files: Record<string, Bun.BunFile> = {};
+      const glob = new Bun.Glob("**/*");
+      for await (const file of glob.scan({ cwd: outputPath, onlyFiles: true })) {
+        if (file !== archiveName) {
+          files[file] = Bun.file(path.join(outputPath, file));
+        }
+      }
+      const archive = new Bun.Archive(files);
+      return new Response(await archive.blob(), {
+        headers: {
+          "Content-Type": "application/x-tar",
         },
-        ["."],
-      );
-      return Bun.file(outputTar);
+      });
     },
     {
       auth: true,

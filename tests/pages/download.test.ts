@@ -1,8 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import * as tar from "tar";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { createJob, createUser, jobDirs, request } from "./helpers/app";
 
 async function userWithOutputs(files: Record<string, string>) {
@@ -17,16 +14,8 @@ async function userWithOutputs(files: Record<string, string>) {
 }
 
 async function tarEntries(response: Response) {
-  const dir = mkdtempSync(join(tmpdir(), "convertx-archive-"));
-  try {
-    const file = join(dir, "archive.tar");
-    writeFileSync(file, Buffer.from(await response.arrayBuffer()));
-    const entries: string[] = [];
-    await tar.list({ file, onReadEntry: (entry) => entries.push(entry.path) });
-    return entries.sort();
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
+  const archive = new Bun.Archive(await response.arrayBuffer());
+  return [...(await archive.files()).keys()].sort();
 }
 
 describe("GET /download/:userId/:jobId/:fileName", () => {
@@ -144,7 +133,7 @@ describe("GET /archive/:jobId", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toBe("application/x-tar");
-    expect(await tarEntries(response)).toEqual(["./", "./a.csv", "./b.csv"]);
+    expect(await tarEntries(response)).toEqual(["a.csv", "b.csv"]);
   });
 
   test("does not include earlier archives in a new archive", async () => {
@@ -153,7 +142,7 @@ describe("GET /archive/:jobId", () => {
     await request(`/archive/${job}`, { cookies: { auth: user.token } });
     const response = await request(`/archive/${job}`, { cookies: { auth: user.token } });
 
-    expect(await tarEntries(response)).toEqual(["./", "./a.csv"]);
+    expect(await tarEntries(response)).toEqual(["a.csv"]);
   });
 
   test("refuses another user's job", async () => {
