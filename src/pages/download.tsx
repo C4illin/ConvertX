@@ -54,7 +54,7 @@ export const download = new Elysia()
 
       const files: Record<string, Bun.BunFile> = {};
       const glob = new Bun.Glob("**/*");
-      for await (const file of glob.scan({ cwd: outputPath, onlyFiles: true })) {
+      for await (const file of glob.scan({ cwd: outputPath, onlyFiles: true, dot: true })) {
         if (file !== archiveName) {
           files[file] = Bun.file(path.join(outputPath, file));
         }
