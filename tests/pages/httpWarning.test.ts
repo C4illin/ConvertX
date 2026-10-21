@@ -7,13 +7,14 @@ afterEach(() => {
 });
 
 describe("HTTP configuration warning", () => {
-  test("is available on the first-run setup page", () => {
+  test("is visible without JavaScript on the first-run setup page", () => {
     expect(firstRun?.setup.body).toContain('id="http-warning"');
+    expect(firstRun?.setup.body).not.toMatch(/<div[^>]*id="http-warning"[^>]*\bhidden\b/);
     expect(firstRun?.setup.body).toContain("HTTP_ALLOWED=true");
   });
 
   test.each(["/login", "/register", "/"])(
-    "is available on %s when HTTP is not allowed",
+    "is visible without JavaScript on %s when HTTP is not allowed",
     async (path) => {
       setEnv({ HTTP_ALLOWED: false, ACCOUNT_REGISTRATION: true, ALLOW_UNAUTHENTICATED: true });
 
@@ -21,7 +22,8 @@ describe("HTTP configuration warning", () => {
       const body = await response.text();
 
       expect(response.status).toBe(200);
-      expect(body).toMatch(/<div[^>]*id="http-warning"[^>]*hidden/);
+      expect(body).toContain('id="http-warning"');
+      expect(body).not.toMatch(/<div[^>]*id="http-warning"[^>]*\bhidden\b/);
       expect(body).toContain('role="alert"');
       expect(body).toContain("HTTPS");
       expect(body).toContain("HTTP_ALLOWED=true");
@@ -57,7 +59,7 @@ describe("HTTP configuration warning", () => {
       const body = await (await request("/login")).text();
       const script = body.match(/<script>([\s\S]*?)<\/script>/)?.[1];
       expect(script).toBeDefined();
-      const warning = { hidden: true };
+      const warning = { hidden: /<div[^>]*id="http-warning"[^>]*\bhidden\b/.test(body) };
 
       runInNewContext(script ?? "", {
         window: { location: new URL(url), isSecureContext },

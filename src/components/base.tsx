@@ -28,18 +28,17 @@ export const BaseHtml = ({
           <div
             id="http-warning"
             role="alert"
-            hidden
             class="m-4 rounded-sm border border-yellow-500/40 bg-yellow-500/10 p-4 text-yellow-200"
           >
-            This HTTP connection cannot save the secure cookies needed to log in and convert files.
-            Use HTTPS, or set <code>HTTP_ALLOWED=true</code> only if you are on a trusted local
-            network.
+            Insecure HTTP connections cannot save the secure cookies needed to log in and convert
+            files. Use HTTPS, or set <code>HTTP_ALLOWED=true</code> only if you are on a trusted
+            local network.
           </div>
           <script>
             {`
               // Browsers also trust localhost and loopback HTTP connections.
-              if (window.location.protocol === "http:" && !window.isSecureContext) {
-                document.getElementById("http-warning").hidden = false;
+              if (window.location.protocol !== "http:" || window.isSecureContext) {
+                document.getElementById("http-warning").hidden = true;
               }
             `}
           </script>
