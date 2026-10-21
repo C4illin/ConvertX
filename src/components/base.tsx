@@ -1,4 +1,5 @@
 import { version } from "../../package.json";
+import { HTTP_ALLOWED } from "../helpers/env";
 
 export const BaseHtml = ({
   children,
@@ -22,6 +23,28 @@ export const BaseHtml = ({
       <link rel="manifest" href={`${webroot}/site.webmanifest`} />
     </head>
     <body class={`flex min-h-screen w-full flex-col bg-neutral-900 text-neutral-200`}>
+      {!HTTP_ALLOWED ? (
+        <>
+          <div
+            id="http-warning"
+            role="alert"
+            hidden
+            class="m-4 rounded-sm border border-yellow-500/40 bg-yellow-500/10 p-4 text-yellow-200"
+          >
+            This HTTP connection cannot save the secure cookies needed to log in and convert files.
+            Use HTTPS, or set <code>HTTP_ALLOWED=true</code> only if you are on a trusted local
+            network.
+          </div>
+          <script>
+            {`
+              // Browsers also trust localhost and loopback HTTP connections.
+              if (window.location.protocol === "http:" && !window.isSecureContext) {
+                document.getElementById("http-warning").hidden = false;
+              }
+            `}
+          </script>
+        </>
+      ) : null}
       {children}
       <footer class="w-full">
         <div class="p-4 text-center text-sm text-neutral-500">
