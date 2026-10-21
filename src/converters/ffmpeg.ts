@@ -721,7 +721,7 @@ export async function convert(
   let extraArgs: string[] = [];
   let message = "Done";
 
-  const audioFormatsWithCover = ["m4a", "mp3", "flac", "ogg"];
+  const audioFormatsWithCover = ["m4a", "m4b", "mp3", "flac", "ogg"];
   const audioFormatsNoCover = ["wav", "aac"];
 
   if (audioFormatsWithCover.includes(convertTo)) {
