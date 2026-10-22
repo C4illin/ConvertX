@@ -9,7 +9,7 @@ import path from "node:path";
 
 export const deleteFile = new Elysia().use(userService).post(
   "/delete",
-  async ({ body, redirect, cookie: { jobId }, user }) => {
+  async ({ body, redirect, set, cookie: { jobId }, user }) => {
     if (!jobId?.value) {
       return redirect(`${WEBROOT}/`, 302);
     }
@@ -31,6 +31,7 @@ export const deleteFile = new Elysia().use(userService).post(
       await unlink(targetPath);
     } catch (e) {
       if ((e as NodeJS.ErrnoException).code === "ENOENT") {
+        set.status = 404;
         return { message: "File not found." };
       }
       throw e;

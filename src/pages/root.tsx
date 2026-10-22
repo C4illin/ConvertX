@@ -38,7 +38,15 @@ export const root = new Elysia().use(userService).get(
         try {
           const verifiedUser = await jwt.verify(auth.value);
           if (verifiedUser && verifiedUser.id) {
-            user = verifiedUser;
+            const numericId = Number.parseInt(verifiedUser.id);
+            // IDs below the anonymous range (excluding shared 0) are registered users
+            const isRegistered = numericId > 0 && numericId < 2 ** 24;
+            if (
+              !isRegistered ||
+              db.query("SELECT * FROM users WHERE id = ?").as(User).get(verifiedUser.id)
+            ) {
+              user = verifiedUser;
+            }
           }
         } catch {
           // Invalid cookie, fall through to anonymous creation

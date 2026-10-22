@@ -85,6 +85,11 @@ const properties: Record<
     properties: propertiesxelatex,
     converter: convertxelatex,
   },
+  // djvu before calibre so the dedicated ddjvu converter wins for DjVu files
+  djvu: {
+    properties: propertiesDjvu,
+    converter: convertDjvu,
+  },
   calibre: {
     properties: propertiesCalibre,
     converter: convertCalibre,
@@ -92,10 +97,6 @@ const properties: Record<
   dasel: {
     properties: propertiesDasel,
     converter: convertDasel,
-  },
-  djvu: {
-    properties: propertiesDjvu,
-    converter: convertDjvu,
   },
   libreoffice: {
     properties: propertiesLibreOffice,

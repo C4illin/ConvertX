@@ -67,6 +67,10 @@ export const convert = new Elysia().use(userService).post(
       return redirect(`${WEBROOT}/`, 302);
     }
 
+    if (!fileNames.every((name) => typeof name === "string")) {
+      return redirect(`${WEBROOT}/`, 302);
+    }
+
     for (let i = 0; i < fileNames.length; i++) {
       fileNames[i] = sanitize(fileNames[i] || "");
     }
