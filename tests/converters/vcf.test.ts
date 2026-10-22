@@ -181,10 +181,7 @@ describe("toCSV", () => {
     expect(toCSV(contacts)).toBe('Full Name,Email\n"John Doe","john@example.com"\n"Jane Smith",""');
   });
 
-  // BUG: the header is built from the first contact only, so fields that only
-  // later contacts have are silently dropped from the export. Remove `.failing`
-  // once toCSV builds the header from all contacts.
-  test.failing("should not drop fields that only later contacts have", () => {
+  test("should not drop fields that only later contacts have", () => {
     const contacts = [{ "Full Name": "John Doe" }, { "Full Name": "Jane Smith", Email: "j@x.com" }];
 
     expect(toCSV(contacts)).toContain("j@x.com");

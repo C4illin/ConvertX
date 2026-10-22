@@ -154,10 +154,7 @@ describe("POST /convert", () => {
     ]);
   });
 
-  // BUG: file_names is parsed and indexed before it is validated, so a value that is not a
-  // JSON array ends in a 500 instead of the redirect used for every other invalid input.
-  // Remove `.failing` once convert.tsx validates the parsed value first.
-  test.failing.each([
+  test.each([
     ["is not JSON", "not json"],
     ["is a JSON string", '"a.vcf"'],
   ])("redirects home when file_names %s", async (_, fileNames) => {
