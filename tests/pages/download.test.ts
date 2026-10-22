@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { createJob, createUser, jobDirs, request } from "./helpers/app";
 
-async function userWithOutputs(files: Record<string, string>) {
+async function userWithOutputs(files: Record<string, string | Uint8Array>) {
   const user = await createUser();
   const job = createJob(user.id);
   const dirs = jobDirs(user.id, job);
@@ -134,6 +134,17 @@ describe("GET /archive/:jobId", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toBe("application/x-tar");
     expect(await tarEntries(response)).toEqual(["a.csv", "b.csv"]);
+  });
+
+  test("preserves binary file contents", async () => {
+    const { user, job } = await userWithOutputs({ "image.png": new Uint8Array([0, 1, 2, 255]) });
+
+    const response = await request(`/archive/${job}`, { cookies: { auth: user.token } });
+    const archive = new Bun.Archive(await response.arrayBuffer());
+    const image = (await archive.files()).get("image.png");
+
+    expect(image).toBeDefined();
+    expect(await image?.arrayBuffer()).toEqual(new Uint8Array([0, 1, 2, 255]).buffer);
   });
 
   test("does not include earlier archives in a new archive", async () => {
