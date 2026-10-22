@@ -246,8 +246,8 @@ async function mainConverter(
     converterFunc = properties[converterName]?.converter;
   } else {
     // Iterate over each converter in properties
-    for (converterName in properties) {
-      const converterObj = properties[converterName];
+    for (const name in properties) {
+      const converterObj = properties[name];
 
       if (!converterObj) {
         break;
@@ -261,6 +261,9 @@ async function mainConverter(
           converterFunc = converterObj.converter;
           break;
         }
+      }
+      if (converterFunc) {
+        break;
       }
     }
   }
@@ -349,7 +352,7 @@ for (const converterName in properties) {
     if (allTargets[converterName]) {
       allTargets[converterName].push(...(converterProperties.to[key] || []));
     } else {
-      allTargets[converterName] = converterProperties.to[key] || [];
+      allTargets[converterName] = [...(converterProperties.to[key] || [])];
     }
   }
 }
