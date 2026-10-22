@@ -59,7 +59,7 @@ export const convert = new Elysia().use(userService).post(
     let fileNames: string[];
     try {
       fileNames = JSON.parse(body.file_names) as string[];
-    } catch (e) {
+    } catch {
       return redirect(`${WEBROOT}/`, 302);
     }
 

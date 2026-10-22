@@ -321,7 +321,7 @@ export const getPossibleTargets = (from: string): Record<string, string[]> => {
   const fromClean = normalizeFiletype(from);
 
   return possibleTargets[fromClean] || {};
-}
+};
 
 const possibleInputs: string[] = [];
 for (const converterName in properties) {
@@ -348,7 +348,10 @@ for (const converterName in properties) {
 
   for (const key in converterProperties.to) {
     if (allTargets[converterName]) {
-      allTargets[converterName] = [...allTargets[converterName], ...(converterProperties.to[key] || [])];
+      allTargets[converterName] = [
+        ...allTargets[converterName],
+        ...(converterProperties.to[key] || []),
+      ];
     } else {
       allTargets[converterName] = [...(converterProperties.to[key] || [])];
     }
@@ -367,7 +370,10 @@ for (const converterName in properties) {
 
   for (const key in converterProperties.from) {
     if (allInputs[converterName]) {
-      allInputs[converterName] = [...allInputs[converterName], ...(converterProperties.from[key] || [])];
+      allInputs[converterName] = [
+        ...allInputs[converterName],
+        ...(converterProperties.from[key] || []),
+      ];
     } else {
       allInputs[converterName] = converterProperties.from[key] || [];
     }

@@ -40,7 +40,7 @@ export const root = new Elysia().use(userService).get(
           if (verifiedUser && verifiedUser.id) {
             user = verifiedUser;
           }
-        } catch (e) {
+        } catch {
           // Invalid cookie, fall through to anonymous creation
         }
       }

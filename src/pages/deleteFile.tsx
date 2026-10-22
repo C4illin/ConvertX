@@ -29,12 +29,11 @@ export const deleteFile = new Elysia().use(userService).post(
 
     try {
       await unlink(targetPath);
-    } catch (error) {
-      if (error.code === "ENOENT") {
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code === "ENOENT") {
         return { message: "File not found." };
       }
-      console.error(`Failed to unlink ${targetPath}:`, error);
-      throw error;
+      throw e;
     }
 
     return {
