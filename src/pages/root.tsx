@@ -120,9 +120,9 @@ export const root = new Elysia().use(userService).get(
           />
           <main
             class={`
-            w-full flex-1 px-2
-            sm:px-4
-          `}
+              w-full flex-1 px-2
+              sm:px-4
+            `}
           >
             <article class="article">
               <h1 class="mb-4 text-xl">Convert</h1>

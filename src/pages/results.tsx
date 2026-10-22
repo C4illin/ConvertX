@@ -72,25 +72,25 @@ function ResultsArticle({
           <tr>
             <th
               class={`
-              p-2
-              sm:px-4
-            `}
+                p-2
+                sm:px-4
+              `}
             >
               Converted File Name
             </th>
             <th
               class={`
-              p-2
-              sm:px-4
-            `}
+                p-2
+                sm:px-4
+              `}
             >
               Status
             </th>
             <th
               class={`
-              p-2
-              sm:px-4
-            `}
+                p-2
+                sm:px-4
+              `}
             >
               Actions
             </th>
@@ -184,9 +184,9 @@ export const results = new Elysia()
             />
             <main
               class={`
-              w-full flex-1 px-2
-              sm:px-4
-            `}
+                w-full flex-1 px-2
+                sm:px-4
+              `}
             >
               <ResultsArticle job={job} files={files} outputPath={outputPath} />
             </main>

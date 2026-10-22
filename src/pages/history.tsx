@@ -51,9 +51,9 @@ export const history = new Elysia().use(userService).get(
           />
           <main
             class={`
-            w-full flex-1 px-2
-            sm:px-4
-          `}
+              w-full flex-1 px-2
+              sm:px-4
+            `}
           >
             <article class="article">
               <div class="mb-4 flex items-center justify-between">
@@ -85,9 +85,9 @@ export const history = new Elysia().use(userService).get(
                   <tr>
                     <th
                       class={`
-                      p-2
-                      sm:px-4
-                    `}
+                        p-2
+                        sm:px-4
+                      `}
                     >
                       <input
                         type="checkbox"
@@ -98,50 +98,50 @@ export const history = new Elysia().use(userService).get(
                     </th>
                     <th
                       class={`
-                      p-2
-                      sm:px-4
-                    `}
+                        p-2
+                        sm:px-4
+                      `}
                     >
                       <span class="sr-only">Expand details</span>
                     </th>
                     <th
                       class={`
-                      p-2
-                      sm:px-4
-                    `}
+                        p-2
+                        sm:px-4
+                      `}
                     >
                       Time
                     </th>
                     <th
                       class={`
-                      p-2
-                      sm:px-4
-                    `}
+                        p-2
+                        sm:px-4
+                      `}
                     >
                       Files
                     </th>
                     <th
                       class={`
-                      p-2
-                      max-sm:hidden
-                      sm:px-4
-                    `}
+                        p-2
+                        max-sm:hidden
+                        sm:px-4
+                      `}
                     >
                       Files Done
                     </th>
                     <th
                       class={`
-                      p-2
-                      sm:px-4
-                    `}
+                        p-2
+                        sm:px-4
+                      `}
                     >
                       Status
                     </th>
                     <th
                       class={`
-                      p-2
-                      sm:px-4
-                    `}
+                        p-2
+                        sm:px-4
+                      `}
                     >
                       Actions
                     </th>
