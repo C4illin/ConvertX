@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import type { User } from "../../src/db/types";
 import { db, FIRST_ACCOUNT, firstRun as recordedFirstRun, SECOND_ACCOUNT } from "./helpers/app";
 

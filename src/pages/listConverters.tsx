@@ -1,8 +1,9 @@
 import Elysia from "elysia";
+
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import { getAllInputs, getAllTargets } from "../converters/main";
-import { ALLOW_UNAUTHENTICATED, WEBROOT, BRANDING } from "../helpers/env";
+import { ALLOW_UNAUTHENTICATED, BRANDING, WEBROOT } from "../helpers/env";
 import { userService } from "./user";
 
 export const listConverters = new Elysia().use(userService).get(
@@ -17,12 +18,10 @@ export const listConverters = new Elysia().use(userService).get(
             branding={BRANDING}
             loggedIn
           />
-          <main
-            class={`
-              w-full flex-1 px-2
-              sm:px-4
-            `}
-          >
+          <main class={`
+            w-full flex-1 px-2
+            sm:px-4
+          `}>
             <article class="article">
               <h1 class="mb-4 text-xl">Converters</h1>
               <table

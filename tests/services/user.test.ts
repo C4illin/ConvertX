@@ -1,7 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+
 import { jwt } from "@elysiajs/jwt";
 import { Elysia } from "elysia";
+
 import { WEBROOT } from "../../src/helpers/env";
 import { userService } from "../../src/services/user";
 

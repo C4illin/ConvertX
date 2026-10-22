@@ -1,19 +1,20 @@
 import { Elysia } from "elysia";
+
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import db from "../db/db";
 import { Filename, Jobs } from "../db/types";
 import {
   ALLOW_UNAUTHENTICATED,
+  BRANDING,
   HIDE_HISTORY,
   LANGUAGE,
   TIMEZONE,
   WEBROOT,
-  BRANDING,
 } from "../helpers/env";
-import { userService } from "./user";
-import { EyeIcon } from "../icons/eye";
 import { DeleteIcon } from "../icons/delete";
+import { EyeIcon } from "../icons/eye";
+import { userService } from "./user";
 
 export const history = new Elysia().use(userService).get(
   "/history",
@@ -48,12 +49,10 @@ export const history = new Elysia().use(userService).get(
             hideHistory={HIDE_HISTORY}
             loggedIn
           />
-          <main
-            class={`
-              w-full flex-1 px-2
-              sm:px-4
-            `}
-          >
+          <main class={`
+            w-full flex-1 px-2
+            sm:px-4
+          `}>
             <article class="article">
               <div class="mb-4 flex items-center justify-between">
                 <h1 class="text-xl">Results</h1>
@@ -82,12 +81,10 @@ export const history = new Elysia().use(userService).get(
               >
                 <thead>
                   <tr>
-                    <th
-                      class={`
-                        p-2
-                        sm:px-4
-                      `}
-                    >
+                    <th class={`
+                      p-2
+                      sm:px-4
+                    `}>
                       <input
                         type="checkbox"
                         id="select-all"
@@ -95,55 +92,33 @@ export const history = new Elysia().use(userService).get(
                         title="Select all"
                       />
                     </th>
-                    <th
-                      class={`
-                        p-2
-                        sm:px-4
-                      `}
-                    >
+                    <th class={`
+                      p-2
+                      sm:px-4
+                    `}>
                       <span class="sr-only">Expand details</span>
                     </th>
-                    <th
-                      class={`
-                        p-2
-                        sm:px-4
-                      `}
-                    >
-                      Time
-                    </th>
-                    <th
-                      class={`
-                        p-2
-                        sm:px-4
-                      `}
-                    >
-                      Files
-                    </th>
-                    <th
-                      class={`
-                        p-2
-                        max-sm:hidden
-                        sm:px-4
-                      `}
-                    >
-                      Files Done
-                    </th>
-                    <th
-                      class={`
-                        p-2
-                        sm:px-4
-                      `}
-                    >
-                      Status
-                    </th>
-                    <th
-                      class={`
-                        p-2
-                        sm:px-4
-                      `}
-                    >
-                      Actions
-                    </th>
+                    <th class={`
+                      p-2
+                      sm:px-4
+                    `}>Time</th>
+                    <th class={`
+                      p-2
+                      sm:px-4
+                    `}>Files</th>
+                    <th class={`
+                      p-2
+                      max-sm:hidden
+                      sm:px-4
+                    `}>Files Done</th>
+                    <th class={`
+                      p-2
+                      sm:px-4
+                    `}>Status</th>
+                    <th class={`
+                      p-2
+                      sm:px-4
+                    `}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>

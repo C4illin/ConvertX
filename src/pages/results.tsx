@@ -1,12 +1,13 @@
 import { Elysia } from "elysia";
+
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import db from "../db/db";
 import { Filename, Jobs } from "../db/types";
 import { buildDownloadUrl } from "../helpers/buildDownloadUrl";
-import { ALLOW_UNAUTHENTICATED, WEBROOT, BRANDING } from "../helpers/env";
-import { DownloadIcon } from "../icons/download";
+import { ALLOW_UNAUTHENTICATED, BRANDING, WEBROOT } from "../helpers/env";
 import { DeleteIcon } from "../icons/delete";
+import { DownloadIcon } from "../icons/download";
 import { EyeIcon } from "../icons/eye";
 import { userService } from "./user";
 
@@ -69,30 +70,18 @@ function ResultsArticle({
       >
         <thead>
           <tr>
-            <th
-              class={`
-                p-2
-                sm:px-4
-              `}
-            >
-              Converted File Name
-            </th>
-            <th
-              class={`
-                p-2
-                sm:px-4
-              `}
-            >
-              Status
-            </th>
-            <th
-              class={`
-                p-2
-                sm:px-4
-              `}
-            >
-              Actions
-            </th>
+            <th class={`
+              p-2
+              sm:px-4
+            `}>Converted File Name</th>
+            <th class={`
+              p-2
+              sm:px-4
+            `}>Status</th>
+            <th class={`
+              p-2
+              sm:px-4
+            `}>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -181,12 +170,10 @@ export const results = new Elysia()
               loggedIn
               branding={BRANDING}
             />
-            <main
-              class={`
-                w-full flex-1 px-2
-                sm:px-4
-              `}
-            >
+            <main class={`
+              w-full flex-1 px-2
+              sm:px-4
+            `}>
               <ResultsArticle job={job} files={files} outputPath={outputPath} />
             </main>
             <script src={`${WEBROOT}/results.js`} defer />
