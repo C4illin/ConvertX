@@ -770,9 +770,9 @@ export async function convert(
   }
 
   // Parse FFMPEG_ARGS environment variable into array
-  const ffmpegArgs = process.env.FFMPEG_ARGS ? process.env.FFMPEG_ARGS.split(/\s+/) : [];
+  const ffmpegArgs = process.env.FFMPEG_ARGS ? process.env.FFMPEG_ARGS.split(/\s+/).filter(Boolean) : [];
   const ffmpegOutputArgs = process.env.FFMPEG_OUTPUT_ARGS
-    ? process.env.FFMPEG_OUTPUT_ARGS.split(/\s+/)
+    ? process.env.FFMPEG_OUTPUT_ARGS.split(/\s+/).filter(Boolean)
     : [];
 
   return new Promise((resolve, reject) => {
