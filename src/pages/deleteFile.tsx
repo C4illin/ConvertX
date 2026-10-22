@@ -27,7 +27,15 @@ export const deleteFile = new Elysia().use(userService).post(
     const sanitized = sanitize(body.filename);
     const targetPath = path.join(userUploadsDir, sanitized);
 
-    await unlink(targetPath);
+    try {
+      await unlink(targetPath);
+    } catch (error) {
+      if (error.code === "ENOENT") {
+        return { message: "File not found." };
+      }
+      console.error(`Failed to unlink ${targetPath}:`, error);
+      throw error;
+    }
 
     return {
       message: "File deleted successfully.",

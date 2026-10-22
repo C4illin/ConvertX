@@ -33,30 +33,44 @@ export const root = new Elysia().use(userService).get(
     // validate jwt
     let user: ({ id: string } & JWTPayloadSpec) | false = false;
     if (ALLOW_UNAUTHENTICATED) {
-      const newUserId = String(
-        UNAUTHENTICATED_USER_SHARING
-          ? 0
-          : randomInt(2 ** 24, Math.min(2 ** 48 + 2 ** 24 - 1, Number.MAX_SAFE_INTEGER)),
-      );
-      const accessToken = await jwt.sign({
-        id: newUserId,
-      });
-
-      user = { id: newUserId };
-      if (!auth) {
-        return {
-          message: "No auth cookie, perhaps your browser is blocking cookies.",
-        };
+      // Check if the current cookie is already a valid session
+      if (auth?.value) {
+        try {
+          const verifiedUser = await jwt.verify(auth.value);
+          if (verifiedUser && verifiedUser.id) {
+            user = verifiedUser;
+          }
+        } catch (e) {
+          // Invalid cookie, fall through to anonymous creation
+        }
       }
 
-      // set cookie
-      auth.set({
-        value: accessToken,
-        httpOnly: true,
-        secure: !HTTP_ALLOWED,
-        maxAge: 24 * 60 * 60,
-        sameSite: "strict",
-      });
+      // If no valid session found, create an anonymous user
+      if (!user) {
+        const newUserId = String(
+          UNAUTHENTICATED_USER_SHARING
+            ? 0
+            : randomInt(2 ** 24, Math.min(2 ** 48 + 2 ** 24 - 1, Number.MAX_SAFE_INTEGER)),
+        );
+        const accessToken = await jwt.sign({
+          id: newUserId,
+        });
+
+        user = { id: newUserId };
+        if (!auth) {
+          return {
+            message: "No auth cookie, perhaps your browser is blocking cookies.",
+          };
+        }
+
+        auth.set({
+          value: accessToken,
+          httpOnly: true,
+          secure: !HTTP_ALLOWED,
+          maxAge: 24 * 60 * 60,
+          sameSite: "strict",
+        });
+      }
     } else if (auth?.value) {
       user = await jwt.verify(auth.value);
 

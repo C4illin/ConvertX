@@ -56,14 +56,19 @@ export const convert = new Elysia().use(userService).post(
       return redirect(`${WEBROOT}/`, 302);
     }
 
-    const fileNames = JSON.parse(body.file_names) as string[];
-
-    for (let i = 0; i < fileNames.length; i++) {
-      fileNames[i] = sanitize(fileNames[i] || "");
+    let fileNames: string[];
+    try {
+      fileNames = JSON.parse(body.file_names) as string[];
+    } catch (e) {
+      return redirect(`${WEBROOT}/`, 302);
     }
 
     if (!Array.isArray(fileNames) || fileNames.length === 0) {
       return redirect(`${WEBROOT}/`, 302);
+    }
+
+    for (let i = 0; i < fileNames.length; i++) {
+      fileNames[i] = sanitize(fileNames[i] || "");
     }
 
     db.query("UPDATE jobs SET num_files = ?1, status = 'pending' WHERE id = ?2").run(
