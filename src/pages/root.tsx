@@ -118,10 +118,12 @@ export const root = new Elysia().use(userService).get(
             hideHistory={HIDE_HISTORY}
             loggedIn
           />
-          <main class={`
+          <main
+            class={`
             w-full flex-1 px-2
             sm:px-4
-          `}>
+          `}
+          >
             <article class="article">
               <h1 class="mb-4 text-xl">Convert</h1>
               <div class="mb-4 scrollbar-thin max-h-[50vh] overflow-y-auto">

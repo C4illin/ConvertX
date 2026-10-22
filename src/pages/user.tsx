@@ -40,10 +40,12 @@ function LoginPage({ error, email = "" }: { error?: string; email?: string }) {
           allowUnauthenticated={ALLOW_UNAUTHENTICATED}
           hideHistory={HIDE_HISTORY}
         />
-        <main class={`
+        <main
+          class={`
           w-full flex-1 px-2
           sm:px-4
-        `}>
+        `}
+        >
           <article class="article">
             <form method="post" class="flex flex-col gap-4">
               {error ? <ErrorBanner message={error} /> : null}
@@ -105,10 +107,12 @@ function AccountPage({ email, error }: { email: string; error?: string }) {
           hideHistory={HIDE_HISTORY}
           loggedIn
         />
-        <main class={`
+        <main
+          class={`
           w-full flex-1 px-2
           sm:px-4
-        `}>
+        `}
+        >
           <article class="article">
             <form method="post" class="flex flex-col gap-4">
               {error ? <ErrorBanner message={error} /> : null}
@@ -167,10 +171,12 @@ export const user = new Elysia()
 
     return (
       <BaseHtml title="ConvertX | Setup" webroot={WEBROOT}>
-        <main class={`
+        <main
+          class={`
           mx-auto w-full max-w-4xl flex-1 px-2
           sm:px-4
-        `}>
+        `}
+        >
           <h1 class="my-8 text-3xl">Welcome to ConvertX!</h1>
           <article class="article p-0">
             <header class="w-full bg-neutral-800 p-4">Create your account</header>
@@ -234,10 +240,12 @@ export const user = new Elysia()
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
             hideHistory={HIDE_HISTORY}
           />
-          <main class={`
+          <main
+            class={`
             w-full flex-1 px-2
             sm:px-4
-          `}>
+          `}
+          >
             <article class="article">
               <form method="post" class="flex flex-col gap-4">
                 <fieldset class="mb-4 flex flex-col gap-4">
