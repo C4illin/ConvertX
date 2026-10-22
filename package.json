@@ -9,7 +9,7 @@
     "format:prettier": "prettier --write .",
     "build:css": "bun x @tailwindcss/cli -i ./src/main.css -o ./public/generated.css",
     "build:js": "tsc",
-    "build:runner": "mkdir -p bin && gcc -O2 -Wall -Wextra src/native/landlock-runner.c -o bin/landlock-runner || true",
+    "build:runner": "mkdir -p bin && gcc -O2 -Wall -Wextra src/native/landlock-runner.c -o bin/landlock-runner",
     "build:bin": "bun run build:css && bun run build:runner && bun build --compile --minify --sourcemap --bytecode --format=esm --define 'process.env.NODE_ENV=\"production\"' src/index.tsx --outfile dist/convertx",
     "build:docker": "docker compose build",
     "build": "bun run build:css && bun run build:js",

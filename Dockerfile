@@ -4,6 +4,10 @@ COPY package.json bun.lock /app/
 RUN bun install --frozen-lockfile
 COPY . .
 
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends gcc libc6-dev && \
+  rm -rf /var/lib/apt/lists/*
+
 RUN bun run build:bin
 
 FROM debian:testing-slim AS release
