@@ -57,19 +57,21 @@ export const root = new Elysia().use(userService).get(
         });
 
         user = { id: newUserId };
-        if (!auth) {
+
+        // Use existing cookie if it exists, otherwise set a new one
+        if (auth) {
+          auth.set({
+            value: accessToken,
+            httpOnly: true,
+            secure: !HTTP_ALLOWED,
+            maxAge: 24 * 60 * 60,
+            sameSite: "strict",
+          });
+        } else {
           return {
             message: "No auth cookie, perhaps your browser is blocking cookies.",
           };
         }
-
-        auth.set({
-          value: accessToken,
-          httpOnly: true,
-          secure: !HTTP_ALLOWED,
-          maxAge: 24 * 60 * 60,
-          sameSite: "strict",
-        });
       }
     } else if (auth?.value) {
       user = await jwt.verify(auth.value);
