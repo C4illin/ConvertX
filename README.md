@@ -36,6 +36,7 @@ A self-hosted online file converter. Supports over a thousand different formats.
 | [Calibre](https://calibre-ebook.com/)                           | E-books          | 26            | 19          |
 | [LibreOffice](https://www.libreoffice.org/)                     | Documents        | 41            | 22          |
 | [Dasel](https://github.com/TomWright/dasel)                     | Data Files       | 5             | 4           |
+| [DjVuLibre](https://djvu.sourceforge.net/)                      | Documents        | 2             | 2           |
 | [Pandoc](https://pandoc.org/)                                   | Documents        | 43            | 65          |
 | [msgconvert](https://github.com/mvz/email-outlook-message-perl) | Outlook          | 1             | 1           |
 | VCF to CSV                                                      | Contacts         | 1             | 1           |
@@ -161,8 +162,6 @@ Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#summar
 <a href="https://github.com/C4illin/ConvertX/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=C4illin/ConvertX" alt="Image with all contributors"/>
 </a>
-
-![Alt](https://repobeats.axiom.co/api/embed/dcdabd0564fcdcccbf5680c1bdc2efad54a3d4d9.svg "Repobeats analytics image")
 
 ## Star History
 

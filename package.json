@@ -1,21 +1,26 @@
 {
   "name": "convertx-frontend",
-  "version": "0.19.0",
+  "version": "0.20.0",
   "scripts": {
     "dev": "bun run --watch src/index.tsx",
     "hot": "bun run --hot src/index.tsx",
     "format": "npm-run-all 'format:*'",
     "format:eslint": "eslint --fix .",
     "format:prettier": "prettier --write .",
+    "build:css": "bun x @tailwindcss/cli -i ./src/main.css -o ./public/generated.css",
     "build:js": "tsc",
     "build:runner": "mkdir -p bin && gcc -O2 -Wall -Wextra src/native/landlock-runner.c -o bin/landlock-runner || true",
-    "build": "bun x @tailwindcss/cli -i ./src/main.css -o ./public/generated.css && bun run build:runner && bun run build:js",
+    "build:bin": "bun run build:css && bun run build:runner && bun build --compile --minify --sourcemap --bytecode --format=esm --define 'process.env.NODE_ENV=\"production\"' src/index.tsx --outfile dist/convertx",
+    "build:docker": "docker compose build",
+    "build": "bun run build:css && bun run build:js",
     "lint": "npm-run-all 'lint:*'",
     "lint:tsc": "tsc --noEmit",
     "lint:knip": "knip",
     "lint:eslint": "eslint .",
     "lint:prettier": "prettier --check .",
-    "lint:xss": "xss-scan"
+    "lint:xss": "xss-scan",
+    "test": "bun test --path-ignore-patterns=tests/integration",
+    "test:integration": "docker build --target test -t convertx:test . && docker run --rm -t -v ./tests:/app/tests -v ./src:/app/src -v ./package.json:/app/package.json convertx:test bun test tests/integration"
   },
   "dependencies": {
     "@elysiajs/html": "^1.4.2",
@@ -36,7 +41,7 @@
     "@kitajs/ts-html-plugin": "^4.1.4",
     "@tailwindcss/cli": "^4.3.3",
     "@tailwindcss/postcss": "^4.3.3",
-    "@types/bun": "latest",
+    "@types/bun": "1.4.3",
     "@types/node": "^24.19.0",
     "eslint": "^10.11.0",
     "eslint-plugin-better-tailwindcss": "^4.7.0",

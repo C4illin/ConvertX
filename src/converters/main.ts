@@ -9,6 +9,7 @@ import { createSandboxedExec } from "../helpers/sandbox";
 import { convert as convertassimp, properties as propertiesassimp } from "./assimp";
 import { convert as convertCalibre, properties as propertiesCalibre } from "./calibre";
 import { convert as convertDasel, properties as propertiesDasel } from "./dasel";
+import { convert as convertDjvu, properties as propertiesDjvu } from "./djvu";
 import { convert as convertDvisvgm, properties as propertiesDvisvgm } from "./dvisvgm";
 import { convert as convertFFmpeg, properties as propertiesFFmpeg } from "./ffmpeg";
 import {
@@ -94,6 +95,10 @@ const properties: Record<
   dasel: {
     properties: propertiesDasel,
     converter: convertDasel,
+  },
+  djvu: {
+    properties: propertiesDjvu,
+    converter: convertDjvu,
   },
   libreoffice: {
     properties: propertiesLibreOffice,

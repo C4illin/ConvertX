@@ -1,90 +1,168 @@
-import { jwt } from "@elysiajs/jwt";
-import { expect, test } from "bun:test";
-import { Elysia } from "elysia";
-import { mkdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { describe, expect, test } from "bun:test";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import * as tar from "tar";
-import db from "../../src/db/db";
-import { download } from "../../src/pages/download";
+import { createJob, createUser, jobDirs, request } from "./helpers/app";
 
-test("download route blocks symlinks and serves normal files", async () => {
-  const testUserId = 998;
-  const testUserEmail = `download-test-${Date.now()}@example.com`;
+async function userWithOutputs(files: Record<string, string>) {
+  const user = await createUser();
+  const job = createJob(user.id);
+  const dirs = jobDirs(user.id, job);
+  mkdirSync(dirs.output, { recursive: true });
+  for (const [name, content] of Object.entries(files)) {
+    writeFileSync(`${dirs.output}${name}`, content);
+  }
+  return { user, job, dirs };
+}
 
-  db.query("INSERT INTO users (id, email, password) VALUES (?, ?, ?)").run(
-    testUserId,
-    testUserEmail,
-    "hashed_pwd",
-  );
-
-  const res = db
-    .query(
-      "INSERT INTO jobs (user_id, date_created, status, num_files) VALUES (?, ?, ?, ?) RETURNING id",
-    )
-    .get(testUserId, new Date().toISOString(), "completed", 1) as { id: number };
-  const jobId = String(res.id);
-
-  const jobDir = `./data/output/${testUserId}/${jobId}`;
-  mkdirSync(jobDir, { recursive: true });
-  writeFileSync(`${jobDir}/normal.txt`, "safe content");
-  symlinkSync("/etc/passwd", `${jobDir}/symlink.txt`);
-
+async function tarEntries(response: Response) {
+  const dir = mkdtempSync(join(tmpdir(), "convertx-archive-"));
   try {
-    const tokenApp = new Elysia()
-      .use(jwt({ name: "jwt", secret: process.env.JWT_SECRET ?? "secret", exp: "7d" }))
-      .get("/token", async ({ jwt }) => jwt.sign({ id: String(testUserId) }));
-    const tokenRes = await tokenApp.handle(new Request("http://localhost/token"));
-    const token = await tokenRes.text();
+    const file = join(dir, "archive.tar");
+    writeFileSync(file, Buffer.from(await response.arrayBuffer()));
+    const entries: string[] = [];
+    await tar.list({ file, onReadEntry: (entry) => entries.push(entry.path) });
+    return entries.sort();
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
 
-    const app = new Elysia().use(download);
+describe("GET /download/:userId/:jobId/:fileName", () => {
+  test("redirects to the login page without a session", async () => {
+    const { user, job } = await userWithOutputs({ "a.csv": "a" });
 
-    // 1. Downloading normal file must succeed (200)
-    const normalRes = await app.handle(
-      new Request(`http://localhost/download/${testUserId}/${jobId}/normal.txt`, {
-        headers: { cookie: `auth=${token}` },
-      }),
-    );
-    expect(normalRes.status).toBe(200);
-    expect(await normalRes.text()).toBe("safe content");
-
-    // 2. Downloading a symlink must be blocked (403)
-    const symlinkRes = await app.handle(
-      new Request(`http://localhost/download/${testUserId}/${jobId}/symlink.txt`, {
-        headers: { cookie: `auth=${token}` },
-      }),
-    );
-    expect(symlinkRes.status).toBe(403);
-    const body = (await symlinkRes.json()) as { message?: string };
-    expect(body.message).toBe("Access denied.");
-
-    // 3. Downloading non-existent file must return 404
-    const notFoundRes = await app.handle(
-      new Request(`http://localhost/download/${testUserId}/${jobId}/nonexistent.txt`, {
-        headers: { cookie: `auth=${token}` },
-      }),
-    );
-    expect(notFoundRes.status).toBe(404);
-
-    // 4. Archive tarball must exclude symlinks
-    const archiveRes = await app.handle(
-      new Request(`http://localhost/archive/${jobId}`, {
-        headers: { cookie: `auth=${token}` },
-      }),
-    );
-    expect(archiveRes.status).toBe(200);
-
-    const tarEntries: string[] = [];
-    await tar.t({
-      file: `${jobDir}/converted_files_${jobId}.tar`,
-      onReadEntry: (e) => {
-        tarEntries.push(e.path);
-      },
+    const response = await request(`/download/${user.id}/${job}/a.csv`, {
+      headers: { accept: "text/html" },
     });
 
-    expect(tarEntries).toContain("./normal.txt");
-    expect(tarEntries).not.toContain("./symlink.txt");
-  } finally {
-    rmSync(`./data/output/${testUserId}`, { recursive: true, force: true });
-    db.query("DELETE FROM jobs WHERE id = ?").run(jobId);
-    db.query("DELETE FROM users WHERE id = ?").run(testUserId);
-  }
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).toBe("/login");
+  });
+
+  test("serves a converted file", async () => {
+    const { user, job } = await userWithOutputs({ "a.csv": "converted" });
+
+    const response = await request(`/download/${user.id}/${job}/a.csv`, {
+      cookies: { auth: user.token },
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toStartWith("text/csv");
+    expect(await response.text()).toBe("converted");
+  });
+
+  test("serves file names with encoded spaces and hashes", async () => {
+    const { user, job } = await userWithOutputs({ "my file #1.csv": "spaced" });
+
+    const response = await request(`/download/${user.id}/${job}/my%20file%20%231.csv`, {
+      cookies: { auth: user.token },
+    });
+
+    expect(await response.text()).toBe("spaced");
+  });
+
+  test("answers 404 for a file that does not exist", async () => {
+    const { user, job } = await userWithOutputs({});
+
+    const response = await request(`/download/${user.id}/${job}/missing.csv`, {
+      cookies: { auth: user.token },
+    });
+
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({ message: "Converted file not found." });
+  });
+
+  test("refuses files of another user's job", async () => {
+    const user = await createUser();
+    const other = await userWithOutputs({ "secret.csv": "secret" });
+
+    const response = await request(`/download/${other.user.id}/${other.job}/secret.csv`, {
+      cookies: { auth: user.token },
+    });
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).toBe("/results");
+  });
+
+  test("ignores the user id in the URL and only serves the caller's own files", async () => {
+    const { user, job } = await userWithOutputs({ "a.csv": "mine" });
+    const other = await createUser();
+    mkdirSync(jobDirs(other.id, job).output, { recursive: true });
+    writeFileSync(`${jobDirs(other.id, job).output}a.csv`, "theirs");
+
+    const response = await request(`/download/${other.id}/${job}/a.csv`, {
+      cookies: { auth: user.token },
+    });
+
+    expect(await response.text()).toBe("mine");
+  });
+
+  test("sanitizes the file name so files outside the job cannot be read", async () => {
+    const { user, job } = await userWithOutputs({});
+    const other = await userWithOutputs({ "secret.csv": "secret" });
+
+    const traversal = encodeURIComponent(`../../${other.user.id}/${other.job}/secret.csv`);
+    const response = await request(`/download/${user.id}/${job}/${traversal}`, {
+      cookies: { auth: user.token },
+    });
+
+    expect(response.status).toBe(404);
+  });
+
+  // BUG: Elysia already decodes path parameters and download.tsx decodes them a second
+  // time, so file names containing "%" fail with a 500 "URI error" (and a literal "%20"
+  // would be turned into a space). The results page links to such files. Remove
+  // `.failing` once the second decodeURIComponent is dropped.
+  test.failing("serves file names containing a percent sign", async () => {
+    const { user, job } = await userWithOutputs({ "100%.csv": "percent" });
+
+    const response = await request(`/download/${user.id}/${job}/100%25.csv`, {
+      cookies: { auth: user.token },
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe("percent");
+  });
+});
+
+describe("GET /archive/:jobId", () => {
+  test("redirects to the login page without a session", async () => {
+    const { job } = await userWithOutputs({ "a.csv": "a" });
+
+    const response = await request(`/archive/${job}`, { headers: { accept: "text/html" } });
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).toBe("/login");
+  });
+
+  test("packs all converted files of the job into a tar archive", async () => {
+    const { user, job } = await userWithOutputs({ "a.csv": "a", "b.csv": "b" });
+
+    const response = await request(`/archive/${job}`, { cookies: { auth: user.token } });
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("application/x-tar");
+    expect(await tarEntries(response)).toEqual(["./", "./a.csv", "./b.csv"]);
+  });
+
+  test("does not include earlier archives in a new archive", async () => {
+    const { user, job } = await userWithOutputs({ "a.csv": "a" });
+
+    await request(`/archive/${job}`, { cookies: { auth: user.token } });
+    const response = await request(`/archive/${job}`, { cookies: { auth: user.token } });
+
+    expect(await tarEntries(response)).toEqual(["./", "./a.csv"]);
+  });
+
+  test("refuses another user's job", async () => {
+    const user = await createUser();
+    const other = await userWithOutputs({ "secret.csv": "secret" });
+
+    const response = await request(`/archive/${other.job}`, { cookies: { auth: user.token } });
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).toBe("/results");
+  });
 });

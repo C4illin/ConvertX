@@ -12,7 +12,7 @@ if [ -z "$PUID" ] || [ "$PUID" -eq 0 ]; then
     umask "$UMASK"
   fi
   if [ $# -eq 0 ]; then
-    set -- bun run dist/src/index.js
+    set -- /app/convertx
   fi
   exec "$@"
 fi
@@ -45,7 +45,7 @@ fi
 export HOME=/home/convertx
 
 if [ $# -eq 0 ]; then
-  set -- bun run dist/src/index.js
+  set -- /app/convertx
 fi
 
 exec gosu convertx "$@"

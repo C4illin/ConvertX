@@ -6,16 +6,160 @@ import { User } from "../db/types";
 import {
   ACCOUNT_REGISTRATION,
   ALLOW_UNAUTHENTICATED,
+  BRANDING,
   HIDE_HISTORY,
   HTTP_ALLOWED,
   WEBROOT,
-  BRANDING,
 } from "../helpers/env";
 import { userService } from "../services/user";
 
 export { userService } from "../services/user";
 
 export let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
+
+function ErrorBanner({ message }: { message: string }) {
+  return (
+    <div
+      class="rounded-sm border border-red-500/40 bg-red-500/10 px-3 py-2 text-red-300"
+      role="alert"
+    >
+      <p safe>{message}</p>
+    </div>
+  );
+}
+
+function LoginPage({ error, email = "" }: { error?: string; email?: string }) {
+  return (
+    <BaseHtml webroot={WEBROOT} title="ConvertX | Login">
+      <>
+        <Header
+          webroot={WEBROOT}
+          branding={BRANDING}
+          accountRegistration={ACCOUNT_REGISTRATION}
+          allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+          hideHistory={HIDE_HISTORY}
+        />
+        <main
+          class={`
+            w-full flex-1 px-2
+            sm:px-4
+          `}
+        >
+          <article class="article">
+            <form method="post" class="flex flex-col gap-4">
+              {error ? <ErrorBanner message={error} /> : null}
+              <fieldset class="mb-4 flex flex-col gap-4">
+                <label class="flex flex-col gap-1">
+                  Email
+                  <input
+                    type="email"
+                    name="email"
+                    class="rounded-sm bg-neutral-800 p-3"
+                    placeholder="Email"
+                    autocomplete="email"
+                    value={email}
+                    autofocus
+                    required
+                  />
+                </label>
+                <label class="flex flex-col gap-1">
+                  Password
+                  <input
+                    type="password"
+                    name="password"
+                    class="rounded-sm bg-neutral-800 p-3"
+                    placeholder="Password"
+                    autocomplete="current-password"
+                    required
+                  />
+                </label>
+              </fieldset>
+              <div class="flex flex-row gap-4">
+                {ACCOUNT_REGISTRATION ? (
+                  <a
+                    href={`${WEBROOT}/register`}
+                    role="button"
+                    class="w-full btn-secondary text-center"
+                  >
+                    Register
+                  </a>
+                ) : null}
+                <input type="submit" value="Login" class="w-full btn-primary" />
+              </div>
+            </form>
+          </article>
+        </main>
+      </>
+    </BaseHtml>
+  );
+}
+
+function AccountPage({ email, error }: { email: string; error?: string }) {
+  return (
+    <BaseHtml webroot={WEBROOT} title="ConvertX | Account">
+      <>
+        <Header
+          webroot={WEBROOT}
+          branding={BRANDING}
+          accountRegistration={ACCOUNT_REGISTRATION}
+          allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+          hideHistory={HIDE_HISTORY}
+          loggedIn
+        />
+        <main
+          class={`
+            w-full flex-1 px-2
+            sm:px-4
+          `}
+        >
+          <article class="article">
+            <form method="post" class="flex flex-col gap-4">
+              {error ? <ErrorBanner message={error} /> : null}
+              <fieldset class="mb-4 flex flex-col gap-4">
+                <label class="flex flex-col gap-1">
+                  Email
+                  <input
+                    type="email"
+                    name="email"
+                    class="rounded-sm bg-neutral-800 p-3"
+                    placeholder="Email"
+                    autocomplete="email"
+                    value={email}
+                    required
+                  />
+                </label>
+                <label class="flex flex-col gap-1">
+                  Password (leave blank for unchanged)
+                  <input
+                    type="password"
+                    name="newPassword"
+                    class="rounded-sm bg-neutral-800 p-3"
+                    placeholder="Password"
+                    autocomplete="new-password"
+                  />
+                </label>
+                <label class="flex flex-col gap-1">
+                  Current Password
+                  <input
+                    type="password"
+                    name="password"
+                    class="rounded-sm bg-neutral-800 p-3"
+                    placeholder="Password"
+                    autocomplete="current-password"
+                    required
+                  />
+                </label>
+              </fieldset>
+              <div role="group">
+                <input type="submit" value="Update" class="w-full btn-primary" />
+              </div>
+            </form>
+          </article>
+        </main>
+      </>
+    </BaseHtml>
+  );
+}
 
 export const user = new Elysia()
   .use(userService)
@@ -208,67 +352,7 @@ export const user = new Elysia()
         auth.remove();
       }
 
-      return (
-        <BaseHtml webroot={WEBROOT} title="ConvertX | Login">
-          <>
-            <Header
-              webroot={WEBROOT}
-              branding={BRANDING}
-              accountRegistration={ACCOUNT_REGISTRATION}
-              allowUnauthenticated={ALLOW_UNAUTHENTICATED}
-              hideHistory={HIDE_HISTORY}
-            />
-            <main
-              class={`
-                w-full flex-1 px-2
-                sm:px-4
-              `}
-            >
-              <article class="article">
-                <form method="post" class="flex flex-col gap-4">
-                  <fieldset class="mb-4 flex flex-col gap-4">
-                    <label class="flex flex-col gap-1">
-                      Email
-                      <input
-                        type="email"
-                        name="email"
-                        class="rounded-sm bg-neutral-800 p-3"
-                        placeholder="Email"
-                        autocomplete="email"
-                        autofocus
-                        required
-                      />
-                    </label>
-                    <label class="flex flex-col gap-1">
-                      Password
-                      <input
-                        type="password"
-                        name="password"
-                        class="rounded-sm bg-neutral-800 p-3"
-                        placeholder="Password"
-                        autocomplete="current-password"
-                        required
-                      />
-                    </label>
-                  </fieldset>
-                  <div class="flex flex-row gap-4">
-                    {ACCOUNT_REGISTRATION ? (
-                      <a
-                        href={`${WEBROOT}/register`}
-                        role="button"
-                        class="w-full btn-secondary text-center"
-                      >
-                        Register
-                      </a>
-                    ) : null}
-                    <input type="submit" value="Login" class="w-full btn-primary" />
-                  </div>
-                </form>
-              </article>
-            </main>
-          </>
-        </BaseHtml>
-      );
+      return <LoginPage />;
     },
     { body: "signIn", cookie: "optionalSession" },
   )
@@ -279,18 +363,14 @@ export const user = new Elysia()
 
       if (!existingUser) {
         set.status = 403;
-        return {
-          message: "Invalid credentials.",
-        };
+        return <LoginPage error="Invalid credentials." email={body.email} />;
       }
 
       const validPassword = await Bun.password.verify(body.password, existingUser.password);
 
       if (!validPassword) {
         set.status = 403;
-        return {
-          message: "Invalid credentials.",
-        };
+        return <LoginPage error="Invalid credentials." email={body.email} />;
       }
 
       const accessToken = await jwt.sign({
@@ -344,69 +424,7 @@ export const user = new Elysia()
         return redirect(`${WEBROOT}/`, 302);
       }
 
-      return (
-        <BaseHtml webroot={WEBROOT} title="ConvertX | Account">
-          <>
-            <Header
-              webroot={WEBROOT}
-              branding={BRANDING}
-              accountRegistration={ACCOUNT_REGISTRATION}
-              allowUnauthenticated={ALLOW_UNAUTHENTICATED}
-              hideHistory={HIDE_HISTORY}
-              loggedIn
-            />
-            <main
-              class={`
-                w-full flex-1 px-2
-                sm:px-4
-              `}
-            >
-              <article class="article">
-                <form method="post" class="flex flex-col gap-4">
-                  <fieldset class="mb-4 flex flex-col gap-4">
-                    <label class="flex flex-col gap-1">
-                      Email
-                      <input
-                        type="email"
-                        name="email"
-                        class="rounded-sm bg-neutral-800 p-3"
-                        placeholder="Email"
-                        autocomplete="email"
-                        value={userData.email}
-                        required
-                      />
-                    </label>
-                    <label class="flex flex-col gap-1">
-                      Password (leave blank for unchanged)
-                      <input
-                        type="password"
-                        name="newPassword"
-                        class="rounded-sm bg-neutral-800 p-3"
-                        placeholder="Password"
-                        autocomplete="new-password"
-                      />
-                    </label>
-                    <label class="flex flex-col gap-1">
-                      Current Password
-                      <input
-                        type="password"
-                        name="password"
-                        class="rounded-sm bg-neutral-800 p-3"
-                        placeholder="Password"
-                        autocomplete="current-password"
-                        required
-                      />
-                    </label>
-                  </fieldset>
-                  <div role="group">
-                    <input type="submit" value="Update" class="w-full btn-primary" />
-                  </div>
-                </form>
-              </article>
-            </main>
-          </>
-        </BaseHtml>
-      );
+      return <AccountPage email={userData.email} />;
     },
     {
       auth: true,
@@ -433,25 +451,24 @@ export const user = new Elysia()
       }
 
       const validPassword = await Bun.password.verify(body.password, existingUser.password);
+      const emailValue = body.email || existingUser.email;
 
       if (!validPassword) {
         set.status = 403;
-        return {
-          message: "Invalid credentials.",
-        };
+        return <AccountPage email={emailValue} error="Invalid credentials." />;
       }
 
       const fields = [];
       const values = [];
 
       if (body.email) {
-        const existingUser = await db
+        const existingEmailUser = await db
           .query("SELECT id FROM users WHERE email = ?")
           .as(User)
           .get(body.email);
-        if (existingUser && existingUser.id.toString() !== user.id) {
+        if (existingEmailUser && existingEmailUser.id.toString() !== user.id) {
           set.status = 409;
-          return { message: "Email already in use." };
+          return <AccountPage email={emailValue} error="Email already in use." />;
         }
         fields.push("email");
         values.push(body.email);
