@@ -259,6 +259,7 @@ async function mainConverter(
           converterObj?.properties?.to[key]?.includes(convertTo)
         ) {
           converterFunc = converterObj.converter;
+          converterName = name;
           break;
         }
       }
@@ -299,6 +300,7 @@ const possibleTargets: Record<string, Record<string, string[]>> = {};
 
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
+
   if (!converterProperties) continue;
 
   for (const key in converterProperties.from) {
@@ -310,7 +312,7 @@ for (const converterName in properties) {
     for (const ext of fromList) {
       if (!possibleTargets[ext]) possibleTargets[ext] = {};
 
-      possibleTargets[ext][converterName] = toList;
+      possibleTargets[ext][converterName] = [...toList];
     }
   }
 }
@@ -319,15 +321,13 @@ export const getPossibleTargets = (from: string): Record<string, string[]> => {
   const fromClean = normalizeFiletype(from);
 
   return possibleTargets[fromClean] || {};
-};
+}
 
 const possibleInputs: string[] = [];
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
 
-  if (!converterProperties) {
-    continue;
-  }
+  if (!converterProperties) continue;
 
   for (const key in converterProperties.from) {
     for (const extension of converterProperties.from[key] ?? []) {
@@ -344,13 +344,11 @@ const allTargets: Record<string, string[]> = {};
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
 
-  if (!converterProperties) {
-    continue;
-  }
+  if (!converterProperties) continue;
 
   for (const key in converterProperties.to) {
     if (allTargets[converterName]) {
-      allTargets[converterName].push(...(converterProperties.to[key] || []));
+      allTargets[converterName] = [...allTargets[converterName], ...(converterProperties.to[key] || [])];
     } else {
       allTargets[converterName] = [...(converterProperties.to[key] || [])];
     }
@@ -365,13 +363,11 @@ const allInputs: Record<string, string[]> = {};
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
 
-  if (!converterProperties) {
-    continue;
-  }
+  if (!converterProperties) continue;
 
   for (const key in converterProperties.from) {
     if (allInputs[converterName]) {
-      allInputs[converterName].push(...(converterProperties.from[key] || []));
+      allInputs[converterName] = [...allInputs[converterName], ...(converterProperties.from[key] || [])];
     } else {
       allInputs[converterName] = converterProperties.from[key] || [];
     }
