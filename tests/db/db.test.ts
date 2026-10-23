@@ -1,11 +1,15 @@
-import { test, expect, beforeEach, afterEach, afterAll } from "bun:test";
+import { test, expect, beforeEach, afterEach } from "bun:test";
 import { Database } from "bun:sqlite";
-import { unlinkSync, existsSync, mkdirSync } from "node:fs";
+import { unlinkSync, existsSync } from "node:fs";
+import { join } from "node:path";
 
-// set environment variable to ensure the test database is used instead of production data
-process.env.DB_PATH = "./data/test-isolated.sqlite";
+const testRoot = process.env.CONVERTX_TEST_ROOT;
+if (!testRoot) {
+  // Without tests/preload.ts the db module would open and migrate ./data/mydb.sqlite.
+  throw new Error("Database tests must run via `bun test` so that tests/preload.ts is loaded.");
+}
 
-// dynamic import ensures that db.ts is loaded after the env is set
+// the dynamic import ensures that the guard above runs before the db module is loaded
 let initializeDatabase: (db: Database) => void;
 let defaultDb: Database | undefined;
 await import("../../src/db/db").then((mod) => {
@@ -61,8 +65,7 @@ let testDbPath: string;
 let testDb: Database;
 
 beforeEach(() => {
-  mkdirSync("./data", { recursive: true });
-  testDbPath = `./data/test-db-${Date.now()}.sqlite`;
+  testDbPath = join(testRoot, `test-db-${Date.now()}.sqlite`);
   testDb = new Database(testDbPath, { create: true });
   // Now uses the real initialization logic from db.ts
   initializeDatabase(testDb);
@@ -97,37 +100,6 @@ afterEach(() => {
   }
 });
 
-afterAll(() => {
-  // Close the module-level default database before cleanup to prevent file lock errors
-  if (defaultDb) {
-    defaultDb.close();
-  }
-  // Cleanup of the isolated test database after the test run
-  if (existsSync("./data/test-isolated.sqlite")) {
-    unlinkSync("./data/test-isolated.sqlite");
-  }
-  if (existsSync("./data/test-isolated.sqlite-wal")) {
-    try {
-      unlinkSync("./data/test-isolated.sqlite-wal");
-    } catch (err) {
-      // WAL file cleanup error - log but don't fail test
-      if (err instanceof Error && err.message.includes("ENOENT")) {
-        // File already gone, which is fine
-      }
-    }
-  }
-  if (existsSync("./data/test-isolated.sqlite-shm")) {
-    try {
-      unlinkSync("./data/test-isolated.sqlite-shm");
-    } catch (err) {
-      // SHM file cleanup error - log but don't fail test
-      if (err instanceof Error && err.message.includes("ENOENT")) {
-        // File already gone, which is fine
-      }
-    }
-  }
-});
-
 test("db initializes and creates tables on first run", () => {
   const tables = queryAllTables(testDb);
   expect(tables.length).toBeGreaterThanOrEqual(3);
@@ -139,7 +111,7 @@ test("db initializes and creates tables on first run", () => {
 
 test("db handles migration from version 0 to version 1", () => {
   testDb.close();
-  const migrateDbPath = `./data/test-db-migrate-${Date.now()}.sqlite`;
+  const migrateDbPath = join(testRoot, `test-db-migrate-${Date.now()}.sqlite`);
   const migrateDb = new Database(migrateDbPath, { create: true });
 
   try {
