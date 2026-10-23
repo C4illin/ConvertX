@@ -23,8 +23,8 @@ export const download = new Elysia()
         return redirect(`${WEBROOT}/results`, 302);
       }
       // parse from URL encoded string
-      const jobId = decodeURIComponent(params.jobId);
-      const fileName = sanitize(decodeURIComponent(params.fileName));
+      const jobId = params.jobId;
+      const fileName = sanitize(params.fileName);
 
       const filePath = `${outputDir}${userId}/${jobId}/${fileName}`;
       const file = Bun.file(filePath);

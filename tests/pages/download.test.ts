@@ -113,11 +113,7 @@ describe("GET /download/:userId/:jobId/:fileName", () => {
     expect(response.status).toBe(404);
   });
 
-  // BUG: Elysia already decodes path parameters and download.tsx decodes them a second
-  // time, so file names containing "%" fail with a 500 "URI error" (and a literal "%20"
-  // would be turned into a space). The results page links to such files. Remove
-  // `.failing` once the second decodeURIComponent is dropped.
-  test.failing("serves file names containing a percent sign", async () => {
+  test("serves file names containing a percent sign", async () => {
     const { user, job } = await userWithOutputs({ "100%.csv": "percent" });
 
     const response = await request(`/download/${user.id}/${job}/100%25.csv`, {
