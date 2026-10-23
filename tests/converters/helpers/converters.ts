@@ -1,11 +1,12 @@
 import { expect } from "bun:test";
+
 import type { ConvertFnWithExecFile, ExecFileFn } from "../../../src/converters/types";
 
 type ExecFileCall = { cmd: string; args: string[] };
 
 /**
- * Creates an execFile replacement that records every invocation and answers with the
- * given error/stdout/stderr, so converter tests never spawn real binaries.
+ * Creates an execFile replacement that records every invocation and answers with the given
+ * error/stdout/stderr, so converter tests never spawn real binaries.
  */
 export function createMockExecFile({
   error = null,
@@ -21,8 +22,8 @@ export function createMockExecFile({
 }
 
 /**
- * Redirects console.log/error/warn into arrays so tests can assert on them without
- * printing to the terminal. Always call restore() afterwards (e.g. in afterEach).
+ * Redirects console.log/error/warn into arrays so tests can assert on them without printing to the
+ * terminal. Always call restore() afterwards (e.g. in afterEach).
  */
 export function captureConsole() {
   const original = { log: console.log, error: console.error, warn: console.warn };

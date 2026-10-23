@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+
 import { createJob, createUser, db, jobDirs, request } from "./helpers/app";
 
 async function userWithJobs(count = 1) {

@@ -1,7 +1,9 @@
-import { Cookie } from "elysia";
-import db from "../db/db";
 import fs from "node:fs";
 import path from "node:path";
+
+import { Cookie } from "elysia";
+
+import db from "../db/db";
 import { MAX_CONVERT_PROCESS } from "../helpers/env";
 import { normalizeFiletype, normalizeOutputFiletype } from "../helpers/normalizeFiletype";
 import { convert as convertassimp, properties as propertiesassimp } from "./assimp";
@@ -19,16 +21,16 @@ import { convert as convertInkscape, properties as propertiesInkscape } from "./
 import { convert as convertLibheif, properties as propertiesLibheif } from "./libheif";
 import { convert as convertLibjxl, properties as propertiesLibjxl } from "./libjxl";
 import { convert as convertLibreOffice, properties as propertiesLibreOffice } from "./libreoffice";
+import { convert as convertMarkitdown, properties as propertiesMarkitdown } from "./markitdown";
 import { convert as convertMsgconvert, properties as propertiesMsgconvert } from "./msgconvert";
 import { convert as convertPandoc, properties as propertiesPandoc } from "./pandoc";
 import { convert as convertPdftops, properties as propertiesPdftops } from "./pdftops";
 import { convert as convertPotrace, properties as propertiesPotrace } from "./potrace";
 import { convert as convertresvg, properties as propertiesresvg } from "./resvg";
+import { convert as convertVcf, properties as propertiesVcf } from "./vcf";
 import { convert as convertImage, properties as propertiesImage } from "./vips";
 import { convert as convertVtracer, properties as propertiesVtracer } from "./vtracer";
-import { convert as convertVcf, properties as propertiesVcf } from "./vcf";
 import { convert as convertxelatex, properties as propertiesxelatex } from "./xelatex";
-import { convert as convertMarkitdown, properties as propertiesMarkitdown } from "./markitdown";
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
 

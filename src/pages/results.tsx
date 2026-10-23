@@ -1,12 +1,13 @@
 import { Elysia } from "elysia";
+
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import db from "../db/db";
 import { Filename, Jobs } from "../db/types";
 import { buildDownloadUrl } from "../helpers/buildDownloadUrl";
-import { ALLOW_UNAUTHENTICATED, WEBROOT, BRANDING } from "../helpers/env";
-import { DownloadIcon } from "../icons/download";
+import { ALLOW_UNAUTHENTICATED, BRANDING, WEBROOT } from "../helpers/env";
 import { DeleteIcon } from "../icons/delete";
+import { DownloadIcon } from "../icons/download";
 import { EyeIcon } from "../icons/eye";
 import { userService } from "./user";
 

@@ -1,6 +1,6 @@
 import {
-  execFile as execFileOriginal,
   type ChildProcess,
+  execFile as execFileOriginal,
   type ExecFileOptions,
 } from "node:child_process";
 
