@@ -33,17 +33,77 @@ dropZone.addEventListener("drop", (e) => {
   }
 });
 
+const generatePastedFilename = (sequenceNumber, file) => {
+  // If the file has a name and it includes a period, use the name.
+  if (file.name && file.name.includes(".")) {
+    return file.name;
+  }
+
+  const extension = window.inferExtensionFromMimeType(file.type);
+  const timestamp = new Date().toISOString().replaceAll(":", "-").replace("Z", "");
+  return `clipboard-file-${timestamp}-${sequenceNumber}.${extension}`;
+};
+
+const isEditablePasteTarget = (target) => {
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
+
+  if (target.isContentEditable) {
+    return true;
+  }
+
+  if (target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement) {
+    return true;
+  }
+
+  // Keep file-input pastes (the dropzone overlay) as uploads; skip text-like inputs.
+  if (target instanceof HTMLInputElement) {
+    return !["file", "button", "submit", "reset", "checkbox", "radio", "hidden", "image"].includes(
+      target.type,
+    );
+  }
+
+  return false;
+};
+
+// Listen for pastes and handle files if any are present.
+document.addEventListener("paste", (e) => {
+  if (isEditablePasteTarget(e.target)) {
+    return;
+  }
+
+  const files = Array.from(e.clipboardData?.files ?? []);
+
+  if (files.length === 0) {
+    return;
+  }
+
+  e.preventDefault();
+
+  for (const [sequenceNumber, file] of files.entries()) {
+    const namedFile = new File([file], generatePastedFilename(sequenceNumber, file), {
+      type: file.type,
+      lastModified: file.lastModified,
+    });
+
+    console.log("Handling pasted file:", namedFile.name);
+    handleFile(namedFile);
+  }
+});
+
 // Extracted handleFile function for reusability in drag-and-drop and file input
 function handleFile(file) {
   const fileList = document.querySelector("#file-list");
 
   const row = document.createElement("tr");
   row.innerHTML = `
-    <td>${file.name}</td>
+    <td></td>
     <td><progress max="100" class="inline-block h-2 appearance-none overflow-hidden rounded-full border-0 bg-neutral-700 bg-none text-accent-500 accent-accent-500 [&::-moz-progress-bar]:bg-accent-500 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:[background:none] [&[value]::-webkit-progress-value]:bg-accent-500 [&[value]::-webkit-progress-value]:transition-[inline-size]"></progress></td>
     <td>${(file.size / 1024).toFixed(2)} kB</td>
     <td><button type="button" class="text-accent-500 hover:underline" onclick="deleteRow(this)">Remove</button></td>
   `;
+  row.firstElementChild.textContent = file.name;
 
   if (!fileType) {
     fileType = file.name.split(".").pop();
