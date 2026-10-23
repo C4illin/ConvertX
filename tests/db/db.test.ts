@@ -1,6 +1,6 @@
-import { test, expect, beforeEach, afterEach } from "bun:test";
 import { Database } from "bun:sqlite";
-import { unlinkSync, existsSync } from "node:fs";
+import { afterAll, afterEach, beforeEach, expect, test } from "bun:test";
+import { existsSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
 
 const testRoot = process.env.CONVERTX_TEST_ROOT;
@@ -91,6 +91,34 @@ afterEach(() => {
   if (existsSync(`${testDbPath}-shm`)) {
     try {
       unlinkSync(`${testDbPath}-shm`);
+    } catch (err) {
+      // SHM file cleanup error - log but don't fail test
+      if (err instanceof Error && err.message.includes("ENOENT")) {
+        // File already gone, which is fine
+      }
+    }
+  }
+});
+
+afterAll(() => {
+  // Do not close defaultDb as subsequent test files in the test suite share the db instance
+  // Cleanup of the isolated test database after the test run
+  if (existsSync("./data/test-isolated.sqlite")) {
+    unlinkSync("./data/test-isolated.sqlite");
+  }
+  if (existsSync("./data/test-isolated.sqlite-wal")) {
+    try {
+      unlinkSync("./data/test-isolated.sqlite-wal");
+    } catch (err) {
+      // WAL file cleanup error - log but don't fail test
+      if (err instanceof Error && err.message.includes("ENOENT")) {
+        // File already gone, which is fine
+      }
+    }
+  }
+  if (existsSync("./data/test-isolated.sqlite-shm")) {
+    try {
+      unlinkSync("./data/test-isolated.sqlite-shm");
     } catch (err) {
       // SHM file cleanup error - log but don't fail test
       if (err instanceof Error && err.message.includes("ENOENT")) {

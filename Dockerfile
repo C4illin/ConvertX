@@ -4,6 +4,10 @@ COPY package.json bun.lock /app/
 RUN bun install --frozen-lockfile
 COPY . .
 
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends gcc libc6-dev && \
+  rm -rf /var/lib/apt/lists/*
+
 RUN bun run build:bin
 
 FROM debian:testing-slim AS release
@@ -24,6 +28,7 @@ RUN apt-get update && apt-get install -y \
   djvulibre-bin \
   dvisvgm \
   ffmpeg \
+  fonts-liberation \
   ghostscript \
   gosu \
   graphicsmagick \
@@ -75,6 +80,7 @@ RUN ARCH=$(uname -m) && \
 
 COPY --from=base /app/public/ /app/public/
 COPY --from=base /app/dist/convertx /app/convertx
+COPY --from=base /app/bin/landlock-runner /usr/local/bin/landlock-runner
 
 # COPY . .
 RUN mkdir data
@@ -85,6 +91,7 @@ RUN chmod +x /entrypoint.sh
 EXPOSE 3000/tcp
 # used for calibre
 ENV QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox"
+ENV SANDBOX_STRICT="true"
 ENV NODE_ENV=production
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD [ "/app/convertx" ]

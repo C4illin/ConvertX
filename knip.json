@@ -19,6 +19,7 @@
     "potrace",
     "soffice",
     "perl",
+    "gcc",
     "markitdown"
   ],
   "tailwind": {
