@@ -85,6 +85,11 @@ const properties: Record<
     properties: propertiesxelatex,
     converter: convertxelatex,
   },
+  // djvu before calibre so the dedicated ddjvu converter wins for DjVu files
+  djvu: {
+    properties: propertiesDjvu,
+    converter: convertDjvu,
+  },
   calibre: {
     properties: propertiesCalibre,
     converter: convertCalibre,
@@ -92,10 +97,6 @@ const properties: Record<
   dasel: {
     properties: propertiesDasel,
     converter: convertDasel,
-  },
-  djvu: {
-    properties: propertiesDjvu,
-    converter: convertDjvu,
   },
   libreoffice: {
     properties: propertiesLibreOffice,
@@ -246,8 +247,8 @@ async function mainConverter(
     converterFunc = properties[converterName]?.converter;
   } else {
     // Iterate over each converter in properties
-    for (converterName in properties) {
-      const converterObj = properties[converterName];
+    for (const name in properties) {
+      const converterObj = properties[name];
 
       if (!converterObj) {
         break;
@@ -259,8 +260,12 @@ async function mainConverter(
           converterObj?.properties?.to[key]?.includes(convertTo)
         ) {
           converterFunc = converterObj.converter;
+          converterName = name;
           break;
         }
+      }
+      if (converterFunc) {
+        break;
       }
     }
   }
@@ -296,6 +301,7 @@ const possibleTargets: Record<string, Record<string, string[]>> = {};
 
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
+
   if (!converterProperties) continue;
 
   for (const key in converterProperties.from) {
@@ -307,7 +313,7 @@ for (const converterName in properties) {
     for (const ext of fromList) {
       if (!possibleTargets[ext]) possibleTargets[ext] = {};
 
-      possibleTargets[ext][converterName] = toList;
+      possibleTargets[ext][converterName] = [...toList];
     }
   }
 }
@@ -322,9 +328,7 @@ const possibleInputs: string[] = [];
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
 
-  if (!converterProperties) {
-    continue;
-  }
+  if (!converterProperties) continue;
 
   for (const key in converterProperties.from) {
     for (const extension of converterProperties.from[key] ?? []) {
@@ -341,15 +345,16 @@ const allTargets: Record<string, string[]> = {};
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
 
-  if (!converterProperties) {
-    continue;
-  }
+  if (!converterProperties) continue;
 
   for (const key in converterProperties.to) {
     if (allTargets[converterName]) {
-      allTargets[converterName].push(...(converterProperties.to[key] || []));
+      allTargets[converterName] = [
+        ...allTargets[converterName],
+        ...(converterProperties.to[key] || []),
+      ];
     } else {
-      allTargets[converterName] = converterProperties.to[key] || [];
+      allTargets[converterName] = [...(converterProperties.to[key] || [])];
     }
   }
 }
@@ -362,13 +367,14 @@ const allInputs: Record<string, string[]> = {};
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
 
-  if (!converterProperties) {
-    continue;
-  }
+  if (!converterProperties) continue;
 
   for (const key in converterProperties.from) {
     if (allInputs[converterName]) {
-      allInputs[converterName].push(...(converterProperties.from[key] || []));
+      allInputs[converterName] = [
+        ...allInputs[converterName],
+        ...(converterProperties.from[key] || []),
+      ];
     } else {
       allInputs[converterName] = converterProperties.from[key] || [];
     }

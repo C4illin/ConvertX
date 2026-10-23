@@ -181,10 +181,7 @@ test("splits FFMPEG_ARGS on any whitespace", async () => {
   expect(calls[0]?.slice(0, 3)).toEqual(["-hide_banner", "-y", "-nostdin"]);
 });
 
-// BUG: split(/\s+/) keeps empty strings for leading/trailing whitespace
-// (" -y ".split(/\s+/) is ["", "-y", ""]), so ffmpeg receives "" as an argument
-// and fails. Remove `.failing` once src/converters/ffmpeg.ts drops empty entries.
-test.failing("ignores leading and trailing whitespace in FFMPEG_ARGS", async () => {
+test("ignores leading and trailing whitespace in FFMPEG_ARGS", async () => {
   process.env.FFMPEG_ARGS = " -y ";
   process.env.FFMPEG_OUTPUT_ARGS = " -preset veryfast ";
 
