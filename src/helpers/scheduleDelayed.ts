@@ -5,20 +5,44 @@ type ArmTimer = (callback: () => void, delayMs: number) => ReturnType<typeof set
 
 const armNativeTimer: ArmTimer = (callback, delayMs) => setTimeout(callback, delayMs);
 
+export type ScheduledTask = {
+  /** Stops the task. Works across chunk boundaries, unlike a raw timer handle. */
+  cancel: () => void;
+};
+
 export function scheduleDelayed(
   delayMs: number,
   task: () => void,
   armTimer: ArmTimer = armNativeTimer,
-): ReturnType<typeof setTimeout> {
-  const chunkMs = Math.min(delayMs, MAX_TIMEOUT_DELAY_MS);
+): ScheduledTask {
+  let handle: ReturnType<typeof setTimeout> | undefined;
+  let cancelled = false;
 
-  return armTimer(() => {
-    const remainingMs = delayMs - chunkMs;
-    if (remainingMs > 0) {
-      scheduleDelayed(remainingMs, task, armTimer);
-      return;
-    }
+  const arm = (remainingMs: number) => {
+    const chunkMs = Math.min(remainingMs, MAX_TIMEOUT_DELAY_MS);
+    handle = armTimer(() => {
+      if (cancelled) {
+        return;
+      }
 
-    task();
-  }, chunkMs);
+      const restMs = remainingMs - chunkMs;
+      if (restMs > 0) {
+        arm(restMs);
+        return;
+      }
+
+      task();
+    }, chunkMs);
+  };
+
+  arm(delayMs);
+
+  return {
+    cancel: () => {
+      cancelled = true;
+      if (handle !== undefined) {
+        clearTimeout(handle);
+      }
+    },
+  };
 }

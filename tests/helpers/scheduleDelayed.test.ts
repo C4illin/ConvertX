@@ -81,6 +81,44 @@ test("runs a 30 day delay in timer-sized chunks that add up to 30 days", () => {
   expect(armed).toHaveLength(0);
 });
 
+test("cancelling before the first chunk fires prevents the task", () => {
+  const { armed, armTimer } = captureTimers();
+  let runs = 0;
+  const scheduled = scheduleDelayed(
+    THIRTY_DAYS_MS,
+    () => {
+      runs += 1;
+    },
+    armTimer,
+  );
+
+  scheduled.cancel();
+  armed.shift()?.fire();
+  expect(runs).toBe(0);
+  expect(armed).toHaveLength(0);
+});
+
+test("cancelling after a chunk fired still stops the remaining chain", () => {
+  const { armed, armTimer } = captureTimers();
+  let runs = 0;
+  const scheduled = scheduleDelayed(
+    THIRTY_DAYS_MS,
+    () => {
+      runs += 1;
+    },
+    armTimer,
+  );
+
+  armed.shift()?.fire();
+  expect(armed).toHaveLength(1);
+  expect(runs).toBe(0);
+
+  scheduled.cancel();
+  armed.shift()?.fire();
+  expect(runs).toBe(0);
+  expect(armed).toHaveLength(0);
+});
+
 test("does not emit a timeout overflow warning for a 30 day delay", async () => {
   const warnings: string[] = [];
   const onWarning = (warning: Error) => {
@@ -89,7 +127,7 @@ test("does not emit a timeout overflow warning for a 30 day delay", async () => 
   process.on("warning", onWarning);
 
   let ran = false;
-  const timer = scheduleDelayed(THIRTY_DAYS_MS, () => {
+  const scheduled = scheduleDelayed(THIRTY_DAYS_MS, () => {
     ran = true;
   });
 
@@ -99,7 +137,7 @@ test("does not emit a timeout overflow warning for a 30 day delay", async () => 
     expect(warnings.join("\n")).not.toContain("TimeoutOverflowWarning");
     expect(warnings.join("\n")).not.toContain("2592000000");
   } finally {
-    clearTimeout(timer);
+    scheduled.cancel();
     process.off("warning", onWarning);
   }
 });
