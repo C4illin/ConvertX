@@ -1,0 +1,178 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%Creator: (ImageMagick)
+%%Title: (/app/tests/integration/converters/outputs/imagemagick/sample.eps2)
+%%CreationDate: (2026-10-16T19:15:04+00:00)
+%%BoundingBox: -0 -0 16 16
+%%HiResBoundingBox: 0 0 16 16
+%%LanguageLevel: 2
+%%Pages: 1
+%%EndComments
+
+%%BeginDefaults
+%%EndDefaults
+
+%%BeginProlog
+%
+% Display a color image.  The image is displayed in color on
+% Postscript viewers or printers that support color, otherwise
+% it is displayed as grayscale.
+%
+/DirectClassImage
+{
+  %
+  % Display a DirectClass image.
+  %
+  colorspace 0 eq
+  {
+    /DeviceRGB setcolorspace
+    <<
+      /ImageType 1
+      /Width columns
+      /Height rows
+      /BitsPerComponent 8
+      /Decode [0 1 0 1 0 1]
+      /ImageMatrix [columns 0 0 rows neg 0 rows]
+      compression 0 gt
+      { /DataSource pixel_stream /RunLengthDecode filter }
+      { /DataSource pixel_stream /RunLengthDecode filter } ifelse
+    >> image
+  }
+  {
+    /DeviceCMYK setcolorspace
+    <<
+      /ImageType 1
+      /Width columns
+      /Height rows
+      /BitsPerComponent 8
+      /Decode [1 0 1 0 1 0 1 0]
+      /ImageMatrix [columns 0 0 rows neg 0 rows]
+      compression 0 gt
+      { /DataSource pixel_stream /RunLengthDecode filter }
+      { /DataSource pixel_stream /RunLengthDecode filter } ifelse
+    >> image
+  } ifelse
+} bind def
+
+/PseudoClassImage
+{
+  %
+  % Display a PseudoClass image.
+  %
+  % Parameters:
+  %   colors: number of colors in the colormap.
+  %
+  currentfile buffer readline pop
+  token pop /colors exch def pop
+  colors 0 eq
+  {
+    %
+    % Image is grayscale.
+    %
+    currentfile buffer readline pop
+    token pop /bits exch def pop
+    /DeviceGray setcolorspace
+    <<
+      /ImageType 1
+      /Width columns
+      /Height rows
+      /BitsPerComponent bits
+      /Decode [0 1]
+      /ImageMatrix [columns 0 0 rows neg 0 rows]
+      compression 0 gt
+      { /DataSource pixel_stream /RunLengthDecode filter }
+      {
+        /DataSource pixel_stream /RunLengthDecode filter
+        <<
+           /K -1
+           /Columns columns
+           /Rows rows
+        >> /CCITTFaxDecode filter
+      } ifelse
+    >> image
+  }
+  {
+    %
+    % Parameters:
+    %   colormap: red, green, blue color packets.
+    %
+    /colormap colors 3 mul string def
+    currentfile colormap readhexstring pop pop
+    currentfile buffer readline pop
+    [ /Indexed /DeviceRGB colors 1 sub colormap ] setcolorspace
+    <<
+      /ImageType 1
+      /Width columns
+      /Height rows
+      /BitsPerComponent 8
+      /Decode [0 255]
+      /ImageMatrix [columns 0 0 rows neg 0 rows]
+      compression 0 gt
+      { /DataSource pixel_stream /RunLengthDecode filter }
+      { /DataSource pixel_stream /RunLengthDecode filter } ifelse
+    >> image
+  } ifelse
+} bind def
+
+/DisplayImage
+{
+  %
+  % Display a DirectClass or PseudoClass image.
+  %
+  % Parameters:
+  %   x & y translation.
+  %   x & y scale.
+  %   label pointsize.
+  %   image label.
+  %   image columns & rows.
+  %   class: 0-DirectClass or 1-PseudoClass.
+  %   colorspace: 0-RGB or 1-CMYK.
+  %   compression: 0-RLECompression or 1-NoCompression.
+  %   hex color packets.
+  %
+  gsave
+  /buffer 512 string def
+  /pixel_stream currentfile def
+
+  currentfile buffer readline pop
+  token pop /x exch def
+  token pop /y exch def pop
+  x y translate
+  currentfile buffer readline pop
+  token pop /x exch def
+  token pop /y exch def pop
+  currentfile buffer readline pop
+  token pop /pointsize exch def pop
+  x y scale
+  currentfile buffer readline pop
+  token pop /columns exch def
+  token pop /rows exch def pop
+  currentfile buffer readline pop
+  token pop /class exch def pop
+  currentfile buffer readline pop
+  token pop /colorspace exch def pop
+  currentfile buffer readline pop
+  token pop /compression exch def pop
+  class 0 gt { PseudoClassImage } { DirectClassImage } ifelse
+  grestore
+} bind def
+%%EndProlog
+%%Page:  1 1
+%%PageBoundingBox: 0 0 16 16
+userdict begin
+%%BeginData:          656 Binary Bytes
+DisplayImage
+0 0
+16 16
+12
+16 16
+0
+0
+0
+ûÿu}’JSeJSeJSeJSeJSeJSeJSeir…ª¸Õïÿ S\o'''''''(mv‰ŸŸ¿òÿ S\o''''''''-zƒ˜þ€õÿ#S\o'''''''''$4ƒŒ¢õÿ#S\o''+%'$2$2'+%''S]nõÿ#S\o',B"ƒË*@"¾ÀÄ¾ÀÄ*@"ƒË,B"'S]nõÿ#S\o'&=] &FLWFLW&=] &'S]nõÿ#S\o'17DÂÄÈ/5BJrJr/5BÂÄÈ17D'S]nõÿ#S\o'17DÂÄÈ/5BJrJr/5BÂÄÈ17D'S]nõÿ#S\o'&=] &FLWFLW /$Cg 0$'S]nõÿ#S\o',B"ƒË*@"¾ÀÄ¾ÀÄ3M!„Ì4O!'S]nõÿ#S\o''+%'$2$2 &$5$!&'S]nõÿ#S\o''''''''''S]nõÿ#S\o''''''''''S]nõÿ#S\o''''''''''S]nõÿ#t~‘JSeJSeJSeJSeJSeJSeJSeJSeJSeJSes}’ûÿ€
+%%EndData
+end
+%%PageTrailer
+%%Trailer
+%%BoundingBox: -0 -0 16 16
+%%HiResBoundingBox: 0 0 16 16
+%%EOF

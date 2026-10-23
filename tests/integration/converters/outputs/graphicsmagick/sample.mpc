@@ -1,0 +1,12 @@
+id=MagickCache
+quantum-depth=16
+class=DirectClass  matte=True
+compression=Zip
+columns=16  rows=16  depth=8
+page=16x16+0+0
+orientation=TopLeft
+png:IHDR.color-type-orig=6
+png:IHDR.bit-depth-orig=8
+EXIF:Orientation=1
+
+:

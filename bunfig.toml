@@ -4,3 +4,6 @@ coverage = true
 coveragePathIgnorePatterns = [
   "tests/converters/helpers/commonTests.ts"
 ]
+pathIgnorePatterns = [
+  "**/integration/**"
+]

@@ -1,0 +1,37 @@
+/* XPM */
+static char *sample[] = {
+/* columns rows colors chars-per-pixel */
+"16 16 15 1",
+"  c black",
+". c DarkSlateGray",
+"X c #7E7E7E",
+"o c navy",
+"O c SeaGreen",
+"+ c LimeGreen",
+"@ c SlateGray",
+"# c sienna",
+"$ c #800080",
+"% c peru",
+"& c tan",
+"* c violet",
+"= c wheat",
+"- c gainsboro",
+"; c grey75",
+/* pixels */
+";;@..$..@.X-;;;;",
+";;... . o o@@;;;",
+";;X .  . .  @X;;",
+";;@  .  .  ..@;;",
+";;.o . .. . ..;;",
+";;@ .%.&&#+. @;;",
+";;@. O .. . ..;;",
+";;. .&....*. X;;",
+";;...=.#O.&. .;;",
+";;X  . .# O  X;;",
+";;X .+.&-.+#..;;",
+";;X . o  . . @;;",
+";;X .  ..  . @;;",
+";;@  ..   . ..;;",
+";;.oo   o  o @;;",
+";;X...@X.X.@.@;;"
+};
