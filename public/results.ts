@@ -13,6 +13,7 @@ function refreshData(): void {
     fetch(`${webroot}/progress/${jobId}`, { method: "POST" })
       .then((res) => res.text())
       .then((html) => {
+        // SECURE: server-rendered HTML fragment from trusted /progress endpoint (no user input)
         main.innerHTML = html;
       })
       .catch((err) => console.log(err));

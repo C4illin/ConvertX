@@ -25,6 +25,11 @@ const api = edenFetch<App>(webroot);
 
 // ── Route helpers (typed via @elysiajs/eden inference from App) ────────────────
 
+// NOTE on `body as never`: elysiajs/eden's body type inference is limited for dynamic
+// routes, so we cast to `never` to bypass the type check. The functions return typed
+// values where possible, but request bodies lose Eden's compile-time safety here.
+// See https://github.com/elysiajs/eden/issues/138
+
 async function postConversions(body: { fileType: string | null }): Promise<string> {
   const res = await api("/conversions", { method: "POST", body: body as never, headers: {} });
   if (res.error) throw new Error(`POST /conversions failed: ${JSON.stringify(res.error)}`);
@@ -118,6 +123,7 @@ function handleFile(file: File): void {
 
     postConversions({ fileType: fileType ?? null })
       .then((html) => {
+        // SECURE: server-rendered HTML fragment from trusted /conversions endpoint (no user input)
         selectContainer.innerHTML = html;
         updateSearchBar();
       })
