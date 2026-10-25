@@ -1,5 +1,6 @@
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import fs from "fs";
-import { beforeEach, afterEach, expect, test, describe } from "bun:test";
+
 import { buildDaselArgs, convert } from "../../src/converters/dasel";
 import type { ExecFileFn } from "../../src/converters/types";
 import { captureConsole } from "./helpers/converters";

@@ -1,5 +1,6 @@
 import fs from "fs";
 import { execFile as execFileOriginal } from "node:child_process";
+
 import { ExecFileFn } from "./types";
 
 export const properties = {

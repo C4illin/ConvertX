@@ -3,7 +3,9 @@ import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+
 import type { Cookie } from "elysia";
+
 import { properties as libreofficeProperties } from "../../src/converters/libreoffice";
 import { captureConsole } from "./helpers/converters";
 
@@ -148,11 +150,7 @@ describe("converter registry", () => {
     expect(getAllInputs("doesnotexist")).toEqual([]);
   });
 
-  // BUG: building allTargets/allInputs stores the first category's array by
-  // reference and then pushes the other categories into it. That mutates the
-  // converters' own properties, so e.g. LibreOffice offers docx -> xlsx and
-  // libjxl offers jxl -> jxl. Remove `.failing` once main.ts copies the arrays.
-  test.failing("listing all targets and inputs does not leak formats across categories", () => {
+  test("listing all targets and inputs does not leak formats across categories", () => {
     expect(getPossibleTargets("docx").libreoffice).not.toContain("xlsx");
     expect(getPossibleTargets("jxl").libjxl).not.toContain("jxl");
     expect(libreofficeProperties.from.text).not.toContain("xlsx");
@@ -251,10 +249,7 @@ describe("mainConverter", () => {
     },
   );
 
-  // BUG: discovery loops with `for (converterName in properties)` and only breaks
-  // the inner loop, so the variable always ends on the last registered converter.
-  // Remove `.failing` once mainConverter stops at the first match.
-  test.failing("logs the name of the auto-discovered converter", async () => {
+  test("logs the name of the auto-discovered converter", async () => {
     const inputPath = `${uploadsDir}named.vcf`;
     await writeFile(inputPath, vcard("Named"));
 
@@ -263,11 +258,7 @@ describe("mainConverter", () => {
     expect(output.logs.join("\n")).toContain("successfully using vcf");
   });
 
-  // BUG: same root cause - later matches overwrite earlier ones, so emf -> png
-  // uses ImageMagick even though Inkscape is registered first on purpose
-  // ("Prioritize Inkscape for EMF files"). The input does not exist, so whichever
-  // converter is picked fails fast; only the logged converter name matters.
-  test.failing("auto-discovery prefers the first registered converter", async () => {
+  test("auto-discovery prefers the first registered converter", async () => {
     await mainConverter(`${uploadsDir}missing.emf`, "emf", "png", `${outputDir}missing.png`);
 
     expect(output.errors.join("\n")).toContain("using inkscape");

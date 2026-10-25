@@ -1,6 +1,7 @@
 import { afterAll, afterEach, beforeEach, expect, test } from "bun:test";
-import { convert } from "../../src/converters/ffmpeg";
 import type { ExecFileOptions } from "node:child_process";
+
+import { convert } from "../../src/converters/ffmpeg";
 import { captureConsole } from "./helpers/converters";
 
 let calls: string[][] = [];
@@ -89,23 +90,26 @@ test.each([
   expect(calls[0]).toEqual(["-i", "in.mkv", "-c:v", codec, "out.video"]);
 });
 
-test.each(["m4a", "mp3", "flac", "ogg"])("keeps embedded cover art for %s output", async (ext) => {
-  await convert("in.wav", "wav", ext, `out.${ext}`, undefined, mockExecFile);
+test.each(["m4a", "m4b", "mp3", "flac", "ogg"])(
+  "keeps embedded cover art for %s output",
+  async (ext) => {
+    await convert("in.mp3", "mp3", ext, `out.${ext}`, undefined, mockExecFile);
 
-  expect(calls[0]).toEqual([
-    "-i",
-    "in.wav",
-    "-map",
-    "0:a",
-    "-map",
-    "0:v:disp:attached_pic?",
-    "-c:v",
-    "copy",
-    "-disposition:v",
-    "attached_pic",
-    `out.${ext}`,
-  ]);
-});
+    expect(calls[0]).toEqual([
+      "-i",
+      "in.mp3",
+      "-map",
+      "0:a",
+      "-map",
+      "0:v:disp:attached_pic?",
+      "-c:v",
+      "copy",
+      "-disposition:v",
+      "attached_pic",
+      `out.${ext}`,
+    ]);
+  },
+);
 
 test.each(["wav", "aac"])("drops video streams for %s output", async (ext) => {
   await convert("in.mp3", "mp3", ext, `out.${ext}`, undefined, mockExecFile);
@@ -178,10 +182,7 @@ test("splits FFMPEG_ARGS on any whitespace", async () => {
   expect(calls[0]?.slice(0, 3)).toEqual(["-hide_banner", "-y", "-nostdin"]);
 });
 
-// BUG: split(/\s+/) keeps empty strings for leading/trailing whitespace
-// (" -y ".split(/\s+/) is ["", "-y", ""]), so ffmpeg receives "" as an argument
-// and fails. Remove `.failing` once src/converters/ffmpeg.ts drops empty entries.
-test.failing("ignores leading and trailing whitespace in FFMPEG_ARGS", async () => {
+test("ignores leading and trailing whitespace in FFMPEG_ARGS", async () => {
   process.env.FFMPEG_ARGS = " -y ";
   process.env.FFMPEG_OUTPUT_ARGS = " -preset veryfast ";
 

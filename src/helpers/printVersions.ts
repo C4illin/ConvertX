@@ -1,5 +1,6 @@
 import { exec } from "node:child_process";
 import { readFile } from "node:fs";
+
 import { version } from "../../package.json";
 
 console.log(`ConvertX v${version}`);

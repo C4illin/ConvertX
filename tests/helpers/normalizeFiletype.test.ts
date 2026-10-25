@@ -1,4 +1,5 @@
-import { test, expect } from "bun:test";
+import { expect, test } from "bun:test";
+
 import { normalizeFiletype, normalizeOutputFiletype } from "../../src/helpers/normalizeFiletype";
 
 test("normalizeFiletype maps known inputs", () => {

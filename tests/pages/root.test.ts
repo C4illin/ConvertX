@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
+
 import {
   app,
   createUser,
@@ -142,12 +143,7 @@ describe("GET / without accounts (ALLOW_UNAUTHENTICATED)", () => {
     expect(body).not.toContain('href="/logoff"');
   });
 
-  // BUG: the ALLOW_UNAUTHENTICATED branch runs before the session check, so every visit
-  // replaces the existing session (even a registered account's) with a new anonymous id
-  // and the user loses access to their previous jobs. This regressed the fix for #114
-  // ("keep unauthenticated user logged in if allowed", bc4ad49) in 538c5b6. Remove
-  // `.failing` once root.tsx verifies an existing session first.
-  test.failing("keeps an existing session", async () => {
+  test("keeps an existing session", async () => {
     setEnv({ ALLOW_UNAUTHENTICATED: true });
     const user = await createUser();
 
