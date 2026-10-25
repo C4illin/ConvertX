@@ -9,6 +9,7 @@ import { Elysia } from "elysia";
 import { chooseConverter } from "./pages/chooseConverter";
 import { convert } from "./pages/convert";
 import { deleteFile } from "./pages/deleteFile";
+import { deleteJob } from "./pages/deleteJob";
 import { download } from "./pages/download";
 import { healthcheck } from "./pages/healthcheck";
 import { history } from "./pages/history";
@@ -25,6 +26,7 @@ export const app = new Elysia()
   .use(upload)
   .use(history)
   .use(convert)
+  .use(deleteJob)
   .use(download)
   .use(results)
   .use(deleteFile)
