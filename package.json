@@ -10,7 +10,7 @@
     "format:eslint": "eslint --fix .",
     "format:prettier": "bun fmt",
     "build:css": "bun x @tailwindcss/cli -i ./src/main.css -o ./public/generated.css",
-    "build:client": "bun build public/script.ts public/results.ts --outdir public/ --target browser --minify",
+    "build:client": "bun build public/script.ts public/results.ts --outdir public/ --target browser --minify --format iife",
     "build:js": "tsc",
     "build:bin": "bun run build:css && bun run build:client && bun build --compile --minify --sourcemap --bytecode --format=esm --define 'process.env.NODE_ENV=\"production\"' src/index.tsx --outfile dist/convertx",
     "build:docker": "docker compose build",
