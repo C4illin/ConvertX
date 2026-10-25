@@ -1,8 +1,8 @@
+import { randomUUID } from "node:crypto";
+import { rename, unlink } from "node:fs/promises";
 import path from "node:path";
 
 import { Elysia } from "elysia";
-import { randomUUID } from "node:crypto";
-import { unlink, rename } from "node:fs/promises";
 import sanitize from "sanitize-filename";
 
 import { outputDir } from "..";
