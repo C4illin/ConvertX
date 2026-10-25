@@ -63,7 +63,7 @@ Any missing converter? Open an issue or pull request!
 # docker-compose.yml
 services:
   convertx:
-    image: ghcr.io/c4illin/convertx
+    image: ghcr.io/c4illin/convertx:latest
     container_name: convertx
     restart: unless-stopped
     ports:
@@ -79,7 +79,7 @@ services:
 or
 
 ```bash
-docker run -p 3000:3000 -e PUID=1000 -e PGID=1000 -v ./data:/app/data ghcr.io/c4illin/convertx
+docker run -p 3000:3000 -e PUID=1000 -e PGID=1000 -v ./data:/app/data ghcr.io/c4illin/convertx:latest
 ```
 
 Ensure `PUID` and `PGID` match your host user (`id -u` and `id -g`) to avoid permission issues on the mapped `./data` volume. If you get unable to open database file, verify the directory permissions or run `chown -R $USER:$USER path` on the path you choose.
@@ -121,7 +121,7 @@ The image is available on [GitHub Container Registry](https://github.com/C4illin
 
 | Image                                  | What it is                       |
 | -------------------------------------- | -------------------------------- |
-| `image: ghcr.io/c4illin/convertx`      | The latest release on ghcr       |
+| `image: ghcr.io/c4illin/convertx:latest`      | The latest release on ghcr       |
 | `image: ghcr.io/c4illin/convertx:main` | The latest commit on ghcr        |
 | `image: c4illin/convertx`              | The latest release on docker hub |
 | `image: c4illin/convertx:main`         | The latest commit on docker hub  |
