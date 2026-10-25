@@ -119,12 +119,12 @@ There is a `:latest` tag that is updated with every release and a `:main` tag th
 
 The image is available on [GitHub Container Registry](https://github.com/C4illin/ConvertX/pkgs/container/ConvertX) and [Docker Hub](https://hub.docker.com/r/c4illin/convertx).
 
-| Image                                  | What it is                       |
-| -------------------------------------- | -------------------------------- |
-| `image: ghcr.io/c4illin/convertx:latest`      | The latest release on ghcr       |
-| `image: ghcr.io/c4illin/convertx:main` | The latest commit on ghcr        |
-| `image: c4illin/convertx`              | The latest release on docker hub |
-| `image: c4illin/convertx:main`         | The latest commit on docker hub  |
+| Image                                    | What it is                       |
+| ---------------------------------------- | -------------------------------- |
+| `image: ghcr.io/c4illin/convertx:latest` | The latest release on ghcr       |
+| `image: ghcr.io/c4illin/convertx:main`   | The latest commit on ghcr        |
+| `image: c4illin/convertx`                | The latest release on docker hub |
+| `image: c4illin/convertx:main`           | The latest commit on docker hub  |
 
 ![Release image size](https://ghcr-badge.egpl.dev/c4illin/convertx/size?color=%230375b6&tag=latest&label=release+image&trim=)
 ![Dev image size](https://ghcr-badge.egpl.dev/c4illin/convertx/size?color=%230375b6&tag=main&label=dev+image&trim=)
