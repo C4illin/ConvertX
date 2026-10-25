@@ -28,7 +28,7 @@ const api = edenFetch<App>(webroot);
 // NOTE on `body as never`: elysiajs/eden's body type inference is limited for dynamic
 // routes, so we cast to `never` to bypass the type check. The functions return typed
 // values where possible, but request bodies lose Eden's compile-time safety here.
-// See https://github.com/elysiajs/eden/issues/138
+// See relevant issue on GitHub.
 
 async function postConversions(body: { fileType: string | null }): Promise<string> {
   const res = await api("/conversions", { method: "POST", body: body as never, headers: {} });
