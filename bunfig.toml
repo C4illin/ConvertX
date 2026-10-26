@@ -7,3 +7,14 @@ coveragePathIgnorePatterns = [
 pathIgnorePatterns = [
   "**/integration/**"
 ]
+
+[fmt]
+arrowParens = "always"
+printWidth = 100
+singleQuote = false
+semi = true
+tabWidth = 2
+sortImports = true
+sortTailwindcss = false
+sortPackageJson = true
+jsdoc = true

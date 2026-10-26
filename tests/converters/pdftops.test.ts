@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, expect, test } from "bun:test";
+
 import { convert } from "../../src/converters/pdftops";
 import { runCommonTests } from "./helpers/commonTests";
 import { captureConsole, createMockExecFile } from "./helpers/converters";

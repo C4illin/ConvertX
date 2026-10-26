@@ -1,11 +1,14 @@
+import { rmSync } from "node:fs";
+
 import { html } from "@elysiajs/html";
 import { staticPlugin } from "@elysiajs/static";
 import { Elysia } from "elysia";
-import { rmSync } from "node:fs";
+
 import db from "./db/db";
 import { Jobs } from "./db/types";
 import { AUTO_DELETE_EVERY_N_HOURS, WEBROOT } from "./helpers/env";
 import "./helpers/printVersions";
+import { scheduleDelayed, ScheduledTask } from "./helpers/scheduleDelayed";
 import { chooseConverter } from "./pages/chooseConverter";
 import { convert } from "./pages/convert";
 import { deleteFile } from "./pages/deleteFile";
@@ -73,12 +76,15 @@ app.listen(process.env.PORT || 3000);
 
 console.log(`🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}${WEBROOT}`);
 
-let clearJobsTimer: ReturnType<typeof setTimeout> | undefined;
+const MILLISECONDS_PER_HOUR = 60 * 60 * 1000;
+const autoDeleteIntervalMs = AUTO_DELETE_EVERY_N_HOURS * MILLISECONDS_PER_HOUR;
+let clearJobsTimer: ScheduledTask;
+
 const clearJobs = () => {
   const jobs = db
     .query("SELECT * FROM jobs WHERE date_created < ?")
     .as(Jobs)
-    .all(new Date(Date.now() - AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000).toISOString());
+    .all(new Date(Date.now() - autoDeleteIntervalMs).toISOString());
 
   for (const job of jobs) {
     // delete the directories
@@ -95,7 +101,7 @@ const clearJobs = () => {
     db.query("DELETE FROM jobs WHERE id = ?").run(job.id);
   }
 
-  clearJobsTimer = setTimeout(clearJobs, AUTO_DELETE_EVERY_N_HOURS * 60 * 60 * 1000);
+  clearJobsTimer = scheduleDelayed(autoDeleteIntervalMs, clearJobs);
 };
 
 if (AUTO_DELETE_EVERY_N_HOURS > 0) {
@@ -107,7 +113,7 @@ const handleShutdown = async () => {
   if (isShuttingDown) return;
   isShuttingDown = true;
   if (clearJobsTimer) {
-    clearTimeout(clearJobsTimer);
+    clearJobsTimer.cancel();
   }
   try {
     await app.stop(true);

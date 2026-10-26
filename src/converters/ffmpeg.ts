@@ -1,6 +1,6 @@
 import {
-  execFile as execFileOriginal,
   type ChildProcess,
+  execFile as execFileOriginal,
   type ExecFileOptions,
 } from "node:child_process";
 
@@ -770,9 +770,15 @@ export async function convert(
   }
 
   // Parse FFMPEG_ARGS environment variable into array
-  const ffmpegArgs = process.env.FFMPEG_ARGS ? process.env.FFMPEG_ARGS.split(/\s+/) : [];
+  const ffmpegArgs = process.env.FFMPEG_ARGS
+    ? process.env.FFMPEG_ARGS.split(/\s+/)
+        .filter(Boolean)
+        .map((arg) => arg.trim())
+    : [];
   const ffmpegOutputArgs = process.env.FFMPEG_OUTPUT_ARGS
     ? process.env.FFMPEG_OUTPUT_ARGS.split(/\s+/)
+        .filter(Boolean)
+        .map((arg) => arg.trim())
     : [];
 
   return new Promise((resolve, reject) => {

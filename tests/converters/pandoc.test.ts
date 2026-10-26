@@ -1,4 +1,5 @@
-import { expect, test, describe } from "bun:test";
+import { describe, expect, test } from "bun:test";
+
 import { convert } from "../../src/converters/pandoc";
 import { runCommonTests } from "./helpers/commonTests";
 import { createMockExecFile } from "./helpers/converters";

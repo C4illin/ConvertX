@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+
 import { convert } from "../../src/converters/inkscape";
 import { runCommonTests } from "./helpers/commonTests";
 import { createMockExecFile } from "./helpers/converters";
