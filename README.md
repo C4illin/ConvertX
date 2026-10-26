@@ -22,6 +22,7 @@ A self-hosted online file converter. Supports over a thousand different formats.
 - Process multiple files at once
 - Password protection
 - Multiple accounts
+- A REST API for scripts and automation, documented with OpenAPI
 
 ## Converters supported
 
@@ -141,6 +142,36 @@ Tutorial in french: <https://belginux.com/installer-convertx-avec-docker/>
 Tutorial in chinese: <https://xzllll.com/24092901/>
 
 Tutorial in polish: <https://www.kreatywnyprogramista.pl/convertx-lokalny-konwerter-plikow>
+
+## API
+
+ConvertX has a REST API at `/api/v1`, so scripts and tools like n8n can convert files without the web interface.
+
+1. In ConvertX, open **Account → API keys** and create a key. It's shown once, so copy it.
+2. Send it as `Authorization: Bearer <key>`.
+
+Convert one file and save the result:
+
+```bash
+curl -H "Authorization: Bearer $CONVERTX_KEY" \
+  -F file=@report.docx -F to=pdf \
+  -o report.pdf \
+  http://localhost:3000/api/v1/convert
+```
+
+For several files, or conversions that take a while, start a job and follow it:
+
+```bash
+curl -H "Authorization: Bearer $CONVERTX_KEY" \
+  -F files=@one.png -F files=@two.png -F to=webp \
+  http://localhost:3000/api/v1/jobs
+# → {"id": 12, "status": "pending", "files": [...]}
+
+curl -H "Authorization: Bearer $CONVERTX_KEY" http://localhost:3000/api/v1/jobs/12
+# → each file's status, and a download URL for each result
+```
+
+`GET /api/v1/targets?from=docx` lists what a format can be converted to. The full reference, which you can try out in the browser, is at `/api/v1/docs`.
 
 ## Screenshots
 
