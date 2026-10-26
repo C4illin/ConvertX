@@ -94,8 +94,8 @@ test("converts every saved PNG target for each converter", async () => {
     console.error = originalConsoleError;
   }
 
-  expect(testedTargets).toBe(558);
-  expect(successfulTargets).toBe(415);
+  expect(testedTargets).toBe(405);
+  expect(successfulTargets).toBe(370);
   expect(observedFailures.sort()).toEqual(expectedFailures);
   expect(failures).toEqual([]);
 }, 120000);

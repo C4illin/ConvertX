@@ -117,6 +117,21 @@ test.each(["wav", "aac"])("drops video streams for %s output", async (ext) => {
   expect(calls[0]).toEqual(["-i", "in.mp3", "-vn", `out.${ext}`]);
 });
 
+test.each(["png", "jpg", "jpeg", "webp"])(
+  "drops audio streams when extracting cover art from audio to %s",
+  async (ext) => {
+    await convert("in.mp3", "mp3", ext, `out.${ext}`, undefined, mockExecFile);
+
+    expect(calls[0]).toEqual(["-i", "in.mp3", "-an", `out.${ext}`]);
+  },
+);
+
+test.each(["png", "jpg", "jpeg", "webp"])("drops audio streams when extracting cover art from audio to %s", async (ext) => {
+  await convert("in.mp3", "mp3", ext, `out.${ext}`, undefined, mockExecFile);
+
+  expect(calls[0]).toEqual(["-i", "in.mp3", "-an", `out.${ext}`]);
+});
+
 test("places the cover art args after FFMPEG_OUTPUT_ARGS", async () => {
   process.env.FFMPEG_OUTPUT_ARGS = "-b:a 192k";
 
