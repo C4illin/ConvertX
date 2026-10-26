@@ -1,19 +1,20 @@
 import { Elysia } from "elysia";
+
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import db from "../db/db";
 import { Filename, Jobs } from "../db/types";
 import {
   ALLOW_UNAUTHENTICATED,
+  BRANDING,
   HIDE_HISTORY,
   LANGUAGE,
   TIMEZONE,
   WEBROOT,
-  BRANDING,
 } from "../helpers/env";
-import { userService } from "./user";
-import { EyeIcon } from "../icons/eye";
 import { DeleteIcon } from "../icons/delete";
+import { EyeIcon } from "../icons/eye";
+import { userService } from "./user";
 
 export const history = new Elysia().use(userService).get(
   "/history",

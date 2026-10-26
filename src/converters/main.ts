@@ -1,12 +1,15 @@
-import { Cookie } from "elysia";
-import db from "../db/db";
 import fs from "node:fs";
 import path from "node:path";
+
+import { Cookie } from "elysia";
+
+import db from "../db/db";
 import { MAX_CONVERT_PROCESS } from "../helpers/env";
 import { normalizeFiletype, normalizeOutputFiletype } from "../helpers/normalizeFiletype";
 import { convert as convertassimp, properties as propertiesassimp } from "./assimp";
 import { convert as convertCalibre, properties as propertiesCalibre } from "./calibre";
 import { convert as convertDasel, properties as propertiesDasel } from "./dasel";
+import { convert as convertDjvu, properties as propertiesDjvu } from "./djvu";
 import { convert as convertDvisvgm, properties as propertiesDvisvgm } from "./dvisvgm";
 import { convert as convertFFmpeg, properties as propertiesFFmpeg } from "./ffmpeg";
 import {
@@ -18,16 +21,16 @@ import { convert as convertInkscape, properties as propertiesInkscape } from "./
 import { convert as convertLibheif, properties as propertiesLibheif } from "./libheif";
 import { convert as convertLibjxl, properties as propertiesLibjxl } from "./libjxl";
 import { convert as convertLibreOffice, properties as propertiesLibreOffice } from "./libreoffice";
+import { convert as convertMarkitdown, properties as propertiesMarkitdown } from "./markitdown";
 import { convert as convertMsgconvert, properties as propertiesMsgconvert } from "./msgconvert";
 import { convert as convertPandoc, properties as propertiesPandoc } from "./pandoc";
 import { convert as convertPdftops, properties as propertiesPdftops } from "./pdftops";
 import { convert as convertPotrace, properties as propertiesPotrace } from "./potrace";
 import { convert as convertresvg, properties as propertiesresvg } from "./resvg";
+import { convert as convertVcf, properties as propertiesVcf } from "./vcf";
 import { convert as convertImage, properties as propertiesImage } from "./vips";
 import { convert as convertVtracer, properties as propertiesVtracer } from "./vtracer";
-import { convert as convertVcf, properties as propertiesVcf } from "./vcf";
 import { convert as convertxelatex, properties as propertiesxelatex } from "./xelatex";
-import { convert as convertMarkitdown, properties as propertiesMarkitdown } from "./markitdown";
 
 // This should probably be reconstructed so that the functions are not imported instead the functions hook into this to make the converters more modular
 
@@ -83,6 +86,11 @@ const properties: Record<
   xelatex: {
     properties: propertiesxelatex,
     converter: convertxelatex,
+  },
+  // djvu before calibre so the dedicated ddjvu converter wins for DjVu files
+  djvu: {
+    properties: propertiesDjvu,
+    converter: convertDjvu,
   },
   calibre: {
     properties: propertiesCalibre,
@@ -241,8 +249,8 @@ async function mainConverter(
     converterFunc = properties[converterName]?.converter;
   } else {
     // Iterate over each converter in properties
-    for (converterName in properties) {
-      const converterObj = properties[converterName];
+    for (const name in properties) {
+      const converterObj = properties[name];
 
       if (!converterObj) {
         break;
@@ -254,8 +262,12 @@ async function mainConverter(
           converterObj?.properties?.to[key]?.includes(convertTo)
         ) {
           converterFunc = converterObj.converter;
+          converterName = name;
           break;
         }
+      }
+      if (converterFunc) {
+        break;
       }
     }
   }
@@ -291,6 +303,7 @@ const possibleTargets: Record<string, Record<string, string[]>> = {};
 
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
+
   if (!converterProperties) continue;
 
   for (const key in converterProperties.from) {
@@ -302,7 +315,7 @@ for (const converterName in properties) {
     for (const ext of fromList) {
       if (!possibleTargets[ext]) possibleTargets[ext] = {};
 
-      possibleTargets[ext][converterName] = toList;
+      possibleTargets[ext][converterName] = [...toList];
     }
   }
 }
@@ -317,9 +330,7 @@ const possibleInputs: string[] = [];
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
 
-  if (!converterProperties) {
-    continue;
-  }
+  if (!converterProperties) continue;
 
   for (const key in converterProperties.from) {
     for (const extension of converterProperties.from[key] ?? []) {
@@ -336,15 +347,16 @@ const allTargets: Record<string, string[]> = {};
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
 
-  if (!converterProperties) {
-    continue;
-  }
+  if (!converterProperties) continue;
 
   for (const key in converterProperties.to) {
     if (allTargets[converterName]) {
-      allTargets[converterName].push(...(converterProperties.to[key] || []));
+      allTargets[converterName] = [
+        ...allTargets[converterName],
+        ...(converterProperties.to[key] || []),
+      ];
     } else {
-      allTargets[converterName] = converterProperties.to[key] || [];
+      allTargets[converterName] = [...(converterProperties.to[key] || [])];
     }
   }
 }
@@ -357,13 +369,14 @@ const allInputs: Record<string, string[]> = {};
 for (const converterName in properties) {
   const converterProperties = properties[converterName]?.properties;
 
-  if (!converterProperties) {
-    continue;
-  }
+  if (!converterProperties) continue;
 
   for (const key in converterProperties.from) {
     if (allInputs[converterName]) {
-      allInputs[converterName].push(...(converterProperties.from[key] || []));
+      allInputs[converterName] = [
+        ...allInputs[converterName],
+        ...(converterProperties.from[key] || []),
+      ];
     } else {
       allInputs[converterName] = converterProperties.from[key] || [];
     }

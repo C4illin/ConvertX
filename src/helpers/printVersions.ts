@@ -1,5 +1,6 @@
 import { exec } from "node:child_process";
 import { readFile } from "node:fs";
+
 import { version } from "../../package.json";
 
 console.log(`ConvertX v${version}`);
@@ -211,14 +212,5 @@ if (process.env.NODE_ENV === "production") {
     }
   });
 
-  exec("bun -v", (error, stdout) => {
-    if (error) {
-      console.error("Bun is not installed. wait what");
-      return;
-    }
-
-    if (stdout) {
-      console.log(`Bun v${stdout.split("\n")[0]}`);
-    }
-  });
+  console.log(`Bun v${Bun.version}`);
 }

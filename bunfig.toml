@@ -1,5 +1,15 @@
 [test]
+preload = ["./tests/preload.ts"]
 coverage = true
-coveragePathIgnorePatterns = [
-  "tests/converters/helpers/commonTests.ts"
-]
+coveragePathIgnorePatterns = ["tests/converters/helpers/commonTests.ts"]
+
+[fmt]
+arrowParens = "always"
+printWidth = 100
+singleQuote = false
+semi = true
+tabWidth = 2
+sortImports = true
+sortTailwindcss = false
+sortPackageJson = true
+jsdoc = true

@@ -1,23 +1,27 @@
 {
   "name": "convertx-frontend",
-  "version": "0.19.0",
+  "version": "0.20.0",
+  "type": "module",
+  "module": "src/index.tsx",
   "scripts": {
     "dev": "bun run --watch src/index.tsx",
     "hot": "bun run --hot src/index.tsx",
     "format": "npm-run-all 'format:*'",
     "format:eslint": "eslint --fix .",
-    "format:prettier": "prettier --write .",
+    "format:prettier": "bun fmt",
+    "build:css": "bun x @tailwindcss/cli -i ./src/main.css -o ./public/generated.css",
     "build:js": "tsc",
+    "build:bin": "bun run build:css && bun build --compile --minify --sourcemap --bytecode --format=esm --define 'process.env.NODE_ENV=\"production\"' src/index.tsx --outfile dist/convertx",
     "build:docker": "docker compose build",
-    "build": "bun x @tailwindcss/cli -i ./src/main.css -o ./public/generated.css && bun run build:js",
+    "build": "bun run build:css && bun run build:js",
     "lint": "npm-run-all 'lint:*'",
-    "lint:tsc": "tsc --noEmit",
+    "lint:tsc": "bun check",
     "lint:knip": "knip",
     "lint:eslint": "eslint .",
-    "lint:prettier": "prettier --check .",
+    "lint:prettier": "bun fmt --check",
     "lint:xss": "xss-scan",
     "test": "bun test --path-ignore-patterns=tests/integration",
-    "test:integration": "docker run --rm -v ./tests:/app/tests -v ./src:/app/src -v ./package.json:/app/package.json convertx:test bun test tests/integration"
+    "test:integration": "docker build --target test -t convertx:test . && docker run --rm -t -v ./tests:/app/tests -v ./src:/app/src -v ./package.json:/app/package.json convertx:test bun test tests/integration"
   },
   "dependencies": {
     "@elysiajs/html": "^1.4.2",
@@ -25,20 +29,14 @@
     "@elysiajs/static": "^1.4.10",
     "@kitajs/html": "^4.2.13",
     "elysia": "1.4.30",
-    "sanitize-filename": "^1.6.4",
-    "tar": "^7.5.22"
-  },
-  "module": "src/index.tsx",
-  "type": "module",
-  "bun-create": {
-    "start": "bun run src/index.tsx"
+    "sanitize-filename": "^1.6.4"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@kitajs/ts-html-plugin": "^4.1.4",
     "@tailwindcss/cli": "^4.3.3",
     "@tailwindcss/postcss": "^4.3.3",
-    "@types/bun": "1.4.2",
+    "@types/bun": "1.4.4",
     "@types/node": "^24.19.0",
     "eslint": "^10.11.0",
     "eslint-plugin-better-tailwindcss": "^4.7.0",
@@ -46,11 +44,13 @@
     "knip": "^6.38.0",
     "npm-run-all2": "^9.0.3",
     "postcss": "^8.5.28",
-    "prettier": "^3.9.9",
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.70.1"
+  },
+  "bun-create": {
+    "start": "bun run src/index.tsx"
   },
   "trustedDependencies": [
     "@parcel/watcher",
