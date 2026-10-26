@@ -1,12 +1,8 @@
 [test]
 preload = ["./tests/preload.ts"]
 coverage = true
-coveragePathIgnorePatterns = [
-  "tests/converters/helpers/commonTests.ts"
-]
-pathIgnorePatterns = [
-  "**/integration/**"
-]
+coveragePathIgnorePatterns = ["tests/converters/helpers/commonTests.ts"]
+pathIgnorePatterns = ["**/integration/**"]
 
 [fmt]
 arrowParens = "always"
@@ -18,3 +14,4 @@ sortImports = true
 sortTailwindcss = false
 sortPackageJson = true
 jsdoc = true
+ignorePatterns = ["tests/integration/converters/outputs/", "tests/integration/converters/inputs/"]

@@ -1,4 +1,5 @@
 import { test } from "bun:test";
+
 import { convert } from "../../../src/converters/vips";
 import { runGoldenConversion } from "./golden";
 
