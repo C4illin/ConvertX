@@ -7,8 +7,8 @@ import { Elysia } from "elysia";
 import db from "./db/db";
 import { Jobs } from "./db/types";
 import { AUTO_DELETE_EVERY_N_HOURS, WEBROOT } from "./helpers/env";
-import { scheduleDelayed } from "./helpers/scheduleDelayed";
 import "./helpers/printVersions";
+import { scheduleDelayed, ScheduledTask } from "./helpers/scheduleDelayed";
 import { chooseConverter } from "./pages/chooseConverter";
 import { convert } from "./pages/convert";
 import { deleteFile } from "./pages/deleteFile";
@@ -78,6 +78,7 @@ console.log(`🦊 Elysia is running at http://${app.server?.hostname}:${app.serv
 
 const MILLISECONDS_PER_HOUR = 60 * 60 * 1000;
 const autoDeleteIntervalMs = AUTO_DELETE_EVERY_N_HOURS * MILLISECONDS_PER_HOUR;
+let clearJobsTimer: ScheduledTask;
 
 const clearJobs = () => {
   const jobs = db
@@ -100,7 +101,7 @@ const clearJobs = () => {
     db.query("DELETE FROM jobs WHERE id = ?").run(job.id);
   }
 
-  scheduleDelayed(autoDeleteIntervalMs, clearJobs);
+  clearJobsTimer = scheduleDelayed(autoDeleteIntervalMs, clearJobs);
 };
 
 if (AUTO_DELETE_EVERY_N_HOURS > 0) {
@@ -112,7 +113,7 @@ const handleShutdown = async () => {
   if (isShuttingDown) return;
   isShuttingDown = true;
   if (clearJobsTimer) {
-    clearTimeout(clearJobsTimer);
+    clearJobsTimer.cancel();
   }
   try {
     await app.stop(true);
