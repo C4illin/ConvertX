@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+
 import { scheduleDelayed } from "../../src/helpers/scheduleDelayed";
 
 /** Largest delay setTimeout accepts before a 32-bit overflow. */

@@ -1,4 +1,4 @@
-/** setTimeout delays above this overflow a signed 32-bit integer and fire immediately. */
+/** SetTimeout delays above this overflow a signed 32-bit integer and fire immediately. */
 const MAX_TIMEOUT_DELAY_MS = 2 ** 31 - 1;
 
 type ArmTimer = (callback: () => void, delayMs: number) => ReturnType<typeof setTimeout>;
