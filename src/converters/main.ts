@@ -170,7 +170,9 @@ export function outputFileName(fileName: string, convertTo: string): string {
   if (fileTypeOrig === "") {
     return `${fileName}.${newFileExt}`;
   }
-  return fileName.replace(new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`), newFileExt);
+  // The extension is everything after the last dot, so it can be sliced off. A RegExp built from
+  // it would break on names such as `scan.[` or `notes.$x`.
+  return `${fileName.slice(0, -fileTypeOrig.length)}${newFileExt}`;
 }
 
 export async function handleConvert(

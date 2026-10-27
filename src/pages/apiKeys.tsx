@@ -3,16 +3,24 @@ import { Elysia, t } from "elysia";
 import { type ApiKey, createApiKey, deleteApiKey, listApiKeys } from "../api/keys";
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
+import db from "../db/db";
 import {
   ACCOUNT_REGISTRATION,
   ALLOW_UNAUTHENTICATED,
   BRANDING,
   HIDE_HISTORY,
+  LANGUAGE,
+  TIMEZONE,
   WEBROOT,
 } from "../helpers/env";
 import { userService } from "../services/user";
 
-function ApiKeysPage({ keys, created }: { keys: ApiKey[]; created?: string }) {
+/** Dates in the configured language and time zone, like the history page. */
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleString(LANGUAGE, { timeZone: TIMEZONE });
+}
+
+function ApiKeysPage({ keys, created }: { keys: ApiKey[]; created?: string | undefined }) {
   return (
     <BaseHtml webroot={WEBROOT} title={`${BRANDING} | API keys`}>
       <>
@@ -101,10 +109,10 @@ function ApiKeysPage({ keys, created }: { keys: ApiKey[]; created?: string }) {
                           <code safe>{`${key.prefix}…`}</code>
                         </td>
                         <td class="px-2 py-1" safe>
-                          {new Date(key.date_created).toLocaleString()}
+                          {formatDate(key.date_created)}
                         </td>
                         <td class="px-2 py-1">
-                          {key.last_used ? new Date(key.last_used).toLocaleString() : "Never"}
+                          {key.last_used ? formatDate(key.last_used) : "Never"}
                         </td>
                         <td class="px-2 py-1">
                           <form
@@ -127,16 +135,40 @@ function ApiKeysPage({ keys, created }: { keys: ApiKey[]; created?: string }) {
   );
 }
 
+/** Keys belong to accounts, so anonymous sessions (`ALLOW_UNAUTHENTICATED`) can't manage any. */
+function isRegistered(userId: string): boolean {
+  return db.query("SELECT 1 FROM users WHERE id = ?").get(userId) !== null;
+}
+
+// Creating a key redirects to the keys page, which shows the new key once. Reloading that page
+// can't create another key. Until it's shown, the key waits here for at most a minute.
+const newKeys = new Map<string, { key: string; expires: number }>();
+
+function takeNewKey(userId: string): string | undefined {
+  const entry = newKeys.get(userId);
+  newKeys.delete(userId);
+  return entry && entry.expires > Date.now() ? entry.key : undefined;
+}
+
 export const apiKeys = new Elysia()
   .use(userService)
-  .get("/account/api-keys", ({ user }) => <ApiKeysPage keys={listApiKeys(user.id)} />, {
-    auth: true,
-  })
+  .get(
+    "/account/api-keys",
+    ({ user, redirect }) => {
+      if (!isRegistered(user.id)) return redirect(`${WEBROOT}/`, 302);
+      return <ApiKeysPage keys={listApiKeys(user.id)} created={takeNewKey(user.id)} />;
+    },
+    { auth: true },
+  )
   .post(
     "/account/api-keys",
-    ({ body, user }) => {
+    ({ body, user, redirect }) => {
+      if (!isRegistered(user.id)) return redirect(`${WEBROOT}/`, 302);
       const { key } = createApiKey(user.id, body.name.slice(0, 100));
-      return <ApiKeysPage keys={listApiKeys(user.id)} created={key} />;
+      const now = Date.now();
+      for (const [id, entry] of newKeys) if (entry.expires <= now) newKeys.delete(id);
+      newKeys.set(user.id, { key, expires: now + 60_000 });
+      return redirect(`${WEBROOT}/account/api-keys`, 303);
     },
     { auth: true, body: t.Object({ name: t.String() }) },
   )
@@ -144,7 +176,7 @@ export const apiKeys = new Elysia()
   .post(
     "/account/api-keys/:id/delete",
     ({ params, user, redirect }) => {
-      deleteApiKey(user.id, params.id);
+      if (isRegistered(user.id)) deleteApiKey(user.id, params.id);
       return redirect(`${WEBROOT}/account/api-keys`, 302);
     },
     { auth: true, params: t.Object({ id: t.Numeric() }) },

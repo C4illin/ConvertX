@@ -56,8 +56,12 @@ export function deleteApiKey(userId: string | number, id: string | number): bool
 /** The user a key belongs to, or `null`. Records when the key was last used. */
 export function userForApiKey(key: string): { id: string } | null {
   if (!key.startsWith(KEY_PREFIX)) return null;
+  // Only keys of registered accounts count, never those of anonymous sessions.
   const row = db
-    .query("SELECT id, user_id, last_used FROM api_keys WHERE key_hash = ?")
+    .query(
+      `SELECT api_keys.id, api_keys.user_id, api_keys.last_used FROM api_keys
+       JOIN users ON users.id = api_keys.user_id WHERE api_keys.key_hash = ?`,
+    )
     .get(hashKey(key)) as { id: number; user_id: number; last_used: string | null } | null;
   if (!row) return null;
   // Writing on every request would be wasteful; a minute's precision is plenty.

@@ -1,7 +1,4 @@
-import { randomUUID } from "node:crypto";
 import { mkdirSync, rmSync } from "node:fs";
-import { rename } from "node:fs/promises";
-import path from "node:path";
 
 import type { Cookie } from "elysia";
 import sanitize from "sanitize-filename";
@@ -9,11 +6,12 @@ import sanitize from "sanitize-filename";
 import { getPossibleTargets, handleConvert, outputFileName } from "../converters/main";
 import db from "../db/db";
 import { Filename, Jobs } from "../db/types";
+import { buildJobArchive } from "../helpers/buildJobArchive";
 import { normalizeFiletype } from "../helpers/normalizeFiletype";
 import { outputDir, uploadsDir } from "../index";
 
 /** An error the API reports to the client as `{ error, message }` with this status. */
-class ApiError extends Error {
+export class ApiError extends Error {
   constructor(
     readonly status: 400 | 404 | 422,
     readonly code: string,
@@ -135,14 +133,33 @@ export async function createJob(
     .get(userId, new Date().toISOString(), names.length) as { id: number };
   const userUploadsDir = `${uploadsDir}${userId}/${job.id}/`;
   const userOutputDir = `${outputDir}${userId}/${job.id}/`;
-  mkdirSync(userOutputDir, { recursive: true });
-  await Promise.all(files.map((file, i) => Bun.write(`${userUploadsDir}${names[i]}`, file)));
+  try {
+    mkdirSync(userOutputDir, { recursive: true });
+    await Promise.all(files.map((file, i) => Bun.write(`${userUploadsDir}${names[i]}`, file)));
+  } catch (error) {
+    // The client never gets this job's id, so nothing of it should be left behind. The record
+    // goes first: whatever stopped the upload may stop removing its folders too.
+    db.query("DELETE FROM jobs WHERE id = ?").run(job.id);
+    for (const dir of [userUploadsDir, userOutputDir]) {
+      try {
+        rmSync(dir, { recursive: true, force: true });
+      } catch {
+        // The error worth reporting is the one rethrown below.
+      }
+    }
+    throw error;
+  }
 
   // handleConvert reads the job id from the web UI's cookie; it only needs `.value`.
   const jobId = { value: String(job.id) } as Cookie<string | undefined>;
   const done = handleConvert(names, userUploadsDir, userOutputDir, to, converter, jobId).then(
     () => {
-      db.query("UPDATE jobs SET status = 'completed' WHERE id = ?").run(job.id);
+      // handleConvert also resolves when files fail; each file's record says how it went.
+      const allDone = describeJob(userId, job.id, "").files.every((f) => f.status === "done");
+      db.query("UPDATE jobs SET status = ? WHERE id = ?").run(
+        allDone ? "completed" : "failed",
+        job.id,
+      );
     },
     (error: unknown) => {
       console.error(`API job ${job.id} failed:`, error);
@@ -238,26 +255,11 @@ export async function outputFile(
   return file;
 }
 
-/** A tar of every converted file in a job, built like the web interface's archive. */
+/** A tar of every converted file in a job, shared with the web interface's archive download. */
 export async function archiveJob(userId: string, jobId: string | number): Promise<string> {
   const job = findJob(userId, jobId);
   if (!job) throw notFound(jobId);
-  const folder = `${outputDir}${userId}/${job.id}`;
-  const name = `converted_files_${job.id}.tar`;
-  const files: Record<string, Uint8Array> = {};
-  for await (const file of new Bun.Glob("**/*").scan({ cwd: folder, onlyFiles: true, dot: true })) {
-    // Leaves out earlier archives of this job, finished or not.
-    if (!file.startsWith(name)) files[file] = await Bun.file(path.join(folder, file)).bytes();
-  }
-  // Written under a temporary name, so a download never gets a half-written archive.
-  const temp = path.join(folder, `${name}.tmp-${randomUUID()}`);
-  try {
-    await Bun.Archive.write(temp, files);
-    await rename(temp, path.join(folder, name));
-  } finally {
-    rmSync(temp, { force: true });
-  }
-  return path.join(folder, name);
+  return buildJobArchive(`${outputDir}${userId}/${job.id}`, String(job.id));
 }
 
 /** Deletes a job, its uploads, its results and its file records. */

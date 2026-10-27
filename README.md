@@ -145,7 +145,7 @@ Tutorial in polish: <https://www.kreatywnyprogramista.pl/convertx-lokalny-konwer
 
 ## API
 
-ConvertX has a REST API at `/api/v1`, so scripts and tools like n8n can convert files without the web interface.
+ConvertX has a REST API at `/api/v1`, so scripts and tools like n8n can convert files without the web interface. If you set `WEBROOT`, the API is under it: with `WEBROOT=/convert`, it's at `/convert/api/v1`.
 
 1. In ConvertX, open **Account → API keys** and create a key. It's shown once, so copy it.
 2. Send it as `Authorization: Bearer <key>`.
@@ -153,11 +153,13 @@ ConvertX has a REST API at `/api/v1`, so scripts and tools like n8n can convert 
 Convert one file and save the result:
 
 ```bash
-curl -H "Authorization: Bearer $CONVERTX_KEY" \
+curl --fail -H "Authorization: Bearer $CONVERTX_KEY" \
   -F file=@report.docx -F to=pdf \
   -o report.pdf \
   http://localhost:3000/api/v1/convert
 ```
+
+With `--fail`, curl exits with an error instead of saving an error message as `report.pdf`. Leave it out to see the message: errors are JSON, with an `error` code and a `message`.
 
 For several files, or conversions that take a while, start a job and follow it:
 

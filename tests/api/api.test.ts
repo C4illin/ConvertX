@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, test } from "bun:test";
+import { existsSync, readdirSync } from "node:fs";
 
 import { Elysia } from "elysia";
 
@@ -11,6 +12,7 @@ if (!process.env.CONVERTX_TEST_ROOT) {
 const { default: db } = await import("../../src/db/db");
 const { api } = await import("../../src/api");
 const { createApiKey, deleteApiKey, listApiKeys } = await import("../../src/api/keys");
+const { outputDir, uploadsDir } = await import("../../src/index");
 
 // Some page, to check the API docs leave the web UI out.
 const app = new Elysia().get("/history", () => "history page").use(api);
@@ -81,6 +83,12 @@ describe("authentication", () => {
     expect(deleteApiKey(alice, apiKey.id)).toBe(true);
     expect((await call("/converters", { key })).status).toBe(401);
   });
+
+  test("only accepts keys of registered accounts", async () => {
+    // e.g. a key made for an anonymous session's id, which has no account
+    const { key } = createApiKey(2 ** 24 + 7, "anonymous");
+    expect((await call("/converters", { key })).status).toBe(401);
+  });
 });
 
 describe("formats", () => {
@@ -140,6 +148,7 @@ describe("converting one file", () => {
       method: "POST",
       body: form({ file: new File(["x"], "contacts.vcf"), to: "csv", converter: "ffmpeg" }),
     });
+    expect(response.status).toBe(422);
     expect(await response.json()).toEqual({
       error: "unsupported_conversion",
       message: "ffmpeg can't convert .vcf to .csv. Converters that can: vcf.",
@@ -221,10 +230,19 @@ describe("jobs", () => {
     }
   });
 
+  test("keeps results whose names start like the archive's", async () => {
+    const lookalike = `converted_files_${id}.tar.csv`;
+    await Bun.write(`${outputDir}${alice}/${id}/${lookalike}`, "kept");
+    const response = await call(`/jobs/${id}/archive`);
+    const files = await new Bun.Archive(await response.arrayBuffer()).files();
+    expect([...files.keys()].sort()).toEqual([lookalike, "more team.csv", "team.csv"]);
+  });
+
   test("lists jobs, newest first", async () => {
     const { total, jobs } = await (await call("/jobs?limit=1")).json();
     expect(total).toBeGreaterThanOrEqual(2);
     expect(jobs).toHaveLength(1);
+    expect(jobs[0].id).toBe(id);
   });
 
   test("keeps jobs private to their owner", async () => {
@@ -266,6 +284,73 @@ describe("jobs", () => {
     expect(db.query("SELECT count(*) AS n FROM file_names WHERE job_id = ?").get(id)).toEqual({
       n: 0,
     });
+    expect(await Bun.file(`${uploadsDir}${alice}/${id}/team.vcf`).exists()).toBe(false);
+    expect(await Bun.file(`${outputDir}${alice}/${id}/team.csv`).exists()).toBe(false);
+    expect(existsSync(`${uploadsDir}${alice}/${id}`)).toBe(false);
+    expect(existsSync(`${outputDir}${alice}/${id}`)).toBe(false);
+  });
+});
+
+describe("failures", () => {
+  test("marks a job failed when a file fails", async () => {
+    // The test environment has no image tools, so this conversion fails.
+    const response = await call("/jobs", {
+      method: "POST",
+      body: form({ files: new File([new Uint8Array([137, 80, 78, 71])], "pixel.png"), to: "jpg" }),
+    });
+    const job = await waitForJob((await response.json()).id);
+    expect(job.status).toBe("failed");
+    expect(job.files[0].status).toBe("failed");
+  });
+
+  test("leaves nothing behind when the uploads can't be saved", async () => {
+    const carol = addUser("carol@example.com");
+    const carolKey = createApiKey(carol, "tests").key;
+    // A file where carol's uploads folder belongs makes saving any upload fail.
+    await Bun.write(`${uploadsDir}${carol}`, "in the way");
+    const response = await call("/jobs", {
+      method: "POST",
+      key: carolKey,
+      body: form({
+        files: new File([vcard("Ada Lovelace", "ada@example.com")], "team.vcf"),
+        to: "csv",
+      }),
+    });
+    expect(response.status).toBe(500);
+    expect((await response.json()).error).toBe("internal_error");
+    expect(db.query("SELECT count(*) AS n FROM jobs WHERE user_id = ?").get(carol)).toEqual({
+      n: 0,
+    });
+    expect(existsSync(`${outputDir}${carol}`) ? readdirSync(`${outputDir}${carol}`) : []).toEqual(
+      [],
+    );
+  });
+
+  test("answers unknown paths with a JSON 404", async () => {
+    const response = await call("/nope");
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({
+      error: "not_found",
+      message: "There's no GET /api/v1/nope. /api/v1/docs lists every endpoint.",
+    });
+  });
+
+  test("answers invalid requests with a JSON 400", async () => {
+    const missingTarget = await call("/convert", {
+      method: "POST",
+      body: form({ file: new File(["x"], "contacts.vcf") }),
+    });
+    const badId = await call("/jobs/abc");
+    for (const [response, field] of [
+      [missingTarget, "to"],
+      [badId, "id"],
+    ] as const) {
+      expect(response.status).toBe(400);
+      expect(await response.json()).toEqual({
+        error: "invalid_request",
+        message: `"${field}" is missing or not valid. /api/v1/docs describes what each endpoint takes.`,
+      });
+    }
   });
 });
 

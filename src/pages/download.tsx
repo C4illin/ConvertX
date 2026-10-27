@@ -1,16 +1,11 @@
-import { randomUUID } from "node:crypto";
-import { rename, unlink } from "node:fs/promises";
-import path from "node:path";
-
 import { Elysia } from "elysia";
 import sanitize from "sanitize-filename";
 
 import { outputDir } from "..";
 import db from "../db/db";
+import { buildJobArchive } from "../helpers/buildJobArchive";
 import { WEBROOT } from "../helpers/env";
 import { userService } from "./user";
-
-const archiveBuilds = new Map<string, Promise<void>>();
 
 export const download = new Elysia()
   .use(userService)
@@ -55,42 +50,7 @@ export const download = new Elysia()
       }
 
       const jobId = decodeURIComponent(params.jobId);
-      const outputPath = `${outputDir}${userId}/${jobId}`;
-      const outputTar = path.join(outputPath, `converted_files_${jobId}.tar`);
-
-      const archiveKey = `${userId}/${jobId}`;
-      let archiveBuild = archiveBuilds.get(archiveKey);
-      if (!archiveBuild) {
-        const build = async () => {
-          const outputTarName = path.basename(outputTar);
-          const outputTarTempName = `${outputTarName}.tmp-${randomUUID()}`;
-          const outputTarTemp = path.join(outputPath, outputTarTempName);
-
-          try {
-            const files: Record<string, Uint8Array> = {};
-            const glob = new Bun.Glob("**/*");
-            for await (const file of glob.scan({ cwd: outputPath, onlyFiles: true, dot: true })) {
-              if (file !== outputTarName && !file.startsWith(`${outputTarName}.tmp-`)) {
-                files[file] = new Uint8Array(
-                  await Bun.file(path.join(outputPath, file)).arrayBuffer(),
-                );
-              }
-            }
-            await Bun.Archive.write(outputTarTemp, files);
-            await rename(outputTarTemp, outputTar);
-          } finally {
-            if (await Bun.file(outputTarTemp).exists()) {
-              await unlink(outputTarTemp);
-            }
-          }
-        };
-
-        archiveBuild = build().finally(() => {
-          archiveBuilds.delete(archiveKey);
-        });
-        archiveBuilds.set(archiveKey, archiveBuild);
-      }
-      await archiveBuild;
+      const outputTar = await buildJobArchive(`${outputDir}${userId}/${jobId}`, jobId);
       return Bun.file(outputTar);
     },
     {

@@ -1,10 +1,11 @@
 import { openapi } from "@elysiajs/openapi";
-import { Elysia, file, t } from "elysia";
+import { Elysia, t } from "elysia";
 
 import { getAllInputs, getAllTargets, getPossibleTargets } from "../converters/main";
 import { WEBROOT } from "../helpers/env";
 import { normalizeFiletype } from "../helpers/normalizeFiletype";
 import {
+  ApiError,
   archiveJob,
   chooseConverter,
   cleanTarget,
@@ -46,7 +47,8 @@ const Job = t.Object(
   {
     id: t.Number(),
     status: t.Union([t.Literal("pending"), t.Literal("completed"), t.Literal("failed")], {
-      description: "`pending` until every file is converted.",
+      description:
+        "`pending` until every file is converted, then `completed`, or `failed` if any file failed. Each file has its own status.",
     }),
     createdAt: t.String({ format: "date-time" }),
     files: t.Array(JobFile),
@@ -74,9 +76,27 @@ function escapeRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+/**
+ * A file as a download. A plain Response passes through Elysia untouched, unlike its file() helper,
+ * which the minified build in the Docker image sends as "[object Object]".
+ */
+function download(path: string, name: string, headers: Record<string, string> = {}): Response {
+  return new Response(Bun.file(path), {
+    headers: {
+      "content-disposition": `attachment; filename*=UTF-8''${encodeURIComponent(name)}`,
+      ...headers,
+    },
+  });
+}
+
 /** Turns one file or several from a multipart form into a list. */
 function asList(files: File | File[]): File[] {
   return Array.isArray(files) ? files : [files];
+}
+
+/** An error in the API's `{ error, message }` shape. */
+function errorResponse(status: number, error: string, message: string): Response {
+  return Response.json({ error, message }, { status });
 }
 
 /**
@@ -113,15 +133,39 @@ export const api = new Elysia({ name: "api", prefix: "/api/v1" })
     }),
   )
   .macro("apiKey", {
-    async resolve({ headers, status }) {
-      const authorization = headers.authorization ?? "";
+    // Headers come from `request`: Elysia decides whether to parse `headers` by reading
+    // this function's source, which the minified build in the Docker image hides from it.
+    async resolve({ request, status }) {
+      const authorization = request.headers.get("authorization") ?? "";
       const key = /^bearer\s+/i.test(authorization)
         ? authorization.replace(/^bearer\s+/i, "").trim()
-        : headers["x-api-key"];
+        : request.headers.get("x-api-key");
       const user = key ? userForApiKey(key) : null;
       if (!user) return status(401, unauthorized);
       return { user };
     },
+  })
+  // Every API error is JSON in the shape the docs describe, including Elysia's own validation and
+  // parse errors. The app's error handler is registered after the API, so it never sees these.
+  .onError(({ code, error }) => {
+    if (error instanceof ApiError) return error.toResponse();
+    if (code === "VALIDATION") {
+      const field = error.valueError?.path.slice(1);
+      return errorResponse(
+        400,
+        "invalid_request",
+        `${field ? `"${field}"` : "The request"} is missing or not valid. ${API_ROOT}/docs describes what each endpoint takes.`,
+      );
+    }
+    if (code === "PARSE") {
+      return errorResponse(400, "invalid_request", "The request body couldn't be read.");
+    }
+    console.error(error);
+    return errorResponse(
+      500,
+      "internal_error",
+      "Something went wrong. The server log has details.",
+    );
   })
   .get(
     "/converters",
@@ -176,6 +220,7 @@ export const api = new Elysia({ name: "api", prefix: "/api/v1" })
           from: t.String(),
           targets: t.Array(t.Object({ format: t.String(), converters: t.Array(t.String()) })),
         }),
+        400: ErrorBody,
         401: ErrorBody,
       },
       detail: {
@@ -188,20 +233,18 @@ export const api = new Elysia({ name: "api", prefix: "/api/v1" })
   )
   .post(
     "/convert",
-    async ({ body, user, set }) => {
+    async ({ body, user }) => {
       const to = cleanTarget(body.to);
       const converter = chooseConverter([body.file.name], to, body.converter);
       const { id, done } = await createJob(user.id, [body.file], to, converter);
       await done;
       const job = describeJob(user.id, id, API_ROOT);
-      set.headers["x-convertx-job"] = String(id);
       const converted = job.files[0];
       if (!converted || converted.status !== "done") {
-        set.status = 422;
-        return {
-          error: "conversion_failed",
-          message: converted?.error ?? "The conversion failed.",
-        };
+        return Response.json(
+          { error: "conversion_failed", message: converted?.error ?? "The conversion failed." },
+          { status: 422, headers: { "x-convertx-job": String(id) } },
+        );
       }
       // Several outputs, such as one image per PDF page, come back as a tar.
       const single = converted.outputs.length === 1 ? converted.outputs[0] : undefined;
@@ -209,9 +252,7 @@ export const api = new Elysia({ name: "api", prefix: "/api/v1" })
         ? await outputFile(user.id, id, single.name)
         : await archiveJob(user.id, id);
       const name = single ? single.name : `converted_files_${id}.tar`;
-      set.headers["content-disposition"] =
-        `attachment; filename*=UTF-8''${encodeURIComponent(name)}`;
-      return file(path);
+      return download(path, name, { "x-convertx-job": String(id) });
     },
     {
       apiKey: true,
@@ -294,7 +335,11 @@ export const api = new Elysia({ name: "api", prefix: "/api/v1" })
         limit: t.Optional(t.Numeric({ minimum: 1, maximum: 100, default: 20 })),
         offset: t.Optional(t.Numeric({ minimum: 0, default: 0 })),
       }),
-      response: { 200: t.Object({ total: t.Number(), jobs: t.Array(JobSummary) }), 401: ErrorBody },
+      response: {
+        200: t.Object({ total: t.Number(), jobs: t.Array(JobSummary) }),
+        400: ErrorBody,
+        401: ErrorBody,
+      },
       detail: {
         summary: "List jobs",
         description: "Your jobs, newest first.",
@@ -305,7 +350,7 @@ export const api = new Elysia({ name: "api", prefix: "/api/v1" })
   .get("/jobs/:id", ({ params, user }) => describeJob(user.id, params.id, API_ROOT), {
     apiKey: true,
     params: t.Object({ id: t.Numeric() }),
-    response: { 200: Job, 401: ErrorBody, 404: ErrorBody },
+    response: { 200: Job, 400: ErrorBody, 401: ErrorBody, 404: ErrorBody },
     detail: {
       summary: "Get a job",
       description: "The job's progress and its converted files.",
@@ -314,31 +359,27 @@ export const api = new Elysia({ name: "api", prefix: "/api/v1" })
   })
   .get(
     "/jobs/:id/files/:name",
-    async ({ params, user, set }) => {
+    async ({ params, user }) => {
       const path = await outputFile(user.id, params.id, params.name);
-      set.headers["content-disposition"] =
-        `attachment; filename*=UTF-8''${encodeURIComponent(params.name)}`;
-      return file(path);
+      return download(path, params.name);
     },
     {
       apiKey: true,
       params: t.Object({ id: t.Numeric(), name: t.String() }),
-      response: { 200: t.File(), 401: ErrorBody, 404: ErrorBody },
+      response: { 200: t.File(), 400: ErrorBody, 401: ErrorBody, 404: ErrorBody },
       detail: { summary: "Download a converted file", tags: ["Conversion"] },
     },
   )
   .get(
     "/jobs/:id/archive",
-    async ({ params, user, set }) => {
+    async ({ params, user }) => {
       const path = await archiveJob(user.id, params.id);
-      set.headers["content-disposition"] =
-        `attachment; filename="converted_files_${params.id}.tar"`;
-      return file(path);
+      return download(path, `converted_files_${params.id}.tar`);
     },
     {
       apiKey: true,
       params: t.Object({ id: t.Numeric() }),
-      response: { 200: t.File(), 401: ErrorBody, 404: ErrorBody },
+      response: { 200: t.File(), 400: ErrorBody, 401: ErrorBody, 404: ErrorBody },
       detail: {
         summary: "Download every converted file",
         description: "A tar of the job's converted files.",
@@ -355,11 +396,22 @@ export const api = new Elysia({ name: "api", prefix: "/api/v1" })
     {
       apiKey: true,
       params: t.Object({ id: t.Numeric() }),
-      response: { 204: t.Void(), 401: ErrorBody, 404: ErrorBody },
+      response: { 204: t.Void(), 400: ErrorBody, 401: ErrorBody, 404: ErrorBody },
       detail: {
         summary: "Delete a job",
         description: "Deletes the job, its uploads and its converted files.",
         tags: ["Conversion"],
       },
     },
+  )
+  // Without this, unknown API paths would get the web interface's plain-text 404.
+  .all(
+    "/*",
+    ({ request }) =>
+      errorResponse(
+        404,
+        "not_found",
+        `There's no ${request.method} ${new URL(request.url).pathname}. ${API_ROOT}/docs lists every endpoint.`,
+      ),
+    { detail: { hide: true } },
   );
