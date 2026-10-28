@@ -6,6 +6,7 @@ import { Elysia } from "elysia";
 
 import db from "./db/db";
 import { Jobs } from "./db/types";
+import { createEdenClient, type EdenAppClient } from "./eden";
 import { AUTO_DELETE_EVERY_N_HOURS, WEBROOT } from "./helpers/env";
 import "./helpers/printVersions";
 import { scheduleDelayed, ScheduledTask } from "./helpers/scheduleDelayed";
@@ -24,6 +25,9 @@ import { user } from "./pages/user";
 
 export const uploadsDir = "./data/uploads/";
 export const outputDir = "./data/output/";
+
+// Re-export the composed app type so consumers can use @elysiajs/eden for type-safe clients.
+export type { App } from "./eden";
 
 // Fix for Elysia issue with Bun, (see https://github.com/oven-sh/bun/issues/12161)
 process.getBuiltinModule = require;
@@ -74,7 +78,22 @@ if (process.env.NODE_ENV !== "production") {
 
 app.listen(process.env.PORT || 3000);
 
-console.log(`🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}${WEBROOT}`);
+/**
+ * Construct the server URL with explicit fallbacks for hostname and port. app.server?.hostname and
+ * app.server?.port may be undefined (Elysia's Server type is a union that doesn't expose these
+ * directly), so we fall back to "localhost" and the configured/default port respectively.
+ */
+const serverUrl = () => {
+  const s = app.server;
+  const host = s?.hostname ?? "localhost";
+  const port = s?.port ?? (process.env.PORT || 3000);
+  return `http://${host}:${port}${WEBROOT}`;
+};
+
+console.log(`🦊 Elysia is running at ${serverUrl()}`);
+
+// Create an Eden client for type-safe server-side API access and testing.
+export const eden = createEdenClient(serverUrl()) as EdenAppClient;
 
 const MILLISECONDS_PER_HOUR = 60 * 60 * 1000;
 const autoDeleteIntervalMs = AUTO_DELETE_EVERY_N_HOURS * MILLISECONDS_PER_HOUR;

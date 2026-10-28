@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "DOM"],
     "module": "ESNext",
     "target": "ES2021",
     "moduleResolution": "bundler",
@@ -28,6 +28,6 @@
     "esModuleInterop": true
     // "noImplicitReturns": true
   },
-  "include": ["src", "package.json"],
+  "include": ["src", "public", "package.json"],
   "exclude": ["dist", "node_modules"]
 }
