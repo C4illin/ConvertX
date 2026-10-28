@@ -58,7 +58,7 @@ RUN apt-get update && apt-get install -y \
   && rm -rf /var/lib/apt/lists/*
 
 # Remove when patch is released
-RUN pip install --break-system-packages --no-cache-dir "Brotli>=1.2.1" "brotlicffi>=1.2.1.0"
+RUN pip install --break-system-packages --ignore-installed --no-cache-dir "Brotli>=1.2.1" "brotlicffi>=1.2.1.0"
 
 RUN groupadd -g 1000 convertx && \
   useradd -u 1000 -g convertx -d /home/convertx -m -s /bin/bash convertx
