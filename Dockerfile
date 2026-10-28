@@ -57,6 +57,9 @@ RUN apt-get update && apt-get install -y \
   && pipx install "markitdown[all]" \
   && rm -rf /var/lib/apt/lists/*
 
+# Remove when patch is released
+RUN pipx runpip markitdown install --upgrade --no-cache-dir "Brotli>=1.2.1" "brotlicffi>=1.2.1.0"
+
 RUN groupadd -g 1000 convertx && \
   useradd -u 1000 -g convertx -d /home/convertx -m -s /bin/bash convertx
 
