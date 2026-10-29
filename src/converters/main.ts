@@ -315,7 +315,13 @@ for (const converterName in properties) {
     for (const ext of fromList) {
       if (!possibleTargets[ext]) possibleTargets[ext] = {};
 
-      possibleTargets[ext][converterName] = [...toList];
+      if (!possibleTargets[ext][converterName]) {
+        possibleTargets[ext][converterName] = [...toList];
+      } else {
+        possibleTargets[ext][converterName] = [
+          ...new Set([...possibleTargets[ext][converterName], ...toList]),
+        ];
+      }
     }
   }
 }
@@ -349,16 +355,13 @@ for (const converterName in properties) {
 
   if (!converterProperties) continue;
 
+  const targets = new Set<string>();
   for (const key in converterProperties.to) {
-    if (allTargets[converterName]) {
-      allTargets[converterName] = [
-        ...allTargets[converterName],
-        ...(converterProperties.to[key] || []),
-      ];
-    } else {
-      allTargets[converterName] = [...(converterProperties.to[key] || [])];
+    for (const ext of converterProperties.to[key] || []) {
+      targets.add(ext);
     }
   }
+  allTargets[converterName] = Array.from(targets);
 }
 
 export const getAllTargets = () => {
@@ -371,16 +374,13 @@ for (const converterName in properties) {
 
   if (!converterProperties) continue;
 
+  const inputs = new Set<string>();
   for (const key in converterProperties.from) {
-    if (allInputs[converterName]) {
-      allInputs[converterName] = [
-        ...allInputs[converterName],
-        ...(converterProperties.from[key] || []),
-      ];
-    } else {
-      allInputs[converterName] = converterProperties.from[key] || [];
+    for (const ext of converterProperties.from[key] || []) {
+      inputs.add(ext);
     }
   }
+  allInputs[converterName] = Array.from(inputs);
 }
 
 export const getAllInputs = (converter: string) => {
