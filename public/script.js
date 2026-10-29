@@ -209,16 +209,20 @@ const uploadFile = (file) => {
 
   xhr.open("POST", `${webroot}/upload`, true);
 
-  xhr.onload = () => {
-    let data = JSON.parse(xhr.responseText);
-
+  // loadend fires after load, error, abort and timeout, so a failed upload
+  // (e.g. a dropped folder) no longer leaves the convert button disabled
+  xhr.onloadend = () => {
     pendingFiles -= 1;
     if (pendingFiles === 0) {
-      if (formatSelected) {
+      if (formatSelected && fileNames.length > 0) {
         convertButton.disabled = false;
       }
       convertButton.textContent = "Convert";
     }
+  };
+
+  xhr.onload = () => {
+    let data = JSON.parse(xhr.responseText);
 
     //Remove the progress bar when upload is done
     let progressbar = file.htmlRow.getElementsByTagName("progress");
