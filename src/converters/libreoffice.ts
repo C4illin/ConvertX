@@ -172,10 +172,6 @@ export function convert(
   args.push("--headless");
   const [inFilter, outFilter] = getFilters(fileType, convertTo);
 
-  if (inFilter) {
-    args.push(`--infilter=${inFilter}`);
-  }
-
   if (outFilter) {
     args.push("--convert-to", `${convertTo}:${outFilter}`, "--outdir", outputPath, filePath);
   } else {
