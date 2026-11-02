@@ -112,6 +112,49 @@ All are optional, JWT_SECRET is recommended to be set.
 | UNAUTHENTICATED_USER_SHARING | false                                              | Shares conversion history between all unauthenticated users                                                                                                   |
 | MAX_CONVERT_PROCESS          | 0                                                  | Maximum number of concurrent conversion processes allowed. Set to 0 for unlimited.                                                                            |
 | PORT                         | 3000                                               | Application listen port                                                                                                                                       |
+| SSO_ENABLED                  | false                                              | Take the user identity from a reverse-proxy header instead of the local login form. See [Single sign-on](#single-sign-on-forward-auth).                       |
+| SSO_UID_HEADER               | x-authentik-uid                                    | Header carrying the stable user id when `SSO_ENABLED` is true                                                                                                 |
+| SSO_USERNAME_HEADER          | x-authentik-username                               | Header carrying the display name when `SSO_ENABLED` is true                                                                                                   |
+
+### Single sign-on (forward auth)
+
+`SSO_ENABLED=true` lets a reverse proxy that has already authenticated the user (authentik, oauth2-proxy, Authelia, …) hand the identity to ConvertX in a header. ConvertX then skips its own login: `/login`, `/setup`, `/register` and `POST /account` return 404, `/logoff` only drops the local session, and `/account` shows the proxy identity read-only.
+
+> [!WARNING]
+> The header is trusted. Enable this only when ConvertX is reachable **exclusively** through the proxy: the proxy must strip client-supplied `X-authentik-*` headers, and direct access to the container port must be blocked (network policy, private network, or both). Never publish the port itself.
+
+The header value is mapped to the integer `users.id` the database requires: authentik's 64-hex uid uses its first 52 bits, offset above the local-account range; any other value is sha256-hashed. The first request creates the user with a random password hash, so password login can never match an SSO account. No schema change and no migration: local accounts keep their ids, SSO accounts live at `id >= 2^24`.
+
+#### authentik + Traefik
+
+```yaml
+# convertx environment
+SSO_ENABLED: "true"
+SSO_UID_HEADER: x-authentik-uid
+SSO_USERNAME_HEADER: x-authentik-username
+```
+
+```yaml
+# Traefik forward-auth middleware (domain-level outpost)
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: authentik-forward-auth
+spec:
+  forwardAuth:
+    address: http://authentik-server/outpost.goauthentik.io/auth/traefik
+    authResponseHeaders:
+      - X-authentik-uid
+      - X-authentik-username
+```
+
+Attach that middleware to the ConvertX router. Any proxy that sets a stable, unique id header works; name it with `SSO_UID_HEADER` / `SSO_USERNAME_HEADER`.
+
+#### Notes
+
+- With `SSO_ENABLED=true` the local password form is unreachable; set the flag back to `false` to use local accounts again. SSO users are not deleted.
+- No role or admin mapping yet: every authenticated user is a normal ConvertX user.
+- No signature verification of `X-authentik-jwt` in v1; the trust boundary is the proxy plus the network restriction above.
 
 ### Docker images
 
