@@ -10,8 +10,10 @@ import {
   BRANDING,
   HIDE_HISTORY,
   HTTP_ALLOWED,
+  SSO_ENABLED,
   WEBROOT,
 } from "../helpers/env";
+import { resolveSsoIdentity } from "../helpers/sso";
 import { userService } from "../services/user";
 
 export { userService } from "../services/user";
@@ -162,9 +164,56 @@ function AccountPage({ email, error }: { email: string; error?: string }) {
   );
 }
 
+/** Read-only identity for forward-auth deployments: there is nothing to edit. */
+function SsoAccountPage({ username, uid }: { username: string; uid: string }) {
+  return (
+    <BaseHtml webroot={WEBROOT} title="ConvertX | Account">
+      <>
+        <Header
+          webroot={WEBROOT}
+          branding={BRANDING}
+          accountRegistration={ACCOUNT_REGISTRATION}
+          allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+          hideHistory={HIDE_HISTORY}
+          loggedIn
+        />
+        <main
+          class={`
+            w-full flex-1 px-2
+            sm:px-4
+          `}
+        >
+          <article class="article">
+            <h2 class="mb-4 text-xl">Account</h2>
+            <p class="mb-4 text-neutral-400">
+              This instance signs you in through a single sign-on proxy. Your identity is managed
+              there and cannot be changed here.
+            </p>
+            <div class="flex flex-col gap-4">
+              <div class="flex flex-col gap-1">
+                <span class="text-neutral-400">Username</span>
+                <span id="sso-username">{username}</span>
+              </div>
+              <div class="flex flex-col gap-1">
+                <span class="text-neutral-400">User ID</span>
+                <span id="sso-uid">{uid}</span>
+              </div>
+            </div>
+          </article>
+        </main>
+      </>
+    </BaseHtml>
+  );
+}
+
 export const user = new Elysia()
   .use(userService)
-  .get("/setup", ({ redirect }) => {
+  .get("/setup", ({ redirect, set }) => {
+    if (SSO_ENABLED) {
+      set.status = 404;
+      return "Not found";
+    }
+
     if (!FIRST_RUN) {
       return redirect(`${WEBROOT}/login`, 302);
     }
@@ -225,7 +274,12 @@ export const user = new Elysia()
       </BaseHtml>
     );
   })
-  .get("/register", ({ redirect }) => {
+  .get("/register", ({ redirect, set }) => {
+    if (SSO_ENABLED) {
+      set.status = 404;
+      return "Not found";
+    }
+
     if (!ACCOUNT_REGISTRATION) {
       return redirect(`${WEBROOT}/login`, 302);
     }
@@ -283,6 +337,11 @@ export const user = new Elysia()
   .post(
     "/register",
     async ({ body: { email, password }, set, redirect, jwt, cookie: { auth } }) => {
+      if (SSO_ENABLED) {
+        set.status = 404;
+        return "Not found";
+      }
+
       if (!ACCOUNT_REGISTRATION && !FIRST_RUN) {
         return redirect(`${WEBROOT}/login`, 302);
       }
@@ -337,7 +396,12 @@ export const user = new Elysia()
   )
   .get(
     "/login",
-    async ({ jwt, redirect, cookie: { auth } }) => {
+    async ({ jwt, redirect, set, cookie: { auth } }) => {
+      if (SSO_ENABLED) {
+        set.status = 404;
+        return "Not found";
+      }
+
       if (FIRST_RUN) {
         return redirect(`${WEBROOT}/setup`, 302);
       }
@@ -360,6 +424,11 @@ export const user = new Elysia()
   .post(
     "/login",
     async function handler({ body, set, redirect, jwt, cookie: { auth } }) {
+      if (SSO_ENABLED) {
+        set.status = 404;
+        return "Not found";
+      }
+
       const existingUser = db.query("SELECT * FROM users WHERE email = ?").as(User).get(body.email);
 
       if (!existingUser) {
@@ -403,18 +472,22 @@ export const user = new Elysia()
       auth.remove();
     }
 
-    return redirect(`${WEBROOT}/login`, 302);
+    // Forward-auth logs the user straight back in, so "log off" can only drop
+    // the local session and return home -- the proxy owns the real logout.
+    return redirect(SSO_ENABLED ? `${WEBROOT}/` : `${WEBROOT}/login`, 302);
   })
   .post("/logoff", ({ redirect, cookie: { auth } }) => {
     if (auth?.value) {
       auth.remove();
     }
 
-    return redirect(`${WEBROOT}/login`, 302);
+    // Forward-auth logs the user straight back in, so "log off" can only drop
+    // the local session and return home -- the proxy owns the real logout.
+    return redirect(SSO_ENABLED ? `${WEBROOT}/` : `${WEBROOT}/login`, 302);
   })
   .get(
     "/account",
-    async ({ user, redirect }) => {
+    async ({ user, redirect, headers }) => {
       if (!user) {
         return redirect(`${WEBROOT}/`, 302);
       }
@@ -423,6 +496,13 @@ export const user = new Elysia()
 
       if (!userData) {
         return redirect(`${WEBROOT}/`, 302);
+      }
+
+      if (SSO_ENABLED) {
+        const identity = resolveSsoIdentity(headers);
+        return (
+          <SsoAccountPage username={identity?.username ?? userData.email} uid={String(user.id)} />
+        );
       }
 
       return <AccountPage email={userData.email} />;
@@ -434,6 +514,11 @@ export const user = new Elysia()
   .post(
     "/account",
     async function handler({ body, set, redirect, jwt, cookie: { auth } }) {
+      if (SSO_ENABLED) {
+        set.status = 404;
+        return "Not found";
+      }
+
       if (!auth?.value) {
         return redirect(`${WEBROOT}/login`, 302);
       }
