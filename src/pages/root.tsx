@@ -14,15 +14,17 @@ import {
   BRANDING,
   HIDE_HISTORY,
   HTTP_ALLOWED,
+  SSO_ENABLED,
   UNAUTHENTICATED_USER_SHARING,
   WEBROOT,
 } from "../helpers/env";
+import { ensureSsoUser, resolveSsoIdentity } from "../helpers/sso";
 import { FIRST_RUN, userService } from "./user";
 
 export const root = new Elysia().use(userService).get(
   "/",
-  async ({ jwt, redirect, cookie: { auth, jobId } }) => {
-    if (!ALLOW_UNAUTHENTICATED) {
+  async ({ jwt, redirect, set, headers, cookie: { auth, jobId } }) => {
+    if (!ALLOW_UNAUTHENTICATED && !SSO_ENABLED) {
       if (FIRST_RUN) {
         return redirect(`${WEBROOT}/setup`, 302);
       }
@@ -34,7 +36,45 @@ export const root = new Elysia().use(userService).get(
 
     // validate jwt
     let user: ({ id: string } & JWTPayloadSpec) | false = false;
-    if (ALLOW_UNAUTHENTICATED) {
+
+    if (SSO_ENABLED) {
+      // The reverse proxy is the only source of identity in SSO mode. The
+      // cookie is a session cache and must never override the header.
+      const identity = resolveSsoIdentity(headers);
+      if (identity) {
+        await ensureSsoUser(identity);
+        user = { id: String(identity.id) };
+
+        // Establish the session cookie on the landing page as well, so the
+        // browser keeps a JWT session for the requests that follow.
+        const session = auth?.value ? await jwt.verify(auth.value) : false;
+        const sameUser = session !== false && session.id === user.id;
+        if (auth && !sameUser) {
+          auth.set({
+            value: await jwt.sign({ id: user.id }),
+            httpOnly: true,
+            secure: !HTTP_ALLOWED,
+            maxAge: 60 * 60 * 24 * 7,
+            sameSite: "strict",
+          });
+        }
+      } else if (auth?.value) {
+        try {
+          user = await jwt.verify(auth.value);
+        } catch {
+          user = false;
+        }
+      }
+
+      if (!user) {
+        set.status = 401;
+        return "Unauthorized: missing SSO identity header";
+      }
+    }
+
+    if (SSO_ENABLED) {
+      // the user row was created by ensureSsoUser above
+    } else if (ALLOW_UNAUTHENTICATED) {
       // Check if the current cookie is already a valid session
       if (auth?.value) {
         try {
@@ -104,6 +144,10 @@ export const root = new Elysia().use(userService).get(
     }
 
     if (!user) {
+      if (SSO_ENABLED) {
+        set.status = 401;
+        return "Unauthorized: missing SSO identity header";
+      }
       return redirect(`${WEBROOT}/login`, 302);
     }
 
