@@ -39,38 +39,15 @@ export const root = new Elysia().use(userService).get(
 
     if (SSO_ENABLED) {
       // The reverse proxy is the only source of identity in SSO mode. The
-      // cookie is a session cache and must never override the header.
+      // cookie is not consulted: no header means 401, even with a valid JWT.
       const identity = resolveSsoIdentity(request.headers);
-      if (identity) {
-        await ensureSsoUser(identity);
-        user = { id: String(identity.id) };
-
-        // Establish the session cookie on the landing page as well, so the
-        // browser keeps a JWT session for the requests that follow.
-        const session = auth?.value ? await jwt.verify(auth.value) : false;
-        const sameUser = session !== false && session.id === user.id;
-        if (auth && !sameUser) {
-          auth.set({
-            value: await jwt.sign({ id: user.id }),
-            httpOnly: true,
-            secure: !HTTP_ALLOWED,
-            maxAge: 60 * 60 * 24 * 7,
-            sameSite: "strict",
-          });
-        }
-      }
-      // No header, no identity: the session cookie is not consulted in SSO mode.
-      // A cookie without a proxy header is a request that did not come through
-      // the proxy (direct pod access) and must not authenticate.
-
-      if (!user) {
+      if (!identity) {
         set.status = 401;
         return "Unauthorized: missing SSO identity header";
       }
-    }
 
-    if (SSO_ENABLED) {
-      // the user row was created by ensureSsoUser above
+      const userId = await ensureSsoUser(identity);
+      user = { id: String(userId) };
     } else if (ALLOW_UNAUTHENTICATED) {
       // Check if the current cookie is already a valid session
       if (auth?.value) {

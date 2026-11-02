@@ -36,6 +36,4 @@ export const SSO_ENABLED = process.env.SSO_ENABLED?.toLowerCase() === "true" || 
 // hash of the user) and X-authentik-username.
 export const SSO_UID_HEADER = process.env.SSO_UID_HEADER ?? "x-authentik-uid";
 
-export const SSO_USERNAME_HEADER =
-  process.env.SSO_USERNAME_HEADER ?? "x-authentik-username";
-
+export const SSO_USERNAME_HEADER = process.env.SSO_USERNAME_HEADER ?? "x-authentik-username";

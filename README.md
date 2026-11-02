@@ -118,12 +118,28 @@ All are optional, JWT_SECRET is recommended to be set.
 
 ### Single sign-on (forward auth)
 
-`SSO_ENABLED=true` lets a reverse proxy that has already authenticated the user (authentik, oauth2-proxy, Authelia, …) hand the identity to ConvertX in a header. ConvertX then skips its own login: `/login`, `/setup`, `/register` and `POST /account` return 404, `/logoff` only drops the local session, and `/account` shows the proxy identity read-only.
+`SSO_ENABLED=true` lets a reverse proxy that has already authenticated the user (authentik, oauth2-proxy, Authelia, …) hand the identity to ConvertX in a header. ConvertX then skips its own login: `/login`, `/setup`, `/register` and `POST /account` return 404, `/logoff` only drops the local session, and `/account` shows the proxy identity read-only. The JWT session cookie is neither issued nor consulted in this mode.
 
 > [!WARNING]
-> The header is trusted. Enable this only when ConvertX is reachable **exclusively** through the proxy: the proxy must strip client-supplied `X-authentik-*` headers, and direct access to the container port must be blocked (network policy, private network, or both). Never publish the port itself.
+> The header is trusted, and Traefik replaces **only** the headers named in `authResponseHeaders`. Every other client-supplied header is forwarded unchanged — and if the auth server answers without returning one of those headers, the client's value survives. So list **every** identity header in `authResponseHeaders`, block direct access to the container port, and never publish it. An SSO deployment must be reachable only through the proxy.
 
-The header value is mapped to the integer `users.id` the database requires: authentik's 64-hex uid uses its first 52 bits, offset above the local-account range; any other value is sha256-hashed. The first request creates the user with a random password hash, so password login can never match an SSO account. No schema change and no migration: local accounts keep their ids, SSO accounts live at `id >= 2^24`.
+```yaml
+# docker-compose.yaml — SSO mode: no published port, proxy network only
+services:
+  convertx:
+    image: ghcr.io/c4illin/convertx
+    expose:
+      - "3000"
+    networks: [proxy]
+    environment:
+      SSO_ENABLED: "true"
+      SSO_UID_HEADER: x-authentik-uid
+      SSO_USERNAME_HEADER: x-authentik-username
+```
+
+If you must keep `ports:`, bind it to loopback only (`127.0.0.1:3000:3000`).
+
+The first request for an identity creates a `users` row. The original header value is stored in `users.external_id` (unique index; the schema migrates to version 2 automatically on start), and the numeric `users.id` stays the ordinary autoincrement key that jobs reference — nothing is hashed, so "which proxy user is this row?" stays answerable. `users.email` holds the display name; the password is a random hash, so password login can never match an SSO account.
 
 #### authentik + Traefik
 
@@ -143,6 +159,8 @@ metadata:
 spec:
   forwardAuth:
     address: http://authentik-server/outpost.goauthentik.io/auth/traefik
+    # Replaces exactly these headers. If the auth response omits one, the
+    # client's value is forwarded unchanged. List both identity headers.
     authResponseHeaders:
       - X-authentik-uid
       - X-authentik-username
@@ -152,9 +170,12 @@ Attach that middleware to the ConvertX router. Any proxy that sets a stable, uni
 
 #### Notes
 
-- With `SSO_ENABLED=true` the local password form is unreachable; set the flag back to `false` to use local accounts again. SSO users are not deleted.
+- **Lockout recovery:** the local login is disabled while the flag is on. If the proxy is unavailable, set `SSO_ENABLED=false` and restart; SSO rows are kept and resolve again when you turn it back on. A permanently enabled local password path would defeat the point, so there is deliberately no in-app break-glass account.
+- `SSO_ENABLED=true` takes precedence over `ALLOW_UNAUTHENTICATED`; anonymous access is not available in SSO mode.
+- `/logoff` cannot end the proxy session: it clears the local session and returns home, where the proxy signs the browser straight back in. Use the identity provider to sign out.
+- State-changing requests whose `Origin` / `Sec-Fetch-Site` says they come from another site are rejected with 403. Non-browser clients that send no `Origin` are unaffected.
 - No role or admin mapping yet: every authenticated user is a normal ConvertX user.
-- No signature verification of `X-authentik-jwt` in v1; the trust boundary is the proxy plus the network restriction above.
+- No signature verification of `X-authentik-jwt` in v1; the trust boundary is the proxy (including `authResponseHeaders`) plus the network restriction above.
 
 ### Docker images
 

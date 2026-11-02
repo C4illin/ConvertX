@@ -1,97 +1,71 @@
 import { describe, expect, test } from "bun:test";
 import { randomBytes } from "node:crypto";
 
-import { resolveSsoIdentity, ssoIdForUid } from "../../src/helpers/sso";
+import { resolveSsoIdentity } from "../../src/helpers/sso";
 
-const FIRST_SSO_ID = 2 ** 24;
-const END_SSO_ID = 2 ** 52;
-
-const authentikUid = () => randomBytes(32).toString("hex");
-
-describe("ssoIdForUid", () => {
-  test("maps a 64 character authentik uid to an integer in the SSO range", () => {
-    const id = ssoIdForUid(authentikUid());
-
-    expect(id).not.toBeNull();
-    expect(id!).toBeGreaterThanOrEqual(FIRST_SSO_ID);
-    expect(id!).toBeLessThan(END_SSO_ID);
-    // users.id is an INTEGER that travels through JSON in the JWT cookie
-    expect(JSON.parse(JSON.stringify(id))).toBe(id);
-    expect(Number.isSafeInteger(id)).toBe(true);
-  });
-
-  test("is deterministic", () => {
-    const uid = authentikUid();
-
-    expect(ssoIdForUid(uid)).toBe(ssoIdForUid(uid));
-    expect(ssoIdForUid(uid.toUpperCase())).toBe(ssoIdForUid(uid));
-    expect(ssoIdForUid(` ${uid} `)).toBe(ssoIdForUid(uid));
-  });
-
-  test("gives different uids different ids", () => {
-    const ids = new Set(Array.from({ length: 200 }, () => ssoIdForUid(authentikUid())));
-
-    expect(ids.size).toBe(200);
-  });
-
-  test("hashes a value that is not an authentik uid, deterministically", () => {
-    const first = ssoIdForUid("meliver@example.com");
-    const second = ssoIdForUid("meliver@example.com");
-
-    expect(first).not.toBeNull();
-    expect(second).toBe(first);
-    expect(first!).toBeGreaterThanOrEqual(FIRST_SSO_ID);
-    expect(first!).toBeLessThan(END_SSO_ID);
-    expect(ssoIdForUid("MELIVER@example.com")).not.toBe(first);
-  });
-
-  test("never returns an id reserved for local accounts", () => {
-    // 0x0000000000000 would truncate to 0 without the offset
-    const id = ssoIdForUid("0".repeat(64));
-
-    expect(id).toBe(FIRST_SSO_ID);
-  });
-
-  const rejected: [string, string][] = [
-    ["an empty value", ""],
-    ["whitespace", "   "],
-    ["an oversized header value", "a".repeat(513)],
-  ];
-
-  test.each(rejected)("rejects %s", (_, value) => {
-    expect(ssoIdForUid(value)).toBeNull();
-  });
-});
+const uid = () => randomBytes(32).toString("hex");
 
 describe("resolveSsoIdentity", () => {
-  const uid = authentikUid();
-
   test("reads a WHATWG Headers instance, which is what request.headers is", () => {
+    const id = uid();
     const headers = new Headers({
-      "X-Authentik-Uid": uid,
+      "X-Authentik-Uid": id,
       "X-Authentik-Username": "alice",
     });
 
-    expect(resolveSsoIdentity(headers)).toEqual({ id: ssoIdForUid(uid)!, username: "alice" });
+    expect(resolveSsoIdentity(headers)).toEqual({ externalId: id, username: "alice" });
   });
 
   test("reads a plain lower-case object", () => {
-    expect(resolveSsoIdentity({ "x-authentik-uid": uid })).toEqual({
-      id: ssoIdForUid(uid)!,
+    const id = uid();
+
+    expect(resolveSsoIdentity({ "x-authentik-uid": id })).toEqual({
+      externalId: id,
       username: "unknown",
     });
   });
 
   test("reads a plain object whose keys keep their original case", () => {
-    expect(resolveSsoIdentity({ "X-Authentik-Uid": uid, "X-Authentik-Username": "bob" })).toEqual({
-      id: ssoIdForUid(uid)!,
+    const id = uid();
+
+    expect(resolveSsoIdentity({ "X-Authentik-Uid": id, "X-Authentik-Username": "bob" })).toEqual({
+      externalId: id,
       username: "bob",
     });
+  });
+
+  test("trims the identity and caps the username", () => {
+    const id = uid();
+
+    expect(
+      resolveSsoIdentity({ "x-authentik-uid": ` ${id} `, "x-authentik-username": "  alice  " }),
+    ).toEqual({ externalId: id, username: "alice" });
+
+    const longName = "a".repeat(300);
+    expect(resolveSsoIdentity({ "x-authentik-uid": id, "x-authentik-username": longName })).toEqual(
+      {
+        externalId: id,
+        username: longName.slice(0, 255),
+      },
+    );
   });
 
   test("returns null instead of throwing when there are no headers at all", () => {
     expect(resolveSsoIdentity(undefined)).toBeNull();
     expect(resolveSsoIdentity(null)).toBeNull();
     expect(resolveSsoIdentity(new Headers())).toBeNull();
+  });
+
+  const rejected: [string, string][] = [
+    ["an empty value", ""],
+    ["whitespace", "   "],
+    ["an oversized header value", "a".repeat(513)],
+    // A proxy that appends instead of replacing produces "uid, attacker".
+    // Hashing that would mint a new identity and orphan the real user's jobs.
+    ["a comma-joined duplicate header", `${uid()}, ${uid()}`],
+  ];
+
+  test.each(rejected)("rejects %s", (_: string, value: string) => {
+    expect(resolveSsoIdentity({ "x-authentik-uid": value })).toBeNull();
   });
 });

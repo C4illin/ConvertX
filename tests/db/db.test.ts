@@ -106,10 +106,16 @@ test("db initializes and creates tables on first run", () => {
   expect(tables.map((t) => t.name)).toContain("users");
   expect(tables.map((t) => t.name)).toContain("jobs");
   expect(tables.map((t) => t.name)).toContain("file_names");
-  expect(getDbVersion(testDb)).toBe(1);
+  expect(getDbVersion(testDb)).toBe(2);
+  expect(getColumnInfo(testDb, "users").map((c) => c.name)).toContain("external_id");
+  expect(
+    testDb
+      .query("SELECT name FROM sqlite_master WHERE type='index' AND name='users_external_id'")
+      .get(),
+  ).toBeTruthy();
 });
 
-test("db handles migration from version 0 to version 1", () => {
+test("db handles migration from version 0 to version 2", () => {
   testDb.close();
   const migrateDbPath = join(testRoot, `test-db-migrate-${Date.now()}.sqlite`);
   const migrateDb = new Database(migrateDbPath, { create: true });
@@ -141,9 +147,10 @@ test("db handles migration from version 0 to version 1", () => {
     // Now runs the real migration logic from db.ts
     initializeDatabase(migrateDb);
 
-    expect(getDbVersion(migrateDb)).toBe(1);
+    expect(getDbVersion(migrateDb)).toBe(2);
     const columnInfo = getColumnInfo(migrateDb, "file_names");
     expect(columnInfo.map((c) => c.name)).toContain("status");
+    expect(getColumnInfo(migrateDb, "users").map((c) => c.name)).toContain("external_id");
   } finally {
     if (migrateDb) migrateDb.close();
     if (existsSync(migrateDbPath)) unlinkSync(migrateDbPath);

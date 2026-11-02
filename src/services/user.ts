@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { jwt } from "@elysiajs/jwt";
 import { Elysia, t } from "elysia";
 
-import { HTTP_ALLOWED, SSO_ENABLED, WEBROOT } from "../helpers/env";
+import { SSO_ENABLED, WEBROOT } from "../helpers/env";
 import { isHtmlPageRequest } from "../helpers/isHtmlPageRequest";
 import { ensureSsoUser, resolveSsoIdentity } from "../helpers/sso";
 
@@ -32,6 +32,43 @@ export const userService = new Elysia({ name: "user/service" })
       jobId: t.Optional(t.String()),
     }),
   })
+  .onBeforeHandle({ as: "global" }, ({ request, set }) => {
+    // In SSO mode the identity comes from the proxy header, not from a
+    // sameSite cookie, so the cookie no longer provides CSRF protection.
+    // Reject state-changing requests that a browser marks as cross-site.
+    if (!SSO_ENABLED) {
+      return;
+    }
+
+    const method = request.method.toUpperCase();
+    if (method === "GET" || method === "HEAD" || method === "OPTIONS") {
+      return;
+    }
+
+    if (request.headers.get("sec-fetch-site") === "cross-site") {
+      set.status = 403;
+      return "Forbidden";
+    }
+
+    const origin = request.headers.get("origin");
+    if (!origin) {
+      // Non-browser clients (curl, integrations) send no Origin.
+      return;
+    }
+
+    let originHost: string;
+    try {
+      originHost = new URL(origin).host;
+    } catch {
+      set.status = 403;
+      return "Forbidden";
+    }
+
+    if (originHost !== (request.headers.get("host") ?? new URL(request.url).host)) {
+      set.status = 403;
+      return "Forbidden";
+    }
+  })
   .macro("auth", {
     cookie: "optionalSession",
     async resolve({ request, set, status, jwt, cookie: { auth } }) {
@@ -55,30 +92,16 @@ export const userService = new Elysia({ name: "user/service" })
 
       if (SSO_ENABLED) {
         const identity = resolveSsoIdentity(request.headers);
-        if (identity) {
-          await ensureSsoUser(identity);
-
-          // Keep the session cookie in sync with the proxy identity, so the
-          // next request of the same browser can be served from the JWT alone.
-          const session = auth?.value ? await jwt.verify(auth.value) : false;
-          const sameUser = session !== false && session.id === String(identity.id);
-          if (auth && !sameUser) {
-            auth.set({
-              value: await jwt.sign({ id: String(identity.id) }),
-              httpOnly: true,
-              secure: !HTTP_ALLOWED,
-              maxAge: 60 * 60 * 24 * 7,
-              sameSite: "strict",
-            });
-          }
-
-          return {
-            success: true,
-            user: { id: String(identity.id) },
-          };
+        if (!identity) {
+          // No cookie fallback: a valid JWT is not an identity in SSO mode.
+          return unauthorized();
         }
-        // No valid identity header: fall through to the cookie, so an existing
-        // session keeps working if a request reaches the app without the proxy.
+
+        const userId = await ensureSsoUser(identity);
+        return {
+          success: true,
+          user: { id: String(userId) },
+        };
       }
 
       if (!auth.value) {

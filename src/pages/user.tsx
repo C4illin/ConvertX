@@ -187,16 +187,21 @@ function SsoAccountPage({ username, uid }: { username: string; uid: string }) {
             <h2 class="mb-4 text-xl">Account</h2>
             <p class="mb-4 text-neutral-400">
               This instance signs you in through a single sign-on proxy. Your identity is managed
-              there and cannot be changed here.
+              there and cannot be changed here. Use your identity provider to sign out — signing out
+              here only clears the local session.
             </p>
             <div class="flex flex-col gap-4">
               <div class="flex flex-col gap-1">
                 <span class="text-neutral-400">Username</span>
-                <span id="sso-username">{username}</span>
+                <span id="sso-username" safe>
+                  {username}
+                </span>
               </div>
               <div class="flex flex-col gap-1">
                 <span class="text-neutral-400">User ID</span>
-                <span id="sso-uid">{uid}</span>
+                <span id="sso-uid" safe>
+                  {uid}
+                </span>
               </div>
             </div>
           </article>
