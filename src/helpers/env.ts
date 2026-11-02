@@ -27,3 +27,15 @@ export const UNAUTHENTICATED_USER_SHARING =
   process.env.UNAUTHENTICATED_USER_SHARING?.toLowerCase() === "true" || false;
 
 export const TIMEZONE = process.env.TZ || undefined;
+
+// Forward-auth / SSO. When enabled, the app takes the identity of a request
+// from the header set by the reverse proxy instead of the login page.
+export const SSO_ENABLED = process.env.SSO_ENABLED?.toLowerCase() === "true" || false;
+
+// authentik's forward-auth outpost sets X-authentik-uid (a stable, salted
+// hash of the user) and X-authentik-username.
+export const SSO_UID_HEADER = process.env.SSO_UID_HEADER ?? "x-authentik-uid";
+
+export const SSO_USERNAME_HEADER =
+  process.env.SSO_USERNAME_HEADER ?? "x-authentik-username";
+
