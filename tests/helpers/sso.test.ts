@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomBytes } from "node:crypto";
 
-import { ssoIdForUid } from "../../src/helpers/sso";
+import { resolveSsoIdentity, ssoIdForUid } from "../../src/helpers/sso";
 
 const FIRST_SSO_ID = 2 ** 24;
 const END_SSO_ID = 2 ** 52;
@@ -60,5 +60,38 @@ describe("ssoIdForUid", () => {
 
   test.each(rejected)("rejects %s", (_, value) => {
     expect(ssoIdForUid(value)).toBeNull();
+  });
+});
+
+describe("resolveSsoIdentity", () => {
+  const uid = authentikUid();
+
+  test("reads a WHATWG Headers instance, which is what request.headers is", () => {
+    const headers = new Headers({
+      "X-Authentik-Uid": uid,
+      "X-Authentik-Username": "alice",
+    });
+
+    expect(resolveSsoIdentity(headers)).toEqual({ id: ssoIdForUid(uid)!, username: "alice" });
+  });
+
+  test("reads a plain lower-case object", () => {
+    expect(resolveSsoIdentity({ "x-authentik-uid": uid })).toEqual({
+      id: ssoIdForUid(uid)!,
+      username: "unknown",
+    });
+  });
+
+  test("reads a plain object whose keys keep their original case", () => {
+    expect(resolveSsoIdentity({ "X-Authentik-Uid": uid, "X-Authentik-Username": "bob" })).toEqual({
+      id: ssoIdForUid(uid)!,
+      username: "bob",
+    });
+  });
+
+  test("returns null instead of throwing when there are no headers at all", () => {
+    expect(resolveSsoIdentity(undefined)).toBeNull();
+    expect(resolveSsoIdentity(null)).toBeNull();
+    expect(resolveSsoIdentity(new Headers())).toBeNull();
   });
 });

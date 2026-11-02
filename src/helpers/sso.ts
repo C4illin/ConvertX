@@ -51,6 +51,50 @@ export function ssoIdForUid(uid: string): number | null {
   return FIRST_SSO_ID + (digest.readUIntBE(0, 6) % SSO_ID_RANGE);
 }
 
+export type HeaderSource =
+  | Headers
+  | Record<string, string | string[] | undefined>
+  | undefined
+  | null;
+
+/**
+ * Reads one header from either a WHATWG `Headers` instance (what `request.headers`
+ * is at runtime) or a plain object (what the tests pass). Both shapes reach this
+ * function in practice; a compiled build can hand a route no parsed `headers` at
+ * all, so call sites pass `request.headers` and this function accepts either.
+ */
+function headerValue(headers: HeaderSource, name: string): string | undefined {
+  if (!headers) {
+    return undefined;
+  }
+
+  const lower = name.toLowerCase();
+
+  if (typeof (headers as Headers).get === "function") {
+    const value = (headers as Headers).get(lower);
+    if (value !== null && value !== undefined) {
+      return value;
+    }
+  }
+
+  const record = headers as Record<string, string | string[] | undefined>;
+  const direct = record[lower] ?? record[name];
+  if (Array.isArray(direct)) {
+    return direct[0];
+  }
+  if (typeof direct === "string") {
+    return direct;
+  }
+
+  for (const [key, value] of Object.entries(record)) {
+    if (key.toLowerCase() === lower) {
+      return Array.isArray(value) ? value[0] : value;
+    }
+  }
+
+  return undefined;
+}
+
 /**
  * Reads the identity of a request from the headers the reverse proxy sets.
  *
@@ -59,10 +103,8 @@ export function ssoIdForUid(uid: string): number | null {
  * for every header listed in the forward-auth middleware, and a NetworkPolicy
  * keeps clients off the app port). Nothing here is a substitute for that.
  */
-export function resolveSsoIdentity(
-  headers: Record<string, string | undefined>,
-): SsoIdentity | null {
-  const uid = headers[SSO_UID_HEADER.toLowerCase()];
+export function resolveSsoIdentity(headers: HeaderSource): SsoIdentity | null {
+  const uid = headerValue(headers, SSO_UID_HEADER);
   if (!uid) {
     return null;
   }
@@ -72,7 +114,7 @@ export function resolveSsoIdentity(
     return null;
   }
 
-  const username = headers[SSO_USERNAME_HEADER.toLowerCase()]?.trim() || "unknown";
+  const username = headerValue(headers, SSO_USERNAME_HEADER)?.trim() || "unknown";
   return { id, username };
 }
 

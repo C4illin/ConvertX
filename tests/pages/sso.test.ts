@@ -116,6 +116,23 @@ describe("SSO_ENABLED", () => {
     expect(response.status).toBe(401);
   });
 
+  test("does not authenticate a session cookie without the identity header", async () => {
+    setEnv(sso());
+    const alice = uid();
+
+    const home = await request("/", { headers: identity(alice, "alice") });
+    const token = setCookieValue(home, "auth") as string;
+    await home.text();
+
+    // A cookie minted by the proxy path is not an identity of its own: direct
+    // pod access must not be able to replay it without the proxy header.
+    const page = await request("/", {
+      headers: { accept: "text/html", cookie: `auth=${token}` },
+    });
+
+    expect(page.status).toBe(401);
+  });
+
   test("lets the identity header win over a session cookie of another user", async () => {
     setEnv(sso());
     const alice = uid();

@@ -487,7 +487,7 @@ export const user = new Elysia()
   })
   .get(
     "/account",
-    async ({ user, redirect, headers }) => {
+    async ({ user, redirect, request }) => {
       if (!user) {
         return redirect(`${WEBROOT}/`, 302);
       }
@@ -499,7 +499,7 @@ export const user = new Elysia()
       }
 
       if (SSO_ENABLED) {
-        const identity = resolveSsoIdentity(headers);
+        const identity = resolveSsoIdentity(request.headers);
         return (
           <SsoAccountPage username={identity?.username ?? userData.email} uid={String(user.id)} />
         );

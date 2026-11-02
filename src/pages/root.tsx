@@ -23,7 +23,7 @@ import { FIRST_RUN, userService } from "./user";
 
 export const root = new Elysia().use(userService).get(
   "/",
-  async ({ jwt, redirect, set, headers, cookie: { auth, jobId } }) => {
+  async ({ jwt, redirect, set, request, cookie: { auth, jobId } }) => {
     if (!ALLOW_UNAUTHENTICATED && !SSO_ENABLED) {
       if (FIRST_RUN) {
         return redirect(`${WEBROOT}/setup`, 302);
@@ -40,7 +40,7 @@ export const root = new Elysia().use(userService).get(
     if (SSO_ENABLED) {
       // The reverse proxy is the only source of identity in SSO mode. The
       // cookie is a session cache and must never override the header.
-      const identity = resolveSsoIdentity(headers);
+      const identity = resolveSsoIdentity(request.headers);
       if (identity) {
         await ensureSsoUser(identity);
         user = { id: String(identity.id) };
@@ -58,13 +58,10 @@ export const root = new Elysia().use(userService).get(
             sameSite: "strict",
           });
         }
-      } else if (auth?.value) {
-        try {
-          user = await jwt.verify(auth.value);
-        } catch {
-          user = false;
-        }
       }
+      // No header, no identity: the session cookie is not consulted in SSO mode.
+      // A cookie without a proxy header is a request that did not come through
+      // the proxy (direct pod access) and must not authenticate.
 
       if (!user) {
         set.status = 401;

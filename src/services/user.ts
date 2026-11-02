@@ -34,7 +34,7 @@ export const userService = new Elysia({ name: "user/service" })
   })
   .macro("auth", {
     cookie: "optionalSession",
-    async resolve({ request, set, status, jwt, cookie: { auth }, headers }) {
+    async resolve({ request, set, status, jwt, cookie: { auth } }) {
       const unauthorized = () => {
         // In SSO mode there is no login page to redirect to: the reverse proxy
         // owns authentication, so a request without an identity is simply
@@ -54,7 +54,7 @@ export const userService = new Elysia({ name: "user/service" })
       };
 
       if (SSO_ENABLED) {
-        const identity = resolveSsoIdentity(headers);
+        const identity = resolveSsoIdentity(request.headers);
         if (identity) {
           await ensureSsoUser(identity);
 
