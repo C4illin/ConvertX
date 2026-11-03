@@ -22,5 +22,9 @@ services:
       # - HIDE_HISTORY=true # hides the history tab in the web interface, defaults to false
       - TZ=Europe/Stockholm # set your timezone, defaults to UTC
       # - UNAUTHENTICATED_USER_SHARING=true # for use with ALLOW_UNAUTHENTICATED=true to share history with all unauthenticated users / devices
+    # Only publish this port if you are running without SSO. With SSO_ENABLED=true the
+    # identity is a request header, so the app must not be reachable except through the
+    # proxy: replace `ports:` with `expose:` and put it on the proxy network. See the
+    # "Single sign-on (forward auth)" section of the README.
     ports:
       - 3000:3000

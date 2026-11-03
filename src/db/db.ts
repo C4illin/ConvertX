@@ -3,11 +3,13 @@ import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 
 /**
- * Whether `name` is an index on `table` and is UNIQUE. `CREATE UNIQUE INDEX IF NOT EXISTS` is a
- * no-op when an index of that name already exists, whatever its shape, so it cannot report this.
+ * Whether `name` is a UNIQUE index on `users`. `CREATE UNIQUE INDEX IF NOT EXISTS` is a no-op when
+ * an index of that name already exists, whatever its shape, so it cannot report this. The table is
+ * fixed rather than a parameter: this is the only interpolated SQL in the codebase and it must not
+ * become reachable from a caller.
  */
-function hasUniqueIndex(db: Database, table: string, name: string): boolean {
-  const indexes = db.query(`PRAGMA index_list(${table})`).all() as {
+function hasUniqueUserIndex(db: Database, name: string): boolean {
+  const indexes = db.query("PRAGMA index_list(users)").all() as {
     name: string;
     unique: number;
   }[];
@@ -109,7 +111,7 @@ export function initializeDatabase(db: Database): void {
     // `IF NOT EXISTS` also leaves a pre-existing *non-unique* index of that name untouched, which
     // would drop the guarantee `ensureSsoUser` relies on without raising anything. Check what is
     // actually there rather than what was asked for.
-    if (!indexMissing && !hasUniqueIndex(db, "users", "users_external_id")) {
+    if (!indexMissing && !hasUniqueUserIndex(db, "users_external_id")) {
       console.error(
         "users_external_id exists but is not unique: identity de-duplication is off. " +
           "Drop it and restart to repair the index.",

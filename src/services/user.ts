@@ -152,9 +152,14 @@ export const userService = new Elysia({ name: "user/service" })
     // the deployment says the request arrived over TLS. Behind a plain-HTTP proxy
     // that sets no X-Forwarded-Proto there is nothing to compare against, and the
     // hostname check is what stands.
+    // The *last* element is the one the nearest proxy recorded. The first is whatever the
+    // client sent when a proxy appends instead of overwriting, and trusting it let a caller
+    // switch this check off: `X-Forwarded-Proto: http, https` with an `http` Origin was
+    // accepted. Single-valued headers (Traefik, nginx) are unaffected by taking the last.
     const forwardedProto = request.headers
       .get("x-forwarded-proto")
-      ?.split(",")[0]
+      ?.split(",")
+      .at(-1)
       ?.trim()
       .toLowerCase();
     const trustedProtocol =

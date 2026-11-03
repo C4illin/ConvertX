@@ -327,6 +327,30 @@ describe("SSO_ENABLED", () => {
     expect(db.query("SELECT id FROM jobs WHERE id = ?").get(job)).toBeNull();
   });
 
+  test("takes the last X-Forwarded-Proto, so a client cannot switch the scheme rule off", async () => {
+    setEnv(sso());
+    const alice = uid();
+
+    const home = await request("/", { headers: identity(alice, "alice") });
+    await home.text();
+    const job = createJob(idFor(alice), { numFiles: 1 });
+
+    // A proxy that appends leaves the caller's own value first: "http, https" means the client
+    // claimed http and the proxy recorded https. Reading the first element let a caller make
+    // the app believe the request arrived in plaintext, which disables the check below.
+    const response = await request(`/delete/${job}`, {
+      method: "POST",
+      headers: {
+        ...identity(alice, "alice"),
+        origin: "http://localhost",
+        "x-forwarded-proto": "http, https",
+      },
+    });
+
+    expect(response.status).toBe(403);
+    expect(db.query("SELECT id FROM jobs WHERE id = ?").get(job)).not.toBeNull();
+  });
+
   test("does not apply the scheme rule when nothing says the request arrived over TLS", async () => {
     setEnv(sso());
     const alice = uid();

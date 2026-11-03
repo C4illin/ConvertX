@@ -122,6 +122,8 @@ All are optional, JWT_SECRET is recommended to be set.
 
 > [!WARNING]
 > The header is trusted, so the proxy must be the only way in. Traefik **deletes** every header named in `authResponseHeaders` from the request, then copies it back from the auth response only if that response carries it — so a _listed_ header can never keep a client-supplied value. A header you leave **out** of that list is forwarded to ConvertX untouched. List **every** identity header in `authResponseHeaders`, block direct access to the container port, and never publish it. An SSO deployment must be reachable only through the proxy.
+>
+> The proxy must also **overwrite** `X-Forwarded-Host` and `X-Forwarded-Proto` rather than forward a client's own values. Both are read when deciding whether a state-changing request is same-origin, so a proxy that appends to them instead of replacing them hands that decision to the caller.
 
 ```yaml
 # docker-compose.yaml — SSO mode: no published port, proxy network only
