@@ -10,8 +10,10 @@ import {
   BRANDING,
   HIDE_HISTORY,
   HTTP_ALLOWED,
+  SSO_ENABLED,
   WEBROOT,
 } from "../helpers/env";
+import { resolveSsoIdentity } from "../helpers/sso";
 import { userService } from "../services/user";
 
 export { userService } from "../services/user";
@@ -155,6 +157,53 @@ function AccountPage({ email, error }: { email: string; error?: string }) {
                 <input type="submit" value="Update" class="w-full btn-primary" />
               </div>
             </form>
+          </article>
+        </main>
+      </>
+    </BaseHtml>
+  );
+}
+
+/** Read-only identity for forward-auth deployments: there is nothing to edit. */
+function SsoAccountPage({ username, uid }: { username: string; uid: string }) {
+  return (
+    <BaseHtml webroot={WEBROOT} title="ConvertX | Account">
+      <>
+        <Header
+          webroot={WEBROOT}
+          branding={BRANDING}
+          accountRegistration={ACCOUNT_REGISTRATION}
+          allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+          hideHistory={HIDE_HISTORY}
+          loggedIn
+        />
+        <main
+          class={`
+            w-full flex-1 px-2
+            sm:px-4
+          `}
+        >
+          <article class="article">
+            <h2 class="mb-4 text-xl">Account</h2>
+            <p class="mb-4 text-neutral-400">
+              This instance signs you in through a single sign-on proxy. Your identity is managed
+              there and cannot be changed here. Use your identity provider to sign out — signing out
+              here only clears the local session.
+            </p>
+            <div class="flex flex-col gap-4">
+              <div class="flex flex-col gap-1">
+                <span class="text-neutral-400">Username</span>
+                <span id="sso-username" safe>
+                  {username}
+                </span>
+              </div>
+              <div class="flex flex-col gap-1">
+                <span class="text-neutral-400">User ID</span>
+                <span id="sso-uid" safe>
+                  {uid}
+                </span>
+              </div>
+            </div>
           </article>
         </main>
       </>
@@ -403,18 +452,22 @@ export const user = new Elysia()
       auth.remove();
     }
 
-    return redirect(`${WEBROOT}/login`, 302);
+    // Forward-auth logs the user straight back in, so "log off" can only drop
+    // the local session and return home -- the proxy owns the real logout.
+    return redirect(SSO_ENABLED ? `${WEBROOT}/` : `${WEBROOT}/login`, 302);
   })
   .post("/logoff", ({ redirect, cookie: { auth } }) => {
     if (auth?.value) {
       auth.remove();
     }
 
-    return redirect(`${WEBROOT}/login`, 302);
+    // Forward-auth logs the user straight back in, so "log off" can only drop
+    // the local session and return home -- the proxy owns the real logout.
+    return redirect(SSO_ENABLED ? `${WEBROOT}/` : `${WEBROOT}/login`, 302);
   })
   .get(
     "/account",
-    async ({ user, redirect }) => {
+    async ({ user, redirect, request }) => {
       if (!user) {
         return redirect(`${WEBROOT}/`, 302);
       }
@@ -423,6 +476,13 @@ export const user = new Elysia()
 
       if (!userData) {
         return redirect(`${WEBROOT}/`, 302);
+      }
+
+      if (SSO_ENABLED) {
+        const identity = resolveSsoIdentity(request.headers);
+        return (
+          <SsoAccountPage username={identity?.username ?? userData.email} uid={String(user.id)} />
+        );
       }
 
       return <AccountPage email={userData.email} />;
@@ -493,6 +553,8 @@ export const user = new Elysia()
         newPassword: t.MaybeEmpty(t.String()),
         password: t.String(),
       }),
+      // In SSO mode an onRequest guard answers 404 before this cookie schema
+      // is validated, so a required session cookie is still correct here.
       cookie: "session",
     },
   );

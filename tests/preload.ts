@@ -24,6 +24,9 @@ for (const name of [
   "LANGUAGE",
   "MAX_CONVERT_PROCESS",
   "UNAUTHENTICATED_USER_SHARING",
+  "SSO_ENABLED",
+  "SSO_UID_HEADER",
+  "SSO_USERNAME_HEADER",
 ]) {
   delete process.env[name];
 }

@@ -14,15 +14,17 @@ import {
   BRANDING,
   HIDE_HISTORY,
   HTTP_ALLOWED,
+  SSO_ENABLED,
   UNAUTHENTICATED_USER_SHARING,
   WEBROOT,
 } from "../helpers/env";
+import { ensureSsoUser, resolveSsoIdentity } from "../helpers/sso";
 import { FIRST_RUN, userService } from "./user";
 
 export const root = new Elysia().use(userService).get(
   "/",
-  async ({ jwt, redirect, cookie: { auth, jobId } }) => {
-    if (!ALLOW_UNAUTHENTICATED) {
+  async ({ jwt, redirect, set, request, cookie: { auth, jobId } }) => {
+    if (!ALLOW_UNAUTHENTICATED && !SSO_ENABLED) {
       if (FIRST_RUN) {
         return redirect(`${WEBROOT}/setup`, 302);
       }
@@ -34,7 +36,21 @@ export const root = new Elysia().use(userService).get(
 
     // validate jwt
     let user: ({ id: string } & JWTPayloadSpec) | false = false;
-    if (ALLOW_UNAUTHENTICATED) {
+
+    if (SSO_ENABLED) {
+      // The reverse proxy is the only source of identity in SSO mode. The
+      // cookie is not consulted: no header means 401, even with a valid JWT.
+      const identity = resolveSsoIdentity(request.headers);
+      if (!identity) {
+        set.status = 401;
+        // Also reached when the header is present but rejected (empty, comma-joined,
+        // over 512 chars), so the message must not claim it was absent.
+        return "Unauthorized: missing or invalid SSO identity header";
+      }
+
+      const userId = await ensureSsoUser(identity);
+      user = { id: String(userId) };
+    } else if (ALLOW_UNAUTHENTICATED) {
       // Check if the current cookie is already a valid session
       if (auth?.value) {
         try {
