@@ -95,7 +95,7 @@ export async function ensureSsoUser({ externalId, username }: SsoIdentity): Prom
     id: number;
   } | null;
   if (!row) {
-    throw new Error("SSO identity did not resolve to a single users row");
+    throw new Error("SSO identity did not resolve to a users row");
   }
 
   return row.id;

@@ -139,7 +139,7 @@ services:
 
 If you must keep `ports:`, bind it to loopback only (`127.0.0.1:3000:3000`).
 
-The first request for an identity creates a `users` row. The original header value is stored in `users.external_id` (unique index; the schema migrates to version 2 automatically on start), and the numeric `users.id` stays the ordinary autoincrement key that jobs reference — nothing is hashed, so "which proxy user is this row?" stays answerable. `users.email` holds the display name; the password is a random hash, so password login can never match an SSO account.
+The first request for an identity creates a `users` row. The original header value is stored in `users.external_id` (unique index; the schema migrates to version 2 automatically on start), and the numeric `users.id` stays the ordinary autoincrement key that jobs reference — nothing is hashed, so "which proxy user is this row?" stays answerable. `users.email` holds the display name; the password is a random hash, so password login can never match an SSO account. A database that already contains duplicate identities cannot have the unique index built: it keeps running and logs the count, and de-duplication is off until you resolve them.
 
 #### authentik + Traefik
 

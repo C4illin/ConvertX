@@ -296,6 +296,36 @@ test("db rethrows an index failure that is not about duplicates", () => {
   }
 });
 
+test("db reports a non-unique index that IF NOT EXISTS would leave alone", () => {
+  const path = join(testRoot, `test-db-notunique-${Date.now()}.sqlite`);
+  const db = new Database(path, { create: true });
+  const logged: string[] = [];
+  const spy = spyOn(console, "error").mockImplementation((...args: unknown[]) => {
+    logged.push(args.map(String).join(" "));
+  });
+
+  try {
+    db.exec(`
+      CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, password TEXT NOT NULL, external_id TEXT);
+      CREATE TABLE file_names (id INTEGER PRIMARY KEY AUTOINCREMENT, job_id INTEGER NOT NULL, file_name TEXT NOT NULL, output_file_name TEXT NOT NULL, status TEXT DEFAULT 'not started');
+      CREATE TABLE jobs (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, date_created TEXT NOT NULL, status TEXT DEFAULT 'not started', num_files INTEGER DEFAULT 0);
+      CREATE INDEX users_external_id ON users(external_id);
+      PRAGMA user_version = 2;
+    `);
+
+    // `CREATE UNIQUE INDEX IF NOT EXISTS` is a no-op here, so nothing throws and the guard would
+    // otherwise run without uniqueness while believing it is protected.
+    expect(() => initializeDatabase(db)).not.toThrow();
+    expect(logged.join("\n")).toContain("is not unique");
+  } finally {
+    spy.mockRestore();
+    db.close();
+    for (const suffix of ["", "-wal", "-shm"]) {
+      if (existsSync(`${path}${suffix}`)) unlinkSync(`${path}${suffix}`);
+    }
+  }
+});
+
 test("db module exports a working database instance", () => {
   expect(defaultDb).toBeTruthy();
   const tables = queryAllTables(defaultDb!);

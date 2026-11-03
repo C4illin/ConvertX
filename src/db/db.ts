@@ -2,6 +2,18 @@ import { Database } from "bun:sqlite";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 
+/**
+ * Whether `name` is an index on `table` and is UNIQUE. `CREATE UNIQUE INDEX IF NOT EXISTS` is a
+ * no-op when an index of that name already exists, whatever its shape, so it cannot report this.
+ */
+function hasUniqueIndex(db: Database, table: string, name: string): boolean {
+  const indexes = db.query(`PRAGMA index_list(${table})`).all() as {
+    name: string;
+    unique: number;
+  }[];
+  return indexes.some((index) => index.name === name && index.unique === 1);
+}
+
 export function initializeDatabase(db: Database): void {
   const dbVersion = db.query("PRAGMA user_version").get() as { user_version?: number };
   const hasTables = db.query("SELECT * FROM sqlite_master WHERE type='table'").get();
@@ -58,11 +70,9 @@ export function initializeDatabase(db: Database): void {
       console.log("Updated database to version 2.");
     }
 
-    // Outside the guard on purpose. A process killed between the ALTER and the
-    // CREATE leaves the column present but the index missing; the guard above
-    // then skips the block forever and ensureSsoUser's INSERT OR IGNORE loses the
-    // one-row-per-identity guarantee it relies on. Creating it every start is
-    // idempotent and cheap.
+    // Outside the guard on purpose, and it must stay outside it: a file stamped v2 whose index
+    // was never created is only repaired by the unconditional retry here, so do not re-wrap this
+    // in the version branch above.
     //
     // A file that already holds duplicate external_ids (the same crash window, with two
     // concurrent first sightings) makes CREATE UNIQUE INDEX throw. Losing the index is a
@@ -71,6 +81,7 @@ export function initializeDatabase(db: Database): void {
     //
     // Any other failure (a lock, an I/O error) is rethrown: booting on would leave the
     // uniqueness this code relies on missing, and the log line would be a lie.
+    let indexMissing = false;
     try {
       db.exec("CREATE UNIQUE INDEX IF NOT EXISTS users_external_id ON users(external_id);");
     } catch (error) {
@@ -87,10 +98,21 @@ export function initializeDatabase(db: Database): void {
         throw error;
       }
 
+      indexMissing = true;
       // Counts only: external_id can be an email address, and this is a log line.
       console.error(
         `Could not create the unique index on users.external_id: ${duplicates.identities} duplicated ` +
           `identities across ${duplicates.rows} rows. Starting without it; resolve the duplicates and restart.`,
+      );
+    }
+
+    // `IF NOT EXISTS` also leaves a pre-existing *non-unique* index of that name untouched, which
+    // would drop the guarantee `ensureSsoUser` relies on without raising anything. Check what is
+    // actually there rather than what was asked for.
+    if (!indexMissing && !hasUniqueIndex(db, "users", "users_external_id")) {
+      console.error(
+        "users_external_id exists but is not unique: identity de-duplication is off. " +
+          "Drop it and restart to repair the index.",
       );
     }
 

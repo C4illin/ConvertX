@@ -19,10 +19,31 @@ function hostKey(url: URL): string {
 }
 
 /**
- * Routes that exist only for local accounts, plus the one POST that changes an account. Built once:
- * `WEBROOT` is fixed at boot and this is consulted on every request.
+ * `WEBROOT` as the router sees it: one leading slash, no trailing one. `""`, `/`, `/convertx`,
+ * `/convertx/` and `convertx` all reduce to the prefix the routes are actually mounted under.
+ * Slicing with an un-normalised root silently matched nothing for `WEBROOT=convertx`, which put the
+ * local login, setup and register pages back in service while SSO was on.
+ */
+export function normaliseWebroot(webroot: string): string {
+  return `/${webroot}`.replace(/\/+/g, "/").replace(/\/+$/, "");
+}
+
+/**
+ * Routes that exist only for local accounts. `POST /account` is handled separately because it
+ * shares its path with the read-only SSO page.
  */
 const LOCAL_ONLY_PATHS = new Set(["/login", "/setup", "/register"]);
+
+const ROOT = normaliseWebroot(WEBROOT);
+
+/**
+ * True when `path` is one of the local-only routes under `root`. The `startsWith` is not
+ * decoration: without it a root of `/convertx` would slice `/convertxX/login` down to `X/login`
+ * instead of rejecting it.
+ */
+export function isLocalOnlyPath(path: string, root: string = ROOT): boolean {
+  return path.startsWith(root) && LOCAL_ONLY_PATHS.has(path.slice(root.length));
+}
 
 export const userService = new Elysia({ name: "user/service" })
   .use(
@@ -58,9 +79,8 @@ export const userService = new Elysia({ name: "user/service" })
     // not exist, and a 422 about a form field or a session cookie the browser
     // never receives would be misleading. GET /account stays available.
     const path = new URL(request.url).pathname.replace(/\/+$/, "") || "/";
-    const root = WEBROOT.replace(/\/+$/, "");
-    const localOnly = LOCAL_ONLY_PATHS.has(path.slice(root.length));
-    const accountPost = request.method.toUpperCase() === "POST" && path === `${root}/account`;
+    const localOnly = isLocalOnlyPath(path);
+    const accountPost = request.method.toUpperCase() === "POST" && path === `${ROOT}/account`;
 
     if (localOnly || accountPost) {
       set.status = 404;
