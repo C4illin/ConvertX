@@ -3,17 +3,28 @@ import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 
 /**
- * Whether `name` is a UNIQUE index on `users`. `CREATE UNIQUE INDEX IF NOT EXISTS` is a no-op when
- * an index of that name already exists, whatever its shape, so it cannot report this. The table is
- * fixed rather than a parameter: this is the only interpolated SQL in the codebase and it must not
- * become reachable from a caller.
+ * Whether `users_external_id` is a full UNIQUE index on exactly `users.external_id`.
+ *
+ * `CREATE UNIQUE INDEX IF NOT EXISTS` is a no-op when an index of that name already exists, so what
+ * is there has to be checked rather than what was asked for: a unique index on a _different_
+ * column, or a partial one, leaves duplicate identities possible while looking satisfied. `users`
+ * is written inline so this cannot become an interpolated query if a caller ever wants a second
+ * table.
  */
 function hasUniqueUserIndex(db: Database, name: string): boolean {
-  const indexes = db.query("PRAGMA index_list(users)").all() as {
-    name: string;
-    unique: number;
+  const index = db
+    .query(`SELECT "unique", partial FROM pragma_index_list('users') WHERE name = ?`)
+    .get(name) as { unique: number; partial: number } | null;
+
+  if (!index || index.unique !== 1 || index.partial !== 0) {
+    return false;
+  }
+
+  const columns = db.query("SELECT name FROM pragma_index_info(?)").all(name) as {
+    name: string | null;
   }[];
-  return indexes.some((index) => index.name === name && index.unique === 1);
+
+  return columns.length === 1 && (columns[0]?.name ?? "").toLowerCase() === "external_id";
 }
 
 export function initializeDatabase(db: Database): void {
@@ -108,13 +119,13 @@ export function initializeDatabase(db: Database): void {
       );
     }
 
-    // `IF NOT EXISTS` also leaves a pre-existing *non-unique* index of that name untouched, which
-    // would drop the guarantee `ensureSsoUser` relies on without raising anything. Check what is
-    // actually there rather than what was asked for.
+    // `IF NOT EXISTS` also leaves a pre-existing index of that name untouched whatever its
+    // shape — non-unique, on another column, or partial — which would drop the guarantee
+    // `ensureSsoUser` relies on without raising anything. Check what is actually there.
     if (!indexMissing && !hasUniqueUserIndex(db, "users_external_id")) {
       console.error(
-        "users_external_id exists but is not unique: identity de-duplication is off. " +
-          "Drop it and restart to repair the index.",
+        "users_external_id does not enforce uniqueness of external_id: identity de-duplication " +
+          "is off. Drop it and restart to repair the index.",
       );
     }
 

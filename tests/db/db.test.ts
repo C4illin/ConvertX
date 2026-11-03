@@ -287,7 +287,10 @@ test("db rethrows an index failure that is not about duplicates", () => {
       PRAGMA user_version = 2;
     `);
 
-    expect(() => initializeDatabase(db)).toThrow();
+    // A table squatting on the index name is not a duplicate-identity condition, so it must
+    // surface instead of being logged as "no duplicates found" and swallowed. Match the actual
+    // conflict: a bare `toThrow()` would also pass on a broken fixture.
+    expect(() => initializeDatabase(db)).toThrow(/already a table named users_external_id/i);
   } finally {
     db.close();
     for (const suffix of ["", "-wal", "-shm"]) {
@@ -296,8 +299,51 @@ test("db rethrows an index failure that is not about duplicates", () => {
   }
 });
 
-test("db reports a non-unique index that IF NOT EXISTS would leave alone", () => {
-  const path = join(testRoot, `test-db-notunique-${Date.now()}.sqlite`);
+// `CREATE UNIQUE INDEX IF NOT EXISTS` is a no-op when the name is taken, so an index of the
+// right name with the wrong shape has to be reported: the identity guard would run without
+// uniqueness while believing it is protected.
+const wrongIndexShapes: [string, string][] = [
+  ["a non-unique index", "CREATE INDEX users_external_id ON users(external_id)"],
+  ["a unique index on another column", "CREATE UNIQUE INDEX users_external_id ON users(email)"],
+  [
+    "a partial unique index",
+    "CREATE UNIQUE INDEX users_external_id ON users(external_id) WHERE external_id IS NOT NULL",
+  ],
+];
+
+test.each(wrongIndexShapes)(
+  "db reports %s that IF NOT EXISTS would leave alone",
+  (_label: string, createIndex: string) => {
+    const path = join(testRoot, `test-db-wrongindex-${Date.now()}.sqlite`);
+    const db = new Database(path, { create: true });
+    const logged: string[] = [];
+    const spy = spyOn(console, "error").mockImplementation((...args: unknown[]) => {
+      logged.push(args.map(String).join(" "));
+    });
+
+    try {
+      db.exec(`
+      CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, password TEXT NOT NULL, external_id TEXT);
+      CREATE TABLE file_names (id INTEGER PRIMARY KEY AUTOINCREMENT, job_id INTEGER NOT NULL, file_name TEXT NOT NULL, output_file_name TEXT NOT NULL, status TEXT DEFAULT 'not started');
+      CREATE TABLE jobs (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, date_created TEXT NOT NULL, status TEXT DEFAULT 'not started', num_files INTEGER DEFAULT 0);
+      ${createIndex};
+      PRAGMA user_version = 2;
+    `);
+
+      expect(() => initializeDatabase(db)).not.toThrow();
+      expect(logged.join("\n")).toContain("does not enforce uniqueness");
+    } finally {
+      spy.mockRestore();
+      db.close();
+      for (const suffix of ["", "-wal", "-shm"]) {
+        if (existsSync(`${path}${suffix}`)) unlinkSync(`${path}${suffix}`);
+      }
+    }
+  },
+);
+
+test("db accepts a correct unique index without reporting anything", () => {
+  const path = join(testRoot, `test-db-goodindex-${Date.now()}.sqlite`);
   const db = new Database(path, { create: true });
   const logged: string[] = [];
   const spy = spyOn(console, "error").mockImplementation((...args: unknown[]) => {
@@ -309,14 +355,12 @@ test("db reports a non-unique index that IF NOT EXISTS would leave alone", () =>
       CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, password TEXT NOT NULL, external_id TEXT);
       CREATE TABLE file_names (id INTEGER PRIMARY KEY AUTOINCREMENT, job_id INTEGER NOT NULL, file_name TEXT NOT NULL, output_file_name TEXT NOT NULL, status TEXT DEFAULT 'not started');
       CREATE TABLE jobs (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, date_created TEXT NOT NULL, status TEXT DEFAULT 'not started', num_files INTEGER DEFAULT 0);
-      CREATE INDEX users_external_id ON users(external_id);
+      CREATE UNIQUE INDEX users_external_id ON users(external_id);
       PRAGMA user_version = 2;
     `);
 
-    // `CREATE UNIQUE INDEX IF NOT EXISTS` is a no-op here, so nothing throws and the guard would
-    // otherwise run without uniqueness while believing it is protected.
     expect(() => initializeDatabase(db)).not.toThrow();
-    expect(logged.join("\n")).toContain("is not unique");
+    expect(logged.join("\n")).not.toContain("does not enforce uniqueness");
   } finally {
     spy.mockRestore();
     db.close();
