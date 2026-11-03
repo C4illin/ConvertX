@@ -26,6 +26,7 @@
   "dependencies": {
     "@elysiajs/html": "^1.4.2",
     "@elysiajs/jwt": "^1.4.2",
+    "@elysiajs/openapi": "1.4.16",
     "@elysiajs/static": "^1.4.10",
     "@kitajs/html": "^4.2.13",
     "elysia": "1.4.30",

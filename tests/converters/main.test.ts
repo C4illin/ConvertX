@@ -17,8 +17,15 @@ if (!process.env.CONVERTX_TEST_ROOT) {
 
 // dynamic imports ensure that the guard above runs before the db module is loaded
 const { default: db } = await import("../../src/db/db");
-const { chunks, getAllInputs, getAllTargets, getPossibleTargets, handleConvert, mainConverter } =
-  await import("../../src/converters/main");
+const {
+  chunks,
+  getAllInputs,
+  getAllTargets,
+  getPossibleTargets,
+  handleConvert,
+  mainConverter,
+  outputFileName,
+} = await import("../../src/converters/main");
 
 const testRoot = mkdtempSync(join(tmpdir(), "convertx-main-test-"));
 
@@ -155,6 +162,20 @@ describe("converter registry", () => {
     expect(getPossibleTargets("jxl").libjxl).not.toContain("jxl");
     expect(libreofficeProperties.from.text).not.toContain("xlsx");
     expect(libreofficeProperties.to.text).not.toContain("xlsm");
+  });
+});
+
+describe("outputFileName", () => {
+  test("swaps the extension for the target's", () => {
+    expect(outputFileName("report.docx", "pdf")).toBe("report.pdf");
+    expect(outputFileName("photo.backup.png", "jpeg")).toBe("photo.backup.jpg");
+    expect(outputFileName("README", "pdf")).toBe("README.pdf");
+  });
+
+  test("handles extensions with regex characters", () => {
+    expect(outputFileName("scan.[", "png")).toBe("scan.png");
+    expect(outputFileName("notes.$x", "pdf")).toBe("notes.pdf");
+    expect(outputFileName("main.c++", "txt")).toBe("main.txt");
   });
 });
 

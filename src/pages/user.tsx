@@ -155,6 +155,12 @@ function AccountPage({ email, error }: { email: string; error?: string }) {
                 <input type="submit" value="Update" class="w-full btn-primary" />
               </div>
             </form>
+            <p class="mt-4">
+              <a href={`${WEBROOT}/account/api-keys`} class="underline">
+                API keys
+              </a>{" "}
+              let scripts and tools use ConvertX.
+            </p>
           </article>
         </main>
       </>
