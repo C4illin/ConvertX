@@ -231,6 +231,42 @@ describe("SSO_ENABLED", () => {
     expect(body).toContain("&lt;img src=x onerror=alert(1)&gt;");
   });
 
+  test("converts with the identity header and no session cookie", async () => {
+    setEnv(sso());
+    const alice = uid();
+    await (await request("/", { headers: identity(alice, "alice") })).text();
+    const job = createJob(idFor(alice), {
+      numFiles: 1,
+      files: [{ file_name: "a.txt", output_file_name: "a.pdf", status: "not started" }],
+    });
+
+    const response = await request("/convert", {
+      method: "POST",
+      headers: {
+        ...identity(alice, "alice"),
+        cookie: `jobId=${job}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ convert_to: "pdf,libreoffice", file_names: '["a.txt"]' }),
+    });
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).not.toBe("/login");
+    expect(response.headers.get("location")).toContain(`/results/${job}`);
+  });
+
+  test("returns 404 for POST /account without form validation noise", async () => {
+    setEnv(sso());
+
+    const response = await request("/account", {
+      method: "POST",
+      headers: { ...identity(uid(), "alice"), "content-type": "application/json" },
+      body: JSON.stringify({ email: "", newPassword: "", password: "" }),
+    });
+
+    expect(response.status).toBe(404);
+  });
+
   test("rejects a cross-site state-changing request", async () => {
     setEnv(sso());
     const alice = uid();

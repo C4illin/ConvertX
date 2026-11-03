@@ -56,9 +56,12 @@ export function initializeDatabase(db: Database): void {
     if (!userColumns.some((c) => c.name.toLowerCase() === "external_id")) {
       db.exec("ALTER TABLE users ADD COLUMN external_id TEXT;");
       db.exec("CREATE UNIQUE INDEX IF NOT EXISTS users_external_id ON users(external_id);");
-      db.exec("PRAGMA user_version = 2;");
       console.log("Updated database to version 2.");
     }
+
+    // Set the version even when the column already existed (a file can carry
+    // the schema without the matching user_version, e.g. after a crash mid-run).
+    db.exec("PRAGMA user_version = 2;");
   }
 
   // enable WAL mode

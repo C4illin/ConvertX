@@ -583,6 +583,8 @@ export const user = new Elysia()
         newPassword: t.MaybeEmpty(t.String()),
         password: t.String(),
       }),
+      // In SSO mode an onRequest guard answers 404 before this cookie schema
+      // is validated, so a required session cookie is still correct here.
       cookie: "session",
     },
   );

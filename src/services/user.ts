@@ -32,6 +32,24 @@ export const userService = new Elysia({ name: "user/service" })
       jobId: t.Optional(t.String()),
     }),
   })
+  .onRequest(({ request, set }) => {
+    if (!SSO_ENABLED) {
+      return;
+    }
+
+    // Short-circuit before body/cookie validation: in SSO mode these routes do
+    // not exist, and a 422 about a form field or a session cookie the browser
+    // never receives would be misleading. GET /account stays available.
+    const path = new URL(request.url).pathname.replace(/\/+$/, "") || "/";
+    const root = WEBROOT.replace(/\/+$/, "");
+    const localOnly = [`${root}/login`, `${root}/setup`, `${root}/register`].includes(path);
+    const accountPost = request.method.toUpperCase() === "POST" && path === `${root}/account`;
+
+    if (localOnly || accountPost) {
+      set.status = 404;
+      return "Not found";
+    }
+  })
   .onBeforeHandle({ as: "global" }, ({ request, set }) => {
     // In SSO mode the identity comes from the proxy header, not from a
     // sameSite cookie, so the cookie no longer provides CSRF protection.
@@ -56,15 +74,34 @@ export const userService = new Elysia({ name: "user/service" })
       return;
     }
 
-    let originHost: string;
+    let originUrl: URL;
     try {
-      originHost = new URL(origin).host;
+      originUrl = new URL(origin);
     } catch {
       set.status = 403;
       return "Forbidden";
     }
 
-    if (originHost !== (request.headers.get("host") ?? new URL(request.url).host)) {
+    // Behind the proxy, Host is the public host; a proxy that rewrites it can
+    // send the original in X-Forwarded-Host. Compare hostnames case-insensitively
+    // (URL lowercases them), ignore a trailing root dot, and normalise the port.
+    const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
+    const hostHeader = forwardedHost ?? request.headers.get("host") ?? new URL(request.url).host;
+
+    let targetUrl: URL;
+    try {
+      targetUrl = new URL(`${originUrl.protocol}//${hostHeader}`);
+    } catch {
+      set.status = 403;
+      return "Forbidden";
+    }
+
+    const normalize = (url: URL) =>
+      `${url.hostname.replace(/\.$/, "").toLowerCase()}:${
+        url.port || (url.protocol === "https:" ? "443" : "80")
+      }`;
+
+    if (normalize(originUrl) !== normalize(targetUrl)) {
       set.status = 403;
       return "Forbidden";
     }
