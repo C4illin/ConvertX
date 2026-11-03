@@ -1,5 +1,5 @@
 import { Database } from "bun:sqlite";
-import { afterEach, beforeEach, expect, test } from "bun:test";
+import { afterEach, beforeEach, expect, spyOn, test } from "bun:test";
 import { existsSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
 
@@ -228,6 +228,66 @@ test("db does not downgrade a file written by a newer build", () => {
 
     // Stamping 2 over a v5 marker would make the next upgrade re-run migrations 3..5.
     expect(getDbVersion(db)).toBe(5);
+  } finally {
+    db.close();
+    for (const suffix of ["", "-wal", "-shm"]) {
+      if (existsSync(`${path}${suffix}`)) unlinkSync(`${path}${suffix}`);
+    }
+  }
+});
+
+test("db boots on a file whose duplicates block the index, and reports them without the identity", () => {
+  const path = join(testRoot, `test-db-dupes-${Date.now()}.sqlite`);
+  const db = new Database(path, { create: true });
+  const logged: string[] = [];
+  const spy = spyOn(console, "error").mockImplementation((...args: unknown[]) => {
+    logged.push(args.map(String).join(" "));
+  });
+
+  try {
+    db.exec(`
+      CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, password TEXT NOT NULL, external_id TEXT);
+      CREATE TABLE file_names (id INTEGER PRIMARY KEY AUTOINCREMENT, job_id INTEGER NOT NULL, file_name TEXT NOT NULL, output_file_name TEXT NOT NULL, status TEXT DEFAULT 'not started');
+      CREATE TABLE jobs (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, date_created TEXT NOT NULL, status TEXT DEFAULT 'not started', num_files INTEGER DEFAULT 0);
+      INSERT INTO users (email, password, external_id) VALUES ('alice', 'hash', 'person@example.com');
+      INSERT INTO users (email, password, external_id) VALUES ('bob', 'hash', 'person@example.com');
+      PRAGMA user_version = 2;
+    `);
+
+    // Two rows claiming one identity makes CREATE UNIQUE INDEX throw. That case is
+    // tolerated: the alternative is a container that will not start.
+    expect(() => initializeDatabase(db)).not.toThrow();
+    expect((db.query("PRAGMA index_list(users)").all() as unknown[]).length).toBe(0);
+
+    const message = logged.join("\n");
+    expect(message).toContain("1 duplicated identities across 2 rows");
+    // The identity may be an email address, so it must not reach the log.
+    expect(message).not.toContain("person@example.com");
+  } finally {
+    spy.mockRestore();
+    db.close();
+    for (const suffix of ["", "-wal", "-shm"]) {
+      if (existsSync(`${path}${suffix}`)) unlinkSync(`${path}${suffix}`);
+    }
+  }
+});
+
+test("db rethrows an index failure that is not about duplicates", () => {
+  const path = join(testRoot, `test-db-indexfail-${Date.now()}.sqlite`);
+  const db = new Database(path, { create: true });
+
+  try {
+    // A table squatting on the index name is not a duplicate-identity condition, so it
+    // must surface instead of being logged as "no duplicates found" and swallowed.
+    db.exec(`
+      CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, password TEXT NOT NULL, external_id TEXT);
+      CREATE TABLE file_names (id INTEGER PRIMARY KEY AUTOINCREMENT, job_id INTEGER NOT NULL, file_name TEXT NOT NULL, output_file_name TEXT NOT NULL, status TEXT DEFAULT 'not started');
+      CREATE TABLE jobs (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, date_created TEXT NOT NULL, status TEXT DEFAULT 'not started', num_files INTEGER DEFAULT 0);
+      CREATE TABLE users_external_id (x INTEGER);
+      PRAGMA user_version = 2;
+    `);
+
+    expect(() => initializeDatabase(db)).toThrow();
   } finally {
     db.close();
     for (const suffix of ["", "-wal", "-shm"]) {

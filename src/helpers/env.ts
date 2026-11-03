@@ -36,25 +36,30 @@ export const SSO_ENABLED = process.env.SSO_ENABLED?.toLowerCase() === "true" || 
 // hash of the user) and X-authentik-username.
 //
 // These values reach `Headers.get`, which throws on anything that is not a valid HTTP
-// token: an empty string, a stray space, an `@`. A throw there is a 500 on every request
-// rather than a fallback, so the name is validated once at load. `||`-style fallback rather
-// than `??` because a variable set to "" must fall back, not survive as `""`.
+// token: a stray space, an `@`, a comma. So the name is validated once at load.
+//
+// Empty means "unset" and takes the default. Anything else that is not a valid header
+// name is a configuration error and refuses to start: falling back would make the app
+// trust the *default* header instead of the one the operator named, which in an auth path
+// is worse than a container that will not boot — the operator sees the throw immediately,
+// and a wrong identity source does not run quietly for weeks.
 const HEADER_NAME = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
 
-function headerName(value: string | undefined, fallback: string): string {
-  const name = value?.trim() ?? "";
-  if (HEADER_NAME.test(name)) {
-    return name;
+function headerName(variable: string, fallback: string): string {
+  const name = process.env[variable]?.trim() ?? "";
+  if (name === "") {
+    return fallback;
   }
-  if (name !== "") {
-    console.warn(`Ignoring an invalid header name (${JSON.stringify(name)}), using ${fallback}.`);
+  if (!HEADER_NAME.test(name)) {
+    if (!SSO_ENABLED) {
+      // Unused in this configuration; do not fail a local-login deployment over a stale var.
+      return fallback;
+    }
+    throw new Error(`${variable} is not a valid HTTP header name: ${JSON.stringify(name)}`);
   }
-  return fallback;
+  return name;
 }
 
-export const SSO_UID_HEADER = headerName(process.env.SSO_UID_HEADER, "x-authentik-uid");
+export const SSO_UID_HEADER = headerName("SSO_UID_HEADER", "x-authentik-uid");
 
-export const SSO_USERNAME_HEADER = headerName(
-  process.env.SSO_USERNAME_HEADER,
-  "x-authentik-username",
-);
+export const SSO_USERNAME_HEADER = headerName("SSO_USERNAME_HEADER", "x-authentik-username");

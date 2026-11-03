@@ -66,19 +66,31 @@ export function initializeDatabase(db: Database): void {
     //
     // A file that already holds duplicate external_ids (the same crash window, with two
     // concurrent first sightings) makes CREATE UNIQUE INDEX throw. Losing the index is a
-    // dedup failure; refusing to boot is an outage, so report the duplicates and carry on
-    // — `ensureSsoUser` still fails closed on a row that is not there.
+    // dedup failure; refusing to boot is an outage, so that one case is reported and
+    // tolerated — `ensureSsoUser` still fails closed on a row that is not there.
+    //
+    // Any other failure (a lock, an I/O error) is rethrown: booting on would leave the
+    // uniqueness this code relies on missing, and the log line would be a lie.
     try {
       db.exec("CREATE UNIQUE INDEX IF NOT EXISTS users_external_id ON users(external_id);");
     } catch (error) {
       const duplicates = db
         .query(
-          "SELECT external_id, COUNT(*) AS n FROM users WHERE external_id IS NOT NULL GROUP BY external_id HAVING n > 1",
+          `SELECT COUNT(*) AS identities, COALESCE(SUM(n), 0) AS rows FROM (
+             SELECT external_id, COUNT(*) AS n FROM users
+             WHERE external_id IS NOT NULL GROUP BY external_id HAVING n > 1
+           )`,
         )
-        .all() as { external_id: string; n: number }[];
+        .get() as { identities: number; rows: number };
+
+      if (!duplicates.identities) {
+        throw error;
+      }
+
+      // Counts only: external_id can be an email address, and this is a log line.
       console.error(
-        `Could not create the unique index on users.external_id: ${(error as Error).message}. ` +
-          `Duplicate identities: ${duplicates.map((d) => `${d.external_id} x${d.n}`).join(", ") || "none found"}.`,
+        `Could not create the unique index on users.external_id: ${duplicates.identities} duplicated ` +
+          `identities across ${duplicates.rows} rows. Starting without it; resolve the duplicates and restart.`,
       );
     }
 
