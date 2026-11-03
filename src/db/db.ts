@@ -55,13 +55,40 @@ export function initializeDatabase(db: Database): void {
     const userColumns = db.query("PRAGMA table_info(users)").all() as { name: string }[];
     if (!userColumns.some((c) => c.name.toLowerCase() === "external_id")) {
       db.exec("ALTER TABLE users ADD COLUMN external_id TEXT;");
-      db.exec("CREATE UNIQUE INDEX IF NOT EXISTS users_external_id ON users(external_id);");
       console.log("Updated database to version 2.");
     }
 
+    // Outside the guard on purpose. A process killed between the ALTER and the
+    // CREATE leaves the column present but the index missing; the guard above
+    // then skips the block forever and ensureSsoUser's INSERT OR IGNORE loses the
+    // one-row-per-identity guarantee it relies on. Creating it every start is
+    // idempotent and cheap.
+    //
+    // A file that already holds duplicate external_ids (the same crash window, with two
+    // concurrent first sightings) makes CREATE UNIQUE INDEX throw. Losing the index is a
+    // dedup failure; refusing to boot is an outage, so report the duplicates and carry on
+    // — `ensureSsoUser` still fails closed on a row that is not there.
+    try {
+      db.exec("CREATE UNIQUE INDEX IF NOT EXISTS users_external_id ON users(external_id);");
+    } catch (error) {
+      const duplicates = db
+        .query(
+          "SELECT external_id, COUNT(*) AS n FROM users WHERE external_id IS NOT NULL GROUP BY external_id HAVING n > 1",
+        )
+        .all() as { external_id: string; n: number }[];
+      console.error(
+        `Could not create the unique index on users.external_id: ${(error as Error).message}. ` +
+          `Duplicate identities: ${duplicates.map((d) => `${d.external_id} x${d.n}`).join(", ") || "none found"}.`,
+      );
+    }
+
     // Set the version even when the column already existed (a file can carry
-    // the schema without the matching user_version, e.g. after a crash mid-run).
-    db.exec("PRAGMA user_version = 2;");
+    // the schema without the matching user_version, e.g. after a crash mid-run),
+    // but never lower it: a file written by a later build keeps its version, so
+    // rolling back and forward again does not re-run migrations.
+    if ((dbVersion?.user_version ?? 0) < 2) {
+      db.exec("PRAGMA user_version = 2;");
+    }
   }
 
   // enable WAL mode

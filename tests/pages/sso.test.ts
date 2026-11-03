@@ -292,6 +292,116 @@ describe("SSO_ENABLED", () => {
     expect(db.query("SELECT id FROM jobs WHERE id = ?").get(job)).toBeNull();
   });
 
+  test("rejects a plaintext origin when the request arrived over TLS", async () => {
+    setEnv(sso());
+    const alice = uid();
+
+    const home = await request("/", { headers: identity(alice, "alice") });
+    await home.text();
+    const job = createJob(idFor(alice), { numFiles: 1 });
+
+    // http://localhost and https://localhost are the same host, so the hostname check
+    // passes; the proxy says the request arrived over TLS, so the scheme must not.
+    const response = await request(`/delete/${job}`, {
+      method: "POST",
+      headers: {
+        ...identity(alice, "alice"),
+        origin: "http://localhost",
+        "x-forwarded-proto": "https",
+      },
+    });
+
+    expect(response.status).toBe(403);
+    expect(db.query("SELECT id FROM jobs WHERE id = ?").get(job)).not.toBeNull();
+
+    const secure = await request(`/delete/${job}`, {
+      method: "POST",
+      headers: {
+        ...identity(alice, "alice"),
+        origin: "https://localhost",
+        "x-forwarded-proto": "https",
+      },
+    });
+
+    expect(secure.status).toBe(302);
+    expect(db.query("SELECT id FROM jobs WHERE id = ?").get(job)).toBeNull();
+  });
+
+  test("does not apply the scheme rule when nothing says the request arrived over TLS", async () => {
+    setEnv(sso());
+    const alice = uid();
+
+    const home = await request("/", { headers: identity(alice, "alice") });
+    await home.text();
+    const job = createJob(idFor(alice), { numFiles: 1 });
+
+    // Behind a TLS-terminating proxy that sets no X-Forwarded-Proto, the app only ever sees
+    // http:// and there is nothing to compare the Origin's scheme against. The limit is
+    // pinned here so it is a known trade rather than an assumption.
+    const response = await request(`/delete/${job}`, {
+      method: "POST",
+      headers: { ...identity(alice, "alice"), origin: "http://localhost" },
+    });
+
+    expect(response.status).toBe(302);
+    expect(db.query("SELECT id FROM jobs WHERE id = ?").get(job)).toBeNull();
+  });
+
+  test("rejects a request a browser marked as cross-site, before looking at Origin", async () => {
+    setEnv(sso());
+    const alice = uid();
+
+    const home = await request("/", { headers: identity(alice, "alice") });
+    await home.text();
+    const job = createJob(idFor(alice), { numFiles: 1 });
+
+    // A browser sends both; the header alone is enough, so the short-circuit is exercised
+    // without an Origin that would also have been rejected.
+    const response = await request(`/delete/${job}`, {
+      method: "POST",
+      headers: { ...identity(alice, "alice"), "sec-fetch-site": "cross-site" },
+    });
+
+    expect(response.status).toBe(403);
+    expect(db.query("SELECT id FROM jobs WHERE id = ?").get(job)).not.toBeNull();
+  });
+
+  test("falls back to Host when the proxy sends X-Forwarded-Host empty", async () => {
+    setEnv(sso());
+    const alice = uid();
+
+    const home = await request("/", { headers: identity(alice, "alice") });
+    await home.text();
+    const job = createJob(idFor(alice), { numFiles: 1 });
+
+    // An empty forwarded host used to win over Host, making `new URL("http://")` throw
+    // and turning every Origin-bearing POST into a 403.
+    const response = await request(`/delete/${job}`, {
+      method: "POST",
+      headers: { ...identity(alice, "alice"), origin: "http://localhost", "x-forwarded-host": "" },
+    });
+
+    expect(response.status).toBe(302);
+    expect(db.query("SELECT id FROM jobs WHERE id = ?").get(job)).toBeNull();
+  });
+
+  test("a request without the username header does not rename an existing user", async () => {
+    setEnv(sso());
+    const alice = uid();
+
+    const first = await request("/", { headers: identity(alice, "alice") });
+    await first.text();
+    expect(rowFor(alice)?.email).toBe("alice");
+
+    // The uid alone must not flatten the stored name to a placeholder that the next
+    // request then has to put back.
+    const second = await request("/", { headers: { "x-authentik-uid": alice } });
+    await second.text();
+
+    expect(second.status).toBe(200);
+    expect(rowFor(alice)?.email).toBe("alice");
+  });
+
   test("disables the local login, setup and register routes", async () => {
     setEnv(sso());
 
@@ -315,7 +425,8 @@ describe("SSO_ENABLED", () => {
 
     expect(response.status).toBe(200);
     expect(body).toContain("alice");
-    expect(body).toContain(String(idFor(uidHex)));
+    // A bare integer matches almost any HTML, so assert the element that renders it.
+    expect(body).toMatch(new RegExp(`<span[^>]*id="sso-uid"[^>]*>\\s*${idFor(uidHex)}\\s*</span>`));
     expect(body).not.toContain('name="newPassword"');
   });
 });

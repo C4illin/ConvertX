@@ -34,6 +34,27 @@ export const SSO_ENABLED = process.env.SSO_ENABLED?.toLowerCase() === "true" || 
 
 // authentik's forward-auth outpost sets X-authentik-uid (a stable, salted
 // hash of the user) and X-authentik-username.
-export const SSO_UID_HEADER = process.env.SSO_UID_HEADER ?? "x-authentik-uid";
+//
+// These values reach `Headers.get`, which throws on anything that is not a valid HTTP
+// token: an empty string, a stray space, an `@`. A throw there is a 500 on every request
+// rather than a fallback, so the name is validated once at load. `||`-style fallback rather
+// than `??` because a variable set to "" must fall back, not survive as `""`.
+const HEADER_NAME = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
 
-export const SSO_USERNAME_HEADER = process.env.SSO_USERNAME_HEADER ?? "x-authentik-username";
+function headerName(value: string | undefined, fallback: string): string {
+  const name = value?.trim() ?? "";
+  if (HEADER_NAME.test(name)) {
+    return name;
+  }
+  if (name !== "") {
+    console.warn(`Ignoring an invalid header name (${JSON.stringify(name)}), using ${fallback}.`);
+  }
+  return fallback;
+}
+
+export const SSO_UID_HEADER = headerName(process.env.SSO_UID_HEADER, "x-authentik-uid");
+
+export const SSO_USERNAME_HEADER = headerName(
+  process.env.SSO_USERNAME_HEADER,
+  "x-authentik-username",
+);

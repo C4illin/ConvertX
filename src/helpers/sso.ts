@@ -7,47 +7,20 @@ const MAX_IDENTITY_LENGTH = 512;
 /** Users.email is a TEXT column; a sane display name fits comfortably. */
 const MAX_USERNAME_LENGTH = 255;
 
-export type SsoIdentity = { externalId: string; username: string };
-
-export type HeaderSource =
-  Headers | Record<string, string | string[] | undefined> | undefined | null;
+export type SsoIdentity = { externalId: string; username: string | null };
 
 /**
- * Reads one header from either a WHATWG `Headers` instance (what `request.headers` is at runtime)
- * or a plain object (what the tests pass). Both shapes reach this function in practice; a compiled
- * build can hand a route no parsed `headers` at all, so call sites pass `request.headers` and this
- * function accepts either.
+ * Reads one header from the request's `Headers`. `undefined` is tolerated because a compiled build
+ * once handed a route no parsed `headers` object at all, and a 401 is a better failure than a 500.
+ * Repeated header lines are already joined with ", " by `Headers.get`, which is what the comma
+ * guard in `resolveSsoIdentity` then rejects.
  */
-function headerValue(headers: HeaderSource, name: string): string | undefined {
+function headerValue(headers: Headers | undefined | null, name: string): string | undefined {
   if (!headers) {
     return undefined;
   }
 
-  const lower = name.toLowerCase();
-
-  if (typeof (headers as Headers).get === "function") {
-    const value = (headers as Headers).get(lower);
-    if (value !== null && value !== undefined) {
-      return value;
-    }
-  }
-
-  const record = headers as Record<string, string | string[] | undefined>;
-  const direct = record[lower] ?? record[name];
-  if (Array.isArray(direct)) {
-    return direct[0];
-  }
-  if (typeof direct === "string") {
-    return direct;
-  }
-
-  for (const [key, value] of Object.entries(record)) {
-    if (key.toLowerCase() === lower) {
-      return Array.isArray(value) ? value[0] : value;
-    }
-  }
-
-  return undefined;
+  return headers.get(name.toLowerCase()) ?? undefined;
 }
 
 /**
@@ -61,7 +34,7 @@ function headerValue(headers: HeaderSource, name: string): string | undefined {
  * <attacker>"` is not an identity, and hashing it would silently mint a new user, making the
  * original user's history "disappear". Reject it.
  */
-export function resolveSsoIdentity(headers: HeaderSource): SsoIdentity | null {
+export function resolveSsoIdentity(headers: Headers | undefined | null): SsoIdentity | null {
   const raw = headerValue(headers, SSO_UID_HEADER);
   if (!raw) {
     return null;
@@ -72,10 +45,11 @@ export function resolveSsoIdentity(headers: HeaderSource): SsoIdentity | null {
     return null;
   }
 
-  const username =
-    headerValue(headers, SSO_USERNAME_HEADER)?.trim().slice(0, MAX_USERNAME_LENGTH) || "unknown";
+  // Null, not a placeholder: a request that carries the id but not the name must not
+  // rename the user, or the display name flips to "unknown" and back on the next one.
+  const name = headerValue(headers, SSO_USERNAME_HEADER)?.trim().slice(0, MAX_USERNAME_LENGTH);
 
-  return { externalId, username };
+  return { externalId, username: name ? name : null };
 }
 
 /**
@@ -96,27 +70,31 @@ export async function ensureSsoUser({ externalId, username }: SsoIdentity): Prom
     .query("SELECT id, email FROM users WHERE external_id = ?")
     .get(externalId) as { id: number; email: string } | null;
   if (existing) {
-    // A renamed proxy user keeps the same row; refresh the display name.
-    if (existing.email !== username) {
+    // A renamed proxy user keeps the same row; refresh the display name. A request
+    // without the username header leaves the stored name alone instead of flattening
+    // it to a placeholder and back again on the next request.
+    if (username !== null && existing.email !== username) {
       db.query("UPDATE users SET email = ? WHERE id = ?").run(username, existing.id);
     }
     return existing.id;
   }
 
   const password = await Bun.password.hash(crypto.randomUUID());
+  // First sight is the only place the placeholder is allowed: `users.email` is NOT NULL,
+  // and a name that is merely late should not stop the row existing.
   db.query("INSERT OR IGNORE INTO users (email, password, external_id) VALUES (?, ?, ?)").run(
-    username,
+    username ?? "unknown",
     password,
     externalId,
   );
 
-  // INSERT OR IGNORE also swallows a UNIQUE violation from another writer. Read
-  // the row back and fail loudly if the value did not actually come to rest
-  // here, instead of handing out an id that belongs to someone else.
-  const row = db
-    .query("SELECT id, external_id FROM users WHERE external_id = ?")
-    .get(externalId) as { id: number; external_id: string | null } | null;
-  if (!row || row.external_id !== externalId) {
+  // INSERT OR IGNORE also swallows a UNIQUE violation from another writer (and, with the
+  // index missing, would not even do that). A row is the only acceptable outcome: if the
+  // identity did not come to rest anywhere, failing here is better than handing out an id.
+  const row = db.query("SELECT id FROM users WHERE external_id = ?").get(externalId) as {
+    id: number;
+  } | null;
+  if (!row) {
     throw new Error("SSO identity did not resolve to a single users row");
   }
 

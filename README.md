@@ -121,7 +121,7 @@ All are optional, JWT_SECRET is recommended to be set.
 `SSO_ENABLED=true` lets a reverse proxy that has already authenticated the user (authentik, oauth2-proxy, Authelia, …) hand the identity to ConvertX in a header. ConvertX then skips its own login: `/login`, `/setup`, `/register` and `POST /account` return 404, `/logoff` only drops the local session, and `/account` shows the proxy identity read-only. The JWT session cookie is neither issued nor consulted in this mode.
 
 > [!WARNING]
-> The header is trusted, and Traefik replaces **only** the headers named in `authResponseHeaders`. Every other client-supplied header is forwarded unchanged — and if the auth server answers without returning one of those headers, the client's value survives. So list **every** identity header in `authResponseHeaders`, block direct access to the container port, and never publish it. An SSO deployment must be reachable only through the proxy.
+> The header is trusted, so the proxy must be the only way in. Traefik **deletes** every header named in `authResponseHeaders` from the request, then copies it back from the auth response only if that response carries it — so a _listed_ header can never keep a client-supplied value. A header you leave **out** of that list is forwarded to ConvertX untouched. List **every** identity header in `authResponseHeaders`, block direct access to the container port, and never publish it. An SSO deployment must be reachable only through the proxy.
 
 ```yaml
 # docker-compose.yaml — SSO mode: no published port, proxy network only
@@ -159,8 +159,9 @@ metadata:
 spec:
   forwardAuth:
     address: http://authentik-server/outpost.goauthentik.io/auth/traefik
-    # Replaces exactly these headers. If the auth response omits one, the
-    # client's value is forwarded unchanged. List both identity headers.
+    # Deleted from the incoming request, then copied back from the auth
+    # response when it carries the header. A header missing here is passed
+    # through from the client untouched. List every identity header.
     authResponseHeaders:
       - X-authentik-uid
       - X-authentik-username
@@ -170,10 +171,10 @@ Attach that middleware to the ConvertX router. Any proxy that sets a stable, uni
 
 #### Notes
 
-- **Lockout recovery:** the local login is disabled while the flag is on. If the proxy is unavailable, set `SSO_ENABLED=false` and restart; SSO rows are kept and resolve again when you turn it back on. A permanently enabled local password path would defeat the point, so there is deliberately no in-app break-glass account.
+- **Lockout recovery:** the local login is disabled while the flag is on, and turning it off does **not** by itself restore access — every SSO row carries the hash of a random value, and `/setup` redirects to `/login` once any user exists. Create a local account with a password you know **before** enabling SSO; if you are ever locked out, set `SSO_ENABLED=false` and restart, then sign in as that local user. SSO rows are kept and resolve again when you turn the flag back on. A permanently enabled local password path would defeat the point, so there is deliberately no in-app break-glass account.
 - `SSO_ENABLED=true` takes precedence over `ALLOW_UNAUTHENTICATED`; anonymous access is not available in SSO mode.
 - `/logoff` cannot end the proxy session: it clears the local session and returns home, where the proxy signs the browser straight back in. Use the identity provider to sign out.
-- State-changing requests whose `Origin` / `Sec-Fetch-Site` says they come from another site are rejected with 403. Non-browser clients that send no `Origin` are unaffected.
+- State-changing requests whose `Origin` / `Sec-Fetch-Site` says they come from another site are rejected with 403, and a plaintext `Origin` is rejected when the request arrived over TLS (`X-Forwarded-Proto: https`). Non-browser clients that send no `Origin` are unaffected.
 - No role or admin mapping yet: every authenticated user is a normal ConvertX user.
 - No signature verification of `X-authentik-jwt` in v1; the trust boundary is the proxy (including `authResponseHeaders`) plus the network restriction above.
 

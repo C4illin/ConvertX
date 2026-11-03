@@ -43,7 +43,9 @@ export const root = new Elysia().use(userService).get(
       const identity = resolveSsoIdentity(request.headers);
       if (!identity) {
         set.status = 401;
-        return "Unauthorized: missing SSO identity header";
+        // Also reached when the header is present but rejected (empty, comma-joined,
+        // over 512 chars), so the message must not claim it was absent.
+        return "Unauthorized: missing or invalid SSO identity header";
       }
 
       const userId = await ensureSsoUser(identity);
@@ -118,10 +120,6 @@ export const root = new Elysia().use(userService).get(
     }
 
     if (!user) {
-      if (SSO_ENABLED) {
-        set.status = 401;
-        return "Unauthorized: missing SSO identity header";
-      }
       return redirect(`${WEBROOT}/login`, 302);
     }
 

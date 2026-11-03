@@ -213,12 +213,7 @@ function SsoAccountPage({ username, uid }: { username: string; uid: string }) {
 
 export const user = new Elysia()
   .use(userService)
-  .get("/setup", ({ redirect, set }) => {
-    if (SSO_ENABLED) {
-      set.status = 404;
-      return "Not found";
-    }
-
+  .get("/setup", ({ redirect }) => {
     if (!FIRST_RUN) {
       return redirect(`${WEBROOT}/login`, 302);
     }
@@ -279,12 +274,7 @@ export const user = new Elysia()
       </BaseHtml>
     );
   })
-  .get("/register", ({ redirect, set }) => {
-    if (SSO_ENABLED) {
-      set.status = 404;
-      return "Not found";
-    }
-
+  .get("/register", ({ redirect }) => {
     if (!ACCOUNT_REGISTRATION) {
       return redirect(`${WEBROOT}/login`, 302);
     }
@@ -342,11 +332,6 @@ export const user = new Elysia()
   .post(
     "/register",
     async ({ body: { email, password }, set, redirect, jwt, cookie: { auth } }) => {
-      if (SSO_ENABLED) {
-        set.status = 404;
-        return "Not found";
-      }
-
       if (!ACCOUNT_REGISTRATION && !FIRST_RUN) {
         return redirect(`${WEBROOT}/login`, 302);
       }
@@ -401,12 +386,7 @@ export const user = new Elysia()
   )
   .get(
     "/login",
-    async ({ jwt, redirect, set, cookie: { auth } }) => {
-      if (SSO_ENABLED) {
-        set.status = 404;
-        return "Not found";
-      }
-
+    async ({ jwt, redirect, cookie: { auth } }) => {
       if (FIRST_RUN) {
         return redirect(`${WEBROOT}/setup`, 302);
       }
@@ -429,11 +409,6 @@ export const user = new Elysia()
   .post(
     "/login",
     async function handler({ body, set, redirect, jwt, cookie: { auth } }) {
-      if (SSO_ENABLED) {
-        set.status = 404;
-        return "Not found";
-      }
-
       const existingUser = db.query("SELECT * FROM users WHERE email = ?").as(User).get(body.email);
 
       if (!existingUser) {
@@ -519,11 +494,6 @@ export const user = new Elysia()
   .post(
     "/account",
     async function handler({ body, set, redirect, jwt, cookie: { auth } }) {
-      if (SSO_ENABLED) {
-        set.status = 404;
-        return "Not found";
-      }
-
       if (!auth?.value) {
         return redirect(`${WEBROOT}/login`, 302);
       }
