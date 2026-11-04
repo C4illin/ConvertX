@@ -16,6 +16,8 @@
 
 A self-hosted online file converter. Supports over a thousand different formats. Written with TypeScript, Bun and Elysia.
 
+[![Deploy to Railyard](https://app.railyard.run/deploy/badge)](https://app.railyard.run/deploy?repo=https://github.com/C4illin/ConvertX)
+
 ## Features
 
 - Convert files to different formats
