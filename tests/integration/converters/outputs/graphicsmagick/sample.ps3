@@ -1,0 +1,234 @@
+%!PS-Adobe-3.0
+%%Creator: GraphicsMagick 1.3.49
+%%Title: /app/tests/integration/converters/outputs/graphicsmagick/sample.ps3
+%%CreationDate: Fri Oct 16 19:15:09 2026
+%%BoundingBox: 0 0 16 16
+%%HiResBoundingBox: 0 0 16 16
+%%LanguageLevel: 3
+%%Orientation: Portrait
+%%PageOrder: Ascend
+%%Pages: 1
+%%EndComments
+%%BeginProlog
+/ByteStreamDecodeFilter
+{
+  /z exch def
+  /r exch def
+  /c exch def
+  /ASCII85Decode filter
+  z 1 eq
+  {
+    <<
+      /K -1
+      /Columns c
+      /Rows r
+    >>
+    /CCITTFaxDecode filter
+  } if
+  z 2 eq {/RunLengthDecode filter} if
+  z 3 eq {/LZWDecode filter} if
+  z 4 eq {/FlateDecode filter} if
+  z 5 eq {/DCTDecode filter} if
+} bind def
+
+/DirectClassImageDict
+{
+  colorspace 0 eq
+  {
+    /DeviceRGB setcolorspace
+    <<
+      /ImageType 1
+      /Width columns
+      /Height rows
+      /BitsPerComponent 8
+      /DataSource pixel_stream
+      /MultipleDataSources false
+      /ImageMatrix [columns 0 0 rows neg 0 rows]
+      /Decode [0 1 0 1 0 1]
+    >>
+  }
+  {
+    /DeviceCMYK setcolorspace
+    <<
+      /ImageType 1
+      /Width columns
+      /Height rows
+      /BitsPerComponent 8
+      /DataSource pixel_stream
+      /MultipleDataSources false
+      /ImageMatrix [columns 0 0 rows neg 0 rows]
+      /Decode
+        compression 5 eq
+        {[1 0 1 0 1 0 1 0]}
+        {[0 1 0 1 0 1 0 1]}
+        ifelse
+    >>
+  }
+  ifelse
+} bind def
+
+/PseudoClassImageDict
+{
+  % COLORS IN PSEUDO CLASS IMAGE
+  currentfile buffer readline pop
+  token pop /colors exch def pop
+  colors 0 eq
+  {
+    % DEPTH OF GRAYSCALE
+    currentfile buffer readline pop
+    token pop /bits exch def pop
+    /DeviceGray setcolorspace
+    <<
+      /ImageType 1
+      /Width columns
+      /Height rows
+      /BitsPerComponent bits
+      /Decode [0 1]
+      /ImageMatrix [columns 0 0 rows neg 0 rows]
+      /DataSource pixel_stream
+    >>
+  }
+  {
+    % RGB COLORMAP
+    /colormap colors 3 mul string def
+    % INDEXES
+    currentfile /ASCII85Decode filter colormap readstring pop pop
+    [ /Indexed /DeviceRGB colors 1 sub colormap ] setcolorspace
+    <<
+      /ImageType 1
+      /Width columns
+      /Height rows
+      /BitsPerComponent 8
+      /Decode [0 255]
+      /ImageMatrix [columns 0 0 rows neg 0 rows]
+      /DataSource pixel_stream
+    >>
+  }
+  ifelse
+} bind def
+
+/NonMaskedImageDict
+{
+  class 1 eq
+  { PseudoClassImageDict }
+  { DirectClassImageDict }
+  ifelse
+} bind def
+
+/MaskedImageDict
+{
+  <<
+    /ImageType 3
+    /InterleaveType 3
+    /DataDict NonMaskedImageDict
+    /MaskDict
+    <<
+      /ImageType 1
+      /Width columns
+      /Height rows
+      /BitsPerComponent 1
+      /DataSource mask_stream
+      /MultipleDataSources false
+      /ImageMatrix [ columns 0 0 rows neg 0 rows]
+      /Decode [ 0 1 ]
+    >>
+  >>
+} bind def
+
+/ClipImage
+{} def
+
+/DisplayImage
+{
+  /buffer 512 string def
+
+  % TRANSLATION
+  currentfile buffer readline pop
+  token pop /x exch def
+  token pop /y exch def pop
+  x y translate
+
+  % IMAGE SIZE AND FONT SIZE
+  currentfile buffer readline pop
+  token pop /x exch def
+  token pop /y exch def pop
+  currentfile buffer readline pop
+  token pop /pointsize exch def pop
+  x y scale
+
+  % CLIPPING PATH
+  currentfile buffer readline pop
+  token pop /clipped exch def pop
+
+  % EPS
+  currentfile buffer readline pop
+  token pop /sp exch def pop
+
+  % IMAGE PIXEL SIZE
+  currentfile buffer readline pop
+  token pop /columns exch def
+  token pop /rows exch def pop
+
+  % COLORSPACE (RGB/CMYK)
+  currentfile buffer readline pop
+  token pop /colorspace exch def pop
+
+  % TRANSPARENCY
+  currentfile buffer readline pop
+  token pop /alpha exch def pop
+
+  % STENCIL MASK?
+  currentfile buffer readline pop
+  token pop /stencil exch def pop
+
+  % IMAGE CLASS (DIRECT/PSEUDO)
+  currentfile buffer readline pop
+  token pop /class exch def pop
+
+  % COMPRESSION
+  currentfile buffer readline pop
+  token pop /compression exch def pop
+
+  % CLIP AND RENDER
+  /pixel_stream currentfile columns rows compression
+    ByteStreamDecodeFilter def
+  clipped {ClipImage} if
+  alpha stencil not and
+  { MaskedImageDict mask_stream resetfile }
+  { NonMaskedImageDict }
+  ifelse
+  stencil {0 setgray imagemask} {image} ifelse
+  grestore
+  sp {showpage} if
+} bind def
+%%EndProlog
+%%Page: 1 1
+%%PageBoundingBox: 0 0 16 16
+/ClipImage {} def
+%%BeginData:           98 ASCII Bytes
+currentfile 16 16 4 ByteStreamDecodeFilter
+/ReusableStreamDecode filter
+GhP5%It7P!qZ1;6&-13R$s`~>
+%%EndData
+/mask_stream exch def
+%%BeginData:          335 ASCII Bytes
+DisplayImage
+0 0
+16 16
+12.000000
+false
+true
+16 16
+0
+true
+false
+0
+4
+GhQY8!.iSP8RB64Qmf;>Fk)MQ$lC*H-=9S9*>8`NC?1\'cC_kD8G,4n-ECA$4JSUDJOoH!,c
+bD&gp79eH<G)bYQ?$lJocJk3&V:G]oJ:So4]p2#GlhRNW9ZQ!TX:cEN'b>;mVH`&<Tt6o*GXG
++9T[g$K=s%B^Tp)a9d8n-a+^S+9F<K>bE4Ie>'QE6!qSk?!b?4Kh24^q^T%E&MrrY`2+N2A<=
+Z,9L2Cl<(0JX%?Gg?LsG9Yl6]t7cYuig3shVo!8:8+4T~>
+%%EndData
+%%PageTrailer
+%%Trailer
+%%EOF

@@ -1,0 +1,31 @@
+/* XPM */
+static const char *sample[] = {
+/* columns rows colors chars-per-pixel */
+"16 16 9 1",
+"  c black",
+". c DarkSlateGray",
+"X c #7E7E7E",
+"o c LimeGreen",
+"O c SlateGray",
+"+ c tan",
+"@ c SkyBlue",
+"# c gainsboro",
+"$ c grey75",
+/* pixels */
+" OO.......O@    ",
+" ..   ..   O@   ",
+" ..   ..    OX  ",
+" ..   ..    .O  ",
+" ..  . .. .  X  ",
+" X. .o.+#.o. X  ",
+" X.  . .. .  .  ",
+" X. .#....#. .  ",
+" XX .#....#. .  ",
+" X. .. .. .. .  ",
+" .. .o.##.o. .  ",
+" ..  .... .  X  ",
+" .X    .    .X  ",
+" .X         .X  ",
+" XX          X  ",
+" OO..........O  "
+};

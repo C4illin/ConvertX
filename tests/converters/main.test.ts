@@ -155,6 +155,33 @@ describe("converter registry", () => {
     expect(getPossibleTargets("jxl").libjxl).not.toContain("jxl");
     expect(libreofficeProperties.from.text).not.toContain("xlsx");
     expect(libreofficeProperties.to.text).not.toContain("xlsm");
+
+    // ffmpeg categories
+    const pngTargets = getPossibleTargets("png").ffmpeg ?? [];
+    expect(pngTargets).toContain("jpg");
+    expect(pngTargets).toContain("webp");
+    expect(pngTargets).toContain("gif");
+    expect(pngTargets).not.toContain("mp3");
+    expect(pngTargets).not.toContain("wav");
+    expect(pngTargets).not.toContain("srt");
+    expect(pngTargets).not.toContain("vtt");
+
+    const mp3Targets = getPossibleTargets("mp3").ffmpeg ?? [];
+    expect(mp3Targets).toContain("flac");
+    expect(mp3Targets).toContain("wav");
+    expect(mp3Targets).toContain("png");
+    expect(mp3Targets).toContain("jpg");
+    expect(mp3Targets).toContain("mp4");
+    expect(mp3Targets).toContain("mkv");
+    expect(mp3Targets).not.toContain("srt");
+    expect(mp3Targets).not.toContain("vtt");
+
+    const srtTargets = getPossibleTargets("srt").ffmpeg ?? [];
+    expect(srtTargets).toContain("vtt");
+    expect(srtTargets).toContain("ass");
+    expect(srtTargets).not.toContain("png");
+    expect(srtTargets).not.toContain("mp3");
+    expect(srtTargets).not.toContain("mp4");
   });
 });
 

@@ -2,6 +2,7 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": ["tests/**/*.test.ts"],
   "project": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.css", "tests/**/*.ts"],
+  "ignore": ["tests/integration/converters/outputs/**"],
   "ignoreBinaries": [
     "pandoc",
     "ffmpeg",

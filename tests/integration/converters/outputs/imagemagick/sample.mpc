@@ -1,0 +1,25 @@
+id=MagickPixelCache
+magick-signature=750888143
+class=DirectClass colors=0 alpha-trait=Blend
+number-channels=4 number-meta-channels=0 channel-mask=0x0000000007ffffff
+columns=16 rows=16 depth=8
+type=TrueColorAlpha
+colorspace=sRGB
+compression=Zip quality=0
+page=16x16+0+0
+rendering-intent=Perceptual
+gamma=0.454545
+red-primary=0.64,0.33 green-primary=0.3,0.6 blue-primary=0.15,0.06
+white-point=0.3127,0.329
+orientation=TopLeft
+date:create=2026-10-16T19:07:40+00:00
+date:modify=2026-10-16T19:02:59+00:00
+date:timestamp=2026-10-16T19:15:06+00:00
+png:IHDR.bit-depth-orig=8
+png:IHDR.bit_depth=8
+png:IHDR.color-type-orig=6
+png:IHDR.color_type={6 (RGBA)}
+png:IHDR.interlace_method={0 (Not interlaced)}
+png:IHDR.width,height={16, 16}
+
+:

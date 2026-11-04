@@ -1,0 +1,142 @@
+---
+  version: 1.0
+  image: 
+    name: /app/tests/integration/converters/inputs/sample.png
+    baseName: sample.png
+    permissions: 644
+    format: PNG
+    formatDescription: Portable Network Graphics
+    mimeType: image/png
+    class: DirectClass
+    geometry: 
+      width: 16
+      height: 16
+      x: 0
+      y: 0
+    
+    units: Undefined
+    type: PaletteAlpha
+    baseType: TrueColorAlpha
+    endianness: Undefined
+    colorspace: sRGB
+    depth: 8
+    baseDepth: 8
+    channelDepth: 
+      alpha: 8
+      red: 8
+      green: 8
+      blue: 8
+    
+    pixels: 256
+    imageStatistics: 
+      overall: 
+        min: 0
+        max: 255
+        mean: 79.2793
+        median: 83.75
+        standardDeviation: 64.2455
+        kurtosis: 0.968842
+        skewness: 0.801093
+        entropy: 0.62786
+      
+    
+    channelStatistics: 
+      alpha: 
+        min: 0
+        max: 255
+        mean: 179.883
+        median: 255
+        standardDeviation: 111.457
+        kurtosis: -1.03387
+        skewness: -0.953882
+        entropy: 0.482426
+       
+      red: 
+        min: 0
+        max: 194
+        mean: 39.3242
+        median: 17
+        standardDeviation: 45.4803
+        kurtosis: 2.26382
+        skewness: 1.56482
+        entropy: 0.660488
+       
+      green: 
+        min: 0
+        max: 204
+        mean: 47.3984
+        median: 24
+        standardDeviation: 50.5941
+        kurtosis: 1.46001
+        skewness: 1.35652
+        entropy: 0.677813
+       
+      blue: 
+        min: 0
+        max: 213
+        mean: 50.5117
+        median: 39
+        standardDeviation: 49.4502
+        kurtosis: 1.18541
+        skewness: 1.23691
+        entropy: 0.690712
+      
+    
+    alpha: '#00000000'
+    renderingIntent: Perceptual
+    gamma: 0.454545
+    chromaticity: 
+      redPrimary: 
+        x: 0.64
+        y: 0.33
+      
+      greenPrimary: 
+        x: 0.3
+        y: 0.6
+      
+      bluePrimary: 
+        x: 0.15
+        y: 0.06
+      
+      whitePrimary: 
+        x: 0.3127
+        y: 0.329
+      
+    
+    matteColor: '#BDBDBDBDBDBD'
+    backgroundColor: '#FFFFFFFFFFFF'
+    borderColor: '#DFDFDFDFDFDF'
+    transparentColor: '#000000000000'
+    interlace: None
+    intensity: Undefined
+    compose: Over
+    pageGeometry: 
+      width: 16
+      height: 16
+      x: 0
+      y: 0
+    
+    dispose: Undefined
+    iterations: 0
+    compression: Zip
+    orientation: TopLeft
+    properties: 
+      "date:create": "2026-10-16T19:07:40+00:00"
+      "date:modify": "2026-10-16T19:02:59+00:00"
+      "date:timestamp": "2026-10-16T19:15:08+00:00"
+      "png:IHDR.bit-depth-orig": 8
+      "png:IHDR.bit_depth": 8
+      "png:IHDR.color-type-orig": 6
+      "png:IHDR.color_type": 6 (RGBA)
+      "png:IHDR.interlace_method": 0 (Not interlaced)
+      "png:IHDR.width,height": 16, 16
+      signature: 48a176883551ab27ff3853b1d7beb8f336c50c4a52106cb6c398da0e7adfca7e
+    
+    tainted: false
+    filesize: 405B
+    numberPixels: 256
+    pixelsPerSecond: 602131B
+    userTime: 0.000u
+    elapsedTime: 0:01.000
+    version: "ImageMagick 7.1.2-31 Q16 x86_64 20260903 https://imagemagick.org"
+...
