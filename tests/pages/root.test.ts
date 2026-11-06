@@ -84,6 +84,15 @@ describe("GET / with accounts", () => {
     );
   });
 
+  test("is not stored by the browser, so going back after converting starts a new job", async () => {
+    const user = await createUser();
+
+    const response = await request("/", { cookies: { auth: user.token } });
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+  });
+
   test("offers every target of every converter", async () => {
     const user = await createUser();
 
