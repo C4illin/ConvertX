@@ -10,7 +10,7 @@ export const listConverters = new Elysia().use(userService).get(
   "/converters",
   async () => {
     return (
-      <BaseHtml webroot={WEBROOT} title="ConvertX | Converters">
+      <BaseHtml webroot={WEBROOT} title="WinC Convert | Converters">
         <>
           <Header
             webroot={WEBROOT}
