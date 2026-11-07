@@ -174,7 +174,7 @@ export const results = new Elysia()
         .all(params.jobId);
 
       return (
-        <BaseHtml webroot={WEBROOT} title="ConvertX | Result">
+        <BaseHtml webroot={WEBROOT} title="WinC Convert | Result">
           <>
             <Header
               webroot={WEBROOT}
