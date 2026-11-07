@@ -40,7 +40,7 @@ export const history = new Elysia().use(userService).get(
     userJobs = userJobs.filter((job) => job.num_files > 0);
 
     return (
-      <BaseHtml webroot={WEBROOT} title="ConvertX | Results">
+      <BaseHtml webroot={WEBROOT} title="WinC Convert | Results">
         <>
           <Header
             webroot={WEBROOT}
