@@ -2,7 +2,7 @@ import { version } from "../../package.json";
 
 export const BaseHtml = ({
   children,
-  title = "ConvertX",
+  title = "WinC Convert",
   webroot = "",
 }: {
   children: JSX.Element;
@@ -25,17 +25,51 @@ export const BaseHtml = ({
       {children}
       <footer class="w-full">
         <div class="p-4 text-center text-sm text-neutral-500">
-          <span>Powered by </span>
-          <a
-            href="https://github.com/C4illin/ConvertX"
-            class={`
-              text-neutral-400
-              hover:text-accent-500
-            `}
-          >
-            ConvertX{" "}
-          </a>
-          <span safe>v{version || ""}</span>
+          <p class="mb-1">
+            Files are deleted automatically after 24 hours. Need help?{" "}
+            <a
+              href="mailto:support@wincservices.com"
+              class={`
+                text-neutral-400
+                hover:text-accent-500
+              `}
+            >
+              support@wincservices.com
+            </a>
+          </p>
+          <p>
+            <span>WinC Convert by </span>
+            <a
+              href="https://wincservices.com"
+              class={`
+                text-neutral-400
+                hover:text-accent-500
+              `}
+            >
+              WinC Services
+            </a>
+            <span> | Based on </span>
+            <a
+              href="https://github.com/C4illin/ConvertX"
+              class={`
+                text-neutral-400
+                hover:text-accent-500
+              `}
+            >
+              ConvertX
+            </a>
+            <span> | </span>
+            <a
+              href="https://github.com/wincservices/ConvertX"
+              class={`
+                text-neutral-400
+                hover:text-accent-500
+              `}
+            >
+              Source
+            </a>
+            <span safe> | v{version || ""}</span>
+          </p>
         </div>
       </footer>
     </body>
