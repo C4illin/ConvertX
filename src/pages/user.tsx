@@ -31,7 +31,7 @@ function ErrorBanner({ message }: { message: string }) {
 
 function LoginPage({ error, email = "" }: { error?: string; email?: string }) {
   return (
-    <BaseHtml webroot={WEBROOT} title="ConvertX | Login">
+    <BaseHtml webroot={WEBROOT} title="WinC Convert | Login">
       <>
         <Header
           webroot={WEBROOT}
@@ -97,7 +97,7 @@ function LoginPage({ error, email = "" }: { error?: string; email?: string }) {
 
 function AccountPage({ email, error }: { email: string; error?: string }) {
   return (
-    <BaseHtml webroot={WEBROOT} title="ConvertX | Account">
+    <BaseHtml webroot={WEBROOT} title="WinC Convert | Account">
       <>
         <Header
           webroot={WEBROOT}
@@ -170,14 +170,14 @@ export const user = new Elysia()
     }
 
     return (
-      <BaseHtml title="ConvertX | Setup" webroot={WEBROOT}>
+      <BaseHtml title="WinC Convert | Setup" webroot={WEBROOT}>
         <main
           class={`
             mx-auto w-full max-w-4xl flex-1 px-2
             sm:px-4
           `}
         >
-          <h1 class="my-8 text-3xl">Welcome to ConvertX!</h1>
+          <h1 class="my-8 text-3xl">Welcome to WinC Convert!</h1>
           <article class="article p-0">
             <header class="w-full bg-neutral-800 p-4">Create your account</header>
             <form method="post" action={`${WEBROOT}/register`} class="p-4">
@@ -208,15 +208,15 @@ export const user = new Elysia()
               <input type="submit" value="Create account" class="btn-primary" />
             </form>
             <footer class="p-4">
-              Report any issues on{" "}
+              Need help? Contact{" "}
               <a
                 class={`
                   text-accent-500 underline
                   hover:text-accent-400
                 `}
-                href="https://github.com/C4illin/ConvertX"
+                href="mailto:support@wincservices.com"
               >
-                GitHub
+                support@wincservices.com
               </a>
               .
             </footer>
@@ -231,7 +231,7 @@ export const user = new Elysia()
     }
 
     return (
-      <BaseHtml webroot={WEBROOT} title="ConvertX | Register">
+      <BaseHtml webroot={WEBROOT} title="WinC Convert | Register">
         <>
           <Header
             webroot={WEBROOT}
