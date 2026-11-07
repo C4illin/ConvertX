@@ -243,10 +243,20 @@ const uploadFile = (file) => {
 };
 
 const formConvert = document.querySelector(`form[action='${webroot}/convert']`);
+let converted = false;
 
 formConvert.addEventListener("submit", () => {
   const hiddenInput = document.querySelector("input[name='file_names']");
   hiddenInput.value = JSON.stringify(fileNames);
+  converted = true;
+});
+
+// Going back after converting can restore this page from the back/forward cache, still
+// tied to the job that was just converted. Load a fresh page, which starts a new job.
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted && converted) {
+    window.location.reload();
+  }
 });
 
 updateSearchBar();

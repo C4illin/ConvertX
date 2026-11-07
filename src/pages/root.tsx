@@ -21,7 +21,7 @@ import { FIRST_RUN, userService } from "./user";
 
 export const root = new Elysia().use(userService).get(
   "/",
-  async ({ jwt, redirect, cookie: { auth, jobId } }) => {
+  async ({ jwt, redirect, set, cookie: { auth, jobId } }) => {
     if (!ALLOW_UNAUTHENTICATED) {
       if (FIRST_RUN) {
         return redirect(`${WEBROOT}/setup`, 302);
@@ -130,6 +130,10 @@ export const root = new Elysia().use(userService).get(
     });
 
     console.log("jobId set to:", id);
+
+    // The page belongs to the job created above. A stored copy (e.g. the browser's back
+    // button after converting) would keep uploading into that job once it is converted.
+    set.headers["cache-control"] = "no-store";
 
     return (
       <BaseHtml webroot={WEBROOT}>
