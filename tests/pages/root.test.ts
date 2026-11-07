@@ -84,7 +84,7 @@ describe("GET / with accounts", () => {
     );
   });
 
-  test("is not stored by the browser, so going back after converting starts a new job", async () => {
+  test("answers with Cache-Control: no-store", async () => {
     const user = await createUser();
 
     const response = await request("/", { cookies: { auth: user.token } });
