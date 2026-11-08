@@ -127,13 +127,13 @@ describe("POST /convert", () => {
 
     await convertRequest(
       { auth: user.token, jobId: job },
-      { convert_to: "JPG,doesnotexist", file_names: '["photo.png"]' },
+      { convert_to: "JPG,vips", file_names: '["photo.png"]' },
     );
 
     await waitFor(() => jobRow(job).status === "completed");
     // jpg is normalized to jpeg, whose files get the .jpg extension
     expect(fileRows(job)).toEqual([
-      { file_name: "photo.png", output_file_name: "photo.jpg", status: "File type not supported" },
+      { file_name: "photo.png", output_file_name: "photo.jpg", status: "Failed, check logs" },
     ]);
   });
 
