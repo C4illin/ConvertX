@@ -30,6 +30,20 @@ export const Header = ({
             </a>
           </li>
         )}
+        {/* Hidden on phones, where four links don't fit; the account page links to it. */}
+        {!allowUnauthenticated ? (
+          <li class="max-sm:hidden">
+            <a
+              class={`
+                text-accent-600 transition-all
+                hover:text-accent-500 hover:underline
+              `}
+              href={`${webroot}/account/api-keys`}
+            >
+              API keys
+            </a>
+          </li>
+        ) : null}
         {!allowUnauthenticated ? (
           <li>
             <a

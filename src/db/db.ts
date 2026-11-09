@@ -46,6 +46,20 @@ export function initializeDatabase(db: Database): void {
     console.log("Updated database to version 1.");
   }
 
+  // Keys for the REST API. Only a hash of each key is stored.
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS api_keys (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      prefix TEXT NOT NULL,
+      key_hash TEXT NOT NULL UNIQUE,
+      date_created TEXT NOT NULL,
+      last_used TEXT,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+  `);
+
   // enable WAL mode
   db.exec("PRAGMA journal_mode = WAL;");
 }
