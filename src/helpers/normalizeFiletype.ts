@@ -49,6 +49,8 @@ export const normalizeOutputFiletype = (filetype: string): string => {
       return "fbx";
     case "assjson":
       return "json";
+    case "wav-3cx":
+      return "wav";
     default:
       return lowercaseFiletype;
   }
