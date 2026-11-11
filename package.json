@@ -28,7 +28,7 @@
     "@elysiajs/jwt": "^1.4.2",
     "@elysiajs/static": "^1.4.10",
     "@kitajs/html": "^4.2.13",
-    "elysia": "1.4.31",
+    "elysia": "1.4.32",
     "sanitize-filename": "^1.6.4"
   },
   "devDependencies": {
