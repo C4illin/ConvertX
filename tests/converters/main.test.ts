@@ -100,6 +100,7 @@ describe("converter registry", () => {
       "libreoffice",
       "markitDown",
       "msgconvert",
+      "oxidocs",
       "pandoc",
       "pdftops",
       "potrace",
