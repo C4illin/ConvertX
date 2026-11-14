@@ -23,6 +23,7 @@ import { convert as convertLibjxl, properties as propertiesLibjxl } from "./libj
 import { convert as convertLibreOffice, properties as propertiesLibreOffice } from "./libreoffice";
 import { convert as convertMarkitdown, properties as propertiesMarkitdown } from "./markitdown";
 import { convert as convertMsgconvert, properties as propertiesMsgconvert } from "./msgconvert";
+import { convert as convertOxidocs, properties as propertiesOxidocs } from "./oxidocs";
 import { convert as convertPandoc, properties as propertiesPandoc } from "./pandoc";
 import { convert as convertPdftops, properties as propertiesPdftops } from "./pdftops";
 import { convert as convertPotrace, properties as propertiesPotrace } from "./potrace";
@@ -103,6 +104,10 @@ const properties: Record<
   libreoffice: {
     properties: propertiesLibreOffice,
     converter: convertLibreOffice,
+  },
+  oxidocs: {
+    properties: propertiesOxidocs,
+    converter: convertOxidocs,
   },
   pandoc: {
     properties: propertiesPandoc,

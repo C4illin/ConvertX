@@ -35,6 +35,7 @@ A self-hosted online file converter. Supports over a thousand different formats.
 | [XeLaTeX](https://tug.org/xetex/)                               | LaTeX            | 1             | 1           |
 | [Calibre](https://calibre-ebook.com/)                           | E-books          | 26            | 19          |
 | [LibreOffice](https://www.libreoffice.org/)                     | Documents        | 41            | 22          |
+| [Oxi](https://github.com/Ryujiyasu/oxi)                         | Word documents   | 3             | 2           |
 | [Dasel](https://github.com/TomWright/dasel)                     | Data Files       | 5             | 4           |
 | [DjVuLibre](https://djvu.sourceforge.net/)                      | Documents        | 2             | 2           |
 | [Pandoc](https://pandoc.org/)                                   | Documents        | 43            | 65          |

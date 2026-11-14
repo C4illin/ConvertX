@@ -76,6 +76,19 @@ RUN ARCH=$(uname -m) && \
   chmod +x /usr/local/bin/vtracer && \
   rm /tmp/vtracer.tar.gz
 
+# Install oxidocs binary (docx to pdf/png)
+RUN ARCH=$(uname -m) && \
+  if [ "$ARCH" = "aarch64" ]; then \
+  OXIDOCS_ASSET="oxidocs-aarch64-unknown-linux-musl"; \
+  else \
+  OXIDOCS_ASSET="oxidocs-x86_64-unknown-linux-musl"; \
+  fi && \
+  curl -L -o /tmp/oxidocs.tar.gz "https://github.com/Ryujiyasu/oxi/releases/download/oxidocs-v0.9.0-static.3/${OXIDOCS_ASSET}.tar.gz" && \
+  tar -xzf /tmp/oxidocs.tar.gz -C /tmp/ && \
+  mv "/tmp/${OXIDOCS_ASSET}/oxidocs" /usr/local/bin/oxidocs && \
+  chmod +x /usr/local/bin/oxidocs && \
+  rm -r /tmp/oxidocs.tar.gz "/tmp/${OXIDOCS_ASSET}"
+
 COPY --from=base /app/public/ /app/public/
 COPY --from=base /app/dist/convertx /app/convertx
 
