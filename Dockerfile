@@ -80,10 +80,13 @@ RUN ARCH=$(uname -m) && \
 RUN ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
   OXIDOCS_ASSET="oxidocs-aarch64-unknown-linux-musl"; \
+  OXIDOCS_SHA256="7c0ba9fd11010e21fcb48913dafb506e93871d9f7daa45ded6f7ae5b1493c19d"; \
   else \
   OXIDOCS_ASSET="oxidocs-x86_64-unknown-linux-musl"; \
+  OXIDOCS_SHA256="38a40a4dfc8925cd9c04593a26f1977d599081de1c0cde741a422d21dd4bb330"; \
   fi && \
   curl -L -o /tmp/oxidocs.tar.gz "https://github.com/Ryujiyasu/oxi/releases/download/oxidocs-v0.9.0-static.3/${OXIDOCS_ASSET}.tar.gz" && \
+  echo "${OXIDOCS_SHA256}  /tmp/oxidocs.tar.gz" | sha256sum -c - && \
   tar -xzf /tmp/oxidocs.tar.gz -C /tmp/ && \
   mv "/tmp/${OXIDOCS_ASSET}/oxidocs" /usr/local/bin/oxidocs && \
   chmod +x /usr/local/bin/oxidocs && \

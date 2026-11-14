@@ -12,7 +12,10 @@ test("converts docx to pdf with docx-to-pdf", async () => {
   await convert("in/report.docx", "docx", "pdf", "out/report.pdf", undefined, execFile);
 
   expect(calls).toEqual([
-    { cmd: "oxidocs", args: ["docx-to-pdf", "--quiet", "in/report.docx", "out/report.pdf"] },
+    {
+      cmd: "oxidocs",
+      args: ["docx-to-pdf", "--strict", "--quiet", "in/report.docx", "out/report.pdf"],
+    },
   ]);
 });
 
@@ -22,6 +25,9 @@ test("draws the first page with docx-to-png", async () => {
   await convert("in/report.docx", "docx", "png", "out/report.png", undefined, execFile);
 
   expect(calls).toEqual([
-    { cmd: "oxidocs", args: ["docx-to-png", "--quiet", "in/report.docx", "out/report.png"] },
+    {
+      cmd: "oxidocs",
+      args: ["docx-to-png", "--strict", "--quiet", "in/report.docx", "out/report.png"],
+    },
   ]);
 });
