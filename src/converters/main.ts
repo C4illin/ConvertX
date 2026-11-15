@@ -364,6 +364,10 @@ for (const converterName in properties) {
   allTargets[converterName] = Array.from(targets);
 }
 
+export const getTargetsForConverter = (converter: string): string[] => {
+  return allTargets[converter] || [];
+};
+
 export const getAllTargets = () => {
   return allTargets;
 };
