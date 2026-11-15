@@ -1,3 +1,5 @@
+
+
 // ffmpeg streams continuous progress to stderr, so a long conversion overflows
 // execFile's 1 MB default maxBuffer and fails with "stderr maxBuffer length
 // exceeded" (issue #565). Raise it well above that. The options object must be
@@ -5,7 +7,7 @@
 // the callback.
 const FFMPEG_MAX_BUFFER = 1024 * 1024 * 64; // 64 MB
 
-import { defaultExecFile, ExecFileFn } from "./types";
+import { defaultExecFile, ExecFileFn, } from "./types";
 
 // This could be done dynamically by running `ffmpeg -formats` and parsing the output
 export const properties = {
@@ -681,6 +683,7 @@ export const properties = {
       "vvc",
       "w64",
       "wav",
+      "wav-3cx",
       "wbmp",
       "webm",
       "webp",
@@ -737,6 +740,12 @@ export async function convert(
     message = "Done: resized to 256x256";
   }
 
+  if (convertTo === "wav-3cx") {
+    // 3CX telephony preset: mono, 8 kHz, 16-bit PCM (pcm_s16le is explicit to
+    // avoid FFMPEG_OUTPUT_ARGS overriding the codec and breaking 3CX playback)
+    extraArgs.push("-ac", "1", "-ar", "8000", "-c:a", "pcm_s16le");
+  }
+
   if (convertTo.split(".").length > 1) {
     // Support av1.mkv and av1.mp4 and h265.mp4 etc.
     const split = convertTo.split(".");
@@ -759,9 +768,15 @@ export async function convert(
   }
 
   // Parse FFMPEG_ARGS environment variable into array
-  const ffmpegArgs = process.env.FFMPEG_ARGS ? process.env.FFMPEG_ARGS.split(/\s+/) : [];
+  const ffmpegArgs = process.env.FFMPEG_ARGS
+    ? process.env.FFMPEG_ARGS.split(/\s+/)
+        .filter(Boolean)
+        .map((arg) => arg.trim())
+    : [];
   const ffmpegOutputArgs = process.env.FFMPEG_OUTPUT_ARGS
     ? process.env.FFMPEG_OUTPUT_ARGS.split(/\s+/)
+        .filter(Boolean)
+        .map((arg) => arg.trim())
     : [];
 
   return new Promise((resolve, reject) => {

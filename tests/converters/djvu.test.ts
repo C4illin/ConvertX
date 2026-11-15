@@ -1,5 +1,6 @@
-import type { ExecFileException } from "node:child_process";
 import { expect, test } from "bun:test";
+import type { ExecFileException } from "node:child_process";
+
 import { convert, properties } from "../../src/converters/djvu";
 import type { ExecFileFn } from "../../src/converters/types";
 import { runCommonTests } from "./helpers/commonTests";

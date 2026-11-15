@@ -1,11 +1,15 @@
+
 import { Elysia } from "elysia";
 import { lstat, realpath } from "node:fs/promises";
 import path from "node:path";
 import sanitize from "sanitize-filename";
-import * as tar from "tar";
+import { randomUUID } from "node:crypto";
+import { rename, unlink } from "node:fs/promises";
 import db from "../db/db";
 import { outputDir, WEBROOT } from "../helpers/env";
 import { userService } from "./user";
+
+const archiveBuilds = new Map<string, Promise<void>>();
 
 export const download = new Elysia()
   .use(userService)
@@ -21,8 +25,8 @@ export const download = new Elysia()
         return redirect(`${WEBROOT}/results`, 302);
       }
       // parse from URL encoded string
-      const jobId = decodeURIComponent(params.jobId);
-      const fileName = sanitize(decodeURIComponent(params.fileName));
+      const jobId = params.jobId;
+      const fileName = sanitize(params.fileName);
 
       const jobOutputDir = path.join(outputDir, userId, jobId);
       const filePath = path.join(jobOutputDir, fileName);
@@ -68,24 +72,39 @@ export const download = new Elysia()
       const outputPath = path.join(outputDir, userId, jobId);
       const outputTar = path.join(outputPath, `converted_files_${jobId}.tar`);
 
-      await tar.create(
-        {
-          file: outputTar,
-          cwd: outputPath,
-          filter: (entryPath, stat) => {
-            const isSymlink =
-              ("isSymbolicLink" in stat &&
-                typeof stat.isSymbolicLink === "function" &&
-                stat.isSymbolicLink()) ||
-              ("type" in stat && (stat as { type?: string }).type === "SymbolicLink");
-            if (entryPath.endsWith(".tar") || isSymlink) {
-              return false;
+      const archiveKey = `${userId}/${jobId}`;
+      let archiveBuild = archiveBuilds.get(archiveKey);
+      if (!archiveBuild) {
+        const build = async () => {
+          const outputTarName = path.basename(outputTar);
+          const outputTarTempName = `${outputTarName}.tmp-${randomUUID()}`;
+          const outputTarTemp = path.join(outputPath, outputTarTempName);
+
+          try {
+            const files: Record<string, Uint8Array> = {};
+            const glob = new Bun.Glob("**/*");
+            for await (const file of glob.scan({ cwd: outputPath, onlyFiles: true, dot: true })) {
+              if (file !== outputTarName && !file.startsWith(`${outputTarName}.tmp-`)) {
+                files[file] = new Uint8Array(
+                  await Bun.file(path.join(outputPath, file)).arrayBuffer(),
+                );
+              }
             }
-            return true;
-          },
-        },
-        ["."],
-      );
+            await Bun.Archive.write(outputTarTemp, files);
+            await rename(outputTarTemp, outputTar);
+          } finally {
+            if (await Bun.file(outputTarTemp).exists()) {
+              await unlink(outputTarTemp);
+            }
+          }
+        };
+
+        archiveBuild = build().finally(() => {
+          archiveBuilds.delete(archiveKey);
+        });
+        archiveBuilds.set(archiveKey, archiveBuild);
+      }
+      await archiveBuild;
       return Bun.file(outputTar);
     },
     {

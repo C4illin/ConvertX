@@ -46,12 +46,14 @@ export function parseVCF(data: string): Record<string, string>[] {
 
 export function toCSV(data: Record<string, string>[]): string {
   if (!data.length) return "";
-  const first = data[0];
-  if (!first) return "";
-  const headers = Object.keys(first);
+  const headers = new Set<string>();
+  for (const row of data) {
+    Object.keys(row).forEach((key) => headers.add(key));
+  }
+  const headerArray = Array.from(headers);
   const escape = (str: string) => `"${str.replace(/"/g, '""')}"`;
-  const rows = data.map((row) => headers.map((h) => escape(row[h] || "")).join(","));
-  return [headers.join(","), ...rows].join("\n");
+  const rows = data.map((row) => headerArray.map((h) => escape(row[h] || "")).join(","));
+  return [headerArray.join(","), ...rows].join("\n");
 }
 
 export async function convert(

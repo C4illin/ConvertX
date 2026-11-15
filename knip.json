@@ -20,7 +20,8 @@
     "soffice",
     "perl",
     "gcc",
-    "markitdown"
+    "markitdown",
+    "fmt"
   ],
   "tailwind": {
     "entry": ["src/main.css"]

@@ -20,13 +20,13 @@
 }
 
 @utility article {
-  @apply px-2 sm:px-4 py-4 mb-4 bg-neutral-800/40 w-full mx-auto max-w-4xl rounded-sm;
+  @apply mx-auto mb-4 w-full max-w-4xl rounded-sm bg-neutral-800/40 px-2 py-4 sm:px-4;
 }
 
 @utility btn-primary {
-  @apply bg-accent-500 text-contrast rounded-sm p-2 sm:p-4 hover:bg-accent-400 cursor-pointer transition-colors;
+  @apply bg-accent-500 text-contrast hover:bg-accent-400 cursor-pointer rounded-sm p-2 transition-colors sm:p-4;
 }
 
 @utility btn-secondary {
-  @apply bg-neutral-400 text-contrast rounded-sm p-2 sm:p-4 hover:bg-neutral-300 cursor-pointer transition-colors;
+  @apply text-contrast cursor-pointer rounded-sm bg-neutral-400 p-2 transition-colors hover:bg-neutral-300 sm:p-4;
 }

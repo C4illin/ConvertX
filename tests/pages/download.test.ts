@@ -1,11 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import * as tar from "tar";
+import { mkdirSync, writeFileSync } from "node:fs";
+
 import { createJob, createUser, jobDirs, request } from "./helpers/app";
 
-async function userWithOutputs(files: Record<string, string>) {
+async function userWithOutputs(files: Record<string, string | Uint8Array>) {
   const user = await createUser();
   const job = createJob(user.id);
   const dirs = jobDirs(user.id, job);
@@ -17,16 +15,8 @@ async function userWithOutputs(files: Record<string, string>) {
 }
 
 async function tarEntries(response: Response) {
-  const dir = mkdtempSync(join(tmpdir(), "convertx-archive-"));
-  try {
-    const file = join(dir, "archive.tar");
-    writeFileSync(file, Buffer.from(await response.arrayBuffer()));
-    const entries: string[] = [];
-    await tar.list({ file, onReadEntry: (entry) => entries.push(entry.path) });
-    return entries.sort();
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
+  const archive = new Bun.Archive(await response.arrayBuffer());
+  return [...(await archive.files()).keys()].sort();
 }
 
 describe("GET /download/:userId/:jobId/:fileName", () => {
@@ -111,11 +101,7 @@ describe("GET /download/:userId/:jobId/:fileName", () => {
     expect(response.status).toBe(404);
   });
 
-  // BUG: Elysia already decodes path parameters and download.tsx decodes them a second
-  // time, so file names containing "%" fail with a 500 "URI error" (and a literal "%20"
-  // would be turned into a space). The results page links to such files. Remove
-  // `.failing` once the second decodeURIComponent is dropped.
-  test.failing("serves file names containing a percent sign", async () => {
+  test("serves file names containing a percent sign", async () => {
     const { user, job } = await userWithOutputs({ "100%.csv": "percent" });
 
     const response = await request(`/download/${user.id}/${job}/100%25.csv`, {
@@ -144,7 +130,18 @@ describe("GET /archive/:jobId", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toBe("application/x-tar");
-    expect(await tarEntries(response)).toEqual(["./", "./a.csv", "./b.csv"]);
+    expect(await tarEntries(response)).toEqual(["a.csv", "b.csv"]);
+  });
+
+  test("preserves binary file contents", async () => {
+    const { user, job } = await userWithOutputs({ "image.png": new Uint8Array([0, 1, 2, 255]) });
+
+    const response = await request(`/archive/${job}`, { cookies: { auth: user.token } });
+    const archive = new Bun.Archive(await response.arrayBuffer());
+    const image = (await archive.files()).get("image.png");
+
+    expect(image).toBeDefined();
+    expect(await image?.arrayBuffer()).toEqual(new Uint8Array([0, 1, 2, 255]).buffer);
   });
 
   test("does not include earlier archives in a new archive", async () => {
@@ -153,7 +150,7 @@ describe("GET /archive/:jobId", () => {
     await request(`/archive/${job}`, { cookies: { auth: user.token } });
     const response = await request(`/archive/${job}`, { cookies: { auth: user.token } });
 
-    expect(await tarEntries(response)).toEqual(["./", "./a.csv"]);
+    expect(await tarEntries(response)).toEqual(["a.csv"]);
   });
 
   test("refuses another user's job", async () => {

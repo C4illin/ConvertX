@@ -1,7 +1,8 @@
+
 import { Elysia, t } from "elysia";
 import { mkdir } from "node:fs/promises";
 import sanitize from "sanitize-filename";
-import { handleConvert } from "../converters/main";
+import { getTargetsForConverter, handleConvert } from "../converters/main";
 import db from "../db/db";
 import { Jobs } from "../db/types";
 import { outputDir, uploadsDir, WEBROOT } from "../helpers/env";
@@ -50,19 +51,29 @@ export const convert = new Elysia().use(userService).post(
       !converterName ||
       convertTo.includes("/") ||
       convertTo.includes("\\") ||
-      convertTo.includes("..")
+      convertTo.includes("..") ||
+      !getTargetsForConverter(converterName)?.includes(convertTo)
     ) {
       return redirect(`${WEBROOT}/`, 302);
     }
 
-    const fileNames = JSON.parse(body.file_names) as string[];
-
-    for (let i = 0; i < fileNames.length; i++) {
-      fileNames[i] = sanitize(fileNames[i] || "");
+    let fileNames: string[];
+    try {
+      fileNames = JSON.parse(body.file_names) as string[];
+    } catch {
+      return redirect(`${WEBROOT}/`, 302);
     }
 
     if (!Array.isArray(fileNames) || fileNames.length === 0) {
       return redirect(`${WEBROOT}/`, 302);
+    }
+
+    if (!fileNames.every((name) => typeof name === "string")) {
+      return redirect(`${WEBROOT}/`, 302);
+    }
+
+    for (let i = 0; i < fileNames.length; i++) {
+      fileNames[i] = sanitize(fileNames[i] || "");
     }
 
     db.query("UPDATE jobs SET num_files = ?1, status = 'pending' WHERE id = ?2").run(

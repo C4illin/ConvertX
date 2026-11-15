@@ -1,5 +1,7 @@
 import { expect, test } from "bun:test";
+
 import { Elysia } from "elysia";
+
 import { isHtmlPageRequest } from "../../src/helpers/isHtmlPageRequest";
 import { userService } from "../../src/services/user";
 

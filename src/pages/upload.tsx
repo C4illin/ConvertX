@@ -1,4 +1,6 @@
 import { Elysia, t } from "elysia";
+import sanitize from "sanitize-filename";
+
 import db from "../db/db";
 import { uploadsDir, WEBROOT } from "../helpers/env";
 

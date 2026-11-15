@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+
 import { createJob, createUser, jobDirs, request, uploadsDir } from "./helpers/app";
 
 async function userWithUploads(...fileNames: string[]) {
@@ -79,11 +80,7 @@ describe("POST /delete", () => {
     expect(existsSync(`${other.dirs.uploads}keep.txt`)).toBe(true);
   });
 
-  // BUG: unlink errors are not handled, so deleting a file that does not exist answers
-  // with a 500 whose body contains the absolute upload path on the server. This also
-  // happens for every sanitized traversal attempt. Remove `.failing` once deleteFile.tsx
-  // handles the missing file.
-  test.failing.each(["missing.txt", "../../1/1/keep.txt"])(
+  test.each(["missing.txt", "../../1/1/keep.txt"])(
     "answers a missing file (%s) without a server error or server paths",
     async (filename) => {
       const { user, job } = await userWithUploads();
