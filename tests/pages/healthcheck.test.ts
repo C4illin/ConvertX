@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { request } from "./helpers/app";
 
 describe("GET /healthcheck", () => {

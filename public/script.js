@@ -7,6 +7,10 @@ let fileType;
 let pendingFiles = 0;
 let formatSelected = false;
 
+const urlParams = new URLSearchParams(window.location.search);
+const defaultTo = urlParams.get("to");
+const defaultConverter = urlParams.get("converter");
+
 dropZone.addEventListener("dragover", (e) => {
   e.preventDefault();
   dropZone.classList.add("dragover");
@@ -39,11 +43,12 @@ function handleFile(file) {
 
   const row = document.createElement("tr");
   row.innerHTML = `
-    <td>${file.name}</td>
+    <td></td>
     <td><progress max="100" class="inline-block h-2 appearance-none overflow-hidden rounded-full border-0 bg-neutral-700 bg-none text-accent-500 accent-accent-500 [&::-moz-progress-bar]:bg-accent-500 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:[background:none] [&[value]::-webkit-progress-value]:bg-accent-500 [&[value]::-webkit-progress-value]:transition-[inline-size]"></progress></td>
     <td>${(file.size / 1024).toFixed(2)} kB</td>
     <td><button type="button" class="text-accent-500 hover:underline" onclick="deleteRow(this)">Remove</button></td>
   `;
+  row.firstElementChild.textContent = file.name;
 
   if (!fileType) {
     fileType = file.name.split(".").pop();
@@ -59,6 +64,24 @@ function handleFile(file) {
       .then((html) => {
         selectContainer.innerHTML = html;
         updateSearchBar();
+
+        if (defaultTo) {
+          const targetBtn = Array.from(document.querySelectorAll(".target")).find((t) =>
+            defaultConverter
+              ? t.dataset.target === defaultTo && t.dataset.converter === defaultConverter
+              : t.dataset.target === defaultTo,
+          );
+          if (targetBtn) {
+            const convertToEl = document.querySelector("select[name='convert_to']");
+            const convertToInputEl = document.querySelector("input[name='convert_to_search']");
+            convertToEl.value = targetBtn.dataset.value;
+            convertToInputEl.value = `${targetBtn.dataset.target} using ${targetBtn.dataset.converter}`;
+            formatSelected = true;
+            if (pendingFiles === 0 && fileNames.length > 0) {
+              convertButton.disabled = false;
+            }
+          }
+        }
       })
       .catch(console.error);
   }

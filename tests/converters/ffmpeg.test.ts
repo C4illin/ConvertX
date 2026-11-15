@@ -1,6 +1,7 @@
 import { afterAll, afterEach, beforeEach, expect, test } from "bun:test";
-import { convert } from "../../src/converters/ffmpeg";
 import type { ExecFileOptions } from "node:child_process";
+
+import { convert } from "../../src/converters/ffmpeg";
 import { captureConsole } from "./helpers/converters";
 
 let calls: string[][] = [];

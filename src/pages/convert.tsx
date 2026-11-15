@@ -1,8 +1,10 @@
 import { mkdir } from "node:fs/promises";
+
 import { Elysia, t } from "elysia";
 import sanitize from "sanitize-filename";
+
 import { outputDir, uploadsDir } from "..";
-import { handleConvert } from "../converters/main";
+import { getTargetsForConverter, handleConvert } from "../converters/main";
 import db from "../db/db";
 import { Jobs } from "../db/types";
 import { WEBROOT } from "../helpers/env";
@@ -51,7 +53,8 @@ export const convert = new Elysia().use(userService).post(
       !converterName ||
       convertTo.includes("/") ||
       convertTo.includes("\\") ||
-      convertTo.includes("..")
+      convertTo.includes("..") ||
+      !getTargetsForConverter(converterName)?.includes(convertTo)
     ) {
       return redirect(`${WEBROOT}/`, 302);
     }

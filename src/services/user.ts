@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
+
 import { jwt } from "@elysiajs/jwt";
 import { Elysia, t } from "elysia";
+
 import { WEBROOT } from "../helpers/env";
 import { isHtmlPageRequest } from "../helpers/isHtmlPageRequest";
 

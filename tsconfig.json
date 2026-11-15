@@ -10,7 +10,6 @@
     "noEmit": false,
     "composite": true,
     "strict": true,
-    "downlevelIteration": true,
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "jsxImportSource": "@kitajs/html",

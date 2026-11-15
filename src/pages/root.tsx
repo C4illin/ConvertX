@@ -1,6 +1,8 @@
 import { randomInt } from "node:crypto";
+
 import { JWTPayloadSpec } from "@elysiajs/jwt";
 import { Elysia, t } from "elysia";
+
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import { getAllTargets } from "../converters/main";
@@ -9,11 +11,11 @@ import { User } from "../db/types";
 import {
   ACCOUNT_REGISTRATION,
   ALLOW_UNAUTHENTICATED,
+  BRANDING,
   HIDE_HISTORY,
   HTTP_ALLOWED,
   UNAUTHENTICATED_USER_SHARING,
   WEBROOT,
-  BRANDING,
 } from "../helpers/env";
 import { FIRST_RUN, userService } from "./user";
 
