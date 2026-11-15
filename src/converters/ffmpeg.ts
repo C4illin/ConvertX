@@ -1,5 +1,3 @@
-
-
 // ffmpeg streams continuous progress to stderr, so a long conversion overflows
 // execFile's 1 MB default maxBuffer and fails with "stderr maxBuffer length
 // exceeded" (issue #565). Raise it well above that. The options object must be
@@ -7,7 +5,7 @@
 // the callback.
 const FFMPEG_MAX_BUFFER = 1024 * 1024 * 64; // 64 MB
 
-import { defaultExecFile, ExecFileFn, } from "./types";
+import { defaultExecFile, ExecFileFn } from "./types";
 
 // This could be done dynamically by running `ffmpeg -formats` and parsing the output
 export const properties = {

@@ -1,10 +1,11 @@
 import {
-  execFile as execFileOriginal,
   type ChildProcess,
+  execFile as execFileOriginal,
   type ExecFileOptions,
 } from "node:child_process";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
+
 import type { ExecFileCallback, ExecFileFn } from "../converters/types";
 
 export interface SandboxConfig {
@@ -16,9 +17,7 @@ export interface SandboxConfig {
 
 let cachedRunnerPath: string | null | undefined = undefined;
 
-/**
- * Locate the landlock-runner binary if available.
- */
+/** Locate the landlock-runner binary if available. */
 export function getLandlockRunnerPath(): string | null {
   if (cachedRunnerPath !== undefined) {
     return cachedRunnerPath;
@@ -55,25 +54,19 @@ export function getLandlockRunnerPath(): string | null {
   return null;
 }
 
-/**
- * Reset the cached runner path (primarily for testing).
- */
+/** Reset the cached runner path (primarily for testing). */
 export function resetCachedRunnerPath(): void {
   cachedRunnerPath = undefined;
 }
 
-/**
- * Returns true if Landlock sandboxing is supported and enabled.
- */
+/** Returns true if Landlock sandboxing is supported and enabled. */
 export function isSandboxAvailable(): boolean {
   return getLandlockRunnerPath() !== null;
 }
 
 const DEFAULT_SYSTEM_RO = "/usr:/lib:/lib64:/bin:/sbin:/etc:/proc:/var";
 
-/**
- * Create a sandboxed execFile function configured for a specific conversion job.
- */
+/** Create a sandboxed execFile function configured for a specific conversion job. */
 export function createSandboxedExec(config: SandboxConfig): ExecFileFn {
   const runnerPath = getLandlockRunnerPath();
   const isStrict = process.env.SANDBOX_STRICT === "true";
