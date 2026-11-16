@@ -13,8 +13,8 @@ export const properties = {
 const unescape = (value: string) =>
   value.replace(/\\([,;\\nN])/g, (_, c) => (c === "n" || c === "N" ? "\n" : c));
 
-// Split a structured value (N, ORG) on the ";" separators, not on escaped "\;"
-const splitFields = (value: string) => value.split(/(?<!\\);/);
+// Split a structured value (N, ORG) on the ";" separators, not on escaped "\;" (but on "\\;")
+const splitFields = (value: string) => value.split(/(?<=(?:^|[^\\])(?:\\\\)*);/);
 
 // vCard 2.1 parameters: "ENCODING=QUOTED-PRINTABLE" or a bare "QUOTED-PRINTABLE"
 const isQuotedPrintable = (params: string[]) =>
@@ -69,24 +69,25 @@ export function parseVCF(data: string): Record<string, string>[] {
         const colonIndex = line.indexOf(":");
         if (colonIndex === -1) continue;
         // "item1.EMAIL;type=INTERNET" -> name EMAIL, params type=INTERNET
-        const [property = "", ...params] = line.slice(0, colonIndex).trim().split(";");
+        const [property = "", ...rawParams] = line.slice(0, colonIndex).trim().split(";");
+        const params = rawParams.map((param) => param.replace(/"/g, ""));
         const key = property.replace(/^[^.]*\./, "").toUpperCase();
-        let value = line.slice(colonIndex + 1).trim();
-        if (isQuotedPrintable(params)) {
-          value = decodeQuotedPrintable(value, params);
-        }
+        const value = line.slice(colonIndex + 1).trim();
+        // decode each field after splitting, so an encoded "=3B" is not a separator
+        const decode = (field = "") =>
+          unescape(isQuotedPrintable(params) ? decodeQuotedPrintable(field, params) : field);
         if (key === "FN") {
-          contact["Full Name"] = unescape(value);
+          contact["Full Name"] = decode(value);
         } else if (key === "N") {
           const parts = splitFields(value);
-          contact["Last Name"] = unescape(parts[0] || "");
-          contact["First Name"] = unescape(parts[1] || "");
+          contact["Last Name"] = decode(parts[0]);
+          contact["First Name"] = decode(parts[1]);
         } else if (key === "TEL") {
-          add("Phone", unescape(value));
+          add("Phone", decode(value));
         } else if (key === "EMAIL") {
-          add("Email", unescape(value));
+          add("Email", decode(value));
         } else if (key === "ORG") {
-          contact["Organization"] = unescape(splitFields(value)[0] || "");
+          contact["Organization"] = decode(splitFields(value)[0]);
         }
       }
       return contact;

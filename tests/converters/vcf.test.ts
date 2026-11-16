@@ -77,6 +77,7 @@ END:VCARD`;
       "TEL;type=CELL;type=pref:+1 555 123 4567",
       "PHOTO;ENCODING=b;TYPE=JPEG:/9j/4AAQSkZJRg==",
       "TEL;type=WORK:+1 555 987 6543",
+      "EMAIL;type=INTERNET;type=WORK:john@work.example",
       "END:VCARD",
     ].join("\r\n");
 
@@ -84,7 +85,7 @@ END:VCARD`;
       {
         "Full Name": "John Appleseed",
         Organization: "Acme, Inc.",
-        Email: "john@example.com",
+        Email: "john@example.com; john@work.example",
         Phone: "+1 555 123 4567; +1 555 987 6543",
       },
     ]);
@@ -124,6 +125,20 @@ END:VCARD`;
           "John Doe-Smith of the Very Long Name Department of the Company Papadimitriou Junior",
         Organization: "R;D Labs",
       },
+    ]);
+  });
+
+  test("should split after an escaped backslash and decode fields after splitting", () => {
+    const vcfData = [
+      "BEGIN:VCARD",
+      "VERSION:2.1",
+      "N:Doe\\\\;John;;;",
+      'ORG;CHARSET=UTF-8;ENCODING="QUOTED-PRINTABLE":R=3BD Labs;Research',
+      "END:VCARD",
+    ].join("\r\n");
+
+    expect(parseVCF(vcfData)).toEqual([
+      { "Last Name": "Doe\\", "First Name": "John", Organization: "R;D Labs" },
     ]);
   });
 
