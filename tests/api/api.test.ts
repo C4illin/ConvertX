@@ -12,7 +12,11 @@ if (!process.env.CONVERTX_TEST_ROOT) {
 const { default: db } = await import("../../src/db/db");
 const { api } = await import("../../src/api");
 const { createApiKey, deleteApiKey, listApiKeys } = await import("../../src/api/keys");
+const { createJob } = await import("../../src/api/jobs");
 const { outputDir, uploadsDir } = await import("../../src/index");
+// Accounts come from the page tests' helper. Loading it walks through the first run, which
+// tests/pages/firstRun.test.ts checks, so it must load before any account exists.
+const { createUser } = await import("../pages/helpers/app");
 
 // Some page, to check the API docs leave the web UI out.
 const app = new Elysia().get("/history", () => "history page").use(api);
@@ -20,15 +24,12 @@ const app = new Elysia().get("/history", () => "history page").use(api);
 const vcard = (name: string, email: string) =>
   `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nN:${name.split(" ")[1]};${name.split(" ")[0]}\nEMAIL:${email}\nEND:VCARD\n`;
 
-function addUser(email: string): string {
-  const row = db
-    .query("INSERT INTO users (email, password) VALUES (?, 'not-used') RETURNING id")
-    .get(email) as { id: number };
-  return String(row.id);
+async function addUser(): Promise<string> {
+  return String((await createUser()).id);
 }
 
-const alice = addUser("alice@example.com");
-const bob = addUser("bob@example.com");
+const alice = await addUser();
+const bob = await addUser();
 const aliceKey = createApiKey(alice, "tests").key;
 const bobKey = createApiKey(bob, "tests").key;
 
@@ -304,7 +305,7 @@ describe("failures", () => {
   });
 
   test("leaves nothing behind when the uploads can't be saved", async () => {
-    const carol = addUser("carol@example.com");
+    const carol = await addUser();
     const carolKey = createApiKey(carol, "tests").key;
     // A file where carol's uploads folder belongs makes saving any upload fail.
     await Bun.write(`${uploadsDir}${carol}`, "in the way");
@@ -324,6 +325,17 @@ describe("failures", () => {
     expect(existsSync(`${outputDir}${carol}`) ? readdirSync(`${outputDir}${carol}`) : []).toEqual(
       [],
     );
+  });
+
+  test("survives a job deleted while it converts", async () => {
+    const files = [new File([vcard("Ada Lovelace", "ada@example.com")], "late.vcf")];
+    const { id, done } = await createJob(alice, files, "csv", "vcf");
+    // Deleting only the record lets the conversion finish, as it does when a converter
+    // creates its output folder again after the job's folders were removed.
+    db.query("DELETE FROM jobs WHERE id = ?").run(id);
+    // POST /jobs doesn't wait for `done`, so a rejection here would stop the server.
+    expect(await done).toBeUndefined();
+    expect(db.query("SELECT 1 FROM jobs WHERE id = ?").get(id)).toBeNull();
   });
 
   test("answers unknown paths with a JSON 404", async () => {

@@ -89,8 +89,9 @@ export function cleanTarget(to: string): string {
 }
 
 /**
- * Saves the uploads, records the job and starts converting in the background. `done` settles when
- * every file has been converted.
+ * Saves the uploads, records the job and starts converting in the background. `done` resolves when
+ * every file has been converted. It doesn't reject: POST /jobs leaves it running, and Bun stops the
+ * server on a rejection nothing handles.
  */
 export async function createJob(
   userId: string,
@@ -152,20 +153,21 @@ export async function createJob(
 
   // handleConvert reads the job id from the web UI's cookie; it only needs `.value`.
   const jobId = { value: String(job.id) } as Cookie<string | undefined>;
-  const done = handleConvert(names, userUploadsDir, userOutputDir, to, converter, jobId).then(
-    () => {
+  const done = handleConvert(names, userUploadsDir, userOutputDir, to, converter, jobId)
+    .then(() => {
+      // The job can be deleted while it converts.
+      if (!findJob(userId, job.id)) return;
       // handleConvert also resolves when files fail; each file's record says how it went.
       const allDone = describeJob(userId, job.id, "").files.every((f) => f.status === "done");
       db.query("UPDATE jobs SET status = ? WHERE id = ?").run(
         allDone ? "completed" : "failed",
         job.id,
       );
-    },
-    (error: unknown) => {
+    })
+    .catch((error: unknown) => {
       console.error(`API job ${job.id} failed:`, error);
       db.query("UPDATE jobs SET status = 'failed' WHERE id = ?").run(job.id);
-    },
-  );
+    });
   return { id: job.id, done };
 }
 

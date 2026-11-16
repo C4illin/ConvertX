@@ -1,5 +1,6 @@
 import { Elysia, t } from "elysia";
 
+import { type ApiKey, listApiKeys } from "../api/keys";
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import db from "../db/db";
@@ -13,6 +14,7 @@ import {
   WEBROOT,
 } from "../helpers/env";
 import { userService } from "../services/user";
+import { ApiKeys, takeNewKey } from "./apiKeys";
 
 export { userService } from "../services/user";
 
@@ -95,7 +97,17 @@ function LoginPage({ error, email = "" }: { error?: string; email?: string }) {
   );
 }
 
-function AccountPage({ email, error }: { email: string; error?: string }) {
+function AccountPage({
+  email,
+  error,
+  keys,
+  newKey,
+}: {
+  email: string;
+  error?: string;
+  keys: ApiKey[];
+  newKey?: string | undefined;
+}) {
   return (
     <BaseHtml webroot={WEBROOT} title="ConvertX | Account">
       <>
@@ -155,13 +167,8 @@ function AccountPage({ email, error }: { email: string; error?: string }) {
                 <input type="submit" value="Update" class="w-full btn-primary" />
               </div>
             </form>
-            <p class="mt-4">
-              <a href={`${WEBROOT}/account/api-keys`} class="underline">
-                API keys
-              </a>{" "}
-              let scripts and tools use ConvertX.
-            </p>
           </article>
+          <ApiKeys keys={keys} newKey={newKey} />
         </main>
       </>
     </BaseHtml>
@@ -431,7 +438,13 @@ export const user = new Elysia()
         return redirect(`${WEBROOT}/`, 302);
       }
 
-      return <AccountPage email={userData.email} />;
+      return (
+        <AccountPage
+          email={userData.email}
+          keys={listApiKeys(user.id)}
+          newKey={takeNewKey(user.id)}
+        />
+      );
     },
     {
       auth: true,
@@ -462,7 +475,13 @@ export const user = new Elysia()
 
       if (!validPassword) {
         set.status = 403;
-        return <AccountPage email={emailValue} error="Invalid credentials." />;
+        return (
+          <AccountPage
+            email={emailValue}
+            error="Invalid credentials."
+            keys={listApiKeys(user.id)}
+          />
+        );
       }
 
       const fields = [];
@@ -475,7 +494,13 @@ export const user = new Elysia()
           .get(body.email);
         if (existingEmailUser && existingEmailUser.id.toString() !== user.id) {
           set.status = 409;
-          return <AccountPage email={emailValue} error="Email already in use." />;
+          return (
+            <AccountPage
+              email={emailValue}
+              error="Email already in use."
+              keys={listApiKeys(user.id)}
+            />
+          );
         }
         fields.push("email");
         values.push(body.email);
