@@ -77,20 +77,24 @@ RUN ARCH=$(uname -m) && \
   rm /tmp/vtracer.tar.gz
 
 # Install oxidocs binary (docx to pdf/png)
+# Renovate bumps OXIDOCS_VERSION when Oxi tags a new oxidocs-v* release; the
+# archive is checked against the .sha256 file published next to it.
+# renovate: datasource=github-releases depName=Ryujiyasu/oxi extractVersion=^oxidocs-v(?<version>.+)$
+ARG OXIDOCS_VERSION=0.9.0-static.5
 RUN ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
   OXIDOCS_ASSET="oxidocs-aarch64-unknown-linux-musl"; \
-  OXIDOCS_SHA256="7c0ba9fd11010e21fcb48913dafb506e93871d9f7daa45ded6f7ae5b1493c19d"; \
   else \
   OXIDOCS_ASSET="oxidocs-x86_64-unknown-linux-musl"; \
-  OXIDOCS_SHA256="38a40a4dfc8925cd9c04593a26f1977d599081de1c0cde741a422d21dd4bb330"; \
   fi && \
-  curl -L -o /tmp/oxidocs.tar.gz "https://github.com/Ryujiyasu/oxi/releases/download/oxidocs-v0.9.0-static.3/${OXIDOCS_ASSET}.tar.gz" && \
-  echo "${OXIDOCS_SHA256}  /tmp/oxidocs.tar.gz" | sha256sum -c - && \
-  tar -xzf /tmp/oxidocs.tar.gz -C /tmp/ && \
+  OXIDOCS_URL="https://github.com/Ryujiyasu/oxi/releases/download/oxidocs-v${OXIDOCS_VERSION}/${OXIDOCS_ASSET}.tar.gz" && \
+  curl -fL -o "/tmp/${OXIDOCS_ASSET}.tar.gz" "${OXIDOCS_URL}" && \
+  curl -fL -o "/tmp/${OXIDOCS_ASSET}.tar.gz.sha256" "${OXIDOCS_URL}.sha256" && \
+  (cd /tmp && sha256sum -c "${OXIDOCS_ASSET}.tar.gz.sha256") && \
+  tar -xzf "/tmp/${OXIDOCS_ASSET}.tar.gz" -C /tmp/ && \
   mv "/tmp/${OXIDOCS_ASSET}/oxidocs" /usr/local/bin/oxidocs && \
   chmod +x /usr/local/bin/oxidocs && \
-  rm -r /tmp/oxidocs.tar.gz "/tmp/${OXIDOCS_ASSET}"
+  rm -r "/tmp/${OXIDOCS_ASSET}.tar.gz" "/tmp/${OXIDOCS_ASSET}.tar.gz.sha256" "/tmp/${OXIDOCS_ASSET}"
 
 COPY --from=base /app/public/ /app/public/
 COPY --from=base /app/dist/convertx /app/convertx
