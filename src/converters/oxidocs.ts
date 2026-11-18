@@ -11,7 +11,7 @@ export const properties = {
   to: {
     text: ["pdf", "png"],
     presentation: ["pdf", "png"],
-    calc: ["pdf"],
+    calc: ["pdf", "png"],
   },
 };
 
@@ -26,7 +26,8 @@ export function convert(
   options?: unknown,
   execFile: ExecFileFn = execFileOriginal, // to make it mockable
 ): Promise<string> {
-  // png draws the first page (the first slide); pdf converts the whole
+  // png draws the first page (the first slide, the first printed page of a
+  // workbook); pdf converts the whole
   // document, every slide, or the print areas of every visible sheet.
   // --strict: when the document holds content Oxi does not draw, it writes
   // nothing and fails (naming the content) rather than hand back a file with

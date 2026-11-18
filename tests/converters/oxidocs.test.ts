@@ -50,15 +50,20 @@ test("converts a presentation with pptx-to-pdf and pptx-to-png", async () => {
   ]);
 });
 
-test("converts a workbook's print areas with xlsx-to-pdf", async () => {
+test("converts a workbook with xlsx-to-pdf and xlsx-to-png", async () => {
   const { execFile, calls } = createMockExecFile();
 
   await convert("in/sheet.xlsx", "xlsx", "pdf", "out/sheet.pdf", undefined, execFile);
+  await convert("in/sheet.xlsx", "xlsx", "png", "out/sheet.png", undefined, execFile);
 
   expect(calls).toEqual([
     {
       cmd: "oxidocs",
       args: ["xlsx-to-pdf", "--strict", "--quiet", "in/sheet.xlsx", "out/sheet.pdf"],
+    },
+    {
+      cmd: "oxidocs",
+      args: ["xlsx-to-png", "--strict", "--quiet", "in/sheet.xlsx", "out/sheet.png"],
     },
   ]);
 });

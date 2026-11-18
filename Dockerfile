@@ -78,7 +78,7 @@ RUN ARCH=$(uname -m) && \
 
 # Install oxidocs binary (docx, pptx and xlsx to pdf/png)
 # renovate: datasource=github-releases depName=Ryujiyasu/oxi versioning=regex:^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?:-static\.(?<build>\d+))?$ extractVersion=^oxidocs-v(?<version>.+)$
-ARG OXIDOCS_VERSION=0.9.0-static.5
+ARG OXIDOCS_VERSION=0.9.0-static.6
 RUN ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
   OXIDOCS_ASSET="oxidocs-aarch64-unknown-linux-musl"; \
