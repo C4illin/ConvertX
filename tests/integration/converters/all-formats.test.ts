@@ -1,6 +1,5 @@
 import { expect, test } from "bun:test";
-import { mkdtemp, readdir, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { mkdir, readdir, rm } from "node:fs/promises";
 import path from "node:path";
 
 import { convert as ffmpeg } from "../../../src/converters/ffmpeg";
@@ -53,9 +52,14 @@ test.each(cases)(
   "converts all targets from %s with %s",
   async (inputFileName, converterName) => {
     const inputFileType = path.parse(inputFileName).ext.slice(1);
+    const inputStem = path.parse(inputFileName).name;
     const inputPath = path.join(testsDirectory, "inputs", inputFileName);
     const convert = converters[converterName];
     const declaredTargets = [...new Set(getPossibleTargets(inputFileType)[converterName] ?? [])];
+    // outputs are kept in a gitignored folder for manual inspection
+    const outputsDirectory = path.join(testsDirectory, "outputs", inputFileName, converterName);
+    await rm(outputsDirectory, { recursive: true, force: true });
+    await mkdir(outputsDirectory, { recursive: true });
     const failures: string[] = [];
     const originalConsoleLog = console.log;
     const originalConsoleError = console.error;
@@ -64,8 +68,7 @@ test.each(cases)(
 
     try {
       for (const target of declaredTargets) {
-        const temporaryDirectory = await mkdtemp(path.join(tmpdir(), `convertx-${converterName}-`));
-        const actualPath = path.join(temporaryDirectory, `output.${target}`);
+        const actualPath = path.join(outputsDirectory, `${inputStem}.${target}`);
 
         try {
           await convert(inputPath, inputFileType, target, actualPath);
@@ -75,8 +78,6 @@ test.each(cases)(
           }
         } catch {
           failures.push(target);
-        } finally {
-          await rm(temporaryDirectory, { recursive: true, force: true });
         }
       }
     } finally {
