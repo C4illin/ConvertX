@@ -202,7 +202,6 @@ const audioInputs = [
   "latm",
   "lbc",
   "loas",
-  "lrc",
   "m2a",
   "m4a",
   "m4b",
