@@ -104,7 +104,7 @@ function createFileRow(file: File): HTMLTableRowElement {
   removeBtn.type = "button";
   removeBtn.className = "text-accent-500 hover:underline";
   removeBtn.textContent = "Remove";
-  removeBtn.setAttribute("onclick", `deleteRow(this)`);
+  removeBtn.addEventListener("click", () => deleteRow(removeBtn));
   removeCell.appendChild(removeBtn);
 
   row.appendChild(nameCell);
@@ -267,7 +267,7 @@ const setTitle = (): void => {
 };
 
 // ── Row deletion ───────────────────────────────────────────────────────────────
-export const deleteRow = (target: HTMLElement): void => {
+const deleteRow = (target: HTMLElement): void => {
   const filename = target.parentElement?.parentElement?.children?.[0]?.textContent ?? "";
   const row = target.parentElement?.parentElement;
   row?.remove();
@@ -291,9 +291,6 @@ export const deleteRow = (target: HTMLElement): void => {
 
   postDelete({ filename }).catch(console.log);
 };
-
-// Required by the inline `onclick="deleteRow(this)"` handler.
-(window as unknown as { deleteRow: typeof deleteRow }).deleteRow = deleteRow;
 
 // ── File upload via XHR ───────────────────────────────────────────────────────
 const uploadFile = (file: File): void => {

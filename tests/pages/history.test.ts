@@ -109,4 +109,15 @@ describe("GET /history", () => {
     expect(body).toContain("&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;.vcf");
     expect(body).toContain("&lt;b&gt;pending&lt;/b&gt;");
   });
+
+  test("loads its behaviour from an external script instead of inline JavaScript", async () => {
+    const user = await createUser();
+    createJob(user.id, { numFiles: 1, files: [file("a")] });
+
+    const body = await historyOf(user.token);
+
+    expect(body).toContain('<script src="/history.js" defer></script>');
+    expect(body).not.toMatch(/<script>/);
+    expect(body).not.toContain("fetch(");
+  });
 });
