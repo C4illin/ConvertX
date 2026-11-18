@@ -3,7 +3,7 @@ import { describe, expect, test } from "bun:test";
 import { app } from "../../src/eden";
 
 describe("eden app composition", () => {
-  test("has all route endpoints mounted", async () => {
+  test("has representative route endpoints mounted", async () => {
     // GET / — home page (root) may redirect (auth) or render (first run).
     const root = await app.handle(new Request("http://localhost/"));
     expect(root.status).toBeLessThan(400);
@@ -19,7 +19,7 @@ describe("eden app composition", () => {
     expect(conversions.status).toBe(200); // public endpoint, returns HTML fragment
   });
 
-  test("POST /healthcheck returns ok", async () => {
+  test("GET /healthcheck returns ok", async () => {
     const res = await app.handle(new Request("http://localhost/healthcheck"));
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -42,6 +42,8 @@ describe("eden app composition", () => {
       }),
     );
 
+    expect(txt.status).toBe(200);
+    expect(jpeg.status).toBe(200);
     expect(await txt.text()).toBe(await jpeg.text());
   });
 

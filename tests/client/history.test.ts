@@ -111,5 +111,33 @@ describe("history.ts", () => {
       expect(reloads).toEqual([]);
       expect(env.console.errors.join("\n")).toContain("Error deleting jobs:");
     });
+
+    describe("with more jobs than the server accepts per request", () => {
+      const bigPage = `
+        <button id="delete-selected-btn" disabled>Delete (<span id="selected-count">0</span>)</button>
+        <input type="checkbox" id="select-all" />
+        ${Array.from(
+          { length: 250 },
+          (_, i) => `<input type="checkbox" data-checkbox-type="job" data-job-id="${i}" />`,
+        ).join("")}`;
+
+      test("deletes in batches of at most 100 ids", async () => {
+        env = setupClient(bigPage);
+        env.respondWith({ success: true, deleted: 1, failed: 0, details: {} });
+        const alerts: string[] = [];
+        globalThis.confirm = () => true;
+        globalThis.alert = (m?: string) => void alerts.push(String(m));
+        Object.defineProperty(window.location, "reload", { value: () => {} });
+        await env.load("history.ts");
+
+        change(document.getElementById("select-all") as HTMLInputElement, true);
+        deleteBtn().click();
+        await Bun.sleep(20);
+
+        const sizes = env.fetchCalls.map((c) => JSON.parse(c.body!).jobIds.length);
+        expect(sizes).toEqual([100, 100, 50]);
+        expect(alerts).toEqual(["Successfully deleted 3 job(s)."]);
+      });
+    });
   });
 });

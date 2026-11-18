@@ -5,6 +5,7 @@ import { edenFetch } from "@elysiajs/eden";
 import type { App } from "../src";
 import {
   arrowPath,
+  chunk,
   deleteConfirmMessage,
   deleteResultMessage,
   selectionState,
@@ -12,6 +13,9 @@ import {
 
 const webroot = document.querySelector<HTMLMetaElement>("meta[name='webroot']")?.content ?? "";
 const api = edenFetch<App>(webroot);
+
+// Mirrors the `maxItems` limit of POST /delete-multiple.
+const DELETE_BATCH_SIZE = 100;
 
 for (const toggle of Array.from(document.querySelectorAll<HTMLElement>(".job-details-toggle"))) {
   toggle.addEventListener("click", () => {
@@ -60,9 +64,27 @@ deleteButton?.addEventListener("click", async () => {
   if (!confirm(deleteConfirmMessage(jobIds.length))) return;
 
   try {
-    const res = await api("/delete-multiple", { method: "POST", body: { jobIds }, headers: {} });
-    if (res.error || !res.data) throw new Error(`HTTP error! status: ${res.error?.status}`);
-    const { message, reload } = deleteResultMessage(res.data);
+    let deleted = 0;
+    let failed = 0;
+    let requestFailures = 0;
+    for (const batch of chunk(jobIds, DELETE_BATCH_SIZE)) {
+      const res = await api("/delete-multiple", {
+        method: "POST",
+        body: { jobIds: batch },
+        headers: {},
+      });
+      if (res.error || !res.data) {
+        requestFailures += 1;
+        failed += batch.length;
+        continue;
+      }
+      deleted += res.data.deleted ?? 0;
+      failed += res.data.failed ?? 0;
+    }
+    if (deleted === 0 && requestFailures > 0) {
+      throw new Error("All delete requests failed");
+    }
+    const { message, reload } = deleteResultMessage({ success: failed === 0, deleted, failed });
     alert(message);
     if (reload) window.location.reload();
   } catch (error) {

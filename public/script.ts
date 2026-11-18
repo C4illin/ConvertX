@@ -179,7 +179,9 @@ const updateSearchBar = (): void => {
     );
 
     for (const target of targets) {
-      target.onmousedown = () => {
+      // Keep focus in the search input so the popup does not close before the click lands.
+      target.addEventListener("mousedown", (e: MouseEvent) => e.preventDefault());
+      target.addEventListener("click", () => {
         if (target.dataset.value && convertToElement) {
           convertToElement.value = target.dataset.value;
         }
@@ -189,7 +191,7 @@ const updateSearchBar = (): void => {
           convertButton.disabled = false;
         }
         showMatching("");
-      };
+      });
     }
 
     convertToGroups[groupName] = [targets, groupElement];
@@ -263,6 +265,15 @@ const setTitle = (): void => {
 };
 
 // ── Row deletion ───────────────────────────────────────────────────────────────
+const resetIfNoFiles = (): void => {
+  if (fileNames.length > 0) return;
+  fileType = null;
+  formatSelected = false;
+  fileInput.removeAttribute("accept");
+  convertButton.disabled = true;
+  setTitle();
+};
+
 const deleteRow = (target: HTMLElement): void => {
   const filename = target.parentElement?.parentElement?.children?.[0]?.textContent ?? "";
   const row = target.parentElement?.parentElement;
@@ -277,21 +288,37 @@ const deleteRow = (target: HTMLElement): void => {
   // reset fileInput
   fileInput.value = "";
 
-  // if fileNames is empty, reset fileType
-  if (fileNames.length === 0) {
-    fileType = null;
-    fileInput.removeAttribute("accept");
-    convertButton.disabled = true;
-    setTitle();
-  }
+  resetIfNoFiles();
 
   postDelete({ filename }).catch(console.log);
 };
 
 // ── File upload via XHR ───────────────────────────────────────────────────────
+const finishUpload = (): void => {
+  pendingFiles -= 1;
+  if (pendingFiles > 0) return;
+  if (formatSelected && fileNames.length > 0) {
+    convertButton.disabled = false;
+  }
+  convertButton.value = "Convert";
+};
+
+// A file that never reached the server must not be submitted for conversion.
+const failUpload = (file: File): void => {
+  const row = (file as ExtendedFile).htmlRow;
+  row?.remove();
+  const index = fileNames.indexOf(file.name);
+  if (index !== -1) {
+    fileNames.splice(index, 1);
+  }
+  fileInput.value = "";
+  finishUpload();
+  resetIfNoFiles();
+};
+
 const uploadFile = (file: File): void => {
   convertButton.disabled = true;
-  convertButton.textContent = "Uploading...";
+  convertButton.value = "Uploading...";
   pendingFiles += 1;
 
   const formData = new FormData();
@@ -301,21 +328,22 @@ const uploadFile = (file: File): void => {
   xhr.open("POST", `${webroot}/upload`, true);
 
   xhr.onload = (): void => {
+    if (xhr.status < 200 || xhr.status >= 300) {
+      console.log(`Upload failed with status ${xhr.status}`);
+      failUpload(file);
+      return;
+    }
+
     let data: { message?: string };
     try {
       data = JSON.parse(xhr.responseText);
     } catch {
       console.warn("Failed to parse upload response:", xhr.responseText);
+      failUpload(file);
       return;
     }
 
-    pendingFiles -= 1;
-    if (pendingFiles === 0) {
-      if (formatSelected) {
-        convertButton.disabled = false;
-      }
-      convertButton.textContent = "Convert";
-    }
+    finishUpload();
 
     // Remove the progress bar when upload is done
     const progressbar = (file as ExtendedFile).htmlRow?.getElementsByTagName("progress");
@@ -337,12 +365,8 @@ const uploadFile = (file: File): void => {
   };
 
   xhr.onerror = (): void => {
-    pendingFiles -= 1;
-    if (pendingFiles === 0 && formatSelected) {
-      convertButton.disabled = false;
-      convertButton.textContent = "Convert";
-    }
     console.log("Upload failed");
+    failUpload(file);
   };
 
   xhr.send(formData);

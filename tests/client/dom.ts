@@ -16,6 +16,7 @@ class FakeXhr {
   url = "";
   sent = false;
   responseText = "";
+  status = 200;
   upload: { onprogress?: (e: ProgressEvent) => void } = {};
   onload?: () => void;
   onerror?: () => void;

@@ -13,8 +13,7 @@ const page = `
     <input type="file" multiple />
     <table><tbody id="file-list"></tbody></table>
     <input name="convert_to_search" />
-    <div class="convert_to_popup hidden"></div>
-    <div class="select_container"></div>
+    <div class="select_container"><div class="convert_to_popup hidden"></div></div>
     <input type="submit" value="Convert" disabled />
   </form>`;
 
@@ -80,16 +79,14 @@ describe("script.ts", () => {
     expect(env.xhrs).toHaveLength(1);
     expect(env.xhrs[0]).toMatchObject({ method: "POST", url: "/upload", sent: true });
     expect(submit().disabled).toBe(true);
-    expect(submit().textContent).toBe("Uploading...");
+    expect(submit().value).toBe("Uploading...");
 
     env.xhrs[0]!.responseText = JSON.stringify({ message: "ok" });
     env.xhrs[0]!.onload!();
     expect(document.querySelector("#file-list progress")).toBeNull();
     expect(submit().disabled).toBe(true);
 
-    document.querySelector<HTMLElement>(".target[data-value='mp3,ffmpeg']")!.onmousedown!(
-      new MouseEvent("mousedown"),
-    );
+    document.querySelector<HTMLElement>(".target[data-value='mp3,ffmpeg']")!.click();
     expect(submit().disabled).toBe(false);
     expect(document.querySelector<HTMLInputElement>("input[name=convert_to_search]")!.value).toBe(
       "mp3 using ffmpeg",
@@ -271,13 +268,53 @@ describe("script.ts", () => {
       await settle();
       env.xhrs[0]!.responseText = "{}";
       env.xhrs[0]!.onload!();
-      document.querySelector<HTMLElement>(".target")!.onmousedown!(new MouseEvent("mousedown"));
+      document.querySelector<HTMLElement>(".target")!.click();
       expect(submit().disabled).toBe(false);
 
       document
         .querySelector<HTMLInputElement>("input[name=convert_to_search]")!
         .dispatchEvent(new Event("search"));
       expect(submit().disabled).toBe(true);
+    });
+  });
+
+  describe("target selection", () => {
+    test("works with keyboard activation, which only fires click", async () => {
+      await start();
+      dropFile("a.wav");
+      await settle();
+      env.xhrs[0]!.responseText = "{}";
+      env.xhrs[0]!.onload!();
+
+      document.querySelector<HTMLElement>(".target[data-value='wav,other']")!.click();
+
+      expect(submit().disabled).toBe(false);
+      expect(document.querySelector<HTMLSelectElement>("select[name=convert_to]")!.value).toBe(
+        "wav,other",
+      );
+    });
+
+    test("keeps focus in the search input while the mouse is pressed on a target", async () => {
+      await start();
+      dropFile("a.wav");
+      await settle();
+
+      const event = new MouseEvent("mousedown", { cancelable: true, bubbles: true });
+      document.querySelector<HTMLElement>(".target")!.dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(true);
+    });
+
+    test("binds the popup behaviour to the popup rendered by the server", async () => {
+      await start();
+      dropFile("a.mp3");
+      await settle();
+      const input = document.querySelector<HTMLInputElement>("input[name=convert_to_search]")!;
+
+      input.dispatchEvent(new Event("focus"));
+
+      expect(document.querySelectorAll(".convert_to_popup")).toHaveLength(1);
+      expect(document.querySelector(".convert_to_popup")!.classList.contains("hidden")).toBe(false);
     });
   });
 
@@ -314,15 +351,80 @@ describe("script.ts", () => {
       expect(env.console.logs).toContain("Upload failed");
     });
 
-    test("enables Convert when a failed upload leaves nothing pending and a format is selected", async () => {
+    test("drops a failed upload and keeps Convert disabled even with a preselected format", async () => {
       await start("http://localhost/?to=mp3");
       dropFile("a.wav");
       await settle();
 
       env.xhrs[0]!.onerror!();
+      dropFile("b.wav");
+      env.xhrs[1]!.onerror!();
+
+      expect(document.querySelectorAll("#file-list tr")).toHaveLength(0);
+      expect(submit().disabled).toBe(true);
+      expect(submit().value).toBe("Convert");
+    });
+
+    test("only submits files that were uploaded successfully", async () => {
+      await start("http://localhost/?to=mp3");
+      dropFile("a.wav");
+      dropFile("b.wav");
+      await settle();
+
+      env.xhrs[0]!.responseText = "{}";
+      env.xhrs[0]!.onload!();
+      env.xhrs[1]!.onerror!();
+      document.querySelector("form")!.dispatchEvent(new Event("submit", { cancelable: true }));
 
       expect(submit().disabled).toBe(false);
-      expect(submit().textContent).toBe("Convert");
+      expect(document.querySelectorAll("#file-list td:first-child")).toHaveLength(1);
+      expect(document.querySelector<HTMLInputElement>("input[name=file_names]")!.value).toBe(
+        JSON.stringify(["a.wav"]),
+      );
+    });
+
+    test("treats an HTTP error response as a failed upload", async () => {
+      await start("http://localhost/?to=mp3");
+      dropFile("a.wav");
+      await settle();
+
+      env.xhrs[0]!.status = 500;
+      env.xhrs[0]!.responseText = JSON.stringify({ message: "boom" });
+      env.xhrs[0]!.onload!();
+
+      expect(document.querySelectorAll("#file-list tr")).toHaveLength(0);
+      expect(submit().disabled).toBe(true);
+      expect(submit().value).toBe("Convert");
+    });
+
+    test("does not leave the file stuck in uploading when the response is unreadable", async () => {
+      await start("http://localhost/?to=mp3");
+      dropFile("a.wav");
+      await settle();
+
+      env.xhrs[0]!.responseText = "<html>";
+      env.xhrs[0]!.onload!();
+
+      expect(document.querySelectorAll("#file-list tr")).toHaveLength(0);
+      expect(submit().value).toBe("Convert");
+    });
+
+    test("forgets the selected format when the last file is removed", async () => {
+      await start();
+      dropFile("a.wav");
+      await settle();
+      env.xhrs[0]!.responseText = "{}";
+      env.xhrs[0]!.onload!();
+      document.querySelector<HTMLElement>(".target")!.click();
+      env.respondWith({ message: "File deleted successfully." });
+      document.querySelector<HTMLButtonElement>("#file-list button")!.click();
+      await settle();
+
+      dropFile("b.wav");
+      env.xhrs[1]!.responseText = "{}";
+      env.xhrs[1]!.onload!();
+
+      expect(submit().disabled).toBe(true);
     });
 
     test("pre-selects the format right away when the upload finished before the converters arrived", async () => {
@@ -345,7 +447,7 @@ describe("script.ts", () => {
       env.xhrs[0]!.onload!();
 
       expect(submit().disabled).toBe(false);
-      expect(submit().textContent).toBe("Convert");
+      expect(submit().value).toBe("Convert");
     });
   });
 });

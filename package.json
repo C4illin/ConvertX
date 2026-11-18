@@ -5,9 +5,11 @@
   "module": "src/index.tsx",
   "scripts": {
     "predev": "bun run build:client",
-    "dev": "bun run --watch src/index.tsx",
+    "dev": "run-p 'build:client --watch' dev:server",
+    "dev:server": "bun run --watch src/index.tsx",
     "prehot": "bun run build:client",
-    "hot": "bun run --hot src/index.tsx",
+    "hot": "run-p 'build:client --watch' hot:server",
+    "hot:server": "bun run --hot src/index.tsx",
     "format": "npm-run-all 'format:*'",
     "format:eslint": "eslint --fix .",
     "format:prettier": "bun fmt",

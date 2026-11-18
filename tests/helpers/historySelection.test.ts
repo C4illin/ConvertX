@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import {
   arrowPath,
+  chunk,
   deleteConfirmMessage,
   deleteResultMessage,
   selectionState,
@@ -51,5 +52,15 @@ describe("deleteResultMessage", () => {
       message: "Failed to delete jobs. Please try again.",
       reload: false,
     });
+  });
+});
+
+describe("chunk", () => {
+  test("splits a list into batches of at most the given size", () => {
+    expect(chunk([1, 2, 3, 4, 5], 2)).toEqual([[1, 2], [3, 4], [5]]);
+  });
+
+  test("returns no batches for an empty list", () => {
+    expect(chunk([], 100)).toEqual([]);
   });
 });
