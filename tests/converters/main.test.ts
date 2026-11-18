@@ -427,7 +427,6 @@ describe("handleConvert", () => {
     ["glb2", "photo.glb"],
     ["stlb", "photo.stl"],
     ["3cx.wav", "photo.3cx.wav"],
-    ["wav-3cx", "photo.3cx.wav"],
   ])("names the output for target %s with its canonical extension", async (convertTo, expected) => {
     // the conversion itself is unsupported, but the output name is still derived and recorded
     await handleConvert(["photo.JPG"], uploadsDir, outputDir, convertTo, "none", jobCookie("name"));

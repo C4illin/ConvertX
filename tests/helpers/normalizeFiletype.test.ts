@@ -14,6 +14,7 @@ test("normalizeFiletype maps known inputs", () => {
   expect(normalizeFiletype("md")).toBe("markdown");
   expect(normalizeFiletype("unknown")).toBe("m4a");
   expect(normalizeFiletype("SVG")).toBe("svg");
+  expect(normalizeFiletype("3CX.WAV")).toBe("3cx.wav");
 });
 
 test("normalizeOutputFiletype maps known outputs", () => {
@@ -29,6 +30,7 @@ test("normalizeOutputFiletype maps known outputs", () => {
   expect(normalizeOutputFiletype("fbxa")).toBe("fbx");
   expect(normalizeOutputFiletype("assjson")).toBe("json");
   expect(normalizeOutputFiletype("WeIrDCase")).toBe("weirdcase");
+  expect(normalizeOutputFiletype("3cx.wav")).toBe("3cx.wav");
 });
 
 test("splitFileName recognizes compound extensions from the known list", () => {

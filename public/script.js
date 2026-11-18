@@ -8,9 +8,7 @@ let pendingFiles = 0;
 let formatSelected = false;
 
 const urlParams = new URLSearchParams(window.location.search);
-// legacy links use the old wav-3cx label for the 3CX telephony preset
-const defaultToParam = urlParams.get("to");
-const defaultTo = defaultToParam === "wav-3cx" ? "3cx.wav" : defaultToParam;
+const defaultTo = urlParams.get("to");
 const defaultConverter = urlParams.get("converter");
 
 dropZone.addEventListener("dragover", (e) => {
