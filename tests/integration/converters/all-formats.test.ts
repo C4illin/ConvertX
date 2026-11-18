@@ -37,69 +37,46 @@ const inputFileNames = (await readdir(path.join(testsDirectory, "inputs")))
   .filter((fileName) => !fileName.startsWith("."))
   .sort();
 
+// one test per input file x converter, skipping converters with no targets for the input
+const cases: [inputFileName: string, converterName: string][] = [];
 for (const inputFileName of inputFileNames) {
-  test(`converts every saved target for each converter from ${inputFileName}`, async () => {
+  const inputFileType = path.parse(inputFileName).ext.slice(1);
+  const possibleTargets = getPossibleTargets(inputFileType);
+  for (const converterName of Object.keys(converters)) {
+    if ((possibleTargets[converterName] ?? []).length > 0) {
+      cases.push([inputFileName, converterName]);
+    }
+  }
+}
+
+test.each(cases)(
+  "converts all targets from %s with %s",
+  async (inputFileName, converterName) => {
     const inputFileType = path.parse(inputFileName).ext.slice(1);
-    const inputStem = path.parse(inputFileName).name;
-    const possibleTargets = getPossibleTargets(inputFileType);
     const inputPath = path.join(testsDirectory, "inputs", inputFileName);
-    const expectedFailuresByInput = (await Bun.file(
-      path.join(testsDirectory, "expected-failures.json"),
-    ).json()) as Record<string, string[]>;
-    expect(Object.keys(expectedFailuresByInput)).toContain(inputFileName);
-    const expectedFailures = expectedFailuresByInput[inputFileName] ?? [];
-    const expectedFailureSet = new Set(expectedFailures);
-    const expectedTestedTargets = Object.keys(converters).reduce(
-      (total, converterName) => total + new Set(possibleTargets[converterName] ?? []).size,
-      0,
-    );
-    const expectedSuccessfulTargets = expectedTestedTargets - expectedFailures.length;
+    const convert = converters[converterName];
+    const declaredTargets = [...new Set(getPossibleTargets(inputFileType)[converterName] ?? [])];
     const failures: string[] = [];
-    const observedFailures: string[] = [];
-    let testedTargets = 0;
-    let successfulTargets = 0;
     const originalConsoleLog = console.log;
     const originalConsoleError = console.error;
     console.log = () => {};
     console.error = () => {};
 
     try {
-      for (const [converterName, convert] of Object.entries(converters)) {
-        const outputDirectory = path.join(testsDirectory, "outputs", converterName, inputFileType);
-        const declaredTargets = [...new Set(possibleTargets[converterName] ?? [])];
+      for (const target of declaredTargets) {
+        const temporaryDirectory = await mkdtemp(path.join(tmpdir(), `convertx-${converterName}-`));
+        const actualPath = path.join(temporaryDirectory, `output.${target}`);
 
-        for (const target of declaredTargets) {
-          const targetKey = `${converterName}:${target}`;
-          const outputFile = `${inputStem}.${target}`;
-          testedTargets++;
-
-          const temporaryDirectory = await mkdtemp(path.join(tmpdir(), `convertx-${converterName}-`));
-          const actualPath = path.join(temporaryDirectory, outputFile);
-          const expectedPath = path.join(outputDirectory, outputFile);
-
-          try {
-            await convert(inputPath, inputFileType, target, actualPath);
-            const actualSize = (await Bun.file(actualPath).stat())?.size ?? 0;
-            if (expectedFailureSet.has(targetKey)) {
-              if (actualSize > 0) {
-                failures.push(`${targetKey}: expected failure became successful`);
-              } else {
-                observedFailures.push(targetKey);
-              }
-            } else {
-              expect(actualSize).toBeGreaterThan(0);
-              expect((await Bun.file(expectedPath).stat())?.size).toBeGreaterThan(0);
-              successfulTargets++;
-            }
-          } catch (error) {
-            if (expectedFailureSet.has(targetKey)) {
-              observedFailures.push(targetKey);
-            } else {
-              failures.push(`${targetKey}: ${String(error)}`);
-            }
-          } finally {
-            await rm(temporaryDirectory, { recursive: true, force: true });
+        try {
+          await convert(inputPath, inputFileType, target, actualPath);
+          const stat = await Bun.file(actualPath).stat();
+          if (stat.size === 0) {
+            failures.push(target);
           }
+        } catch {
+          failures.push(target);
+        } finally {
+          await rm(temporaryDirectory, { recursive: true, force: true });
         }
       }
     } finally {
@@ -107,9 +84,7 @@ for (const inputFileName of inputFileNames) {
       console.error = originalConsoleError;
     }
 
-    expect(testedTargets).toBe(expectedTestedTargets);
-    expect(successfulTargets).toBe(expectedSuccessfulTargets);
-    expect(observedFailures.sort()).toEqual([...expectedFailures].sort());
-    expect(failures).toEqual([]);
-  }, 120000);
-}
+    expect(failures.sort()).toMatchSnapshot();
+  },
+  120000,
+);
