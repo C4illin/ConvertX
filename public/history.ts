@@ -13,7 +13,7 @@ import {
 const webroot = document.querySelector<HTMLMetaElement>("meta[name='webroot']")?.content ?? "";
 const api = edenFetch<App>(webroot);
 
-for (const toggle of document.querySelectorAll<HTMLElement>(".job-details-toggle")) {
+for (const toggle of Array.from(document.querySelectorAll<HTMLElement>(".job-details-toggle"))) {
   toggle.addEventListener("click", () => {
     const jobId = toggle.dataset.jobId;
     const detailsRow = document.getElementById(`details-${jobId}`);
