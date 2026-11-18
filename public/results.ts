@@ -22,9 +22,11 @@ function refreshData(): void {
       body: {},
     })
       .then((res) => {
-        if (res.error) throw new Error(`POST /progress failed: ${res.status}`);
+        if (res.error || typeof res.data !== "string") {
+          throw new Error(`POST /progress failed: ${res.status}`);
+        }
         // SECURE: server-rendered HTML fragment from trusted /progress endpoint (no user input)
-        main.innerHTML = res.data as unknown as string;
+        main.innerHTML = res.data;
       })
       .catch((err) => console.log(err));
 

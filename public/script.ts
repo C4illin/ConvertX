@@ -29,19 +29,14 @@ const formConvert = document.querySelector<HTMLFormElement>(`form[action='${webr
 const api = edenFetch<App>(webroot);
 
 // ── Route helpers (typed via @elysiajs/eden inference from App) ────────────────
-
-// NOTE: elysiajs/eden's body type inference is limited for dynamic routes,
-// so we cast to `never` to bypass the type check. The functions return typed
-// values where possible, but request bodies lose Eden's compile-time safety here.
-
-async function postConversions(body: { fileType: string | null }): Promise<string> {
-  const res = await api("/conversions", { method: "POST", body: body as never, headers: {} });
+async function postConversions(body: { fileType: string }): Promise<string> {
+  const res = await api("/conversions", { method: "POST", body, headers: {} });
   if (res.error) throw new Error(`POST /conversions failed: ${JSON.stringify(res.error)}`);
-  return res.data as unknown as string;
+  return res.data;
 }
 
 async function postDelete(body: { filename: string }): Promise<unknown> {
-  const res = await api("/delete", { method: "POST", body: body as never, headers: {} });
+  const res = await api("/delete", { method: "POST", body, headers: {} });
   if (res.error) throw new Error(`POST /delete failed: ${JSON.stringify(res.error)}`);
   return res.data;
 }
@@ -121,11 +116,12 @@ function handleFile(file: File): void {
   const row = createFileRow(file);
 
   if (!fileType) {
-    fileType = file.name.split(".").pop() ?? null;
+    const extension = file.name.split(".").pop() ?? "";
+    fileType = extension;
     fileInput.setAttribute("accept", `.${fileType}`);
     setTitle();
 
-    postConversions({ fileType: fileType ?? null })
+    postConversions({ fileType: extension })
       .then((html) => {
         // SECURE: server-rendered HTML fragment from trusted /conversions endpoint (no user input)
         selectContainer.innerHTML = html;
