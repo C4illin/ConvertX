@@ -1,19 +1,12 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":disableDependencyDashboard"],
+  "extends": [
+    "config:recommended",
+    ":disableDependencyDashboard",
+    "customManagers:dockerfileVersions"
+  ],
   "lockFileMaintenance": {
     "enabled": true,
     "automerge": true
-  },
-  "customManagers": [
-    {
-      "customType": "regex",
-      "description": "oxidocs release in the Dockerfile. Its tags are oxidocs-v0.9.0-static.N; the -static.N rebuild number is a release, not a prerelease. A dedicated pattern because the Dockerfile has CRLF line endings, which customManagers:dockerfileVersions does not match.",
-      "managerFilePatterns": ["/(^|/)Dockerfile$/"],
-      "matchStrings": [
-        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: extractVersion=(?<extractVersion>\\S+))?\\s+ARG\\s+[A-Z0-9_]+_VERSION=(?<currentValue>\\S+)"
-      ],
-      "versioningTemplate": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-static\\.(?<build>\\d+))?$"
-    }
-  ]
+  }
 }

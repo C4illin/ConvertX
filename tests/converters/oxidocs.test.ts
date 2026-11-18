@@ -31,3 +31,34 @@ test("draws the first page with docx-to-png", async () => {
     },
   ]);
 });
+
+test("converts a presentation with pptx-to-pdf and pptx-to-png", async () => {
+  const { execFile, calls } = createMockExecFile();
+
+  await convert("in/deck.pptx", "pptx", "pdf", "out/deck.pdf", undefined, execFile);
+  await convert("in/deck.pptx", "pptx", "png", "out/deck.png", undefined, execFile);
+
+  expect(calls).toEqual([
+    {
+      cmd: "oxidocs",
+      args: ["pptx-to-pdf", "--strict", "--quiet", "in/deck.pptx", "out/deck.pdf"],
+    },
+    {
+      cmd: "oxidocs",
+      args: ["pptx-to-png", "--strict", "--quiet", "in/deck.pptx", "out/deck.png"],
+    },
+  ]);
+});
+
+test("converts a workbook's print areas with xlsx-to-pdf", async () => {
+  const { execFile, calls } = createMockExecFile();
+
+  await convert("in/sheet.xlsx", "xlsx", "pdf", "out/sheet.pdf", undefined, execFile);
+
+  expect(calls).toEqual([
+    {
+      cmd: "oxidocs",
+      args: ["xlsx-to-pdf", "--strict", "--quiet", "in/sheet.xlsx", "out/sheet.pdf"],
+    },
+  ]);
+});
