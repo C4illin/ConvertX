@@ -1,5 +1,6 @@
-import { afterEach, describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 
+import { captureConsole } from "../converters/helpers/converters";
 import {
   app,
   createUser,
@@ -11,7 +12,14 @@ import {
   setEnv,
 } from "./helpers/app";
 
+let output: ReturnType<typeof captureConsole>;
+
+beforeEach(() => {
+  output = captureConsole();
+});
+
 afterEach(() => {
+  output.restore();
   resetEnv();
 });
 

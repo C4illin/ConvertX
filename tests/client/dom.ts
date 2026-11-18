@@ -1,5 +1,7 @@
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 
+import { captureConsole } from "../converters/helpers/converters";
+
 // Bun's native implementations, captured before happy-dom replaces the globals.
 const NativeResponse = Response;
 
@@ -27,6 +29,7 @@ class FakeXhr {
 }
 
 export interface ClientEnv {
+  console: ReturnType<typeof captureConsole>;
   xhrs: FakeXhr[];
   fetchCalls: FetchCall[];
   timers: { fn: () => void; ms: number }[];
@@ -40,6 +43,7 @@ let importCounter = 0;
 
 /** Sets up a DOM from `html`, runs a public/*.ts client script in it and records network/timers. */
 export function setupClient(html: string, url = "http://localhost/"): ClientEnv {
+  const output = captureConsole();
   GlobalRegistrator.register({ url });
   document.head.innerHTML = '<meta name="webroot" content="">';
   document.body.innerHTML = html;
@@ -78,12 +82,16 @@ export function setupClient(html: string, url = "http://localhost/"): ClientEnv 
     fetchCalls,
     timers,
     xhrs,
+    console: output,
     respondWith: (body, status = 200) => {
       response = { body, status };
     },
     load: async (script) => {
       await import(`../../public/${script}?${importCounter++}`);
     },
-    teardown: () => GlobalRegistrator.unregister(),
+    teardown: async () => {
+      await GlobalRegistrator.unregister();
+      output.restore();
+    },
   };
 }

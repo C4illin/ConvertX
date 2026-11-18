@@ -46,6 +46,7 @@ describe("results.ts", () => {
 
     expect(document.querySelector("progress")).not.toBeNull();
     expect(document.getElementById("fresh")).toBeNull();
+    expect(env.console.logs.join("\n")).toContain("POST /progress failed: 404");
   });
 
   test("download-all clicks every download link, staggered by 300ms", async () => {

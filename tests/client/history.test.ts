@@ -109,6 +109,7 @@ describe("history.ts", () => {
 
       expect(alerts).toEqual(["An error occurred while deleting jobs. Please try again."]);
       expect(reloads).toEqual([]);
+      expect(env.console.errors.join("\n")).toContain("Error deleting jobs:");
     });
   });
 });

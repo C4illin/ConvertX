@@ -161,4 +161,191 @@ describe("script.ts", () => {
       );
     });
   });
+
+  describe("drop zone", () => {
+    test("highlights while dragging over and clears on leave or drop", async () => {
+      await start();
+      const zone = document.getElementById("dropzone")!;
+
+      zone.dispatchEvent(new Event("dragover", { cancelable: true }));
+      expect(zone.classList.contains("dragover")).toBe(true);
+      zone.dispatchEvent(new Event("dragleave"));
+      expect(zone.classList.contains("dragover")).toBe(false);
+
+      zone.dispatchEvent(new Event("dragover", { cancelable: true }));
+      dropFile("a.wav");
+      expect(zone.classList.contains("dragover")).toBe(false);
+    });
+
+    test("warns and ignores drops without files", async () => {
+      await start();
+      const event = new Event("drop", { cancelable: true }) as Event & { dataTransfer: unknown };
+      event.dataTransfer = { files: [] };
+      document.getElementById("dropzone")!.dispatchEvent(event);
+      await settle();
+
+      expect(env.console.warnings).toEqual([
+        "No files dropped — likely a URL or unsupported source.",
+      ]);
+      expect(env.fetchCalls).toEqual([]);
+    });
+
+    test("accepts several files but asks for converters only once", async () => {
+      await start();
+      dropFile("a.wav");
+      dropFile("b.wav");
+      await settle();
+
+      expect(document.querySelectorAll("#file-list tr")).toHaveLength(2);
+      expect(env.fetchCalls).toHaveLength(1);
+      expect(env.xhrs).toHaveLength(2);
+    });
+  });
+
+  test("handles files picked through the file input", async () => {
+    await start();
+    const input = document.querySelector<HTMLInputElement>("input[type=file]")!;
+    Object.defineProperty(input, "files", { value: [new File(["x"], "pick.wav")] });
+    input.dispatchEvent(new Event("change"));
+    await settle();
+
+    expect(document.querySelector("#file-list td")!.textContent).toBe("pick.wav");
+  });
+
+  describe("format search", () => {
+    const visible = () =>
+      Array.from(document.querySelectorAll<HTMLElement>(".target"))
+        .filter((t) => !t.classList.contains("hidden"))
+        .map((t) => t.dataset.value);
+    const search = (value: string) => {
+      const input = document.querySelector<HTMLInputElement>("input[name=convert_to_search]")!;
+      input.value = value;
+      input.dispatchEvent(new Event("input"));
+    };
+
+    test("filters targets and hides converter groups without matches", async () => {
+      await start();
+      dropFile("a.mp3");
+      await settle();
+
+      search("mp");
+      expect(visible()).toEqual(["mp3,ffmpeg"]);
+      const groups = document.querySelectorAll<HTMLElement>(".convert_to_group");
+      expect(groups[0]!.classList.contains("hidden")).toBe(false);
+      expect(groups[1]!.classList.contains("hidden")).toBe(true);
+
+      search("");
+      expect(visible()).toHaveLength(3);
+    });
+
+    test("shows the popup on focus and hides it on blur", async () => {
+      await start();
+      dropFile("a.mp3");
+      await settle();
+      const input = document.querySelector<HTMLInputElement>("input[name=convert_to_search]")!;
+      const popup = document.querySelector<HTMLElement>(".convert_to_popup")!;
+
+      input.dispatchEvent(new Event("focus"));
+      expect(popup.classList.contains("hidden")).toBe(false);
+      input.dispatchEvent(new Event("blur"));
+      expect(popup.classList.contains("hidden")).toBe(true);
+    });
+
+    test("keeps the popup open when focus moves to a target", async () => {
+      await start();
+      dropFile("a.mp3");
+      await settle();
+      const input = document.querySelector<HTMLInputElement>("input[name=convert_to_search]")!;
+      const popup = document.querySelector<HTMLElement>(".convert_to_popup")!;
+
+      input.dispatchEvent(new Event("focus"));
+      const blur = new Event("blur") as Event & { relatedTarget: unknown };
+      blur.relatedTarget = document.querySelector(".target");
+      input.dispatchEvent(blur);
+      expect(popup.classList.contains("hidden")).toBe(false);
+    });
+
+    test("disables Convert again when the search is cleared", async () => {
+      await start();
+      dropFile("a.mp3");
+      await settle();
+      env.xhrs[0]!.responseText = "{}";
+      env.xhrs[0]!.onload!();
+      document.querySelector<HTMLElement>(".target")!.onmousedown!(new MouseEvent("mousedown"));
+      expect(submit().disabled).toBe(false);
+
+      document
+        .querySelector<HTMLInputElement>("input[name=convert_to_search]")!
+        .dispatchEvent(new Event("search"));
+      expect(submit().disabled).toBe(true);
+    });
+  });
+
+  describe("upload", () => {
+    test("shows the upload progress in the file row", async () => {
+      await start();
+      dropFile("a.wav");
+      await settle();
+
+      env.xhrs[0]!.upload.onprogress!({ loaded: 25, total: 100 } as ProgressEvent);
+
+      expect(document.querySelector("progress")!.value).toBe(25);
+      expect(env.console.logs).toContain("upload progress (a.wav): 25");
+    });
+
+    test("warns about an unreadable upload response", async () => {
+      await start();
+      dropFile("a.wav");
+      await settle();
+
+      env.xhrs[0]!.responseText = "<html>";
+      env.xhrs[0]!.onload!();
+
+      expect(env.console.warnings).toEqual(["Failed to parse upload response: <html>"]);
+    });
+
+    test("logs a failed upload", async () => {
+      await start();
+      dropFile("a.wav");
+      await settle();
+
+      env.xhrs[0]!.onerror!();
+
+      expect(env.console.logs).toContain("Upload failed");
+    });
+
+    test("enables Convert when a failed upload leaves nothing pending and a format is selected", async () => {
+      await start("http://localhost/?to=mp3");
+      dropFile("a.wav");
+      await settle();
+
+      env.xhrs[0]!.onerror!();
+
+      expect(submit().disabled).toBe(false);
+      expect(submit().textContent).toBe("Convert");
+    });
+
+    test("pre-selects the format right away when the upload finished before the converters arrived", async () => {
+      await start("http://localhost/?to=mp3");
+      dropFile("a.wav");
+      env.xhrs[0]!.responseText = "{}";
+      env.xhrs[0]!.onload!();
+      await settle();
+
+      expect(submit().disabled).toBe(false);
+    });
+
+    test("enables Convert after the upload when a format is already selected", async () => {
+      await start("http://localhost/?to=mp3");
+      dropFile("a.wav");
+      await settle();
+      expect(submit().disabled).toBe(true);
+
+      env.xhrs[0]!.responseText = "{}";
+      env.xhrs[0]!.onload!();
+
+      expect(submit().disabled).toBe(false);
+      expect(submit().textContent).toBe("Convert");
+    });
+  });
 });
