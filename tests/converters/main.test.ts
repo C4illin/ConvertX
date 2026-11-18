@@ -17,8 +17,15 @@ if (!process.env.CONVERTX_TEST_ROOT) {
 
 // dynamic imports ensure that the guard above runs before the db module is loaded
 const { default: db } = await import("../../src/db/db");
-const { chunks, getAllInputs, getAllTargets, getPossibleTargets, handleConvert, mainConverter } =
-  await import("../../src/converters/main");
+const {
+  chunks,
+  getAllInputs,
+  getAllTargets,
+  getPossibleTargets,
+  handleConvert,
+  mainConverter,
+  parseFileName,
+} = await import("../../src/converters/main");
 
 const testRoot = mkdtempSync(join(tmpdir(), "convertx-main-test-"));
 
@@ -82,6 +89,22 @@ describe("converter registry", () => {
 
   test("getPossibleTargets returns an empty object for unknown input types", () => {
     expect(getPossibleTargets("xyz123")).toEqual({});
+  });
+
+  test("parseFileName resolves compound extensions registered by converters", () => {
+    expect(parseFileName("scan.nii.gz")).toEqual({ filetype: "nii.gz", stem: "scan" });
+    expect(parseFileName("scan.NII.GZ")).toEqual({ filetype: "NII.GZ", stem: "scan" });
+    expect(parseFileName("scan.hdr.gz")).toEqual({ filetype: "hdr.gz", stem: "scan" });
+    expect(getPossibleTargets(parseFileName("scan.nii.gz").filetype)).toEqual(
+      getPossibleTargets("nii.gz"),
+    );
+  });
+
+  test("parseFileName falls back to the last segment for unregistered extensions", () => {
+    expect(parseFileName("photo.JPG")).toEqual({ filetype: "JPG", stem: "photo" });
+    expect(parseFileName("archive.tar.gz")).toEqual({ filetype: "gz", stem: "archive.tar" });
+    expect(parseFileName("vcf.backup.vcf")).toEqual({ filetype: "vcf", stem: "vcf.backup" });
+    expect(parseFileName("noextfile")).toEqual({ filetype: "", stem: "noextfile" });
   });
 
   test("getAllTargets has an entry for every registered converter", () => {
@@ -332,6 +355,21 @@ describe("handleConvert", () => {
       { file_name: "vcf.backup.vcf", output_file_name: "vcf.backup.csv", status: "Done" },
     ]);
     expect(await readFile(`${outputDir}vcf.backup.csv`, "utf-8")).toContain("Backup");
+  });
+
+  test("strips a compound extension from the output name", async () => {
+    await writeFile(`${uploadsDir}scan.nii.gz`, "not really a nifti file");
+
+    // converter "none" is not registered, but the output name is still derived and recorded
+    await handleConvert(["scan.nii.gz"], uploadsDir, outputDir, "png", "none", jobCookie("nii"));
+
+    expect(rowsFor("nii")).toEqual([
+      {
+        file_name: "scan.nii.gz",
+        output_file_name: "scan.png",
+        status: "File type not supported",
+      },
+    ]);
   });
 
   test("keeps the base name of files with an upper-case extension", async () => {

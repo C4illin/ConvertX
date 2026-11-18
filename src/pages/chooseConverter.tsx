@@ -1,11 +1,14 @@
 import Elysia, { t } from "elysia";
 
-import { getPossibleTargets } from "../converters/main";
+import { getPossibleTargets, parseFileName } from "../converters/main";
 import { userService } from "./user";
 
 export const chooseConverter = new Elysia().use(userService).post(
   "/conversions",
   ({ body }) => {
+    // prefer the file name so compound extensions like "nii.gz" resolve correctly
+    const fileType = body.fileName ? parseFileName(body.fileName).filetype : body.fileType;
+    const possibleTargets = getPossibleTargets(fileType);
     return (
       <>
         <article
@@ -15,7 +18,7 @@ export const chooseConverter = new Elysia().use(userService).post(
             sm:h-[30vh]
           `}
         >
-          {Object.entries(getPossibleTargets(body.fileType)).map(([converter, targets]) => (
+          {Object.entries(possibleTargets).map(([converter, targets]) => (
             <article
               class={`convert_to_group flex w-full flex-col border-b border-neutral-700 p-4`}
               data-converter={converter}
@@ -50,7 +53,7 @@ export const chooseConverter = new Elysia().use(userService).post(
           <option selected disabled value="">
             Convert to
           </option>
-          {Object.entries(getPossibleTargets(body.fileType)).map(([converter, targets]) => (
+          {Object.entries(possibleTargets).map(([converter, targets]) => (
             <optgroup label={converter}>
               {targets.map((target) => (
                 <option value={`${target},${converter}`} safe>
@@ -63,5 +66,5 @@ export const chooseConverter = new Elysia().use(userService).post(
       </>
     );
   },
-  { body: t.Object({ fileType: t.String() }) },
+  { body: t.Object({ fileType: t.String(), fileName: t.Optional(t.String()) }) },
 );

@@ -20,6 +20,17 @@ describe("POST /conversions", () => {
     expect(await conversionsFor("jpg")).toBe(await conversionsFor("jpeg"));
   });
 
+  test("resolves compound extensions from the file name", async () => {
+    // the client only knows the last segment ("gz"), the file name carries "nii.gz"
+    const response = await request("/conversions", {
+      json: { fileType: "gz", fileName: "scan.nii.gz" },
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe(await conversionsFor("nii.gz"));
+    expect(await conversionsFor("nii.gz")).toContain('data-converter="vips"');
+  });
+
   test("offers no converters for an unknown file type", async () => {
     const body = await conversionsFor("xyz123");
 

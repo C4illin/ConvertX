@@ -5,7 +5,11 @@ import { Cookie } from "elysia";
 
 import db from "../db/db";
 import { MAX_CONVERT_PROCESS } from "../helpers/env";
-import { normalizeFiletype, normalizeOutputFiletype } from "../helpers/normalizeFiletype";
+import {
+  normalizeFiletype,
+  normalizeOutputFiletype,
+  splitFileName,
+} from "../helpers/normalizeFiletype";
 import { convert as convertassimp, properties as propertiesassimp } from "./assimp";
 import { convert as convertCalibre, properties as propertiesCalibre } from "./calibre";
 import { convert as convertDasel, properties as propertiesDasel } from "./dasel";
@@ -179,18 +183,11 @@ export async function handleConvert(
     const toProcess: Promise<string>[] = [];
     for (const fileName of chunk) {
       const filePath = `${userUploadsDir}${fileName}`;
-      const fileTypeOrig = fileName.includes(".") ? (fileName.split(".").pop() ?? "") : "";
+      const { filetype: fileTypeOrig, stem: fileStem } = parseFileName(fileName);
       const fileType = normalizeFiletype(fileTypeOrig);
       const newFileExt = normalizeOutputFiletype(convertTo);
-      let newFileName: string;
-      if (fileTypeOrig === "") {
-        newFileName = `${fileName}.${newFileExt}`;
-      } else {
-        newFileName = fileName.replace(
-          new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`),
-          newFileExt,
-        );
-      }
+      const newFileName =
+        fileTypeOrig === "" ? `${fileName}.${newFileExt}` : `${fileStem}.${newFileExt}`;
       const targetPath = `${userOutputDir}${newFileName}`;
       toProcess.push(
         new Promise((resolve, reject) => {
@@ -347,6 +344,13 @@ for (const converterName in properties) {
   }
 }
 possibleInputs.sort();
+
+/**
+ * Splits a file name into filetype and stem using the registered input extensions, so compound
+ * formats like "nii.gz" resolve to "nii.gz" instead of just "gz".
+ */
+export const parseFileName = (fileName: string): { filetype: string; stem: string } =>
+  splitFileName(fileName, possibleInputs);
 
 const allTargets: Record<string, string[]> = {};
 

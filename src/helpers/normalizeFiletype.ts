@@ -18,6 +18,36 @@ export const normalizeFiletype = (filetype: string): string => {
   }
 };
 
+/**
+ * Splits a file name into its extension (filetype) and stem. Compound extensions such as "nii.gz"
+ * are recognized when listed in knownFiletypes (longest match wins, compared case-insensitively);
+ * otherwise the last dot-separated segment is used, matching path.parse(fileName).ext. The returned
+ * filetype keeps the file name's original casing.
+ */
+export const splitFileName = (
+  fileName: string,
+  knownFiletypes: string[],
+): { filetype: string; stem: string } => {
+  const lowerName = fileName.toLowerCase();
+  let match = "";
+  for (const ext of knownFiletypes) {
+    if (ext.length > match.length && lowerName.endsWith(`.${ext}`)) {
+      match = ext;
+    }
+  }
+  if (match !== "") {
+    return {
+      filetype: fileName.slice(fileName.length - match.length),
+      stem: fileName.slice(0, fileName.length - match.length - 1),
+    };
+  }
+  if (!fileName.includes(".")) {
+    return { filetype: "", stem: fileName };
+  }
+  const dot = fileName.lastIndexOf(".");
+  return { filetype: fileName.slice(dot + 1), stem: fileName.slice(0, dot) };
+};
+
 export const normalizeOutputFiletype = (filetype: string): string => {
   const lowercaseFiletype = filetype.toLowerCase();
 

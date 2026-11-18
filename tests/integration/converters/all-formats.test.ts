@@ -7,7 +7,7 @@ import { convert as graphicsmagick } from "../../../src/converters/graphicsmagic
 import { convert as imagemagick } from "../../../src/converters/imagemagick";
 import { convert as inkscape } from "../../../src/converters/inkscape";
 import { convert as libjxl } from "../../../src/converters/libjxl";
-import { getPossibleTargets } from "../../../src/converters/main";
+import { getPossibleTargets, parseFileName } from "../../../src/converters/main";
 import { convert as resvg } from "../../../src/converters/resvg";
 import { convert as vips } from "../../../src/converters/vips";
 import { convert as vtracer } from "../../../src/converters/vtracer";
@@ -39,7 +39,7 @@ const inputFileNames = (await readdir(path.join(testsDirectory, "inputs")))
 // one test per input file x converter, skipping converters with no targets for the input
 const cases: [inputFileName: string, converterName: string][] = [];
 for (const inputFileName of inputFileNames) {
-  const inputFileType = path.parse(inputFileName).ext.slice(1);
+  const { filetype: inputFileType } = parseFileName(inputFileName);
   const possibleTargets = getPossibleTargets(inputFileType);
   for (const converterName of Object.keys(converters)) {
     if ((possibleTargets[converterName] ?? []).length > 0) {
@@ -51,8 +51,7 @@ for (const inputFileName of inputFileNames) {
 test.each(cases)(
   "converts all targets from %s with %s",
   async (inputFileName, converterName) => {
-    const inputFileType = path.parse(inputFileName).ext.slice(1);
-    const inputStem = path.parse(inputFileName).name;
+    const { filetype: inputFileType, stem: inputStem } = parseFileName(inputFileName);
     const inputPath = path.join(testsDirectory, "inputs", inputFileName);
     const convert = converters[converterName];
     const declaredTargets = [...new Set(getPossibleTargets(inputFileType)[converterName] ?? [])];
