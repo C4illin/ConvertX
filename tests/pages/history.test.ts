@@ -117,7 +117,7 @@ describe("GET /history", () => {
     const body = await historyOf(user.token);
 
     expect(body).toContain('<script src="/history.js" defer></script>');
-    expect(body).not.toMatch(/<script>/);
+    expect(body).not.toMatch(/<script(?![^>]*\ssrc=)/i);
     expect(body).not.toContain("fetch(");
   });
 });
