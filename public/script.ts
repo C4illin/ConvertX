@@ -4,12 +4,17 @@
 import { edenFetch } from "@elysiajs/eden";
 
 import type { App } from "../src";
+import { findPresetTarget } from "../src/helpers/findPresetTarget";
 
 // ── State ──────────────────────────────────────────────────────────────────────
 let fileType: string | null = null;
 const fileNames: string[] = [];
 let pendingFiles = 0;
 let formatSelected = false;
+
+const urlParams = new URLSearchParams(window.location.search);
+const defaultTo = urlParams.get("to");
+const defaultConverter = urlParams.get("converter");
 
 // ── DOM refs (guarded by type assertions) ──────────────────────────────────────
 const webroot = document.querySelector<HTMLMetaElement>("meta[name='webroot']")!.content;
@@ -125,6 +130,7 @@ function handleFile(file: File): void {
         // SECURE: server-rendered HTML fragment from trusted /conversions endpoint (no user input)
         selectContainer.innerHTML = html;
         updateSearchBar();
+        applyPresetTarget();
       })
       .catch(console.error);
   }
@@ -218,6 +224,30 @@ const updateSearchBar = (): void => {
     convertToPopup.classList.remove("hidden");
     convertToPopup.classList.add("flex");
   });
+};
+
+// ── Pre-selection via ?to=<format>&converter=<name> ───────────────────────────
+const applyPresetTarget = (): void => {
+  const buttons = Array.from(document.querySelectorAll<HTMLElement>(".target")).map((el) => ({
+    target: el.dataset.target ?? "",
+    converter: el.dataset.converter ?? "",
+    value: el.dataset.value ?? "",
+  }));
+  const match = findPresetTarget(buttons, defaultTo, defaultConverter);
+  if (!match) return;
+
+  const convertToEl = document.querySelector<HTMLSelectElement>("select[name='convert_to']");
+  const convertToInputEl = document.querySelector<HTMLInputElement>(
+    "input[name='convert_to_search']",
+  );
+  if (!convertToEl || !convertToInputEl) return;
+
+  convertToEl.value = match.value;
+  convertToInputEl.value = `${match.target} using ${match.converter}`;
+  formatSelected = true;
+  if (pendingFiles === 0 && fileNames.length > 0) {
+    convertButton.disabled = false;
+  }
 };
 
 // ── File input change ──────────────────────────────────────────────────────────
