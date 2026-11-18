@@ -106,6 +106,7 @@ const imageInputs = [
 ];
 
 const audioInputs = [
+  "3cx.wav",
   "669",
   "722",
   "aa",
@@ -647,6 +648,7 @@ const imageOutputs = [
 ];
 
 const audioOutputs = [
+  "3cx.wav",
   "aac",
   "ac3",
   "ac4",
@@ -837,7 +839,7 @@ export async function convert(
   let message = "Done";
 
   const audioFormatsWithCover = ["m4a", "m4b", "mp3", "flac", "ogg"];
-  const audioFormatsNoCover = ["wav", "aac"];
+  const audioFormatsNoCover = ["wav", "aac", "3cx.wav"];
 
   if (audioFormatsWithCover.includes(convertTo)) {
     extraArgs.push(
@@ -865,7 +867,7 @@ export async function convert(
     message = "Done: resized to 256x256";
   }
 
-  if (convertTo === "wav-3cx") {
+  if (convertTo === "3cx.wav") {
     // 3CX telephony preset: mono, 8 kHz, 16-bit PCM (pcm_s16le is explicit to
     // avoid FFMPEG_OUTPUT_ARGS overriding the codec and breaking 3CX playback)
     extraArgs.push("-ac", "1", "-ar", "8000", "-c:a", "pcm_s16le");

@@ -20,7 +20,8 @@ export const normalizeFiletype = (filetype: string): string => {
 
 /**
  * Splits a file name into its extension (filetype) and stem. Compound extensions such as "nii.gz"
- * are recognized when listed in knownFiletypes (longest match wins, compared case-insensitively);
+ * are recognized when listed in knownFiletypes (longest match wins; both sides are lowercased
+ * before comparing, so mixed-case extension lists work too);
  * otherwise the last dot-separated segment is used, matching path.parse(fileName).ext. The returned
  * filetype keeps the file name's original casing.
  */
@@ -31,8 +32,9 @@ export const splitFileName = (
   const lowerName = fileName.toLowerCase();
   let match = "";
   for (const ext of knownFiletypes) {
-    if (ext.length > match.length && lowerName.endsWith(`.${ext}`)) {
-      match = ext;
+    const lowerExt = ext.toLowerCase();
+    if (lowerExt.length > match.length && lowerName.endsWith(`.${lowerExt}`)) {
+      match = lowerExt;
     }
   }
   if (match !== "") {
@@ -79,8 +81,6 @@ export const normalizeOutputFiletype = (filetype: string): string => {
       return "fbx";
     case "assjson":
       return "json";
-    case "wav-3cx":
-      return "wav";
     default:
       return lowercaseFiletype;
   }

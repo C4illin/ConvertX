@@ -45,6 +45,14 @@ test("splitFileName prefers the longest known extension and keeps the original c
   expect(splitFileName("archive.gz", known)).toEqual({ filetype: "gz", stem: "archive" });
 });
 
+test("splitFileName matches mixed-case entries in the known list", () => {
+  const known = ["NII.GZ", "Hdr.Gz"];
+  expect(splitFileName("scan.nii.gz", known)).toEqual({ filetype: "nii.gz", stem: "scan" });
+  expect(splitFileName("SCAN.NII.GZ", known)).toEqual({ filetype: "NII.GZ", stem: "SCAN" });
+  expect(splitFileName("scan.HDR.GZ", known)).toEqual({ filetype: "HDR.GZ", stem: "scan" });
+  expect(splitFileName("photo.png", known)).toEqual({ filetype: "png", stem: "photo" });
+});
+
 test("splitFileName falls back to the last segment when no known extension matches", () => {
   const known = ["nii.gz", "png"];
   expect(splitFileName("archive.tar.gz", known)).toEqual({ filetype: "gz", stem: "archive.tar" });

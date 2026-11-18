@@ -95,9 +95,11 @@ describe("converter registry", () => {
     expect(parseFileName("scan.nii.gz")).toEqual({ filetype: "nii.gz", stem: "scan" });
     expect(parseFileName("scan.NII.GZ")).toEqual({ filetype: "NII.GZ", stem: "scan" });
     expect(parseFileName("scan.hdr.gz")).toEqual({ filetype: "hdr.gz", stem: "scan" });
+    expect(parseFileName("call.3cx.wav")).toEqual({ filetype: "3cx.wav", stem: "call" });
     expect(getPossibleTargets(parseFileName("scan.nii.gz").filetype)).toEqual(
       getPossibleTargets("nii.gz"),
     );
+    expect(Object.keys(getPossibleTargets("3cx.wav"))).toContain("ffmpeg");
   });
 
   test("parseFileName falls back to the last segment for unregistered extensions", () => {
@@ -424,6 +426,8 @@ describe("handleConvert", () => {
     ["markdown_strict", "photo.md"],
     ["glb2", "photo.glb"],
     ["stlb", "photo.stl"],
+    ["3cx.wav", "photo.3cx.wav"],
+    ["wav-3cx", "photo.3cx.wav"],
   ])("names the output for target %s with its canonical extension", async (convertTo, expected) => {
     // the conversion itself is unsupported, but the output name is still derived and recorded
     await handleConvert(["photo.JPG"], uploadsDir, outputDir, convertTo, "none", jobCookie("name"));

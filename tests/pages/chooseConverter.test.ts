@@ -31,6 +31,16 @@ describe("POST /conversions", () => {
     expect(await conversionsFor("nii.gz")).toContain('data-converter="vips"');
   });
 
+  test("advertises the 3cx.wav telephony preset under ffmpeg", async () => {
+    const body = await conversionsFor("wav");
+
+    expect(body).toContain('data-value="3cx.wav,ffmpeg"');
+  });
+
+  test("maps the legacy wav-3cx label to 3cx.wav", async () => {
+    expect(await conversionsFor("wav-3cx")).toBe(await conversionsFor("3cx.wav"));
+  });
+
   test("offers no converters for an unknown file type", async () => {
     const body = await conversionsFor("xyz123");
 

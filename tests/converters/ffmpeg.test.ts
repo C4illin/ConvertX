@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeEach, expect, test } from "bun:test";
 import type { ExecFileOptions } from "node:child_process";
 
-import { convert } from "../../src/converters/ffmpeg";
+import { convert, properties } from "../../src/converters/ffmpeg";
 import { captureConsole } from "./helpers/converters";
 
 let calls: string[][] = [];
@@ -115,6 +115,29 @@ test.each(["wav", "aac"])("drops video streams for %s output", async (ext) => {
   await convert("in.mp3", "mp3", ext, `out.${ext}`, undefined, mockExecFile);
 
   expect(calls[0]).toEqual(["-i", "in.mp3", "-vn", `out.${ext}`]);
+});
+
+test("advertises 3cx.wav as an audio input and output", () => {
+  expect(properties.from.audio).toContain("3cx.wav");
+  expect(properties.to.audio).toContain("3cx.wav");
+});
+
+test("applies the 3CX telephony preset for 3cx.wav output", async () => {
+  const result = await convert("in.mp3", "mp3", "3cx.wav", "out.3cx.wav", undefined, mockExecFile);
+
+  expect(result).toBe("Done");
+  expect(calls[0]).toEqual([
+    "-i",
+    "in.mp3",
+    "-vn",
+    "-ac",
+    "1",
+    "-ar",
+    "8000",
+    "-c:a",
+    "pcm_s16le",
+    "out.3cx.wav",
+  ]);
 });
 
 test.each(["png", "jpg", "jpeg", "webp"])(
