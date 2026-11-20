@@ -26,6 +26,8 @@ const { deleteFile } = await import("../../../src/pages/deleteFile");
 const { listConverters } = await import("../../../src/pages/listConverters");
 const { chooseConverter } = await import("../../../src/pages/chooseConverter");
 const { healthcheck } = await import("../../../src/pages/healthcheck");
+const { apiKeys } = await import("../../../src/pages/apiKeys");
+const { api } = await import("../../../src/api");
 
 export { db, uploadsDir };
 
@@ -43,7 +45,9 @@ export const app = new Elysia({ prefix: realEnvModule.WEBROOT })
   .use(deleteFile)
   .use(listConverters)
   .use(chooseConverter)
-  .use(healthcheck);
+  .use(healthcheck)
+  .use(apiKeys)
+  .use(api);
 
 // --- environment flags ---------------------------------------------------------
 // src/helpers/env.ts reads process.env once at import, so flags are switched by

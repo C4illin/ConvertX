@@ -4,11 +4,13 @@ import { html } from "@elysiajs/html";
 import { staticPlugin } from "@elysiajs/static";
 import { Elysia } from "elysia";
 
+import { api } from "./api";
 import db from "./db/db";
 import { Jobs } from "./db/types";
 import { AUTO_DELETE_EVERY_N_HOURS, WEBROOT } from "./helpers/env";
 import "./helpers/printVersions";
 import { scheduleDelayed, ScheduledTask } from "./helpers/scheduleDelayed";
+import { apiKeys } from "./pages/apiKeys";
 import { chooseConverter } from "./pages/chooseConverter";
 import { convert } from "./pages/convert";
 import { deleteFile } from "./pages/deleteFile";
@@ -53,6 +55,8 @@ const app = new Elysia({
   .use(listConverters)
   .use(chooseConverter)
   .use(healthcheck)
+  .use(apiKeys)
+  .use(api)
   .onError(({ error, code, request }) => {
     if (code === "NOT_FOUND") {
       console.warn(`404: ${request.method} ${new URL(request.url).pathname}`);

@@ -163,6 +163,18 @@ function chunks<T>(arr: T[], size: number): T[][] {
   );
 }
 
+/** The name a converted file gets: the input's name, with the target's extension. */
+export function outputFileName(fileName: string, convertTo: string): string {
+  const fileTypeOrig = fileName.includes(".") ? (fileName.split(".").pop() ?? "") : "";
+  const newFileExt = normalizeOutputFiletype(convertTo);
+  if (fileTypeOrig === "") {
+    return `${fileName}.${newFileExt}`;
+  }
+  // The extension is everything after the last dot, so it can be sliced off. A RegExp built from
+  // it would break on names such as `scan.[` or `notes.$x`.
+  return `${fileName.slice(0, -fileTypeOrig.length)}${newFileExt}`;
+}
+
 export async function handleConvert(
   fileNames: string[],
   userUploadsDir: string,
@@ -181,16 +193,7 @@ export async function handleConvert(
       const filePath = `${userUploadsDir}${fileName}`;
       const fileTypeOrig = fileName.includes(".") ? (fileName.split(".").pop() ?? "") : "";
       const fileType = normalizeFiletype(fileTypeOrig);
-      const newFileExt = normalizeOutputFiletype(convertTo);
-      let newFileName: string;
-      if (fileTypeOrig === "") {
-        newFileName = `${fileName}.${newFileExt}`;
-      } else {
-        newFileName = fileName.replace(
-          new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`),
-          newFileExt,
-        );
-      }
+      const newFileName = outputFileName(fileName, convertTo);
       const targetPath = `${userOutputDir}${newFileName}`;
       toProcess.push(
         new Promise((resolve, reject) => {
