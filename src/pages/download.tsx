@@ -1,13 +1,12 @@
 import { randomUUID } from "node:crypto";
-import { rename, unlink } from "node:fs/promises";
+import { lstat, realpath, rename, unlink } from "node:fs/promises";
 import path from "node:path";
 
 import { Elysia } from "elysia";
 import sanitize from "sanitize-filename";
 
-import { outputDir } from "..";
 import db from "../db/db";
-import { WEBROOT } from "../helpers/env";
+import { outputDir, WEBROOT } from "../helpers/env";
 import { userService } from "./user";
 
 const archiveBuilds = new Map<string, Promise<void>>();
@@ -29,13 +28,28 @@ export const download = new Elysia()
       const jobId = params.jobId;
       const fileName = sanitize(params.fileName);
 
-      const filePath = `${outputDir}${userId}/${jobId}/${fileName}`;
-      const file = Bun.file(filePath);
-      if (!(await file.exists())) {
+      const jobOutputDir = path.join(outputDir, userId, jobId);
+      const filePath = path.join(jobOutputDir, fileName);
+
+      try {
+        const stat = await lstat(filePath);
+        if (stat.isSymbolicLink()) {
+          set.status = 403;
+          return { message: "Access denied." };
+        }
+
+        const resolvedBase = await realpath(jobOutputDir);
+        const resolvedFile = await realpath(filePath);
+        if (!resolvedFile.startsWith(resolvedBase + path.sep)) {
+          set.status = 403;
+          return { message: "Access denied." };
+        }
+      } catch {
         set.status = 404;
         return { message: "Converted file not found." };
       }
 
+      const file = Bun.file(filePath);
       return file;
     },
     {
@@ -55,7 +69,7 @@ export const download = new Elysia()
       }
 
       const jobId = decodeURIComponent(params.jobId);
-      const outputPath = `${outputDir}${userId}/${jobId}`;
+      const outputPath = path.join(outputDir, userId, jobId);
       const outputTar = path.join(outputPath, `converted_files_${jobId}.tar`);
 
       const archiveKey = `${userId}/${jobId}`;

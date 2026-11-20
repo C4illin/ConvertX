@@ -1,6 +1,4 @@
-import { execFile as execFileOriginal } from "node:child_process";
-
-import { ExecFileFn } from "./types";
+import { defaultExecFile, ExecFileFn } from "./types";
 
 export const properties = {
   from: {
@@ -17,7 +15,7 @@ export async function convert(
   convertTo: string,
   targetPath: string,
   options?: unknown,
-  execFile: ExecFileFn = execFileOriginal, // to make it mockable
+  execFile: ExecFileFn = defaultExecFile,
 ): Promise<string> {
   const args: string[] = [];
 

@@ -8,6 +8,7 @@ import db from "./db/db";
 import { Jobs } from "./db/types";
 import { AUTO_DELETE_EVERY_N_HOURS, WEBROOT } from "./helpers/env";
 import "./helpers/printVersions";
+import { getLandlockRunnerPath, isSandboxAvailable } from "./helpers/sandbox";
 import { scheduleDelayed, ScheduledTask } from "./helpers/scheduleDelayed";
 import { chooseConverter } from "./pages/chooseConverter";
 import { convert } from "./pages/convert";
@@ -75,6 +76,14 @@ if (process.env.NODE_ENV !== "production") {
 app.listen(process.env.PORT || 3000);
 
 console.log(`🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}${WEBROOT}`);
+
+if (isSandboxAvailable()) {
+  console.log(`🔒 Landlock sandbox: ENABLED (${getLandlockRunnerPath()})`);
+} else if (process.env.SANDBOX_STRICT === "true") {
+  console.warn("⚠️ Landlock sandbox: STRICT mode enabled but runner unavailable!");
+} else {
+  console.log("ℹ️ Landlock sandbox: NOT AVAILABLE (running unsandboxed)");
+}
 
 const MILLISECONDS_PER_HOUR = 60 * 60 * 1000;
 const autoDeleteIntervalMs = AUTO_DELETE_EVERY_N_HOURS * MILLISECONDS_PER_HOUR;
