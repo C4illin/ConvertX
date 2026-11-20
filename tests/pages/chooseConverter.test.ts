@@ -37,6 +37,17 @@ describe("POST /conversions", () => {
     expect(body).toContain('data-value="3cx.wav,ffmpeg"');
   });
 
+  test("falls back to fileType when the file name has no parseable extension", async () => {
+    // a name without an extension (or a dotfile) parses to an empty filetype and
+    // must not clobber the fileType the client supplied
+    for (const fileName of ["noextfile", ".bashrc", "README"]) {
+      const response = await request("/conversions", { json: { fileType: "png", fileName } });
+
+      expect(response.status).toBe(200);
+      expect(await response.text()).toBe(await conversionsFor("png"));
+    }
+  });
+
   test("offers no converters for an unknown file type", async () => {
     const body = await conversionsFor("xyz123");
 

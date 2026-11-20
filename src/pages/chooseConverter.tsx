@@ -6,8 +6,9 @@ import { userService } from "./user";
 export const chooseConverter = new Elysia().use(userService).post(
   "/conversions",
   ({ body }) => {
-    // prefer the file name so compound extensions like "nii.gz" resolve correctly
-    const fileType = body.fileName ? parseFileName(body.fileName).filetype : body.fileType;
+    // prefer the file name so compound extensions like "nii.gz" resolve correctly,
+    // but fall back to fileType when the name has no parseable extension
+    const fileType = (body.fileName ? parseFileName(body.fileName).filetype : "") || body.fileType;
     const possibleTargets = getPossibleTargets(fileType);
     return (
       <>
