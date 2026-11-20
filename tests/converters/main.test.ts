@@ -395,6 +395,21 @@ describe("handleConvert", () => {
     expect(await readFile(`${outputDir}noextfile.csv`, "utf-8")).toContain("No Ext");
   });
 
+  test("treats a dotfile as extensionless and appends the output extension", async () => {
+    await writeFile(`${uploadsDir}.bashrc`, "alias ll='ls -la'");
+
+    // no converter is registered for "bashrc" or "", but the output name is still derived
+    await handleConvert([".bashrc"], uploadsDir, outputDir, "csv", "none", jobCookie("dot"));
+
+    expect(rowsFor("dot")).toEqual([
+      {
+        file_name: ".bashrc",
+        output_file_name: ".bashrc.csv",
+        status: "File type not supported",
+      },
+    ]);
+  });
+
   test("resolves and records the status when no converter supports the conversion", async () => {
     await writeFile(`${uploadsDir}dummy.xyz123`, "dummy content");
 

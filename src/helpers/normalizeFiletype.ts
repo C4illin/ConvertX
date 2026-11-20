@@ -43,10 +43,11 @@ export const splitFileName = (
       stem: fileName.slice(0, fileName.length - match.length - 1),
     };
   }
-  if (!fileName.includes(".")) {
+  const dot = fileName.lastIndexOf(".");
+  // no dot at all, or only a leading dot (dotfile like ".bashrc"): no extension (unless it matched above)
+  if (dot <= 0) {
     return { filetype: "", stem: fileName };
   }
-  const dot = fileName.lastIndexOf(".");
   return { filetype: fileName.slice(dot + 1), stem: fileName.slice(0, dot) };
 };
 

@@ -66,3 +66,13 @@ test("splitFileName handles names without an extension", () => {
   expect(splitFileName("noextfile", ["png"])).toEqual({ filetype: "", stem: "noextfile" });
   expect(splitFileName("noextfile", [])).toEqual({ filetype: "", stem: "noextfile" });
 });
+
+test("splitFileName treats dotfiles as extensionless unless the suffix is a known type", () => {
+  const known = ["vcf", "nii.gz", "png"];
+  expect(splitFileName(".bashrc", known)).toEqual({ filetype: "", stem: ".bashrc" });
+  expect(splitFileName(".bashrc", [])).toEqual({ filetype: "", stem: ".bashrc" });
+  expect(splitFileName(".", known)).toEqual({ filetype: "", stem: "." });
+  // a dotfile whose suffix is registered still matches it
+  expect(splitFileName(".vcf", known)).toEqual({ filetype: "vcf", stem: "" });
+  expect(splitFileName(".nii.gz", known)).toEqual({ filetype: "nii.gz", stem: "" });
+});
