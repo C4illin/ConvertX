@@ -14,4 +14,4 @@ sortImports = true
 sortTailwindcss = false
 sortPackageJson = true
 jsdoc = true
-ignorePatterns = ["public/*.js"]
+ignorePatterns = ["public/*.js", "tests/integration/converters/outputs/", "tests/integration/converters/inputs/"]

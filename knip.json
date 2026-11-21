@@ -19,8 +19,7 @@
     "potrace",
     "soffice",
     "perl",
-    "markitdown",
-    "fmt"
+    "markitdown"
   ],
   "tailwind": {
     "entry": ["src/main.css"]

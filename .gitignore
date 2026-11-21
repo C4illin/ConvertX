@@ -53,3 +53,4 @@ package-lock.json
 /public/results.js
 /public/script.js
 /public/history.js
+/tests/integration/converters/outputs/
