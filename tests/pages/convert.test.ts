@@ -1,8 +1,19 @@
-import { describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { mkdirSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 
+import { captureConsole } from "../converters/helpers/converters";
 import { createJob, createUser, db, jobDirs, request, waitFor } from "./helpers/app";
+
+let output: ReturnType<typeof captureConsole>;
+
+beforeEach(() => {
+  output = captureConsole();
+});
+
+afterEach(() => {
+  output.restore();
+});
 
 type JobRow = { status: string; num_files: number };
 type FileRow = { file_name: string; output_file_name: string; status: string };

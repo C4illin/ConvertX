@@ -6,7 +6,12 @@ import tseslint, { parser as eslintParserTypeScript } from "typescript-eslint";
 
 export default defineConfig(
   {
-    ignores: ["**/node_modules/**", "dist/**", "tests/integration/converters/outputs/**"],
+    ignores: [
+      "**/node_modules/**",
+      "dist/**",
+      "**/public/**/*.js",
+      "tests/integration/converters/outputs/**",
+    ],
   },
   js.configs.recommended,
   tseslint.configs.recommended,
