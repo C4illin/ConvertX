@@ -18,6 +18,39 @@ export const normalizeFiletype = (filetype: string): string => {
   }
 };
 
+/**
+ * Splits a file name into its extension (filetype) and stem. Compound extensions such as "nii.gz"
+ * are recognized when listed in knownFiletypes (longest match wins; both sides are lowercased
+ * before comparing, so mixed-case extension lists work too); otherwise the last dot-separated
+ * segment is used, matching path.parse(fileName).ext. The returned filetype keeps the file name's
+ * original casing.
+ */
+export const splitFileName = (
+  fileName: string,
+  knownFiletypes: string[],
+): { filetype: string; stem: string } => {
+  const lowerName = fileName.toLowerCase();
+  let match = "";
+  for (const ext of knownFiletypes) {
+    const lowerExt = ext.toLowerCase();
+    if (lowerExt.length > match.length && lowerName.endsWith(`.${lowerExt}`)) {
+      match = lowerExt;
+    }
+  }
+  if (match !== "") {
+    return {
+      filetype: fileName.slice(fileName.length - match.length),
+      stem: fileName.slice(0, fileName.length - match.length - 1),
+    };
+  }
+  const dot = fileName.lastIndexOf(".");
+  // no dot at all, or only a leading dot (dotfile like ".bashrc"): no extension (unless it matched above)
+  if (dot <= 0) {
+    return { filetype: "", stem: fileName };
+  }
+  return { filetype: fileName.slice(dot + 1), stem: fileName.slice(0, dot) };
+};
+
 export const normalizeOutputFiletype = (filetype: string): string => {
   const lowercaseFiletype = filetype.toLowerCase();
 
@@ -49,8 +82,6 @@ export const normalizeOutputFiletype = (filetype: string): string => {
       return "fbx";
     case "assjson":
       return "json";
-    case "wav-3cx":
-      return "wav";
     default:
       return lowercaseFiletype;
   }

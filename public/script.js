@@ -57,7 +57,8 @@ function handleFile(file) {
 
     fetch(`${webroot}/conversions`, {
       method: "POST",
-      body: JSON.stringify({ fileType }),
+      // fileName lets the server resolve compound extensions like "nii.gz"
+      body: JSON.stringify({ fileType, fileName: file.name }),
       headers: { "Content-Type": "application/json" },
     })
       .then((res) => res.text())
