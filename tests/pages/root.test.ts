@@ -84,6 +84,15 @@ describe("GET / with accounts", () => {
     );
   });
 
+  test("answers with Cache-Control: no-store", async () => {
+    const user = await createUser();
+
+    const response = await request("/", { cookies: { auth: user.token } });
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+  });
+
   test("offers every target of every converter", async () => {
     const user = await createUser();
 
