@@ -13,16 +13,7 @@ import { userService } from "./user";
 
 export const convert = new Elysia().use(userService).post(
   "/convert",
-  async ({ body, redirect, jwt, cookie: { auth, jobId } }) => {
-    if (!auth?.value) {
-      return redirect(`${WEBROOT}/login`, 302);
-    }
-
-    const user = await jwt.verify(auth.value);
-    if (!user) {
-      return redirect(`${WEBROOT}/login`, 302);
-    }
-
+  async ({ body, redirect, user, cookie: { jobId } }) => {
     if (!jobId?.value) {
       return redirect(`${WEBROOT}/`, 302);
     }

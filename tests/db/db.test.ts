@@ -1,5 +1,5 @@
 import { Database } from "bun:sqlite";
-import { afterEach, beforeEach, expect, test } from "bun:test";
+import { afterEach, beforeEach, expect, spyOn, test } from "bun:test";
 import { existsSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
 
@@ -106,10 +106,16 @@ test("db initializes and creates tables on first run", () => {
   expect(tables.map((t) => t.name)).toContain("users");
   expect(tables.map((t) => t.name)).toContain("jobs");
   expect(tables.map((t) => t.name)).toContain("file_names");
-  expect(getDbVersion(testDb)).toBe(1);
+  expect(getDbVersion(testDb)).toBe(2);
+  expect(getColumnInfo(testDb, "users").map((c) => c.name)).toContain("external_id");
+  expect(
+    testDb
+      .query("SELECT name FROM sqlite_master WHERE type='index' AND name='users_external_id'")
+      .get(),
+  ).toBeTruthy();
 });
 
-test("db handles migration from version 0 to version 1", () => {
+test("db handles migration from version 0 to version 2", () => {
   testDb.close();
   const migrateDbPath = join(testRoot, `test-db-migrate-${Date.now()}.sqlite`);
   const migrateDb = new Database(migrateDbPath, { create: true });
@@ -141,9 +147,17 @@ test("db handles migration from version 0 to version 1", () => {
     // Now runs the real migration logic from db.ts
     initializeDatabase(migrateDb);
 
-    expect(getDbVersion(migrateDb)).toBe(1);
+    expect(getDbVersion(migrateDb)).toBe(2);
     const columnInfo = getColumnInfo(migrateDb, "file_names");
     expect(columnInfo.map((c) => c.name)).toContain("status");
+    expect(getColumnInfo(migrateDb, "users").map((c) => c.name)).toContain("external_id");
+    // The unique index is a separate statement from the ALTER, so a regression there
+    // would leave the column in place and `ensureSsoUser`'s one-row guarantee gone.
+    expect(
+      migrateDb
+        .query("SELECT name FROM sqlite_master WHERE type='index' AND name='users_external_id'")
+        .get(),
+    ).toBeTruthy();
   } finally {
     if (migrateDb) migrateDb.close();
     if (existsSync(migrateDbPath)) unlinkSync(migrateDbPath);
@@ -154,6 +168,206 @@ test("db handles migration from version 0 to version 1", () => {
 
 test("db enables WAL mode", () => {
   expect(getJournalMode(testDb)?.toLowerCase()).toBe("wal");
+});
+
+test("db restores the unique index on a file that has the column but lost the index", () => {
+  // The crash window the migration comment names: ALTER committed, CREATE INDEX never ran,
+  // and user_version already says 2. The column guard then skips its block forever, so only
+  // an unconditional create brings the one-row-per-identity guarantee back.
+  const path = join(testRoot, `test-db-noindex-${Date.now()}.sqlite`);
+  const db = new Database(path, { create: true });
+
+  try {
+    db.exec(`
+      CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, password TEXT NOT NULL, external_id TEXT);
+      CREATE TABLE file_names (id INTEGER PRIMARY KEY AUTOINCREMENT, job_id INTEGER NOT NULL, file_name TEXT NOT NULL, output_file_name TEXT NOT NULL, status TEXT DEFAULT 'not started');
+      CREATE TABLE jobs (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, date_created TEXT NOT NULL, status TEXT DEFAULT 'not started', num_files INTEGER DEFAULT 0);
+      INSERT INTO users (email, password, external_id) VALUES ('alice', 'hash', 'uid-alice');
+      PRAGMA user_version = 2;
+    `);
+
+    expect((db.query("PRAGMA index_list(users)").all() as { name: string }[]).length).toBe(0);
+
+    initializeDatabase(db);
+
+    const indexes = db.query("PRAGMA index_list(users)").all() as {
+      name: string;
+      unique: number;
+    }[];
+    const externalIdIndex = indexes.find((i) => i.name === "users_external_id");
+    expect(externalIdIndex).toBeTruthy();
+    expect(externalIdIndex?.unique).toBe(1);
+
+    // The guarantee itself, not just the index's name.
+    expect(() =>
+      db
+        .query("INSERT INTO users (email, password, external_id) VALUES (?, ?, ?)")
+        .run("bob", "hash", "uid-alice"),
+    ).toThrow();
+  } finally {
+    db.close();
+    for (const suffix of ["", "-wal", "-shm"]) {
+      if (existsSync(`${path}${suffix}`)) unlinkSync(`${path}${suffix}`);
+    }
+  }
+});
+
+test("db does not downgrade a file written by a newer build", () => {
+  const path = join(testRoot, `test-db-newer-${Date.now()}.sqlite`);
+  const db = new Database(path, { create: true });
+
+  try {
+    db.exec(`
+      CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, password TEXT NOT NULL);
+      CREATE TABLE file_names (id INTEGER PRIMARY KEY AUTOINCREMENT, job_id INTEGER NOT NULL, file_name TEXT NOT NULL, output_file_name TEXT NOT NULL);
+      CREATE TABLE jobs (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, date_created TEXT NOT NULL);
+      PRAGMA user_version = 5;
+    `);
+
+    initializeDatabase(db);
+
+    // Stamping 2 over a v5 marker would make the next upgrade re-run migrations 3..5.
+    expect(getDbVersion(db)).toBe(5);
+  } finally {
+    db.close();
+    for (const suffix of ["", "-wal", "-shm"]) {
+      if (existsSync(`${path}${suffix}`)) unlinkSync(`${path}${suffix}`);
+    }
+  }
+});
+
+test("db boots on a file whose duplicates block the index, and reports them without the identity", () => {
+  const path = join(testRoot, `test-db-dupes-${Date.now()}.sqlite`);
+  const db = new Database(path, { create: true });
+  const logged: string[] = [];
+  const spy = spyOn(console, "error").mockImplementation((...args: unknown[]) => {
+    logged.push(args.map(String).join(" "));
+  });
+
+  try {
+    db.exec(`
+      CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, password TEXT NOT NULL, external_id TEXT);
+      CREATE TABLE file_names (id INTEGER PRIMARY KEY AUTOINCREMENT, job_id INTEGER NOT NULL, file_name TEXT NOT NULL, output_file_name TEXT NOT NULL, status TEXT DEFAULT 'not started');
+      CREATE TABLE jobs (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, date_created TEXT NOT NULL, status TEXT DEFAULT 'not started', num_files INTEGER DEFAULT 0);
+      INSERT INTO users (email, password, external_id) VALUES ('alice', 'hash', 'person@example.com');
+      INSERT INTO users (email, password, external_id) VALUES ('bob', 'hash', 'person@example.com');
+      PRAGMA user_version = 2;
+    `);
+
+    // Two rows claiming one identity makes CREATE UNIQUE INDEX throw. That case is
+    // tolerated: the alternative is a container that will not start.
+    expect(() => initializeDatabase(db)).not.toThrow();
+    expect((db.query("PRAGMA index_list(users)").all() as unknown[]).length).toBe(0);
+
+    const message = logged.join("\n");
+    expect(message).toContain("1 duplicated identities across 2 rows");
+    // The identity may be an email address, so it must not reach the log.
+    expect(message).not.toContain("person@example.com");
+  } finally {
+    spy.mockRestore();
+    db.close();
+    for (const suffix of ["", "-wal", "-shm"]) {
+      if (existsSync(`${path}${suffix}`)) unlinkSync(`${path}${suffix}`);
+    }
+  }
+});
+
+test("db rethrows an index failure that is not about duplicates", () => {
+  const path = join(testRoot, `test-db-indexfail-${Date.now()}.sqlite`);
+  const db = new Database(path, { create: true });
+
+  try {
+    // A table squatting on the index name is not a duplicate-identity condition, so it
+    // must surface instead of being logged as "no duplicates found" and swallowed.
+    db.exec(`
+      CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, password TEXT NOT NULL, external_id TEXT);
+      CREATE TABLE file_names (id INTEGER PRIMARY KEY AUTOINCREMENT, job_id INTEGER NOT NULL, file_name TEXT NOT NULL, output_file_name TEXT NOT NULL, status TEXT DEFAULT 'not started');
+      CREATE TABLE jobs (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, date_created TEXT NOT NULL, status TEXT DEFAULT 'not started', num_files INTEGER DEFAULT 0);
+      CREATE TABLE users_external_id (x INTEGER);
+      PRAGMA user_version = 2;
+    `);
+
+    // A table squatting on the index name is not a duplicate-identity condition, so it must
+    // surface instead of being logged as "no duplicates found" and swallowed. Match the actual
+    // conflict: a bare `toThrow()` would also pass on a broken fixture.
+    expect(() => initializeDatabase(db)).toThrow(/already a table named users_external_id/i);
+  } finally {
+    db.close();
+    for (const suffix of ["", "-wal", "-shm"]) {
+      if (existsSync(`${path}${suffix}`)) unlinkSync(`${path}${suffix}`);
+    }
+  }
+});
+
+// `CREATE UNIQUE INDEX IF NOT EXISTS` is a no-op when the name is taken, so an index of the
+// right name with the wrong shape has to be reported: the identity guard would run without
+// uniqueness while believing it is protected.
+const wrongIndexShapes: [string, string][] = [
+  ["a non-unique index", "CREATE INDEX users_external_id ON users(external_id)"],
+  ["a unique index on another column", "CREATE UNIQUE INDEX users_external_id ON users(email)"],
+  [
+    "a partial unique index",
+    "CREATE UNIQUE INDEX users_external_id ON users(external_id) WHERE external_id IS NOT NULL",
+  ],
+];
+
+test.each(wrongIndexShapes)(
+  "db reports %s that IF NOT EXISTS would leave alone",
+  (_label: string, createIndex: string) => {
+    const path = join(testRoot, `test-db-wrongindex-${Date.now()}.sqlite`);
+    const db = new Database(path, { create: true });
+    const logged: string[] = [];
+    const spy = spyOn(console, "error").mockImplementation((...args: unknown[]) => {
+      logged.push(args.map(String).join(" "));
+    });
+
+    try {
+      db.exec(`
+      CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, password TEXT NOT NULL, external_id TEXT);
+      CREATE TABLE file_names (id INTEGER PRIMARY KEY AUTOINCREMENT, job_id INTEGER NOT NULL, file_name TEXT NOT NULL, output_file_name TEXT NOT NULL, status TEXT DEFAULT 'not started');
+      CREATE TABLE jobs (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, date_created TEXT NOT NULL, status TEXT DEFAULT 'not started', num_files INTEGER DEFAULT 0);
+      ${createIndex};
+      PRAGMA user_version = 2;
+    `);
+
+      expect(() => initializeDatabase(db)).not.toThrow();
+      expect(logged.join("\n")).toContain("does not enforce uniqueness");
+    } finally {
+      spy.mockRestore();
+      db.close();
+      for (const suffix of ["", "-wal", "-shm"]) {
+        if (existsSync(`${path}${suffix}`)) unlinkSync(`${path}${suffix}`);
+      }
+    }
+  },
+);
+
+test("db accepts a correct unique index without reporting anything", () => {
+  const path = join(testRoot, `test-db-goodindex-${Date.now()}.sqlite`);
+  const db = new Database(path, { create: true });
+  const logged: string[] = [];
+  const spy = spyOn(console, "error").mockImplementation((...args: unknown[]) => {
+    logged.push(args.map(String).join(" "));
+  });
+
+  try {
+    db.exec(`
+      CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, password TEXT NOT NULL, external_id TEXT);
+      CREATE TABLE file_names (id INTEGER PRIMARY KEY AUTOINCREMENT, job_id INTEGER NOT NULL, file_name TEXT NOT NULL, output_file_name TEXT NOT NULL, status TEXT DEFAULT 'not started');
+      CREATE TABLE jobs (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, date_created TEXT NOT NULL, status TEXT DEFAULT 'not started', num_files INTEGER DEFAULT 0);
+      CREATE UNIQUE INDEX users_external_id ON users(external_id);
+      PRAGMA user_version = 2;
+    `);
+
+    expect(() => initializeDatabase(db)).not.toThrow();
+    expect(logged.join("\n")).not.toContain("does not enforce uniqueness");
+  } finally {
+    spy.mockRestore();
+    db.close();
+    for (const suffix of ["", "-wal", "-shm"]) {
+      if (existsSync(`${path}${suffix}`)) unlinkSync(`${path}${suffix}`);
+    }
+  }
 });
 
 test("db module exports a working database instance", () => {

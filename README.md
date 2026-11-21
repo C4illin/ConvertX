@@ -112,6 +112,100 @@ All are optional, JWT_SECRET is recommended to be set.
 | UNAUTHENTICATED_USER_SHARING | false                                              | Shares conversion history between all unauthenticated users                                                                                                   |
 | MAX_CONVERT_PROCESS          | 0                                                  | Maximum number of concurrent conversion processes allowed. Set to 0 for unlimited.                                                                            |
 | PORT                         | 3000                                               | Application listen port                                                                                                                                       |
+| SSO_ENABLED                  | false                                              | Take the user identity from a reverse-proxy header instead of the local login form. See [Single sign-on](#single-sign-on-forward-auth).                       |
+| SSO_UID_HEADER               | x-authentik-uid                                    | Header carrying the stable user id when `SSO_ENABLED` is true                                                                                                 |
+| SSO_USERNAME_HEADER          | x-authentik-username                               | Header carrying the display name when `SSO_ENABLED` is true                                                                                                   |
+
+### Single sign-on (forward auth)
+
+`SSO_ENABLED=true` makes ConvertX take the user's identity from a request header that a reverse proxy sets after it has authenticated them. The built-in login is switched off. Any proxy that can set a stable header works: authentik, oauth2-proxy, Authelia.
+
+#### Before you enable it
+
+1. Create a local account with a password you know. It is the only way back in if the proxy breaks.
+2. Put ConvertX on a network the proxy can reach and clients cannot.
+
+#### Enable it
+
+```yaml
+services:
+  convertx:
+    image: ghcr.io/c4illin/convertx
+    expose:
+      - "3000" # not `ports:`
+    networks: [proxy]
+    environment:
+      SSO_ENABLED: "true"
+      SSO_UID_HEADER: x-authentik-uid
+      SSO_USERNAME_HEADER: x-authentik-username
+```
+
+Never publish the container port. Every control below assumes the app is reachable only through the proxy. If you must keep `ports:`, bind it to `127.0.0.1`.
+
+#### Configure the proxy
+
+Three rules. All three are required.
+
+1. Send the id header on every request, including assets.
+2. List every identity header in `authResponseHeaders`. Traefik deletes a listed header from the incoming request and copies it back from the auth response, so a client cannot supply it. A header you leave out is forwarded untouched.
+3. Make the proxy overwrite `X-Forwarded-Host` and `X-Forwarded-Proto`, never append. ConvertX reads both when it checks same-origin, so appended values let the caller decide.
+
+```yaml
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: authentik-forward-auth
+spec:
+  forwardAuth:
+    address: http://authentik-server/outpost.goauthentik.io/auth/traefik
+    authResponseHeaders:
+      - X-authentik-uid
+      - X-authentik-username
+```
+
+Attach the middleware to the ConvertX router.
+
+#### What changes
+
+| Route                                              | With `SSO_ENABLED=true`                                                                              |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `GET /`, `/history`, `/converters`, `/results/:id` | 200 with the header, 401 without it                                                                  |
+| `GET /account`                                     | 200, read-only identity                                                                              |
+| `GET` and `POST /login`, `/setup`, `/register`     | 404                                                                                                  |
+| `POST /account`                                    | 404                                                                                                  |
+| `/logoff`                                          | Clears the job cookie, then the proxy signs the browser in again. Sign out at the identity provider. |
+| Everything else                                    | Unchanged, and still requires the header                                                             |
+
+No JWT cookie is issued or read in this mode. A cookie from before you enabled SSO authenticates nothing.
+
+#### What is stored
+
+| Column              | Holds                                                    |
+| ------------------- | -------------------------------------------------------- |
+| `users.external_id` | The header value, verbatim. Unique index.                |
+| `users.id`          | Autoincrement key. Jobs reference this.                  |
+| `users.email`       | The display name. `unknown` until a request carries one. |
+| `users.password`    | A hash of a random value. Cannot be used to log in.      |
+
+The schema migrates to version 2 on start. No data moves and existing local accounts keep their ids.
+
+#### When something is wrong
+
+| Symptom                                                                        | Cause                                                                          | Fix                                                                    |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| Every request is 401                                                           | The proxy sends no id header, or sends a different name than `SSO_UID_HEADER`  | Compare the header name on both sides                                  |
+| 401 says "missing or invalid"                                                  | The header is present but empty, comma-joined, or over 512 characters          | Make the proxy replace the header instead of appending                 |
+| 403 on a browser POST                                                          | Cross-site `Origin`, or a plaintext `Origin` on a TLS deployment               | Check rule 3                                                           |
+| The container exits at start: `SSO_UID_HEADER is not a valid HTTP header name` | The variable is not a valid header name. Empty is fine. A space or `@` is not. | Fix the variable                                                       |
+| Locked out after a proxy outage                                                | The local login is off while the flag is on                                    | Set `SSO_ENABLED=false`, restart, sign in with the account from step 1 |
+| Log says `does not enforce uniqueness of external_id`                          | The database holds duplicate identities, so the unique index cannot be built   | Resolve the duplicates, drop `users_external_id`, restart              |
+
+#### Limits
+
+- Every authenticated user is a normal user. There are no roles and no admin mapping.
+- `X-authentik-jwt` is not verified. The trust boundary is the proxy plus the network rule above.
+- `SSO_ENABLED=true` takes precedence over `ALLOW_UNAUTHENTICATED`. Anonymous access is unavailable.
+- A request with no `Origin` header, such as curl, is not subject to the cross-site check. Browsers always send one.
 
 ### Docker images
 
