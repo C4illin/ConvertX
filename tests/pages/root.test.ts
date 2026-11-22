@@ -152,4 +152,31 @@ describe("GET / without accounts (ALLOW_UNAUTHENTICATED)", () => {
     expect(setCookie(response, "auth")).toBeUndefined();
     expect(jobsOf(user.id)).toHaveLength(1);
   });
+
+  test("assigns distinct job IDs to concurrent requests sharing unauthenticated user 0", async () => {
+    setEnv({ ALLOW_UNAUTHENTICATED: true, UNAUTHENTICATED_USER_SHARING: true });
+    const existingIds = new Set(jobsOf("0").map((job) => job.id));
+
+    const responses = await Promise.all(Array.from({ length: 10 }, () => request("/")));
+    const cookieIds = responses.map((res) => Number(setCookieValue(res, "jobId")));
+    const createdDbIds = jobsOf("0")
+      .map((job) => job.id)
+      .filter((id) => !existingIds.has(id));
+
+    expect(new Set(cookieIds).size).toBe(10);
+    expect(cookieIds.slice().sort((a, b) => a - b)).toEqual(createdDbIds);
+  });
+
+  test("assigns distinct job IDs to concurrent requests from the same authenticated user", async () => {
+    const user = await createUser();
+
+    const responses = await Promise.all(
+      Array.from({ length: 10 }, () => request("/", { cookies: { auth: user.token } })),
+    );
+    const cookieIds = responses.map((res) => Number(setCookieValue(res, "jobId")));
+    const dbIds = jobsOf(user.id).map((job) => job.id);
+
+    expect(new Set(cookieIds).size).toBe(10);
+    expect(cookieIds.slice().sort((a, b) => a - b)).toEqual(dbIds);
+  });
 });
