@@ -54,7 +54,9 @@ export const convert = new Elysia().use(userService).post(
       convertTo.includes("/") ||
       convertTo.includes("\\") ||
       convertTo.includes("..") ||
-      !getTargetsForConverter(converterName)?.includes(convertTo)
+      !getTargetsForConverter(converterName)?.some(
+        (target) => normalizeFiletype(target) === convertTo,
+      )
     ) {
       return redirect(`${WEBROOT}/`, 302);
     }

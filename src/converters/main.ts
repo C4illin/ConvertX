@@ -256,7 +256,9 @@ async function mainConverter(
       for (const key in converterObj.properties.from) {
         if (
           converterObj?.properties?.from[key]?.includes(fileType) &&
-          converterObj?.properties?.to[key]?.includes(convertTo)
+          converterObj?.properties?.to[key]?.some(
+            (target) => normalizeFiletype(target) === convertTo,
+          )
         ) {
           converterFunc = converterObj.converter;
           converterName = name;

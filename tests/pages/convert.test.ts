@@ -137,6 +137,26 @@ describe("POST /convert", () => {
     ]);
   });
 
+  test.each([
+    ["md,markitDown", '["report.docx"]', "report.md"],
+    ["tex,inkscape", '["diagram.svg"]', "diagram.tex"],
+  ])(
+    "accepts alias target %s when converter lists the canonical extension",
+    async (convertTo, fileNames, wantOutputName) => {
+      const { user, job } = await userWithJob();
+
+      const response = await convertRequest(
+        { auth: user.token, jobId: job },
+        { convert_to: convertTo, file_names: fileNames },
+      );
+
+      expect(response.status).toBe(302);
+      expect(response.headers.get("location")).toBe(`/results/${job}`);
+      await waitFor(() => jobRow(job).status === "completed");
+      expect(fileRows(job)[0]?.output_file_name).toBe(wantOutputName);
+    },
+  );
+
   test("sanitizes file names so conversions cannot read outside the job directory", async () => {
     const { user, job } = await userWithJob();
 
