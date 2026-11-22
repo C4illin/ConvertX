@@ -78,7 +78,9 @@ RUN ARCH=$(uname -m) && \
   chmod +x /usr/local/bin/vtracer && \
   rm /tmp/vtracer.tar.gz
 
-# Install oxidocs binary (docx, pptx and xlsx to pdf/png)
+# Install oxidocs binary (docx, pptx and xlsx to pdf/png). It writes the fonts it
+# carries next to itself on first use, so that is done here, as root: with PUID
+# set, /usr/local/bin is not writable when it runs.
 # renovate: datasource=github-releases depName=Ryujiyasu/oxi versioning=regex:^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?:-static\.(?<build>\d+))?$ extractVersion=^oxidocs-v(?<version>.+)$
 ARG OXIDOCS_VERSION=0.9.0-static.6
 RUN ARCH=$(uname -m) && \
@@ -91,6 +93,7 @@ RUN ARCH=$(uname -m) && \
   tar -xzf /tmp/oxidocs.tar.gz -C /tmp/ && \
   mv "/tmp/${OXIDOCS_ASSET}/oxidocs" /usr/local/bin/oxidocs && \
   chmod +x /usr/local/bin/oxidocs && \
+  oxidocs fonts-index > /dev/null && \
   rm -r /tmp/oxidocs.tar.gz "/tmp/${OXIDOCS_ASSET}"
 
 COPY --from=base /app/public/ /app/public/
