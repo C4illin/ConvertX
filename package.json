@@ -21,8 +21,11 @@
     "lint:eslint": "eslint .",
     "lint:prettier": "bun fmt --check",
     "lint:xss": "xss-scan",
-    "test": "bun test --path-ignore-patterns=tests/integration",
-    "test:integration": "docker build --target test -t convertx:test . && docker run --rm -t -v ./tests:/app/tests -v ./src:/app/src -v ./package.json:/app/package.json convertx:test bun test tests/integration"
+    "test": "bun test",
+    "test:integration": "bun run test:integration:build && bun run test:integration:run",
+    "test:integration:build": "docker build --target test -t convertx:test .",
+    "test:integration:run": "docker run --rm -t -v ./tests:/app/tests -v ./src:/app/src -v ./package.json:/app/package.json convertx:test bun test tests/integration",
+    "test:integration:update": "docker run --rm -t -v ./tests:/app/tests -v ./src:/app/src -v ./package.json:/app/package.json convertx:test bun test tests/integration --update-snapshots"
   },
   "dependencies": {
     "@elysiajs/html": "^1.4.2",
@@ -37,7 +40,7 @@
     "@kitajs/ts-html-plugin": "^4.1.4",
     "@tailwindcss/cli": "^4.3.3",
     "@tailwindcss/postcss": "^4.3.3",
-    "@types/bun": "1.4.4",
+    "@types/bun": "1.4.5",
     "@types/node": "^24.19.0",
     "eslint": "^10.11.0",
     "eslint-plugin-better-tailwindcss": "^4.7.0",

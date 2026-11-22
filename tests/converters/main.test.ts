@@ -17,8 +17,15 @@ if (!process.env.CONVERTX_TEST_ROOT) {
 
 // dynamic imports ensure that the guard above runs before the db module is loaded
 const { default: db } = await import("../../src/db/db");
-const { chunks, getAllInputs, getAllTargets, getPossibleTargets, handleConvert, mainConverter } =
-  await import("../../src/converters/main");
+const {
+  chunks,
+  getAllInputs,
+  getAllTargets,
+  getPossibleTargets,
+  handleConvert,
+  mainConverter,
+  parseFileName,
+} = await import("../../src/converters/main");
 
 const testRoot = mkdtempSync(join(tmpdir(), "convertx-main-test-"));
 
@@ -82,6 +89,24 @@ describe("converter registry", () => {
 
   test("getPossibleTargets returns an empty object for unknown input types", () => {
     expect(getPossibleTargets("xyz123")).toEqual({});
+  });
+
+  test("parseFileName resolves compound extensions registered by converters", () => {
+    expect(parseFileName("scan.nii.gz")).toEqual({ filetype: "nii.gz", stem: "scan" });
+    expect(parseFileName("scan.NII.GZ")).toEqual({ filetype: "NII.GZ", stem: "scan" });
+    expect(parseFileName("scan.hdr.gz")).toEqual({ filetype: "hdr.gz", stem: "scan" });
+    expect(parseFileName("call.3cx.wav")).toEqual({ filetype: "3cx.wav", stem: "call" });
+    expect(getPossibleTargets(parseFileName("scan.nii.gz").filetype)).toEqual(
+      getPossibleTargets("nii.gz"),
+    );
+    expect(Object.keys(getPossibleTargets("3cx.wav"))).toContain("ffmpeg");
+  });
+
+  test("parseFileName falls back to the last segment for unregistered extensions", () => {
+    expect(parseFileName("photo.JPG")).toEqual({ filetype: "JPG", stem: "photo" });
+    expect(parseFileName("archive.tar.gz")).toEqual({ filetype: "gz", stem: "archive.tar" });
+    expect(parseFileName("vcf.backup.vcf")).toEqual({ filetype: "vcf", stem: "vcf.backup" });
+    expect(parseFileName("noextfile")).toEqual({ filetype: "", stem: "noextfile" });
   });
 
   test("getAllTargets has an entry for every registered converter", () => {
@@ -155,6 +180,33 @@ describe("converter registry", () => {
     expect(getPossibleTargets("jxl").libjxl).not.toContain("jxl");
     expect(libreofficeProperties.from.text).not.toContain("xlsx");
     expect(libreofficeProperties.to.text).not.toContain("xlsm");
+
+    // ffmpeg categories
+    const pngTargets = getPossibleTargets("png").ffmpeg ?? [];
+    expect(pngTargets).toContain("jpg");
+    expect(pngTargets).toContain("webp");
+    expect(pngTargets).toContain("gif");
+    expect(pngTargets).not.toContain("mp3");
+    expect(pngTargets).not.toContain("wav");
+    expect(pngTargets).not.toContain("srt");
+    expect(pngTargets).not.toContain("vtt");
+
+    const mp3Targets = getPossibleTargets("mp3").ffmpeg ?? [];
+    expect(mp3Targets).toContain("flac");
+    expect(mp3Targets).toContain("wav");
+    expect(mp3Targets).toContain("png");
+    expect(mp3Targets).toContain("jpg");
+    expect(mp3Targets).toContain("mp4");
+    expect(mp3Targets).toContain("mkv");
+    expect(mp3Targets).not.toContain("srt");
+    expect(mp3Targets).not.toContain("vtt");
+
+    const srtTargets = getPossibleTargets("srt").ffmpeg ?? [];
+    expect(srtTargets).toContain("vtt");
+    expect(srtTargets).toContain("ass");
+    expect(srtTargets).not.toContain("png");
+    expect(srtTargets).not.toContain("mp3");
+    expect(srtTargets).not.toContain("mp4");
   });
 });
 
@@ -307,6 +359,21 @@ describe("handleConvert", () => {
     expect(await readFile(`${outputDir}vcf.backup.csv`, "utf-8")).toContain("Backup");
   });
 
+  test("strips a compound extension from the output name", async () => {
+    await writeFile(`${uploadsDir}scan.nii.gz`, "not really a nifti file");
+
+    // converter "none" is not registered, but the output name is still derived and recorded
+    await handleConvert(["scan.nii.gz"], uploadsDir, outputDir, "png", "none", jobCookie("nii"));
+
+    expect(rowsFor("nii")).toEqual([
+      {
+        file_name: "scan.nii.gz",
+        output_file_name: "scan.png",
+        status: "File type not supported",
+      },
+    ]);
+  });
+
   test("keeps the base name of files with an upper-case extension", async () => {
     await writeFile(`${uploadsDir}CONTACT.VCF`, vcard("Upper"));
 
@@ -326,6 +393,21 @@ describe("handleConvert", () => {
       { file_name: "noextfile", output_file_name: "noextfile.csv", status: "Done" },
     ]);
     expect(await readFile(`${outputDir}noextfile.csv`, "utf-8")).toContain("No Ext");
+  });
+
+  test("treats a dotfile as extensionless and appends the output extension", async () => {
+    await writeFile(`${uploadsDir}.bashrc`, "alias ll='ls -la'");
+
+    // no converter is registered for "bashrc" or "", but the output name is still derived
+    await handleConvert([".bashrc"], uploadsDir, outputDir, "csv", "none", jobCookie("dot"));
+
+    expect(rowsFor("dot")).toEqual([
+      {
+        file_name: ".bashrc",
+        output_file_name: ".bashrc.csv",
+        status: "File type not supported",
+      },
+    ]);
   });
 
   test("resolves and records the status when no converter supports the conversion", async () => {
@@ -359,6 +441,7 @@ describe("handleConvert", () => {
     ["markdown_strict", "photo.md"],
     ["glb2", "photo.glb"],
     ["stlb", "photo.stl"],
+    ["3cx.wav", "photo.3cx.wav"],
   ])("names the output for target %s with its canonical extension", async (convertTo, expected) => {
     // the conversion itself is unsupported, but the output name is still derived and recorded
     await handleConvert(["photo.JPG"], uploadsDir, outputDir, convertTo, "none", jobCookie("name"));

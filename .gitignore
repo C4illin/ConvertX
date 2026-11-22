@@ -51,3 +51,6 @@ package-lock.json
 /tsconfig.tsbuildinfo
 /public/generated.css
 /bin
+
+/tests/integration/converters/outputs/
+

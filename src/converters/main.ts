@@ -6,7 +6,11 @@ import { Cookie } from "elysia";
 
 import db from "../db/db";
 import { MAX_CONVERT_PROCESS } from "../helpers/env";
-import { normalizeFiletype, normalizeOutputFiletype } from "../helpers/normalizeFiletype";
+import {
+  normalizeFiletype,
+  normalizeOutputFiletype,
+  splitFileName,
+} from "../helpers/normalizeFiletype";
 import { createSandboxedExec } from "../helpers/sandbox";
 import { convert as convertassimp, properties as propertiesassimp } from "./assimp";
 import { convert as convertCalibre, properties as propertiesCalibre } from "./calibre";
@@ -197,18 +201,11 @@ export async function handleConvert(
       const toProcess: Promise<string>[] = [];
       for (const fileName of chunk) {
         const filePath = `${userUploadsDir}${fileName}`;
-        const fileTypeOrig = fileName.includes(".") ? (fileName.split(".").pop() ?? "") : "";
+        const { filetype: fileTypeOrig, stem: fileStem } = parseFileName(fileName);
         const fileType = normalizeFiletype(fileTypeOrig);
         const newFileExt = normalizeOutputFiletype(convertTo);
-        let newFileName: string;
-        if (fileTypeOrig === "") {
-          newFileName = `${fileName}.${newFileExt}`;
-        } else {
-          newFileName = fileName.replace(
-            new RegExp(`${fileTypeOrig}(?!.*${fileTypeOrig})`),
-            newFileExt,
-          );
-        }
+        const newFileName =
+          fileTypeOrig === "" ? `${fileName}.${newFileExt}` : `${fileStem}.${newFileExt}`;
         const targetPath = `${userOutputDir}${newFileName}`;
         toProcess.push(
           new Promise((resolve, reject) => {
@@ -356,7 +353,13 @@ for (const converterName in properties) {
     for (const ext of fromList) {
       if (!possibleTargets[ext]) possibleTargets[ext] = {};
 
-      possibleTargets[ext][converterName] = [...toList];
+      if (!possibleTargets[ext][converterName]) {
+        possibleTargets[ext][converterName] = [...toList];
+      } else {
+        possibleTargets[ext][converterName] = [
+          ...new Set([...possibleTargets[ext][converterName], ...toList]),
+        ];
+      }
     }
   }
 }
@@ -383,6 +386,13 @@ for (const converterName in properties) {
 }
 possibleInputs.sort();
 
+/**
+ * Splits a file name into filetype and stem using the registered input extensions, so compound
+ * formats like "nii.gz" resolve to "nii.gz" instead of just "gz".
+ */
+export const parseFileName = (fileName: string): { filetype: string; stem: string } =>
+  splitFileName(fileName, possibleInputs);
+
 const allTargets: Record<string, string[]> = {};
 
 for (const converterName in properties) {
@@ -390,16 +400,13 @@ for (const converterName in properties) {
 
   if (!converterProperties) continue;
 
+  const targets = new Set<string>();
   for (const key in converterProperties.to) {
-    if (allTargets[converterName]) {
-      allTargets[converterName] = [
-        ...allTargets[converterName],
-        ...(converterProperties.to[key] || []),
-      ];
-    } else {
-      allTargets[converterName] = [...(converterProperties.to[key] || [])];
+    for (const ext of converterProperties.to[key] || []) {
+      targets.add(ext);
     }
   }
+  allTargets[converterName] = Array.from(targets);
 }
 
 export const getTargetsForConverter = (converter: string): string[] => {
@@ -416,16 +423,13 @@ for (const converterName in properties) {
 
   if (!converterProperties) continue;
 
+  const inputs = new Set<string>();
   for (const key in converterProperties.from) {
-    if (allInputs[converterName]) {
-      allInputs[converterName] = [
-        ...allInputs[converterName],
-        ...(converterProperties.from[key] || []),
-      ];
-    } else {
-      allInputs[converterName] = converterProperties.from[key] || [];
+    for (const ext of converterProperties.from[key] || []) {
+      inputs.add(ext);
     }
   }
+  allInputs[converterName] = Array.from(inputs);
 }
 
 export const getAllInputs = (converter: string) => {

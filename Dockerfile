@@ -1,4 +1,4 @@
-FROM oven/bun:1.4.4-slim AS base
+FROM oven/bun:1.4.5-slim AS base
 WORKDIR /app
 COPY package.json bun.lock /app/
 RUN bun install --frozen-lockfile
@@ -37,7 +37,9 @@ RUN apt-get update && apt-get install -y \
   latexmk \
   libheif-examples \
   libjxl-tools \
-  libreoffice \
+  libreoffice-calc-nogui \
+  libreoffice-draw-nogui \
+  libreoffice-writer-nogui \
   libva2 \
   libvips-tools \
   libemail-address-perl \
