@@ -194,6 +194,7 @@ test("db handles migration from version 1 to version 2, cleans orphans, and enab
         VALUES (100, 10, 'active.png', 'active.webp', 'completed');
       INSERT INTO file_names (id, job_id, file_name, output_file_name, status)
         VALUES (101, 999, 'orphan.png', 'orphan.webp', 'completed');
+      UPDATE sqlite_sequence SET seq = 105 WHERE name = 'file_names';
       PRAGMA user_version = 1;
     `);
 
@@ -219,6 +220,18 @@ test("db handles migration from version 1 to version 2, cleans orphans, and enab
         status: "completed",
       },
     ]);
+
+    const seqRow = migrateDb
+      .query("SELECT seq FROM sqlite_sequence WHERE name = 'file_names'")
+      .get() as { seq: number } | null;
+    expect(seqRow?.seq).toBe(105);
+
+    const inserted = migrateDb
+      .query(
+        "INSERT INTO file_names (job_id, file_name, output_file_name, status) VALUES (10, 'next.png', 'next.webp', 'completed') RETURNING id",
+      )
+      .get() as { id: number };
+    expect(inserted.id).toBe(106);
 
     const schema = migrateDb
       .query("SELECT sql FROM sqlite_master WHERE type='table' AND name='file_names'")

@@ -57,6 +57,17 @@ export function initializeDatabase(db: Database): void {
       const hasCascade = /\bON\s+DELETE\s+CASCADE\b/i.test(tableDef?.sql ?? "");
 
       db.transaction(() => {
+        const hasSequenceTable = Boolean(
+          db
+            .query("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'sqlite_sequence'")
+            .get(),
+        );
+        const previousSeqRow = hasSequenceTable
+          ? (db.query("SELECT seq FROM sqlite_sequence WHERE name = 'file_names'").get() as {
+              seq?: number;
+            } | null)
+          : null;
+
         db.exec("DELETE FROM file_names WHERE job_id NOT IN (SELECT id FROM jobs);");
 
         if (!hasCascade) {
@@ -74,6 +85,17 @@ export function initializeDatabase(db: Database): void {
             DROP TABLE file_names;
             ALTER TABLE file_names_migrated RENAME TO file_names;
           `);
+
+          if (previousSeqRow?.seq != null) {
+            const maxRow = db
+              .query("SELECT COALESCE(MAX(id), 0) AS maxId FROM file_names")
+              .get() as { maxId: number };
+            const preservedSeq = Math.max(previousSeqRow.seq, maxRow.maxId);
+            db.query("DELETE FROM sqlite_sequence WHERE name = 'file_names'").run();
+            db.query("INSERT INTO sqlite_sequence (name, seq) VALUES ('file_names', ?)").run(
+              preservedSeq,
+            );
+          }
         }
 
         db.exec("PRAGMA user_version = 2;");
