@@ -1,0 +1,17 @@
+This is a sample txt to test conversion in ConvertX
+
+Txt files have no styling
+
+But they can include unicode characters.
+
+NFC vs NFD: ä ä 한 한
+Astral: 😀 𐀀 𠮷
+Emoji: 👨‍👩‍👧‍👦 👍🏽 🇸🇪
+RTL: שלום مَرْحَبًا
+Bidi mixed: Latin שלום Latin مرحبا end
+CJK: 漢字 ひらがな カタカナ 한국어 ＡＢＣ１２３ あ　い
+Vietnamese: Tiếng Việt
+Spaces: a b c­d e​f g‌h   (NBSP, soft hyphen, ZWSP, ZWNJ between letters)
+Punctuation: — – “ ” ‘ ’ … € £ ¥ © ® ™
+Math: → ← ↑ ↓ ∑ ∞ ≈ ≠ ≤ ≥ ± × ÷
+Boundaries: ǿࠀ�
