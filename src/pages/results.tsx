@@ -20,6 +20,12 @@ function ResultsArticle({
   files: Filename[];
   outputPath: string;
 }) {
+  const isCompleted =
+    job.status === "completed" || (job.status !== "pending" && files.length >= job.num_files);
+  const progressMax = Math.max(job.num_files, files.length);
+  const pendingStyle = isCompleted ? "" : "pointer-events: none;";
+  const pendingAttrs = isCompleted ? "" : { disabled: true, "aria-busy": "true" };
+
   return (
     <article class="article">
       <div class="mb-4 flex items-center justify-between">
@@ -28,19 +34,19 @@ function ResultsArticle({
           <form action={`${WEBROOT}/delete/${job.id}`} method="POST">
             <button
               type="submit"
-              style={files.length !== job.num_files ? "pointer-events: none;" : ""}
+              style={pendingStyle}
               class="flex btn-secondary flex-row gap-2 text-contrast"
-              {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
+              {...pendingAttrs}
             >
               <DeleteIcon /> <p>Delete</p>
             </button>
           </form>
           <a
-            style={files.length !== job.num_files ? "pointer-events: none;" : ""}
+            style={pendingStyle}
             href={`${WEBROOT}/archive/${job.id}`}
             download={`converted_files_${job.id}.tar`}
             class="flex btn-primary flex-row gap-2 text-contrast"
-            {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
+            {...pendingAttrs}
           >
             <DownloadIcon /> <p>Tar</p>
           </a>
@@ -50,8 +56,8 @@ function ResultsArticle({
         </div>
       </div>
       <progress
-        max={job.num_files}
-        {...(files.length === job.num_files ? { value: files.length } : "")}
+        max={progressMax}
+        {...(isCompleted ? { value: progressMax } : "")}
         class={`
           mb-4 inline-block h-2 w-full appearance-none overflow-hidden rounded-full border-0
           bg-neutral-700 bg-none text-accent-500 accent-accent-500

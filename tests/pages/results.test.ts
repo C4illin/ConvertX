@@ -130,6 +130,38 @@ describe.each([
     expect(body).toContain(`href="/archive/${job}"`);
   });
 
+  test("enables actions and completes progress when a single input produces multiple outputs", async () => {
+    const user = await createUser();
+    const job = createJob(user.id, {
+      numFiles: 1,
+      status: "completed",
+      files: [done("page-1"), done("page-2"), done("page-3")],
+    });
+
+    const body = await (
+      await request(`${route}/${job}`, { method, cookies: { auth: user.token } })
+    ).text();
+
+    expect(body).not.toContain('aria-busy="true"');
+    expect(body).toContain('<progress max="3" value="3"');
+  });
+
+  test("keeps actions disabled while pending even if output count already reaches num_files", async () => {
+    const user = await createUser();
+    const job = createJob(user.id, {
+      numFiles: 2,
+      status: "pending",
+      files: [done("page-1"), done("page-2"), done("page-3")],
+    });
+
+    const body = await (
+      await request(`${route}/${job}`, { method, cookies: { auth: user.token } })
+    ).text();
+
+    expect(body.match(/aria-busy="true"/g)).toHaveLength(2);
+    expect(body).toMatch(/<progress max="3"(?! value)/);
+  });
+
   test("prefixes all links with WEBROOT", async () => {
     setEnv({ WEBROOT: "/convertx" });
     const user = await createUser();
