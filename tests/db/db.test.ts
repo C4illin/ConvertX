@@ -108,10 +108,10 @@ test("db initializes and creates tables on first run", () => {
   expect(tables.map((t) => t.name)).toContain("users");
   expect(tables.map((t) => t.name)).toContain("jobs");
   expect(tables.map((t) => t.name)).toContain("file_names");
-  expect(getDbVersion(testDb)).toBe(1);
+  expect(getDbVersion(testDb)).toBe(2);
 });
 
-test("db handles migration from version 0 to version 1", () => {
+test("db handles migration from version 0 to version 2", () => {
   testDb.close();
   const migrateDbPath = join(testRoot, `test-db-migrate-${Date.now()}.sqlite`);
   const migrateDb = new Database(migrateDbPath, { create: true });
@@ -143,9 +143,87 @@ test("db handles migration from version 0 to version 1", () => {
     // Now runs the real migration logic from db.ts
     initializeDatabase(migrateDb);
 
-    expect(getDbVersion(migrateDb)).toBe(1);
+    expect(getDbVersion(migrateDb)).toBe(2);
     const columnInfo = getColumnInfo(migrateDb, "file_names");
     expect(columnInfo.map((c) => c.name)).toContain("status");
+
+    const schema = migrateDb
+      .query("SELECT sql FROM sqlite_master WHERE type='table' AND name='file_names'")
+      .get() as { sql?: string } | null;
+    expect(schema?.sql).toMatch(/ON\s+DELETE\s+CASCADE/i);
+  } finally {
+    if (migrateDb) migrateDb.close();
+    if (existsSync(migrateDbPath)) unlinkSync(migrateDbPath);
+    if (existsSync(`${migrateDbPath}-wal`)) unlinkSync(`${migrateDbPath}-wal`);
+    if (existsSync(`${migrateDbPath}-shm`)) unlinkSync(`${migrateDbPath}-shm`);
+  }
+});
+
+test("db handles migration from version 1 to version 2, cleans orphans, and enables cascade", () => {
+  testDb.close();
+  const migrateDbPath = join(testRoot, `test-db-migrate-v1-${Date.now()}.sqlite`);
+  const migrateDb = new Database(migrateDbPath, { create: true });
+
+  try {
+    migrateDb.exec(`
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT NOT NULL,
+        password TEXT NOT NULL
+      );
+      CREATE TABLE file_names (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        job_id INTEGER NOT NULL,
+        file_name TEXT NOT NULL,
+        output_file_name TEXT NOT NULL,
+        status TEXT DEFAULT 'not started',
+        FOREIGN KEY (job_id) REFERENCES jobs(id)
+      );
+      CREATE TABLE jobs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        date_created TEXT NOT NULL,
+        status TEXT DEFAULT 'not started',
+        num_files INTEGER DEFAULT 0,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      );
+      INSERT INTO users (id, email, password) VALUES (1, 'u@example.com', 'pw');
+      INSERT INTO jobs (id, user_id, date_created, status, num_files)
+        VALUES (10, 1, '2026-11-22T00:00:00.000Z', 'completed', 1);
+      INSERT INTO file_names (id, job_id, file_name, output_file_name, status)
+        VALUES (100, 10, 'active.png', 'active.webp', 'completed');
+      INSERT INTO file_names (id, job_id, file_name, output_file_name, status)
+        VALUES (101, 999, 'orphan.png', 'orphan.webp', 'completed');
+      PRAGMA user_version = 1;
+    `);
+
+    initializeDatabase(migrateDb);
+
+    expect(getDbVersion(migrateDb)).toBe(2);
+
+    const remaining = migrateDb
+      .query("SELECT id, job_id, file_name, output_file_name, status FROM file_names")
+      .all() as {
+      id: number;
+      job_id: number;
+      file_name: string;
+      output_file_name: string;
+      status: string;
+    }[];
+    expect(remaining).toEqual([
+      {
+        id: 100,
+        job_id: 10,
+        file_name: "active.png",
+        output_file_name: "active.webp",
+        status: "completed",
+      },
+    ]);
+
+    const schema = migrateDb
+      .query("SELECT sql FROM sqlite_master WHERE type='table' AND name='file_names'")
+      .get() as { sql?: string } | null;
+    expect(schema?.sql).toMatch(/ON\s+DELETE\s+CASCADE/i);
   } finally {
     if (migrateDb) migrateDb.close();
     if (existsSync(migrateDbPath)) unlinkSync(migrateDbPath);
