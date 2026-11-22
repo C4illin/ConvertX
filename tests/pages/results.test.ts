@@ -143,6 +143,8 @@ describe.each([
     ).text();
 
     expect(body).not.toContain('aria-busy="true"');
+    expect(body).not.toContain("disabled");
+    expect(body).not.toContain("pointer-events: none;");
     expect(body).toContain('<progress max="3" value="3"');
   });
 
@@ -159,6 +161,8 @@ describe.each([
     ).text();
 
     expect(body.match(/aria-busy="true"/g)).toHaveLength(2);
+    expect(body.match(/\bdisabled(?:=|(?=[\s>]))/g)).toHaveLength(2);
+    expect(body.match(/pointer-events:\s*none;/g)).toHaveLength(2);
     expect(body).toMatch(/<progress max="3"(?! value)/);
   });
 
