@@ -29,9 +29,6 @@ export const outputDir = "./data/output/";
 // Re-export the composed app type so consumers can use @elysiajs/eden for type-safe clients.
 export type { App } from "./eden";
 
-// Fix for Elysia issue with Bun, (see https://github.com/oven-sh/bun/issues/12161)
-process.getBuiltinModule = require;
-
 const app = new Elysia({
   serve: {
     maxRequestBodySize: Number.MAX_SAFE_INTEGER,
@@ -40,7 +37,7 @@ const app = new Elysia({
 })
   .use(html())
   .use(
-    staticPlugin({
+    await staticPlugin({
       assets: "public",
       prefix: "",
     }),
