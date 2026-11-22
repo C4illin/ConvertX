@@ -26,6 +26,20 @@ async function userIdOf(response: Response) {
   return payload ? payload.id : undefined;
 }
 
+function withConcurrentJobInsert<T>(fn: () => Promise<T>): Promise<T> {
+  db.run(`
+    CREATE TEMP TRIGGER concurrent_job_insert_race
+    AFTER INSERT ON jobs
+    WHEN NEW.date_created != 'concurrent-racer'
+    BEGIN
+      INSERT INTO jobs (user_id, date_created) VALUES (NEW.user_id, 'concurrent-racer');
+    END;
+  `);
+  return fn().finally(() => {
+    db.run("DROP TRIGGER IF EXISTS temp.concurrent_job_insert_race");
+  });
+}
+
 describe("GET / with accounts", () => {
   test("redirects to the login page without a session", async () => {
     const response = await request("/");
@@ -167,6 +181,21 @@ describe("GET / without accounts (ALLOW_UNAUTHENTICATED)", () => {
     expect(cookieIds.slice().sort((a, b) => a - b)).toEqual(createdDbIds);
   });
 
+  test("keeps the request's own job ID even if another job is inserted for the same authenticated user immediately after INSERT", async () => {
+    const user = await createUser();
+
+    const response = await withConcurrentJobInsert(() =>
+      request("/", { cookies: { auth: user.token } }),
+    );
+    const cookieId = Number(setCookieValue(response, "jobId"));
+    const jobs = jobsOf(user.id);
+
+    expect(jobs).toHaveLength(2);
+    expect(jobs[0]?.date_created).not.toBe("concurrent-racer");
+    expect(jobs[1]?.date_created).toBe("concurrent-racer");
+    expect(cookieId).toBe(jobs[0]!.id);
+  });
+
   test("assigns distinct job IDs to concurrent requests from the same authenticated user", async () => {
     const user = await createUser();
 
@@ -178,5 +207,19 @@ describe("GET / without accounts (ALLOW_UNAUTHENTICATED)", () => {
 
     expect(new Set(cookieIds).size).toBe(10);
     expect(cookieIds.slice().sort((a, b) => a - b)).toEqual(dbIds);
+  });
+
+  test("keeps the request's own job ID when a concurrent job is inserted for shared unauthenticated user 0 immediately after INSERT", async () => {
+    setEnv({ ALLOW_UNAUTHENTICATED: true, UNAUTHENTICATED_USER_SHARING: true });
+    const existingIds = new Set(jobsOf("0").map((job) => job.id));
+
+    const response = await withConcurrentJobInsert(() => request("/"));
+    const cookieId = Number(setCookieValue(response, "jobId"));
+    const newJobs = jobsOf("0").filter((job) => !existingIds.has(job.id));
+
+    expect(newJobs).toHaveLength(2);
+    expect(newJobs[0]?.date_created).not.toBe("concurrent-racer");
+    expect(newJobs[1]?.date_created).toBe("concurrent-racer");
+    expect(cookieId).toBe(newJobs[0]!.id);
   });
 });
