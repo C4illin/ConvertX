@@ -11,9 +11,11 @@ if (!testRoot) {
 
 // the dynamic import ensures that the guard above runs before the db module is loaded
 let initializeDatabase: (db: Database) => void;
+let deleteJobRecord: (db: Database, jobId: number) => void;
 let defaultDb: Database | undefined;
 await import("../../src/db/db").then((mod) => {
   initializeDatabase = mod.initializeDatabase;
+  deleteJobRecord = mod.deleteJobRecord;
   defaultDb = mod.default as Database | undefined;
 });
 
@@ -193,4 +195,35 @@ test("db can insert and query data", () => {
 
   // Cleanup
   testDb.query("DELETE FROM users WHERE email = ?").run("test@example.com");
+});
+
+test("deleteJobRecord removes the job and its file_names rows without affecting other jobs", () => {
+  const userResult = testDb
+    .query("INSERT INTO users (email, password) VALUES (?, ?) RETURNING id")
+    .get("cleanup@example.com", "pw") as { id: number };
+
+  const targetJob = testDb
+    .query("INSERT INTO jobs (user_id, date_created, num_files) VALUES (?, ?, ?) RETURNING id")
+    .get(userResult.id, "2026-11-22T00:00:00.000Z", 2) as { id: number };
+  const keptJob = testDb
+    .query("INSERT INTO jobs (user_id, date_created, num_files) VALUES (?, ?, ?) RETURNING id")
+    .get(userResult.id, "2026-11-22T00:00:00.000Z", 1) as { id: number };
+
+  const insertFile = testDb.prepare(
+    "INSERT INTO file_names (job_id, file_name, output_file_name, status) VALUES (?, ?, ?, ?)",
+  );
+  insertFile.run(targetJob.id, "a.png", "a.webp", "completed");
+  insertFile.run(targetJob.id, "b.png", "b.webp", "completed");
+  insertFile.run(keptJob.id, "keep.png", "keep.webp", "completed");
+
+  deleteJobRecord(testDb, targetJob.id);
+
+  expect(testDb.query("SELECT id FROM jobs WHERE id = ?").get(targetJob.id)).toBeNull();
+  expect(testDb.query("SELECT id FROM file_names WHERE job_id = ?").all(targetJob.id)).toHaveLength(
+    0,
+  );
+  expect(testDb.query("SELECT id FROM jobs WHERE id = ?").get(keptJob.id)).not.toBeNull();
+  expect(testDb.query("SELECT id FROM file_names WHERE job_id = ?").all(keptJob.id)).toHaveLength(
+    1,
+  );
 });

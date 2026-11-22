@@ -19,7 +19,7 @@ export function initializeDatabase(db: Database): void {
         file_name TEXT NOT NULL,
         output_file_name TEXT NOT NULL,
         status TEXT DEFAULT 'not started',
-        FOREIGN KEY (job_id) REFERENCES jobs(id)
+        FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
       );
       CREATE TABLE IF NOT EXISTS jobs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,6 +48,14 @@ export function initializeDatabase(db: Database): void {
 
   // enable WAL mode
   db.exec("PRAGMA journal_mode = WAL;");
+}
+
+/** Delete a job and all of its associated `file_names` rows atomically. */
+export function deleteJobRecord(database: Database, jobId: number): void {
+  database.transaction(() => {
+    database.query("DELETE FROM file_names WHERE job_id = ?").run(jobId);
+    database.query("DELETE FROM jobs WHERE id = ?").run(jobId);
+  })();
 }
 
 const dbPath = process.env.DB_PATH ?? "./data/mydb.sqlite";

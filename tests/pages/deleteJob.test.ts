@@ -6,7 +6,10 @@ import { createJob, createUser, db, jobDirs, request } from "./helpers/app";
 async function userWithJobs(count = 1) {
   const user = await createUser();
   const jobs = Array.from({ length: count }, () => {
-    const job = createJob(user.id, { numFiles: 1 });
+    const job = createJob(user.id, {
+      numFiles: 1,
+      files: [{ file_name: "in.vcf", output_file_name: "out.csv", status: "completed" }],
+    });
     const dirs = jobDirs(user.id, job);
     mkdirSync(dirs.uploads, { recursive: true });
     mkdirSync(dirs.output, { recursive: true });
@@ -19,6 +22,10 @@ async function userWithJobs(count = 1) {
 
 function jobExists(jobId: number | string) {
   return db.query("SELECT id FROM jobs WHERE id = ?").get(jobId) !== null;
+}
+
+function fileNamesExist(jobId: number | string) {
+  return db.query("SELECT id FROM file_names WHERE job_id = ?").get(jobId) !== null;
 }
 
 function filesExist(userId: number, jobId: number) {
@@ -52,6 +59,7 @@ describe("POST /delete/:jobId", () => {
     expect(response.status).toBe(302);
     expect(response.headers.get("location")).toBe("/history");
     expect(jobExists(job)).toBe(false);
+    expect(fileNamesExist(job)).toBe(false);
     expect(filesExist(user.id, job)).toBe(false);
   });
 
@@ -68,6 +76,7 @@ describe("POST /delete/:jobId", () => {
     expect(response.status).toBe(302);
     expect(response.headers.get("location")).toBe("/results");
     expect(jobExists(job)).toBe(true);
+    expect(fileNamesExist(job)).toBe(true);
     expect(filesExist(other.user.id, job)).toBe(true);
   });
 
@@ -111,6 +120,7 @@ describe("POST /delete-multiple", () => {
     });
     for (const job of jobs) {
       expect(jobExists(job)).toBe(false);
+      expect(fileNamesExist(job)).toBe(false);
       expect(filesExist(user.id, job)).toBe(false);
     }
   });
