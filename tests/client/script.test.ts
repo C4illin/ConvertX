@@ -56,8 +56,22 @@ describe("script.ts", () => {
     expect(document.querySelector("input[type=file]")!.getAttribute("accept")).toBe(".wav");
     expect(env.fetchCalls).toHaveLength(1);
     expect(env.fetchCalls[0]!.url).toEndWith("/conversions");
-    expect(JSON.parse(env.fetchCalls[0]!.body!)).toEqual({ fileType: "wav" });
+    expect(JSON.parse(env.fetchCalls[0]!.body!)).toEqual({
+      fileType: "wav",
+      fileName: "song.wav",
+    });
     expect(document.querySelectorAll(".target")).toHaveLength(3);
+  });
+
+  test("passes the full file name so compound extensions can be resolved by the server", async () => {
+    await start();
+    dropFile("scan.nii.gz");
+    await settle();
+
+    expect(JSON.parse(env.fetchCalls[0]!.body!)).toEqual({
+      fileType: "gz",
+      fileName: "scan.nii.gz",
+    });
   });
 
   test("renders file names as text, never as HTML", async () => {

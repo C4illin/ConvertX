@@ -29,7 +29,7 @@ const formConvert = document.querySelector<HTMLFormElement>(`form[action='${webr
 const api = edenFetch<App>(webroot);
 
 // ── Route helpers (typed via @elysiajs/eden inference from App) ────────────────
-async function postConversions(body: { fileType: string }): Promise<string> {
+async function postConversions(body: { fileType: string; fileName: string }): Promise<string> {
   const res = await api("/conversions", { method: "POST", body, headers: {} });
   if (res.error) throw new Error(`POST /conversions failed: ${JSON.stringify(res.error)}`);
   return res.data;
@@ -121,7 +121,7 @@ function handleFile(file: File): void {
     fileInput.setAttribute("accept", `.${fileType}`);
     setTitle();
 
-    postConversions({ fileType: extension })
+    postConversions({ fileType: extension, fileName: file.name })
       .then((html) => {
         // SECURE: server-rendered HTML fragment from trusted /conversions endpoint (no user input)
         selectContainer.innerHTML = html;
