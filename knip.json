@@ -20,8 +20,7 @@
     "soffice",
     "oxidocs",
     "perl",
-    "markitdown",
-    "fmt"
+    "markitdown"
   ],
   "tailwind": {
     "entry": ["src/main.css"]

@@ -21,7 +21,9 @@ RUN apt-get update && apt-get install -y \
   latexmk \
   libheif-examples \
   libjxl-tools \
-  libreoffice \
+  libreoffice-calc-nogui \
+  libreoffice-draw-nogui \
+  libreoffice-writer-nogui \
   libva2 \
   libvips-tools \
   libemail-outlook-message-perl \
