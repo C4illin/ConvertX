@@ -2,8 +2,7 @@ import { Elysia, t } from "elysia";
 import sanitize from "sanitize-filename";
 
 import db from "../db/db";
-import { WEBROOT } from "../helpers/env";
-import { uploadsDir } from "../index";
+import { uploadsDir, WEBROOT } from "../helpers/env";
 import { userService } from "./user";
 
 export const upload = new Elysia().use(userService).post(

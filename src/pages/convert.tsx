@@ -3,11 +3,10 @@ import { mkdir } from "node:fs/promises";
 import { Elysia, t } from "elysia";
 import sanitize from "sanitize-filename";
 
-import { outputDir, uploadsDir } from "..";
 import { getTargetsForConverter, handleConvert } from "../converters/main";
 import db from "../db/db";
 import { Jobs } from "../db/types";
-import { WEBROOT } from "../helpers/env";
+import { outputDir, uploadsDir, WEBROOT } from "../helpers/env";
 import { normalizeFiletype } from "../helpers/normalizeFiletype";
 import { userService } from "./user";
 
