@@ -50,7 +50,7 @@ function ResultsArticle({
           >
             <DownloadIcon /> <p>Tar</p>
           </a>
-          <button class="flex btn-primary flex-row gap-2 text-contrast" onclick="downloadAll()">
+          <button class="flex btn-primary flex-row gap-2 text-contrast" data-action="download-all">
             <DownloadIcon /> <p>All</p>
           </button>
         </div>

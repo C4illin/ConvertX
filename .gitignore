@@ -50,4 +50,7 @@ package-lock.json
 /Bruno
 /tsconfig.tsbuildinfo
 /public/generated.css
+/public/results.js
+/public/script.js
+/public/history.js
 /tests/integration/converters/outputs/

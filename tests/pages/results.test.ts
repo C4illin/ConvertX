@@ -116,6 +116,18 @@ describe.each([
     expect(body).toMatch(/<progress max="2"(?! value)/);
   });
 
+  test("wires the download-all button without inline handlers", async () => {
+    const user = await createUser();
+    const job = createJob(user.id, { numFiles: 1, files: [done("a")] });
+
+    const body = await (
+      await request(`${route}/${job}`, { method, cookies: { auth: user.token } })
+    ).text();
+
+    expect(body).toContain('data-action="download-all"');
+    expect(body).not.toContain("onclick");
+  });
+
   test("enables delete and tar download once every file is converted", async () => {
     const user = await createUser();
     const job = createJob(user.id, { numFiles: 2, files: [done("a"), done("b")] });
