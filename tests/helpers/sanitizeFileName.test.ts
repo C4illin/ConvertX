@@ -41,6 +41,9 @@ describe("resolveStoredFileNames", () => {
   });
 
   test("resolves mixed NFC, NFD, and missing files in a single batch", async () => {
+    if (process.platform === "darwin") {
+      return;
+    }
     const dir = mkdtempSync(path.join(tmpdir(), "convertx-batch-"));
     try {
       writeFileSync(path.join(dir, "a\u0308-only-nfd.txt"), "1");

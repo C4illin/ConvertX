@@ -5,24 +5,30 @@ import { Elysia, t } from "elysia";
 
 import db from "../db/db";
 import { WEBROOT } from "../helpers/env";
-import { resolveStoredFileName, sanitizeFileName } from "../helpers/sanitizeFileName";
+import { resolveStoredFileNames, sanitizeFileName } from "../helpers/sanitizeFileName";
 import { uploadsDir } from "../index";
 import { userService } from "./user";
 
-async function saveUploadedFile(userUploadsDir: string, file: File): Promise<void> {
-  const sanitizedFileName = sanitizeFileName(file.name);
-  const existing = await resolveStoredFileName(userUploadsDir, file.name);
-  if (existing !== sanitizedFileName && existing !== "") {
-    try {
-      await unlink(path.join(userUploadsDir, existing));
-    } catch (error) {
-      const code = (error as NodeJS.ErrnoException | null)?.code;
-      if (code !== "ENOENT" && code !== "ENOTDIR") {
-        throw error;
+async function saveUploadedFiles(userUploadsDir: string, files: File[]): Promise<void> {
+  const existingNames = await resolveStoredFileNames(
+    userUploadsDir,
+    files.map((file) => file.name),
+  );
+  for (const [i, file] of files.entries()) {
+    const sanitizedFileName = sanitizeFileName(file.name);
+    const existing = existingNames[i] ?? sanitizedFileName;
+    if (existing !== sanitizedFileName && existing !== "") {
+      try {
+        await unlink(path.join(userUploadsDir, existing));
+      } catch (error) {
+        const code = (error as NodeJS.ErrnoException | null)?.code;
+        if (code !== "ENOENT" && code !== "ENOTDIR") {
+          throw error;
+        }
       }
     }
+    await Bun.write(`${userUploadsDir}${sanitizedFileName}`, file);
   }
-  await Bun.write(`${userUploadsDir}${sanitizedFileName}`, file);
 }
 
 export const upload = new Elysia().use(userService).post(
@@ -44,9 +50,7 @@ export const upload = new Elysia().use(userService).post(
 
     if (body?.file) {
       const files = Array.isArray(body.file) ? body.file : [body.file];
-      for (const file of files) {
-        await saveUploadedFile(userUploadsDir, file);
-      }
+      await saveUploadedFiles(userUploadsDir, files);
     }
 
     return {
