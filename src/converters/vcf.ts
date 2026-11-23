@@ -25,17 +25,19 @@ export function parseVCF(data: string): Record<string, string>[] {
         if (colonIndex === -1) continue;
         const key = line.slice(0, colonIndex).trim();
         const value = line.slice(colonIndex + 1).trim();
-        if (key === "FN") {
+        const prop = (key.split(";")[0] || "").trim().toUpperCase();
+
+        if (prop === "FN") {
           contact["Full Name"] = value;
-        } else if (key === "N") {
+        } else if (prop === "N") {
           const parts = value.split(";");
           contact["Last Name"] = parts[0] || "";
           contact["First Name"] = parts[1] || "";
-        } else if (key.startsWith("TEL")) {
+        } else if (prop === "TEL") {
           contact["Phone"] = value;
-        } else if (key.startsWith("EMAIL")) {
+        } else if (prop === "EMAIL") {
           contact["Email"] = value;
-        } else if (key === "ORG") {
+        } else if (prop === "ORG") {
           contact["Organization"] = value.split(";")[0] || "";
         }
       }

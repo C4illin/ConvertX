@@ -66,6 +66,30 @@ END:VCARD`;
     ]);
   });
 
+  test("should parse VCF with parameters on FN, N, and ORG", () => {
+    const vcfData = `BEGIN:VCARD
+VERSION:3.0
+FN;CHARSET=UTF-8:John Doe
+N;CHARSET=UTF-8:Doe;John;;;
+ORG;CHARSET=UTF-8:Example Corp;Engineering
+TEL;TYPE=WORK,VOICE:(111) 555-1212
+EMAIL;TYPE=PREF,INTERNET:john.doe@example.com
+END:VCARD`;
+
+    const result = parseVCF(vcfData);
+
+    expect(result).toEqual([
+      {
+        "Full Name": "John Doe",
+        "Last Name": "Doe",
+        "First Name": "John",
+        Organization: "Example Corp",
+        Phone: "(111) 555-1212",
+        Email: "john.doe@example.com",
+      },
+    ]);
+  });
+
   test("should handle CRLF line endings", () => {
     const vcfData = "BEGIN:VCARD\r\nFN:John Doe\r\nTEL:123\r\nEND:VCARD\r\n";
 
