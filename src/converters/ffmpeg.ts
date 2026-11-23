@@ -862,7 +862,7 @@ export async function convert(
     // Make sure image is 256x256 or smaller
     extraArgs = [
       "-filter:v",
-      "scale='min(256,iw)':min'(256,ih)':force_original_aspect_ratio=decrease",
+      "scale='min(256,iw)':'min(256,ih)':force_original_aspect_ratio=decrease",
     ];
     message = "Done: resized to 256x256";
   }

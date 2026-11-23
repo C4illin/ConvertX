@@ -56,7 +56,7 @@ afterAll(() => {
   }
 });
 
-const ICO_FILTER = "scale='min(256,iw)':min'(256,ih)':force_original_aspect_ratio=decrease";
+const ICO_FILTER = "scale='min(256,iw)':'min(256,ih)':force_original_aspect_ratio=decrease";
 
 test("converts a normal file", async () => {
   const result = await convert("in.mp4", "mp4", "avi", "out.avi", undefined, mockExecFile);
