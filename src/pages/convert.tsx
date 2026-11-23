@@ -8,7 +8,7 @@ import db from "../db/db";
 import { Jobs } from "../db/types";
 import { WEBROOT } from "../helpers/env";
 import { normalizeFiletype } from "../helpers/normalizeFiletype";
-import { resolveStoredFileName } from "../helpers/sanitizeFileName";
+import { resolveStoredFileNames } from "../helpers/sanitizeFileName";
 import { userService } from "./user";
 
 export const convert = new Elysia().use(userService).post(
@@ -74,9 +74,10 @@ export const convert = new Elysia().use(userService).post(
       return redirect(`${WEBROOT}/`, 302);
     }
 
-    for (let i = 0; i < fileNames.length; i++) {
-      fileNames[i] = resolveStoredFileName(userUploadsDir, fileNames[i] || "");
-    }
+    fileNames = await resolveStoredFileNames(
+      userUploadsDir,
+      fileNames.map((name) => name || ""),
+    );
 
     db.query("UPDATE jobs SET num_files = ?1, status = 'pending' WHERE id = ?2").run(
       fileNames.length,

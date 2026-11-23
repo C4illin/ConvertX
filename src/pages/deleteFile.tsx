@@ -26,7 +26,7 @@ export const deleteFile = new Elysia().use(userService).post(
 
     const userUploadsDir = path.join(uploadsDir, user.id, jobId.value);
 
-    const sanitized = resolveStoredFileName(userUploadsDir, body.filename);
+    const sanitized = await resolveStoredFileName(userUploadsDir, body.filename);
     const targetPath = path.join(userUploadsDir, sanitized);
 
     try {

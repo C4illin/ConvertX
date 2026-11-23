@@ -28,7 +28,7 @@ export const download = new Elysia()
       // parse from URL encoded string
       const jobId = params.jobId;
       const userOutputDir = path.join(outputDir, String(userId), jobId);
-      const fileName = resolveStoredFileName(userOutputDir, params.fileName);
+      const fileName = await resolveStoredFileName(userOutputDir, params.fileName);
 
       const filePath = `${outputDir}${userId}/${jobId}/${fileName}`;
       const file = Bun.file(filePath);
