@@ -111,4 +111,19 @@ describe("POST /upload", () => {
 
     expect(response.status).toBe(422);
   });
+
+  test("normalizes decomposed (NFD) umlaut filenames to NFC on disk", async () => {
+    const user = await createUser();
+    const job = createJob(user.id);
+    const { uploads } = jobDirs(user.id, job);
+
+    const response = await request("/upload", {
+      method: "POST",
+      cookies: { auth: user.token, jobId: job },
+      body: uploadForm(new File(["umlaut"], "a\u0308o\u0308u\u0308.txt")),
+    });
+
+    expect(response.status).toBe(200);
+    expect(readdirSync(uploads)).toEqual(["\u00e4\u00f6\u00fc.txt"]);
+  });
 });

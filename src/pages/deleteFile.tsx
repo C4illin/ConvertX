@@ -2,11 +2,11 @@ import { unlink } from "node:fs/promises";
 import path from "node:path";
 
 import { Elysia, t } from "elysia";
-import sanitize from "sanitize-filename";
 
 import { uploadsDir } from "..";
 import db from "../db/db";
 import { WEBROOT } from "../helpers/env";
+import { resolveStoredFileName } from "../helpers/sanitizeFileName";
 import { userService } from "./user";
 
 export const deleteFile = new Elysia().use(userService).post(
@@ -26,7 +26,7 @@ export const deleteFile = new Elysia().use(userService).post(
 
     const userUploadsDir = path.join(uploadsDir, user.id, jobId.value);
 
-    const sanitized = sanitize(body.filename);
+    const sanitized = resolveStoredFileName(userUploadsDir, body.filename);
     const targetPath = path.join(userUploadsDir, sanitized);
 
     try {

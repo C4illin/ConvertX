@@ -197,17 +197,21 @@ export async function handleConvert(
                 const dir = path.dirname(targetPath);
                 const parsed = path.parse(targetPath);
 
+                const parsedNameNfc = parsed.name.normalize("NFC");
+                const parsedBaseNfc = parsed.base.normalize("NFC");
+
                 const outputFiles = fs
                   .readdirSync(dir)
                   .filter((f) => {
-                    if (f === parsed.base) {
+                    const normalized = f.normalize("NFC");
+                    if (normalized === parsedBaseNfc) {
                       return true;
                     }
 
                     return (
-                      f.startsWith(`${parsed.name}-`) &&
-                      f.endsWith(parsed.ext) &&
-                      /^\d+$/.test(f.slice(parsed.name.length + 1, -parsed.ext.length))
+                      normalized.startsWith(`${parsedNameNfc}-`) &&
+                      normalized.endsWith(parsed.ext) &&
+                      /^\d+$/.test(normalized.slice(parsedNameNfc.length + 1, -parsed.ext.length))
                     );
                   })
                   .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));

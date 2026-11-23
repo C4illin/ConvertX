@@ -180,4 +180,28 @@ describe("POST /convert", () => {
     expect(response.status).toBe(302);
     expect(response.headers.get("location")).toBe("/");
   });
+
+  test.each([
+    ["disk NFC, request NFD", "\u00e4NWA871-UK.vcf", "a\u0308NWA871-UK.vcf"],
+    ["disk NFD, request NFC", "a\u0308NWA871-UK.vcf", "\u00e4NWA871-UK.vcf"],
+  ])(
+    "converts umlaut filenames across Unicode normalizations (%s)",
+    async (_, diskName, requestName) => {
+      const { user, job, dirs } = await userWithJob();
+      mkdirSync(dirs.uploads, { recursive: true });
+      await writeFile(`${dirs.uploads}${diskName}`, "BEGIN:VCARD\nFN:Alice\nEND:VCARD\n");
+
+      const response = await convertRequest(
+        { auth: user.token, jobId: job },
+        { convert_to: "csv,vcf", file_names: JSON.stringify([requestName]) },
+      );
+
+      expect(response.status).toBe(302);
+      expect(response.headers.get("location")).toBe(`/results/${job}`);
+      await waitFor(() => jobRow(job).status === "completed");
+      expect(fileRows(job)).toEqual([
+        { file_name: diskName, output_file_name: `${diskName.slice(0, -4)}.csv`, status: "Done" },
+      ]);
+    },
+  );
 });

@@ -1,7 +1,6 @@
 import { mkdir } from "node:fs/promises";
 
 import { Elysia, t } from "elysia";
-import sanitize from "sanitize-filename";
 
 import { outputDir, uploadsDir } from "..";
 import { getTargetsForConverter, handleConvert } from "../converters/main";
@@ -9,6 +8,7 @@ import db from "../db/db";
 import { Jobs } from "../db/types";
 import { WEBROOT } from "../helpers/env";
 import { normalizeFiletype } from "../helpers/normalizeFiletype";
+import { resolveStoredFileName } from "../helpers/sanitizeFileName";
 import { userService } from "./user";
 
 export const convert = new Elysia().use(userService).post(
@@ -75,7 +75,7 @@ export const convert = new Elysia().use(userService).post(
     }
 
     for (let i = 0; i < fileNames.length; i++) {
-      fileNames[i] = sanitize(fileNames[i] || "");
+      fileNames[i] = resolveStoredFileName(userUploadsDir, fileNames[i] || "");
     }
 
     db.query("UPDATE jobs SET num_files = ?1, status = 'pending' WHERE id = ?2").run(
