@@ -107,19 +107,14 @@ export const root = new Elysia().use(userService).get(
       return redirect(`${WEBROOT}/login`, 302);
     }
 
-    // create a new job
-    db.query("INSERT INTO jobs (user_id, date_created) VALUES (?, ?)").run(
-      user.id,
-      new Date().toISOString(),
-    );
-
-    const { id } = db
-      .query("SELECT id FROM jobs WHERE user_id = ? ORDER BY id DESC")
-      .get(user.id) as { id: number };
-
     if (!jobId) {
       return { message: "Cookies should be enabled to use this app." };
     }
+
+    // create a new job atomically to avoid cross-request ID collisions under concurrency
+    const { id } = db
+      .query("INSERT INTO jobs (user_id, date_created) VALUES (?, ?) RETURNING id")
+      .get(user.id, new Date().toISOString()) as { id: number };
 
     jobId.set({
       value: id,
