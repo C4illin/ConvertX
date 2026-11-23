@@ -315,6 +315,12 @@ describe("mainConverter", () => {
 
     expect(output.errors.join("\n")).toContain("using inkscape");
   });
+
+  test("auto-discovery matches normalized target aliases against declared converter targets", async () => {
+    await mainConverter(`${uploadsDir}missing.emf`, "emf", "latex", `${outputDir}missing.tex`);
+
+    expect(output.errors.join("\n")).toContain("using inkscape");
+  });
 });
 
 describe("handleConvert", () => {
