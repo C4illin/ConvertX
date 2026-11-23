@@ -80,6 +80,19 @@ describe("POST /delete", () => {
     expect(existsSync(`${other.dirs.uploads}keep.txt`)).toBe(true);
   });
 
+  test("deletes umlaut files regardless of Unicode normalization form", async () => {
+    const { user, job, dirs } = await userWithUploads("a\u0308-umlaut.txt");
+
+    const response = await request("/delete", {
+      cookies: { auth: user.token, jobId: job },
+      json: { filename: "\u00e4-umlaut.txt" },
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ message: "File deleted successfully." });
+    expect(existsSync(`${dirs.uploads}a\u0308-umlaut.txt`)).toBe(false);
+  });
+
   test.each(["missing.txt", "../../1/1/keep.txt"])(
     "answers a missing file (%s) without a server error or server paths",
     async (filename) => {

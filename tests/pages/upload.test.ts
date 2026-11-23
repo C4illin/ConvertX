@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
@@ -110,5 +110,38 @@ describe("POST /upload", () => {
     });
 
     expect(response.status).toBe(422);
+  });
+
+  test("normalizes decomposed (NFD) umlaut filenames to NFC on disk", async () => {
+    const user = await createUser();
+    const job = createJob(user.id);
+    const { uploads } = jobDirs(user.id, job);
+
+    const response = await request("/upload", {
+      method: "POST",
+      cookies: { auth: user.token, jobId: job },
+      body: uploadForm(new File(["umlaut"], "a\u0308o\u0308u\u0308.txt")),
+    });
+
+    expect(response.status).toBe(200);
+    expect(readdirSync(uploads)).toEqual(["\u00e4\u00f6\u00fc.txt"]);
+  });
+
+  test("replaces an equivalent pre-existing NFD file when re-uploaded as NFC", async () => {
+    const user = await createUser();
+    const job = createJob(user.id);
+    const { uploads } = jobDirs(user.id, job);
+    mkdirSync(uploads, { recursive: true });
+    writeFileSync(`${uploads}a\u0308NWA.txt`, "old");
+
+    const response = await request("/upload", {
+      method: "POST",
+      cookies: { auth: user.token, jobId: job },
+      body: uploadForm(new File(["new"], "\u00e4NWA.txt")),
+    });
+
+    expect(response.status).toBe(200);
+    expect(readdirSync(uploads)).toEqual(["\u00e4NWA.txt"]);
+    expect(await readFile(`${uploads}\u00e4NWA.txt`, "utf-8")).toBe("new");
   });
 });

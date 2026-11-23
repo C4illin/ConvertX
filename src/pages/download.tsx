@@ -3,11 +3,11 @@ import { rename, unlink } from "node:fs/promises";
 import path from "node:path";
 
 import { Elysia } from "elysia";
-import sanitize from "sanitize-filename";
 
 import { outputDir } from "..";
 import db from "../db/db";
 import { WEBROOT } from "../helpers/env";
+import { resolveStoredFileName } from "../helpers/sanitizeFileName";
 import { userService } from "./user";
 
 const archiveBuilds = new Map<string, Promise<void>>();
@@ -27,7 +27,8 @@ export const download = new Elysia()
       }
       // parse from URL encoded string
       const jobId = params.jobId;
-      const fileName = sanitize(params.fileName);
+      const userOutputDir = path.join(outputDir, String(userId), jobId);
+      const fileName = await resolveStoredFileName(userOutputDir, params.fileName);
 
       const filePath = `${outputDir}${userId}/${jobId}/${fileName}`;
       const file = Bun.file(filePath);

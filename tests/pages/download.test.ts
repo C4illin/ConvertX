@@ -111,6 +111,20 @@ describe("GET /download/:userId/:jobId/:fileName", () => {
     expect(response.status).toBe(200);
     expect(await response.text()).toBe("percent");
   });
+
+  test("serves umlaut file names across NFC/NFD Unicode normalizations", async () => {
+    const { user, job } = await userWithOutputs({ "a\u0308NWA.csv": "umlaut" });
+
+    const response = await request(
+      `/download/${user.id}/${job}/${encodeURIComponent("\u00e4NWA.csv")}`,
+      {
+        cookies: { auth: user.token },
+      },
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe("umlaut");
+  });
 });
 
 describe("GET /archive/:jobId", () => {
