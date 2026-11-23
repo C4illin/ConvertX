@@ -21,14 +21,14 @@ async function fileExists(targetPath: string): Promise<boolean> {
 }
 
 /**
- * Normalize Unicode to NFC before sanitizing so decomposed (NFD, e.g. macOS)
- * and precomposed (NFC) forms truncate and map identically.
+ * Normalize Unicode to NFC before sanitizing so decomposed (NFD, e.g. macOS) and precomposed (NFC)
+ * forms truncate and map identically.
  */
 export const sanitizeFileName = (fileName: string): string => sanitize(fileName.normalize("NFC"));
 
 /**
- * Resolve sanitized filenames inside `dir` in batch, preserving exact matches when both NFC and
- * NFD forms coexist and scanning `dir` at most once for Unicode-equivalent entries.
+ * Resolve sanitized filenames inside `dir` in batch, preserving exact matches when both NFC and NFD
+ * forms coexist and scanning `dir` at most once for Unicode-equivalent entries.
  */
 export const resolveStoredFileNames = async (
   dir: string,
@@ -86,8 +86,6 @@ export const resolveStoredFileNames = async (
   return resolved;
 };
 
-/**
- * Resolve a single filename inside `dir` against exact and NFC-equivalent entries.
- */
+/** Resolve a single filename inside `dir` against exact and NFC-equivalent entries. */
 export const resolveStoredFileName = async (dir: string, fileName: string): Promise<string> =>
   (await resolveStoredFileNames(dir, [fileName]))[0] ?? sanitizeFileName(fileName);
