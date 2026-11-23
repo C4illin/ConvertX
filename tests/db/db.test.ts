@@ -11,9 +11,11 @@ if (!testRoot) {
 
 // the dynamic import ensures that the guard above runs before the db module is loaded
 let initializeDatabase: (db: Database) => void;
+let deleteJobRecord: (db: Database, jobId: number) => void;
 let defaultDb: Database | undefined;
 await import("../../src/db/db").then((mod) => {
   initializeDatabase = mod.initializeDatabase;
+  deleteJobRecord = mod.deleteJobRecord;
   defaultDb = mod.default as Database | undefined;
 });
 
@@ -106,10 +108,10 @@ test("db initializes and creates tables on first run", () => {
   expect(tables.map((t) => t.name)).toContain("users");
   expect(tables.map((t) => t.name)).toContain("jobs");
   expect(tables.map((t) => t.name)).toContain("file_names");
-  expect(getDbVersion(testDb)).toBe(1);
+  expect(getDbVersion(testDb)).toBe(2);
 });
 
-test("db handles migration from version 0 to version 1", () => {
+test("db handles migration from version 0 to version 2", () => {
   testDb.close();
   const migrateDbPath = join(testRoot, `test-db-migrate-${Date.now()}.sqlite`);
   const migrateDb = new Database(migrateDbPath, { create: true });
@@ -141,9 +143,100 @@ test("db handles migration from version 0 to version 1", () => {
     // Now runs the real migration logic from db.ts
     initializeDatabase(migrateDb);
 
-    expect(getDbVersion(migrateDb)).toBe(1);
+    expect(getDbVersion(migrateDb)).toBe(2);
     const columnInfo = getColumnInfo(migrateDb, "file_names");
     expect(columnInfo.map((c) => c.name)).toContain("status");
+
+    const schema = migrateDb
+      .query("SELECT sql FROM sqlite_master WHERE type='table' AND name='file_names'")
+      .get() as { sql?: string } | null;
+    expect(schema?.sql).toMatch(/ON\s+DELETE\s+CASCADE/i);
+  } finally {
+    if (migrateDb) migrateDb.close();
+    if (existsSync(migrateDbPath)) unlinkSync(migrateDbPath);
+    if (existsSync(`${migrateDbPath}-wal`)) unlinkSync(`${migrateDbPath}-wal`);
+    if (existsSync(`${migrateDbPath}-shm`)) unlinkSync(`${migrateDbPath}-shm`);
+  }
+});
+
+test("db handles migration from version 1 to version 2, cleans orphans, and enables cascade", () => {
+  testDb.close();
+  const migrateDbPath = join(testRoot, `test-db-migrate-v1-${Date.now()}.sqlite`);
+  const migrateDb = new Database(migrateDbPath, { create: true });
+
+  try {
+    migrateDb.exec(`
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT NOT NULL,
+        password TEXT NOT NULL
+      );
+      CREATE TABLE file_names (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        job_id INTEGER NOT NULL,
+        file_name TEXT NOT NULL,
+        output_file_name TEXT NOT NULL,
+        status TEXT DEFAULT 'not started',
+        FOREIGN KEY (job_id) REFERENCES jobs(id)
+      );
+      CREATE TABLE jobs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        date_created TEXT NOT NULL,
+        status TEXT DEFAULT 'not started',
+        num_files INTEGER DEFAULT 0,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      );
+      INSERT INTO users (id, email, password) VALUES (1, 'u@example.com', 'pw');
+      INSERT INTO jobs (id, user_id, date_created, status, num_files)
+        VALUES (10, 1, '2026-11-22T00:00:00.000Z', 'completed', 1);
+      INSERT INTO file_names (id, job_id, file_name, output_file_name, status)
+        VALUES (100, 10, 'active.png', 'active.webp', 'completed');
+      INSERT INTO file_names (id, job_id, file_name, output_file_name, status)
+        VALUES (101, 999, 'orphan.png', 'orphan.webp', 'completed');
+      UPDATE sqlite_sequence SET seq = 105 WHERE name = 'file_names';
+      PRAGMA user_version = 1;
+    `);
+
+    initializeDatabase(migrateDb);
+
+    expect(getDbVersion(migrateDb)).toBe(2);
+
+    const remaining = migrateDb
+      .query("SELECT id, job_id, file_name, output_file_name, status FROM file_names")
+      .all() as {
+      id: number;
+      job_id: number;
+      file_name: string;
+      output_file_name: string;
+      status: string;
+    }[];
+    expect(remaining).toEqual([
+      {
+        id: 100,
+        job_id: 10,
+        file_name: "active.png",
+        output_file_name: "active.webp",
+        status: "completed",
+      },
+    ]);
+
+    const seqRow = migrateDb
+      .query("SELECT seq FROM sqlite_sequence WHERE name = 'file_names'")
+      .get() as { seq: number } | null;
+    expect(seqRow?.seq).toBe(105);
+
+    const inserted = migrateDb
+      .query(
+        "INSERT INTO file_names (job_id, file_name, output_file_name, status) VALUES (10, 'next.png', 'next.webp', 'completed') RETURNING id",
+      )
+      .get() as { id: number };
+    expect(inserted.id).toBe(106);
+
+    const schema = migrateDb
+      .query("SELECT sql FROM sqlite_master WHERE type='table' AND name='file_names'")
+      .get() as { sql?: string } | null;
+    expect(schema?.sql).toMatch(/ON\s+DELETE\s+CASCADE/i);
   } finally {
     if (migrateDb) migrateDb.close();
     if (existsSync(migrateDbPath)) unlinkSync(migrateDbPath);
@@ -193,4 +286,35 @@ test("db can insert and query data", () => {
 
   // Cleanup
   testDb.query("DELETE FROM users WHERE email = ?").run("test@example.com");
+});
+
+test("deleteJobRecord removes the job and its file_names rows without affecting other jobs", () => {
+  const userResult = testDb
+    .query("INSERT INTO users (email, password) VALUES (?, ?) RETURNING id")
+    .get("cleanup@example.com", "pw") as { id: number };
+
+  const targetJob = testDb
+    .query("INSERT INTO jobs (user_id, date_created, num_files) VALUES (?, ?, ?) RETURNING id")
+    .get(userResult.id, "2026-11-22T00:00:00.000Z", 2) as { id: number };
+  const keptJob = testDb
+    .query("INSERT INTO jobs (user_id, date_created, num_files) VALUES (?, ?, ?) RETURNING id")
+    .get(userResult.id, "2026-11-22T00:00:00.000Z", 1) as { id: number };
+
+  const insertFile = testDb.prepare(
+    "INSERT INTO file_names (job_id, file_name, output_file_name, status) VALUES (?, ?, ?, ?)",
+  );
+  insertFile.run(targetJob.id, "a.png", "a.webp", "completed");
+  insertFile.run(targetJob.id, "b.png", "b.webp", "completed");
+  insertFile.run(keptJob.id, "keep.png", "keep.webp", "completed");
+
+  deleteJobRecord(testDb, targetJob.id);
+
+  expect(testDb.query("SELECT id FROM jobs WHERE id = ?").get(targetJob.id)).toBeNull();
+  expect(testDb.query("SELECT id FROM file_names WHERE job_id = ?").all(targetJob.id)).toHaveLength(
+    0,
+  );
+  expect(testDb.query("SELECT id FROM jobs WHERE id = ?").get(keptJob.id)).not.toBeNull();
+  expect(testDb.query("SELECT id FROM file_names WHERE job_id = ?").all(keptJob.id)).toHaveLength(
+    1,
+  );
 });

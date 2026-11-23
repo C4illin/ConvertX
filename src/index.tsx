@@ -4,7 +4,7 @@ import { html } from "@elysiajs/html";
 import { staticPlugin } from "@elysiajs/static";
 import { Elysia } from "elysia";
 
-import db from "./db/db";
+import db, { deleteJobRecord } from "./db/db";
 import { Jobs } from "./db/types";
 import { createEdenClient, type EdenAppClient } from "./eden";
 import { AUTO_DELETE_EVERY_N_HOURS, WEBROOT } from "./helpers/env";
@@ -113,8 +113,8 @@ const clearJobs = () => {
       force: true,
     });
 
-    // delete the job
-    db.query("DELETE FROM jobs WHERE id = ?").run(job.id);
+    // delete the job and its file_names rows
+    deleteJobRecord(db, job.id);
   }
 
   clearJobsTimer = scheduleDelayed(autoDeleteIntervalMs, clearJobs);

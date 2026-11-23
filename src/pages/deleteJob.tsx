@@ -3,7 +3,7 @@ import { rmSync } from "node:fs";
 import { Elysia, t } from "elysia";
 
 import { outputDir, uploadsDir } from "..";
-import db from "../db/db";
+import db, { deleteJobRecord } from "../db/db";
 import { Jobs } from "../db/types";
 import { WEBROOT } from "../helpers/env";
 import { userService } from "./user";
@@ -34,8 +34,8 @@ export const deleteJob = new Elysia()
         force: true,
       });
 
-      // delete the job
-      db.query("DELETE FROM jobs WHERE id = ?").run(job.id);
+      // delete the job and its file_names rows
+      deleteJobRecord(db, job.id);
       return redirect(`${WEBROOT}/history`, 302);
     },
     {
@@ -92,8 +92,8 @@ export const deleteJob = new Elysia()
             console.error(`Failed to delete uploads directory for job ${jobId}:`, error);
           }
 
-          // Delete the job from database
-          db.query("DELETE FROM jobs WHERE id = ?").run(job.id);
+          // Delete the job and its file_names rows from database
+          deleteJobRecord(db, job.id);
           results.success.push(jobId);
         } catch (error) {
           results.failed.push({
