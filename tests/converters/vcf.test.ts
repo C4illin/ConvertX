@@ -66,6 +66,93 @@ END:VCARD`;
     ]);
   });
 
+  test("should keep every phone and email, including grouped ones", () => {
+    const vcfData = [
+      "BEGIN:VCARD",
+      "VERSION:3.0",
+      "FN:John Appleseed",
+      "ORG:Acme\\, Inc.;",
+      "item1.EMAIL;type=INTERNET;type=pref:john@example.com",
+      "item1.X-ABLabel:_$!<Other>!$_",
+      "TEL;type=CELL;type=pref:+1 555 123 4567",
+      "PHOTO;ENCODING=b;TYPE=JPEG:/9j/4AAQSkZJRg==",
+      "TEL;type=WORK:+1 555 987 6543",
+      "EMAIL;type=INTERNET;type=WORK:john@work.example",
+      "END:VCARD",
+    ].join("\r\n");
+
+    expect(parseVCF(vcfData)).toEqual([
+      {
+        "Full Name": "John Appleseed",
+        Organization: "Acme, Inc.",
+        Email: "john@example.com; john@work.example",
+        Phone: "+1 555 123 4567; +1 555 987 6543",
+      },
+    ]);
+  });
+
+  test("should decode quoted-printable names from vCard 2.1", () => {
+    const vcfData = [
+      "BEGIN:VCARD",
+      "VERSION:2.1",
+      "N;CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE:M=C3=BCller;J=C3=BCrgen;;;",
+      "FN;CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE:J=C3=BCrgen M=",
+      "=C3=BCller",
+      "END:VCARD",
+    ].join("\r\n");
+
+    expect(parseVCF(vcfData)).toEqual([
+      { "Last Name": "Müller", "First Name": "Jürgen", "Full Name": "Jürgen Müller" },
+    ]);
+  });
+
+  test("should unfold long lines and keep escaped semicolons", () => {
+    const vcfData = [
+      "BEGIN:VCARD",
+      "VERSION:3.0",
+      "N:Doe\\;Smith;John;;;",
+      "FN:John Doe-Smith of the Very Long Name Department of the Company Papadimitrio",
+      " u Junior",
+      "ORG:R\\;D Labs;Research",
+      "END:VCARD",
+    ].join("\r\n");
+
+    expect(parseVCF(vcfData)).toEqual([
+      {
+        "Last Name": "Doe;Smith",
+        "First Name": "John",
+        "Full Name":
+          "John Doe-Smith of the Very Long Name Department of the Company Papadimitriou Junior",
+        Organization: "R;D Labs",
+      },
+    ]);
+  });
+
+  test("should split after an escaped backslash and decode fields after splitting", () => {
+    const vcfData = [
+      "BEGIN:VCARD",
+      "VERSION:2.1",
+      "N:Doe\\\\;John;;;",
+      'ORG;CHARSET=UTF-8;ENCODING="QUOTED-PRINTABLE":R=3BD Labs;Research',
+      "END:VCARD",
+    ].join("\r\n");
+
+    expect(parseVCF(vcfData)).toEqual([
+      { "Last Name": "Doe\\", "First Name": "John", Organization: "R;D Labs" },
+    ]);
+  });
+
+  test("should decode quoted-printable values in their charset", () => {
+    const vcfData = [
+      "BEGIN:VCARD",
+      "VERSION:2.1",
+      "N;CHARSET=ISO-8859-1;QUOTED-PRINTABLE:M=FCller;J=FCrgen;;;",
+      "END:VCARD",
+    ].join("\r\n");
+
+    expect(parseVCF(vcfData)).toEqual([{ "Last Name": "Müller", "First Name": "Jürgen" }]);
+  });
+
   test("should handle CRLF line endings", () => {
     const vcfData = "BEGIN:VCARD\r\nFN:John Doe\r\nTEL:123\r\nEND:VCARD\r\n";
 
