@@ -106,6 +106,17 @@ if (process.env.NODE_ENV === "production") {
     }
   });
 
+  exec("oxidocs --version", (error, stdout) => {
+    if (error) {
+      console.error("oxidocs is not installed");
+      return;
+    }
+
+    if (stdout) {
+      console.log(`oxidocs v${stdout.replace("oxidocs", "").trim()}`);
+    }
+  });
+
   exec("xelatex -version", (error, stdout) => {
     if (error) {
       console.error("Tex Live with XeTeX is not installed.");
