@@ -179,6 +179,9 @@ export async function handleConvert(
     "INSERT INTO file_names (job_id, file_name, output_file_name, status) VALUES (?1, ?2, ?3, ?4)",
   );
 
+  // Inputs that differ only by extension (photo.png, photo.jpg) would write the same output.
+  const usedNames = new Set<string>();
+
   for (const chunk of chunks(fileNames, MAX_CONVERT_PROCESS)) {
     const toProcess: Promise<string>[] = [];
     for (const fileName of chunk) {
@@ -186,8 +189,12 @@ export async function handleConvert(
       const { filetype: fileTypeOrig, stem: fileStem } = parseFileName(fileName);
       const fileType = normalizeFiletype(fileTypeOrig);
       const newFileExt = normalizeOutputFiletype(convertTo);
-      const newFileName =
+      let newFileName =
         fileTypeOrig === "" ? `${fileName}.${newFileExt}` : `${fileStem}.${newFileExt}`;
+      if (usedNames.has(newFileName)) {
+        newFileName = `${fileStem}_${fileTypeOrig}.${newFileExt}`;
+      }
+      usedNames.add(newFileName);
       const targetPath = `${userOutputDir}${newFileName}`;
       toProcess.push(
         new Promise((resolve, reject) => {
