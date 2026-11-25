@@ -354,6 +354,27 @@ describe("handleConvert", () => {
     expect(await readFile(`${outputDir}${JOB_PREFIX}no-job.csv`, "utf-8")).toContain("No Job");
   });
 
+  test("keeps both outputs of inputs that differ only by extension", async () => {
+    await writeFile(`${uploadsDir}people.vcf`, vcard("Lower"));
+    await writeFile(`${uploadsDir}people.VCF`, vcard("Upper"));
+
+    await handleConvert(
+      ["people.vcf", "people.VCF"],
+      uploadsDir,
+      outputDir,
+      "csv",
+      "vcf",
+      jobCookie("same-stem"),
+    );
+
+    expect(rowsFor("same-stem")).toEqual([
+      { file_name: "people.vcf", output_file_name: "people.csv", status: "Done" },
+      { file_name: "people.VCF", output_file_name: "people_VCF.csv", status: "Done" },
+    ]);
+    expect(await readFile(`${outputDir}people.csv`, "utf-8")).toContain("Lower");
+    expect(await readFile(`${outputDir}people_VCF.csv`, "utf-8")).toContain("Upper");
+  });
+
   test("replaces only the last occurrence of the extension", async () => {
     await writeFile(`${uploadsDir}vcf.backup.vcf`, vcard("Backup"));
 
