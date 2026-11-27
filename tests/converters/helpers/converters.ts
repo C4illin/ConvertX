@@ -1,8 +1,9 @@
 import { expect } from "bun:test";
+import type { ExecFileOptions } from "node:child_process";
 
 import type { ConvertFnWithExecFile, ExecFileFn } from "../../../src/converters/types";
 
-type ExecFileCall = { cmd: string; args: string[] };
+type ExecFileCall = { cmd: string; args: string[]; options?: ExecFileOptions };
 
 /**
  * Creates an execFile replacement that records every invocation and answers with the given
@@ -14,8 +15,8 @@ export function createMockExecFile({
   stderr = "",
 }: { error?: Error | null; stdout?: string; stderr?: string } = {}) {
   const calls: ExecFileCall[] = [];
-  const execFile: ExecFileFn = (cmd, args, callback) => {
-    calls.push({ cmd, args });
+  const execFile: ExecFileFn = (cmd, args, callback, options) => {
+    calls.push(options === undefined ? { cmd, args } : { cmd, args, options });
     callback(error, stdout, stderr);
   };
   return { execFile, calls };
