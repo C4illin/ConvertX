@@ -1,6 +1,9 @@
 import { expect, test } from "bun:test";
+import type { ExecFileOptions } from "node:child_process";
+import path from "node:path";
 
 import { convert } from "../../src/converters/imagemagick";
+import type { ExecFileFn } from "../../src/converters/types";
 import { runCommonTests } from "./helpers/commonTests";
 import { createMockExecFile } from "./helpers/converters";
 
@@ -85,3 +88,23 @@ test.each([
     },
   ]);
 });
+
+test.each(["html", "htm"])(
+  "runs in the output directory for %s so multi-page *_map.shtml files land there",
+  async (convertTo) => {
+    const calls: { args: string[]; options?: ExecFileOptions }[] = [];
+    const execFile: ExecFileFn = (_cmd, args, callback, options) => {
+      calls.push({ args, options });
+      callback(null, "", "");
+    };
+
+    await convert("in/doc.pdf", "pdf", convertTo, `out/job/doc.${convertTo}`, undefined, execFile);
+
+    expect(calls).toEqual([
+      {
+        args: ["-density", "300", path.resolve("in/doc.pdf"), "-auto-orient", `./doc.${convertTo}`],
+        options: { cwd: "out/job" },
+      },
+    ]);
+  },
+);
