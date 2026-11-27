@@ -1,4 +1,5 @@
-import { execFile as execFileOriginal } from "node:child_process";
+import { execFile as execFileOriginal, type ExecFileOptions } from "node:child_process";
+import path from "node:path";
 
 import { ExecFileFn } from "./types";
 
@@ -448,7 +449,9 @@ export function convert(
   convertTo: string,
   targetPath: string,
   options?: unknown,
-  execFile: ExecFileFn = execFileOriginal, // to make it mockable
+  // to make it mockable; ExecFileFn takes options last, node's execFile before the callback
+  execFile: ExecFileFn = (cmd, args, callback, execOptions) =>
+    execFileOriginal(cmd, args, { ...execOptions, encoding: "utf8" }, callback),
 ): Promise<string> {
   let outputArgs: string[] = [];
   let inputArgs: string[] = [];
@@ -478,6 +481,17 @@ export function convert(
   // when converted to formats where the orientation tag is lost or ignored
   outputArgs.push("-auto-orient");
 
+  // For multi-page HTML, ImageMagick writes each page's *_map.shtml into the
+  // working directory, not next to the HTML. Run it in the output directory
+  // so those files land with the rest of the output. The target stays relative
+  // ("./name.html") because ImageMagick uses it for the PNG links in the HTML.
+  let execOptions: ExecFileOptions | undefined;
+  if (convertTo === "html" || convertTo === "htm") {
+    execOptions = { cwd: path.dirname(targetPath) };
+    filePath = path.resolve(filePath);
+    targetPath = `./${path.basename(targetPath)}`;
+  }
+
   return new Promise((resolve, reject) => {
     execFile(
       "magick",
@@ -497,6 +511,7 @@ export function convert(
 
         resolve("Done");
       },
+      execOptions,
     );
   });
 }

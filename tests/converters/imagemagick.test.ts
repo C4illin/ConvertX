@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import path from "node:path";
 
 import { convert } from "../../src/converters/imagemagick";
 import { runCommonTests } from "./helpers/commonTests";
@@ -84,4 +85,22 @@ test.each([
       args: [...inputArgs, `in/image.${fileType}`, ...outputArgs, `out/image.${convertTo}`],
     },
   ]);
+  expect(calls[0]?.options).toBeUndefined();
 });
+
+test.each(["html", "htm"])(
+  "runs in the output directory for %s so multi-page *_map.shtml files land there",
+  async (convertTo) => {
+    const { execFile, calls } = createMockExecFile();
+
+    await convert("in/doc.pdf", "pdf", convertTo, `out/job/doc.${convertTo}`, undefined, execFile);
+
+    expect(calls).toEqual([
+      {
+        cmd: "magick",
+        args: ["-density", "300", path.resolve("in/doc.pdf"), "-auto-orient", `./doc.${convertTo}`],
+        options: { cwd: "out/job" },
+      },
+    ]);
+  },
+);
