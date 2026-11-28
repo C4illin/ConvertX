@@ -90,16 +90,22 @@ test.each([
   expect(calls[0]).toEqual(["-i", "in.mkv", "-c:v", codec, "out.video"]);
 });
 
-test.each(["m4a", "m4b", "mp3", "flac", "ogg"])(
+test.each([
+  ["m4a", "0:a"],
+  ["m4b", "0:a"],
+  ["mp3", "0:a:0"],
+  ["flac", "0:a:0"],
+  ["ogg", "0:a"],
+])(
   "keeps embedded cover art for %s output",
-  async (ext) => {
+  async (ext, audioMap) => {
     await convert("in.mp3", "mp3", ext, `out.${ext}`, undefined, mockExecFile);
 
     expect(calls[0]).toEqual([
       "-i",
       "in.mp3",
       "-map",
-      "0:a",
+      audioMap,
       "-map",
       "0:v:disp:attached_pic?",
       "-c:v",

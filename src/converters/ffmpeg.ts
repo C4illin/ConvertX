@@ -840,11 +840,13 @@ export async function convert(
 
   const audioFormatsWithCover = ["m4a", "m4b", "mp3", "flac", "ogg"];
   const audioFormatsNoCover = ["wav", "aac", "3cx.wav"];
+  // MP3 and FLAC hold exactly one audio stream
+  const singleAudioStream = ["mp3", "flac"];
 
   if (audioFormatsWithCover.includes(convertTo)) {
     extraArgs.push(
       "-map",
-      "0:a",
+      singleAudioStream.includes(convertTo) ? "0:a:0" : "0:a",
       "-map",
       "0:v:disp:attached_pic?",
       "-c:v",
